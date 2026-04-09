@@ -38,7 +38,7 @@
 ## 4. 데이터 무결성 정책 (Financial Guardrails)
 
 * **Immutable Ledger**: 한 번 확정된 `LedgerEntry`는 절대 수정하거나 삭제할 수 없습니다. 오입력 시에는 반드시 상쇄 전표(Correction Entry)를 발행하여 보정해야 합니다.
-* **Data Encryption at Rest (KMS)**: 파트너의 실제 계좌 정보, 정산 증빙 서식 등 민감한 재무 정보는 데이터베이스 저장 시 **KMS(AWS Key Management Service)**를 통한 어플리케이션 레벨 암호화를 거쳐 저장해야 합니다.
+* **Application-level Encryption**: 파트너의 실제 계좌 정보, 정산 증빙 서식 등 민감한 재무 정보는 데이터베이스 저장 시 **표준 암호화 알고리즘(AES-256 등)**을 통한 어플리케이션 레벨 암호화를 거쳐 저장해야 합니다.
 * **Reconciliation (재무 대조)**: 매일 자정 PG사 대사 데이터와 내부 `Cash` 계정 잔액을 대조하여 1원 단위의 오차까지 추적하여 로그를 남깁니다.
 
 ## 5. 법적 컴플라이언스 및 증빙 (Legal Compliance)
