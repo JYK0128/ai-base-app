@@ -1,6 +1,11 @@
 {
   "version": 1,
   "skills": {
+    "cloud-vuln-guide": {
+      "source": "JYK0128/cloud-vuln-guide",
+      "sourceType": "github",
+      "computedHash": "e3233764cf27c7919c197f69e28853ebd61926b31b78bec27acffc8fc2f3d8c4"
+    },
     "skill-creator": {
       "source": "anthropics/skills",
       "sourceType": "github",
