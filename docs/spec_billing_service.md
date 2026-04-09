@@ -68,7 +68,7 @@ export class JournalEntry {
   @OneToMany(() => LedgerEntry, (e) => e.journalEntry) entries = new Collection<LedgerEntry>(this);
   
   // 외부 참조 정보 (e.g., Payment ID, Subscription ID)
-  @Property({ index: true, nullable: true }) referenceId?: string;
+  @Property({ index: true, nullable: true }) referenceId?: string; // Saga correlationId 또는 MessageId와 매핑
   @Property({ nullable: true }) referenceType?: string;
 }
 

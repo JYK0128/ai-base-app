@@ -29,7 +29,7 @@ Infra Service는 특정 벤더에 종속되지 않는 표준 프로토콜(SMTP, 
 
 * `/notifications/send`: 통합 알림 발송 요청
 * `/files/presign`: 스토리지 업로드용 권한 주소 발급
-* `/audit-logs`: 활동 기록 조회
+* `/audit-logs`: 전사 마이크로서비스 통합 활동 기록 조회 (Write-Once 저장소 기반)
 
 ## 4. 기술 구현 원칙
 

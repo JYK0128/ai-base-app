@@ -18,12 +18,12 @@
 
 ## 🏗️ 1. 시스템 및 네트워크 아키텍처
 
-플랫폼은 Kubernetes(EKS) 환경에서 6개의 마이크로서비스로 분리되어 운영되며, AWS ALB를 통한 경로 기반 로드 밸런싱을 수행합니다.
+플랫폼은 표준 Kubernetes (K8s) 환경에서 6개의 마이크로서비스로 운영되며, Nginx Ingress Controller를 통한 경로 기반 로드 밸런싱을 수행하여 클라우드 종속성(Cloud-Agnostic)을 배제합니다.
 
 ```mermaid
 graph TD
-    subgraph "Kubernetes Cluster (Marketplace Namespace)"
-        Ingress[ALB Ingress Controller]
+    subgraph "Standard Kubernetes Cluster"
+        Ingress[Nginx Ingress Controller]
         
         CoreSVC[1. Core Service]
         B2BAuth[2. B2B Auth Service]
@@ -33,9 +33,9 @@ graph TD
         InfraSVC[6. Infra Service]
     end
     
-    subgraph "Persistent Storage"
-        RDS[(PostgreSQL Multi-AZ)]
-        Redis[(ElastiCache for Redis)]
+    subgraph "Persistent Storage (Agnostic)"
+        RDS[(Standard PostgreSQL)]
+        Redis[(Managed Redis / RabbitMQ)]
     end
 
     User((Client)) -->|HTTPS| Ingress
@@ -52,23 +52,35 @@ graph TD
 
 ---
 
-## 🗺️ 2. 도메인 모델 구조도 (ERD)
+## 🗺️ 2. 도메인 모델 및 보안 원칙
 
-### 2.1. B2B 조직 관리 도메인 (Core)
+### 2.1. 초정밀 보안 아키텍처 (Hardened 27 Items)
 
-조직(Organization)과 테넌트 격리를 위한 권한/계정 모델입니다.
+플랫폼은 **"화이트리스트(Whitelist) 기반 27계 층 보안"**을 준수합니다.
+
+| 분류 | 핵심 보안 조치 (MVP Priority) |
+| :--- | :--- |
+| **데이터** | Bcrypt 비밀번호 해싱 (Salt 포함), AES-256 개인정보 암호화, **Write-Once(수정 불가) 감사 로그** |
+| **접근** | TOTP 2차 인증 (Admin), JWT Refresh Token Rotation, Session-IP Binding (탈취 방지) |
+| **망 보안** | VPC 네트워크 격리, Geo-blocking (국외 차단), DDoS 방어, CORS/Helmet 보안 헤더 |
+| **운영** | Rate Limiting (Brute-force 방어), **Honeypot(공격자 함정)**, Timing Attack Defense (지연 응답) |
+
+### 2.2. B2B 조직 관리 도메인 (Core)
+
+조직(Organization)과 테넌트 격리를 위한 권한/계정 모델입니다. 시스템 기본 역할(Owner/Admin/Manager) 외에도 **조직별로 고유한 커스텀 역할을 동적으로 정의**할 수 있는 유연한 RBAC 구조를 가집니다.
 
 ```mermaid
 erDiagram
     Organization {
         uuid id
         string name
+        string type "PLATFORM | PARTNER"
         string defaultLocale
     }
     OrganizationAccount {
         uuid id
         string email
-        string passwordHash
+        string passwordHash_Bcrypt
     }
     Manager {
         uuid id
@@ -77,6 +89,7 @@ erDiagram
     OrganizationRole {
         uuid id
         string name
+        boolean isSystemRole "Owner/Admin/Manager 여부"
     }
     Permission {
         uuid id
@@ -87,9 +100,10 @@ erDiagram
     OrganizationAccount ||--o{ Manager : "profile"
     Organization ||--o{ OrganizationRole : "defines"
     OrganizationRole ||--o{ Permission : "holds"
+    Manager }o--o{ OrganizationRole : "assigned"
 ```
 
-### 2.2. B2C 고객 및 상품 도메인 (Identity & Program)
+### 2.3. B2C 고객 및 상품 도메인 (Identity & Program)
 
 개별 프로그램(Program)과 해당 프로그램을 구독/이용하는 컨슈머 모델입니다.
 
@@ -120,7 +134,7 @@ erDiagram
     Customer }o--|| Program : "consumes"
 ```
 
-### 2.3. 재무 및 정산 도메인 (Billing)
+### 2.4. 재무 및 정산 도메인 (Billing)
 
 정통 복식부기에 기반한 결제 및 원장 관리 모델입니다.
 
@@ -155,14 +169,14 @@ erDiagram
 
 단일 레포지토리(Monorepo) 내에서 6개의 백엔드 서비스로 엄격하게 분리됩니다.
 
-| 서비스명 | 경로 | 핵심 역할 | 도메인 엔터티 |
+| 서비스명 | 경로 | 핵심 역할 | 보안 및 특이사항 |
 | :--- | :--- | :--- | :--- |
-| **Core Service** | `/core` | 조직, 매니저, 커스텀 RBAC 권한 단일 출처 | `Organization`, `Manager`, `Role` |
-| **B2B Auth Service** | `/auth/b2b` | 파트너 앱 매니저 인증, 세션 검증 (단기 토큰) | JWT 발급, B2B 매니저 세션 |
-| **B2C Auth Service** | `/auth/b2c` | 소비자 SSO, 대용량 트래픽 최적화 로그인 | `Account`, `Customer` |
-| **Program Service** | `/prog` | 비즈니스 상품 카탈로그, 구독 모델 제공 | `Program`, `SubscriptionPlan` |
-| **Billing Service** | `/billing` | 결제, 인보이스, 복식부기 원장 엔진 | `Invoice`, `Ledger`, `Subscription` |
-| **Infra Service** | `/infra` | 공통 기능 (I18n 다국어, 통합 감사 로그) | `AuditLog`, `Translation` |
+| **Core Service** | `/core` | 조직, 매니저, 커스텀 RBAC | 테넌트 격리형 권한 엔진 |
+| **B2B Auth Service** | `/auth/b2b` | 파트너 매니저 인증 | Refresh Token Rotation 적용 |
+| **B2C Auth Service** | `/auth/b2c` | 소비자 SSO, 대용량 최적화 | IP-Session Binding 검증 |
+| **Program Service** | `/prog` | 비즈니스 상품 카탈로그 | 유효성 기반 상품 무결성 |
+| **Billing Service** | `/billing` | 결제, 복식부기 원장 엔진 | **멱등성(Idempotency) 결제** |
+| **Infra Service** | `/infra` | 다국어, **수정 불가 감사 로그** | **Write-Once 로그 저장소 운영** |
 
 ---
 

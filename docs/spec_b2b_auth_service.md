@@ -2,13 +2,23 @@
 
 ## 1. 개요
 
-조직(Organization) 파업너 및 운영 매니저의 권한 관리와 보안 인증을 담당합니다.
+조직(Organization) 파트너 및 운영 매니저의 권한 관리와 보안 인증을 담당합니다.
 
 ## 2. 권한 및 보안 모델 (RBAC)
 
-* **표준 역할(Role)**: `SuperAdmin` (플랫폼 운영), `OrgAdmin` (파트너 관리자), `OrgManager` (현장 실무자).
-* **MFA (Multi-Factor Authentication)**: 보안을 위해 이메일 OTP 또는 TOTP 2차 인증을 필수로 설정합니다.
-* **Audit Logging**: 매니저의 권한 변경 및 설정 조회 이력을 상세 기록합니다.
+* **표준 역할 체계 (Dual-Layer RBAC)**:
+  1. **플랫폼(Platform) 그룹**: 전체 시스템 및 모든 파트너사 통제
+     * `OWNER`: 전사 최고 권한, 재무 및 핵심 설정 관리
+     * `ADMIN`: 파트너 승인, 테넌트 관리, 운영 정책 설정
+     * `MANAGER`: 파트너 기술 지원 및 대리 응대
+  2. **파트너(Partner) 그룹**: 개별 조직(Organization) 내부의 독립 권한
+     * `OWNER`: 파트너사 대표, 정산 및 전역 설정 권한
+     * `ADMIN`: 사내 스태프 관리, 초대 및 권한 부여
+     * `MANAGER`: 실무 데이터 조회 및 운영 업무 수행
+* **커스텀 역할 확장**: 표준 역할 체계 외에 각 조직의 비즈니스 요구에 따른 동적 역할 생성 및 권한 매핑을 지원합니다.
+* **다중 역할 기반 인증**: 사용자가 보유한 모든 역할의 권한이 액세스 토큰(JWT) 및 세션에 통합 반영되어야 합니다.
+* **MFA (Multi-Factor Authentication)**: 플랫폼 및 파트너 관계자 모두에게 이메일 또는 TOTP 2차 인증을 필수로 적용합니다.
+* **Audit Logging**: 운영자 및 매니저의 모든 권한 변경 및 주요 설정 조회 이력을 상세 기록합니다.
 
 ## 3. 주요 관리 기능
 
@@ -23,4 +33,4 @@
 | `POST` | `/auth/login` | 관리자 이메일/비번 기반 로그인 |
 | `POST` | `/auth/mfa/verify` | 2차 인증 코드 검증 |
 | `POST` | `/organizations/invite` | 신규 매니저 초대장 발급 (이메일 발송) |
-| `GET` | `/audit/access-logs` | 보안 감사용 접속 이력 조회 |
+| `GET` | `/audit/access-logs` | 보안 감사용 접속 및 인증 시도 이력 조회 (상세 행위는 Infra 서비스 참조) |
