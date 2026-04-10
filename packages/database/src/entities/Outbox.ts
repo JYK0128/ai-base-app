@@ -1,6 +1,6 @@
-import { Entity, PrimaryKey, Property } from '@mikro-orm/core';
+import { Entity, PrimaryKey, Property } from '@mikro-orm/decorators/legacy';
 
-@Entity({ tableName: 'outbox' })
+@Entity({ schema: 'platform' })
 export class Outbox {
   @PrimaryKey()
   id!: string;

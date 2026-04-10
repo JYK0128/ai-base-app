@@ -1,4 +1,4 @@
-import { Entity, PrimaryKey, Property, Enum } from '@mikro-orm/core';
+import { Entity, PrimaryKey, Property, Enum } from '@mikro-orm/decorators/legacy';
 
 export enum PlatformRole {
   PLATFORM_ADMIN = 'PLATFORM_ADMIN',
@@ -7,7 +7,7 @@ export enum PlatformRole {
   PARTNER_STAFF = 'PARTNER_STAFF',
 }
 
-@Entity({ tableName: 'platform_users' })
+@Entity({ schema: 'platform' })
 export class PlatformUser {
   @PrimaryKey()
   id!: string;

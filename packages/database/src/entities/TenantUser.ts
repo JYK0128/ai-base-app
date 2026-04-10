@@ -1,6 +1,6 @@
-import { Entity, PrimaryKey, Property } from '@mikro-orm/core';
+import { Entity, PrimaryKey, Property } from '@mikro-orm/decorators/legacy';
 
-@Entity({ tableName: 'tenant_users' })
+@Entity({ schema: 'tenant' })
 export class TenantUser {
   @PrimaryKey()
   id!: string;

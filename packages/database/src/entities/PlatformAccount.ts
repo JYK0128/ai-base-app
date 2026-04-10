@@ -1,6 +1,6 @@
-import { Entity, PrimaryKey, Property } from '@mikro-orm/core';
+import { Entity, PrimaryKey, Property } from '@mikro-orm/decorators/legacy';
 
-@Entity({ tableName: 'platform_accounts' })
+@Entity({ schema: 'platform' })
 export class PlatformAccount {
   @PrimaryKey()
   id!: string;

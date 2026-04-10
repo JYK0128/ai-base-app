@@ -1,8 +1,11 @@
 import express from 'express';
 import { MikroORM } from '@mikro-orm/postgresql';
+import { TsMorphMetadataProvider } from '@mikro-orm/reflection';
 import { Partner, PartnerStatus } from '@app/database/src/entities/Partner';
 import { PlatformUser, PlatformRole } from '@app/database/src/entities/PlatformUser';
 import { PlatformAccount } from '@app/database/src/entities/PlatformAccount';
+import { TenantAccount } from '@app/database/src/entities/TenantAccount';
+import { TenantUser } from '@app/database/src/entities/TenantUser';
 import { Outbox } from '@app/database/src/entities/Outbox';
 import * as argon2 from 'argon2';
 import { v4 as uuidv4 } from 'uuid';
@@ -21,10 +24,10 @@ let orm: MikroORM;
 
 async function initORM() {
   orm = await MikroORM.init({
-    entities: [Partner, PlatformUser, PlatformAccount, Outbox],
+    entities: [Partner, PlatformAccount, PlatformUser, TenantAccount, TenantUser, Outbox],
+    metadataProvider: TsMorphMetadataProvider,
     dbName: 'platform_db',
     clientUrl: process.env.DATABASE_URL || 'postgresql://postgres:postgres@localhost:5432/platform_db',
-    discovery: { disableDynamicFileAccess: true },
   });
 }
 

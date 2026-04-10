@@ -4,12 +4,24 @@
   "private": true,
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "scripts": {
+    "mikro-orm": "npx mikro-orm"
+  },
+  "mikro-orm": {
+    "useTsNode": true,
+    "configPaths": [
+      "./src/mikro-orm.config.ts"
+    ]
+  },
   "dependencies": {
-    "@mikro-orm/core": "^6.0.0",
-    "@mikro-orm/postgresql": "^6.0.0",
-    "@mikro-orm/reflection": "^6.0.0"
+    "@mikro-orm/core": "7.0.9",
+    "@mikro-orm/decorators": "7.0.9",
+    "@mikro-orm/postgresql": "7.0.9",
+    "@mikro-orm/reflection": "7.0.9",
+    "reflect-metadata": "^0.2.2"
   },
   "devDependencies": {
+    "@mikro-orm/cli": "7.0.9",
     "typescript": "^5.0.0"
   }
 }

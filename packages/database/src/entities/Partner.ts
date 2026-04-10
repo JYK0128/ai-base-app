@@ -1,4 +1,4 @@
-import { Entity, PrimaryKey, Property, Enum } from '@mikro-orm/core';
+import { Entity, PrimaryKey, Property, Enum } from '@mikro-orm/decorators/legacy';
 
 export enum PartnerStatus {
   PENDING = 'PENDING',
@@ -6,7 +6,7 @@ export enum PartnerStatus {
   SUSPENDED = 'SUSPENDED',
 }
 
-@Entity({ tableName: 'partners' })
+@Entity({ schema: 'platform' })
 export class Partner {
   @PrimaryKey()
   id!: string;
