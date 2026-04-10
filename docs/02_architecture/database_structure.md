@@ -8,8 +8,15 @@
 
 ## 2. 스키마 레이어 구성
 
-* **Platform Schema**: 파트너 마스터, 구독 정책, 플랫폼 운영 계정, 공통 설정
-* **Tenant Schema**: 테넌트별 최종 사용자, 서비스 거래 내역, 화이트라벨링 설정, 상품 정보
+* **Platform Schema**:
+  * **platform_accounts**: 플랫폼 전용 식별 계정 (Admin/Staff용 SSO)
+  * **partners**: 파트너사 마스터 정보 및 인프라 설정
+  * **platform_users**: 운영진 및 파트너 관리자 (platform_accounts와 매핑)
+  * **memberships**: 구독 정책 및 할당량 관리
+* **Tenant Schema**:
+  * **tenant_accounts**: 서비스 전용 식별 계정 (End User용 SSO)
+  * **tenant_users**: 서비스 최종 사용자 프로필 (tenant_accounts와 매핑)
+  * **transactions**: 서비스 이용 및 거래 내역
 * **Observability**: 이벤트 발행 큐, 변경 이력(CDC), 감사 로그(Audit), 보안 이벤트 로그
 
 ## 3. 데이터 무결성 및 성능 전략
