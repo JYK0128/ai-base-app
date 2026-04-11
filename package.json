@@ -8,20 +8,8 @@
     "lint": "turbo run lint"
   },
   "devDependencies": {
-    "@mikro-orm/cli": "7.0.9",
-    "@mikro-orm/reflection": "7.0.9",
-    "eslint": "^8.0.0",
-    "prettier": "^3.0.0",
-    "ts-node": "^10.9.2",
-    "turbo": "latest",
-    "typescript": "^5.0.0"
+    "turbo": "2.9.6",
+    "typescript": "6.0.2"
   },
-  "packageManager": "pnpm@9.15.9",
-  "dependencies": {
-    "@mikro-orm/core": "7.0.9",
-    "@mikro-orm/decorators": "7.0.9",
-    "@mikro-orm/postgresql": "7.0.9",
-    "reflect-metadata": "^0.2.2",
-    "ts-morph": "^27.0.2"
-  }
+  "packageManager": "pnpm@9.15.9"
 }

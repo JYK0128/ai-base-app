@@ -1,18 +1,9 @@
 {
-  "compilerOptions": {
-    "target": "ESNext",
-    "module": "CommonJS",
-    "moduleResolution": "node",
-    "experimentalDecorators": true,
-    "emitDecoratorMetadata": true,
-    "strict": true,
-    "esModuleInterop": true,
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
-    "baseUrl": ".",
-    "paths": {
-      "@app/*": ["packages/*/src"]
-    }
-  },
-  "exclude": ["node_modules"]
+  "files": [],
+  "references": [
+    { "path": "packages/config" },
+    { "path": "packages/database" },
+    { "path": "packages/helper" },
+    { "path": "apps/service-auth" }
+  ]
 }
