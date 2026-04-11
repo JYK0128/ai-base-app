@@ -1,0 +1,14 @@
+{
+  "name": "platform-auth-service",
+  "version": "0.1.0",
+  "type": "module",
+  "private": true,
+  "dependencies": {
+    "@pkg/config": "workspace:*",
+    "@pkg/database": "workspace:*"
+  },
+  "devDependencies": {
+    "eslint": "9.39.4",
+    "typescript": "6.0.2"
+  }
+}

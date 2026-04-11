@@ -15,6 +15,22 @@ importers:
         specifier: 6.0.2
         version: 6.0.2
 
+  apps/platform-auth-service:
+    dependencies:
+      '@pkg/config':
+        specifier: workspace:*
+        version: link:../../packages/config
+      '@pkg/database':
+        specifier: workspace:*
+        version: link:../../packages/database
+    devDependencies:
+      eslint:
+        specifier: 9.39.4
+        version: 9.39.4
+      typescript:
+        specifier: 6.0.2
+        version: 6.0.2
+
   packages/config:
     devDependencies:
       '@stylistic/eslint-plugin':
@@ -48,7 +64,7 @@ importers:
         specifier: 17.4.0
         version: 17.4.0
       stylelint:
-        specifier: ^17.6.0
+        specifier: 17.6.0
         version: 17.6.0(typescript@6.0.2)
       stylelint-config-clean-order:
         specifier: 8.0.1
@@ -100,19 +116,19 @@ importers:
         version: 0.2.2
     devDependencies:
       '@mikro-orm/cli':
-        specifier: 7.0.10
-        version: 7.0.10
+        specifier: 7.0.9
+        version: 7.0.9
       '@pkg/config':
         specifier: workspace:*
         version: link:../config
       '@types/node':
-        specifier: ^25.6.0
+        specifier: 25.6.0
         version: 25.6.0
       eslint:
         specifier: 9.39.4
         version: 9.39.4
       typescript:
-        specifier: ^6.0.2
+        specifier: 6.0.2
         version: 6.0.2
 
 packages:
@@ -313,19 +329,10 @@ packages:
   '@keyv/serialize@1.1.1':
     resolution: {integrity: sha512-dXn3FZhPv0US+7dtJsIi2R+c7qWYiReoEh5zUntWCf4oSpMNib8FDhSoed6m3QyZdx5hK7iLFkYk3rNxwt8vTA==}
 
-  '@mikro-orm/cli@7.0.10':
-    resolution: {integrity: sha512-tdd0+rCTZKRiFiISrJJydngPE/3JdGfdpDvF8/21PZt+b/Cbkm8FvNcr3UxbWsflPgnWxX4iJWlQkOhpy22ydg==}
+  '@mikro-orm/cli@7.0.9':
+    resolution: {integrity: sha512-MJCXZkF3NcFvBITiuX/sH/3dUiontGbKhVCvLwPvbb8z977MESHtpLPDvntmL0AQ0tYb1MZCgXjO+wRvtS0EqQ==}
     engines: {node: '>= 22.17.0'}
     hasBin: true
-
-  '@mikro-orm/core@7.0.10':
-    resolution: {integrity: sha512-l7n9dDiqzfc+AeHv81YlmBGIKgdjUxDejyrimWOKyUTmVP6IdzUSiaW3TCmrNmhU0hYlQrHOsUMRTGTP/KdV5w==}
-    engines: {node: '>= 22.17.0'}
-    peerDependencies:
-      dataloader: 2.2.3
-    peerDependenciesMeta:
-      dataloader:
-        optional: true
 
   '@mikro-orm/core@7.0.9':
     resolution: {integrity: sha512-WEGsjgY/eSrdk40ZedMNGzvaigZot5vQuCghiAZKxS+4pGeNfILA0pLB4jOHeynPpTwAsbKh1vLWEnpRXh/M8Q==}
@@ -1325,8 +1332,8 @@ packages:
     resolution: {integrity: sha512-PXwfBhYu0hBCPw8Dn0E+WDYb7af3dSLVWKi3HGv84IdF4TyFoC0ysxFd0Goxw7nSv4T/PzEJQxsYsEiFCKo2BA==}
     engines: {node: '>=8.6'}
 
-  mikro-orm@7.0.10:
-    resolution: {integrity: sha512-ScUVOL3uvK+IjPot40MYqn3qkgysj2NLwoq086bn83AincOLC04koJIFcMLJpzmfPWeErFkhPIyum++IKr2Q1w==}
+  mikro-orm@7.0.9:
+    resolution: {integrity: sha512-7OvlcHeO9yqoIOQKki8Nh8YNEDekqogkuh/W66BLGM3FyzoqQVMCdFnSgfcg00lmhBZHdlnyV3Ihbmx5uNiaZA==}
     engines: {node: '>= 22.17.0'}
 
   minimatch@10.2.5:
@@ -2151,15 +2158,13 @@ snapshots:
 
   '@keyv/serialize@1.1.1': {}
 
-  '@mikro-orm/cli@7.0.10':
+  '@mikro-orm/cli@7.0.9':
     dependencies:
-      '@mikro-orm/core': 7.0.10
-      mikro-orm: 7.0.10
+      '@mikro-orm/core': 7.0.9
+      mikro-orm: 7.0.9
       yargs: 17.7.2
     transitivePeerDependencies:
       - dataloader
-
-  '@mikro-orm/core@7.0.10': {}
 
   '@mikro-orm/core@7.0.9': {}
 
@@ -3287,7 +3292,7 @@ snapshots:
       braces: 3.0.3
       picomatch: 2.3.2
 
-  mikro-orm@7.0.10: {}
+  mikro-orm@7.0.9: {}
 
   minimatch@10.2.5:
     dependencies:
