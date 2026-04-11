@@ -1,3 +1,4 @@
+import type { Opt } from '@mikro-orm/core';
 import { Entity, PrimaryKey, Property } from '@mikro-orm/decorators/legacy';
 
 @Entity({ schema: 'platform' })
@@ -9,11 +10,11 @@ export class Outbox {
   eventType!: string;
 
   @Property({ type: 'json' })
-  payload!: any;
+  payload!: Record<string, unknown>;
 
   @Property()
-  processed: boolean = false;
+  processed: boolean & Opt = false;
 
   @Property()
-  createdAt: Date = new Date();
+  createdAt: Date & Opt = new Date();
 }

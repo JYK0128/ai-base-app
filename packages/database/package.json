@@ -1,9 +1,24 @@
 {
-  "name": "@app/database",
+  "name": "@pkg/database",
   "version": "0.1.0",
+  "type": "module",
   "private": true,
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "import": "./src/index.ts",
+      "require": "./src/index.ts",
+      "default": "./src/index.ts"
+    },
+    "./*": {
+      "types": "./src/*.ts",
+      "import": "./src/*.ts",
+      "require": "./src/*.ts",
+      "default": "./src/*.ts"
+    }
+  },
   "scripts": {
     "mikro-orm": "npx mikro-orm"
   },
@@ -13,15 +28,23 @@
       "./src/mikro-orm.config.ts"
     ]
   },
-  "dependencies": {
+  "peerDependencies": {
     "@mikro-orm/core": "7.0.9",
     "@mikro-orm/decorators": "7.0.9",
+    "@mikro-orm/entity-generator": "7.0.9",
+    "@mikro-orm/migrations": "7.0.9",
     "@mikro-orm/postgresql": "7.0.9",
     "@mikro-orm/reflection": "7.0.9",
-    "reflect-metadata": "^0.2.2"
+    "@mikro-orm/seeder": "7.0.9",
+    "@mikro-orm/sql-highlighter": "1.0.1",
+    "@pkg/config": "workspace:*",
+    "reflect-metadata": "0.2.2"
   },
   "devDependencies": {
-    "@mikro-orm/cli": "7.0.9",
-    "typescript": "^5.0.0"
+    "@pkg/config": "workspace:*",
+    "@mikro-orm/cli": "7.0.10",
+    "@types/node": "^25.6.0",
+    "eslint": "9.39.4",
+    "typescript": "^6.0.2"
   }
 }

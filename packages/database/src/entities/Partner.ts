@@ -1,4 +1,5 @@
-import { Entity, PrimaryKey, Property, Enum } from '@mikro-orm/decorators/legacy';
+import type { Opt } from '@mikro-orm/core';
+import { Entity, Enum, PrimaryKey, Property } from '@mikro-orm/decorators/legacy';
 
 export enum PartnerStatus {
   PENDING = 'PENDING',
@@ -18,11 +19,11 @@ export class Partner {
   email!: string;
 
   @Enum(() => PartnerStatus)
-  status: PartnerStatus = PartnerStatus.PENDING;
+  status: PartnerStatus & Opt = PartnerStatus.PENDING;
 
   @Property()
-  createdAt: Date = new Date();
+  createdAt: Date & Opt = new Date();
 
   @Property({ onUpdate: () => new Date() })
-  updatedAt: Date = new Date();
+  updatedAt: Date & Opt = new Date();
 }

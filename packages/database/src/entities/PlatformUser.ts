@@ -1,4 +1,5 @@
-import { Entity, PrimaryKey, Property, Enum } from '@mikro-orm/decorators/legacy';
+import type { Opt } from '@mikro-orm/core';
+import { Entity, Enum, PrimaryKey, Property } from '@mikro-orm/decorators/legacy';
 
 export enum PlatformRole {
   PLATFORM_ADMIN = 'PLATFORM_ADMIN',
@@ -13,7 +14,7 @@ export class PlatformUser {
   id!: string;
 
   @Property()
-  platformAccountId!: string; // Reference to Platform Account
+  platformAccountId!: string;
 
   @Enum(() => PlatformRole)
   role!: PlatformRole;
@@ -22,8 +23,8 @@ export class PlatformUser {
   partnerId?: string;
 
   @Property()
-  createdAt: Date = new Date();
+  createdAt: Date & Opt = new Date();
 
   @Property({ onUpdate: () => new Date() })
-  updatedAt: Date = new Date();
+  updatedAt: Date & Opt = new Date();
 }
