@@ -13,9 +13,8 @@
 
 ## 3. 표준 응답 구조 (Envelope)
 
-* **성공**: `{"success": true, "data": {...}, "message": "...", "requestId": "..."}`
-* **실패**: `{"success": false, "error": {"code": "...", "message": "..."}, "requestId": "..."}`
-* **가이드**: RFC 7807(Problem Details) 에러 규격 준수
+* **성공**: `{"success": true, "issueId": "...", "topicId": "...", "timestamp": "...", "data": {...}, "detail": null, code: "...", "message": "..."}`
+* **실패**: `{"success": false, "issueId": "...", "topicId": "...", "timestamp": "...", "data": null, "detail": {...}, code: "...", "message": "..."}`
 
 ## 4. HTTP 상태 코드 가이드
 
