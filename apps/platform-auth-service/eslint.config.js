@@ -1,8 +1,8 @@
-import nodeConfig from '@pkg/config/eslint/node';
+import nestConfig from '@pkg/config/eslint/nest';
 import { defineConfig } from 'eslint/config';
 
 export default defineConfig([
-  nodeConfig,
+  nestConfig,
   {
     languageOptions: {
       parserOptions: {
