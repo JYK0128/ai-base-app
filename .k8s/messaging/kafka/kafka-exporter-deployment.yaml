@@ -3,6 +3,8 @@ kind: Deployment
 metadata:
   name: kafka-exporter
   namespace: monitoring
+  labels:
+    app: kafka-exporter
 spec:
   replicas: 1
   selector:
@@ -13,11 +15,24 @@ spec:
       labels:
         app: kafka-exporter
     spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65534
+        runAsGroup: 65534
+        fsGroup: 65534
+        seccompProfile:
+          type: RuntimeDefault
       containers:
       - name: kafka-exporter
         image: danielqsj/kafka-exporter:v1.9.0
         args:
         - --kafka.server=kafka.dev-infra.svc.cluster.local:9092
+        securityContext:
+          readOnlyRootFilesystem: true
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
         ports:
         - containerPort: 9308
         readinessProbe:
@@ -39,17 +54,3 @@ spec:
           limits:
             cpu: 200m
             memory: 128Mi
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: kafka-exporter
-  namespace: monitoring
-  labels:
-    app: kafka-exporter
-spec:
-  ports:
-  - port: 9308
-    targetPort: 9308
-  selector:
-    app: kafka-exporter

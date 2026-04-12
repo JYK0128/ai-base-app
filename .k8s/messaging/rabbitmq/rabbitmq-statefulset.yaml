@@ -18,7 +18,7 @@ spec:
     spec:
       securityContext:
         runAsNonRoot: true
-        runAsUser: 999 # 'rabbitmq' user in some images has UID 999
+        runAsUser: 999
         runAsGroup: 999
         fsGroup: 999
         seccompProfile:
@@ -27,6 +27,10 @@ spec:
       containers:
       - name: rabbitmq
         image: rabbitmq:3-management
+        # 내장 프로메테우스 플러그인 자동 활성화
+        env:
+        - name: RABBITMQ_SERVER_ADDITIONAL_ERL_ARGS
+          value: "-rabbitmq_prometheus return_per_object_metrics true"
         envFrom:
         - secretRef:
             name: rabbitmq-secret
@@ -69,6 +73,8 @@ spec:
           name: amqp
         - containerPort: 15672
           name: management
+        - containerPort: 15692
+          name: prometheus # 메트릭 추출용 포트
         volumeMounts:
         - name: rabbitmq-data
           mountPath: /var/lib/rabbitmq

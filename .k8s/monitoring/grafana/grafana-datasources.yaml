@@ -1,0 +1,32 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-datasources
+  namespace: monitoring
+data:
+  datasources.yaml: |
+    apiVersion: 1
+    datasources:
+    - name: Mimir
+      type: prometheus
+      url: http://mimir.monitoring.svc.cluster.local:9009/prometheus
+      access: proxy
+      isDefault: true
+      editable: true
+    - name: Loki
+      type: loki
+      url: http://loki.monitoring.svc.cluster.local:3100
+      access: proxy
+      editable: true
+    - name: Tempo
+      type: tempo
+      url: http://tempo.monitoring.svc.cluster.local:3100
+      access: proxy
+      editable: true
+      # Loki와 Tempo 연합 (로그에서 트레이스로 바로 가기)
+      jsonData:
+        lokiSearch:
+          datasourceUid: 'Loki'
+        tracesToLogs:
+          datasourceUid: 'Loki'
+          filterByTraceId: true

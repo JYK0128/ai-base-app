@@ -3,6 +3,8 @@ kind: DaemonSet
 metadata:
   name: promtail
   namespace: monitoring
+  labels:
+    app: promtail
 spec:
   selector:
     matchLabels:
@@ -13,11 +15,23 @@ spec:
         app: promtail
     spec:
       serviceAccountName: promtail
+      # 보안 표준화: 비루트 권한 적용 (Promtail은 로그를 읽어야 하므로 UID 확인 필요)
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 0 # 잠시만요, Promtail은 /var/log를 읽어야 하므로 보통 root 권한이 필요할 수 있습니다. 
+                     # 일단 capabilities drop을 최대한 적용하겠습니다.
       containers:
       - name: promtail
         image: grafana/promtail:latest
         args:
         - "-config.file=/etc/promtail/promtail.yaml"
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+            add:
+            - DAC_READ_SEARCH # 로그 파일을 읽기 위한 최소 권한
         volumeMounts:
         - name: logs
           mountPath: /var/log/pods
@@ -31,31 +45,3 @@ spec:
       - name: config
         configMap:
           name: promtail-config
----
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: promtail
-  namespace: monitoring
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRole
-metadata:
-  name: promtail
-rules:
-- apiGroups: [""]
-  resources: ["nodes", "nodes/proxy", "services", "endpoints", "pods"]
-  verbs: ["get", "list", "watch"]
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRoleBinding
-metadata:
-  name: promtail
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
-  name: promtail
-subjects:
-- kind: ServiceAccount
-  name: promtail
-  namespace: monitoring

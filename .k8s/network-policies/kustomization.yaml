@@ -1,0 +1,8 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - allow-app-flows.yaml
+  - allow-data-flows.yaml
+  - allow-dns-egress.yaml
+  - default-deny.yaml

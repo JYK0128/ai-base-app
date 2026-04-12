@@ -1,0 +1,36 @@
+name: K8s Manifest Validation
+
+on:
+  push:
+    paths:
+      - '.k8s/**'
+  pull_request:
+    paths:
+      - '.k8s/**'
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # 1. Kustomize 빌드 테스트 (dev/prod 모두)
+      - name: Build Kustomize (Dev)
+        run: kubectl kustomize .k8s/overlays/dev > dev-manifests.yaml
+      
+      - name: Build Kustomize (Prod)
+        run: kubectl kustomize .k8s/overlays/prod > prod-manifests.yaml
+
+      # 2. kubeconform으로 문법 및 스키마 검증
+      - name: Validate with kubeconform
+        uses: yannh/kubeconform-action@v0.0.8
+        with:
+          files: "*-manifests.yaml"
+          kubernetes_version: "1.30.0"
+
+      # 3. kube-linter로 보안 및 베스트 프랙티스 검사
+      - name: Lint with kube-linter
+        uses: stackrox/kube-linter-action@v1.0.4
+        with:
+          directory: .k8s/base
+          # 검사 제외 항목이 필요하다면 여기에 추가 가능

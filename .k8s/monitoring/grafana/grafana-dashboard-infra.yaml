@@ -1,0 +1,49 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-dashboard-infra
+  namespace: monitoring
+  labels:
+    grafana_dashboard: "1" # 사이드카가 인식하기 위한 라벨
+data:
+  infra-overview.json: |
+    {
+      "annotations": {
+        "list": [
+          {
+            "builtIn": 1,
+            "datasource": "-- Grafana --",
+            "enable": true,
+            "hide": true,
+            "iconColor": "rgba(255, 99, 132, 1)",
+            "name": "Annotations & Alerts",
+            "type": "dashboard"
+          }
+        ]
+      },
+      "editable": true,
+      "gnetId": null,
+      "graphTooltip": 0,
+      "id": null,
+      "links": [],
+      "panels": [
+        {
+          "content": "# Infrastructure Overview\n\nWelcome to your automated monitoring dashboard.\n\n- **Metrics**: Mimir\n- **Logs**: Loki\n- **Traces**: Tempo",
+          "gridPos": { "h": 6, "w": 24, "x": 0, "y": 0 },
+          "id": 1,
+          "mode": "markdown",
+          "title": "Status",
+          "type": "text"
+        }
+      ],
+      "schemaVersion": 30,
+      "style": "dark",
+      "tags": ["automated"],
+      "templating": { "list": [] },
+      "time": { "from": "now-6h", "to": "now" },
+      "timepicker": {},
+      "timezone": "",
+      "title": "Cluster Overview (Automated Load)",
+      "uid": "infra-auto",
+      "version": 1
+    }

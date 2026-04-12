@@ -1,0 +1,9 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - service-gateway-deployment.yaml
+  - service-gateway-service.yaml
+  - service-gateway-config.yaml
+  - service-gateway-hpa.yaml
+  - service-gateway-pdb.yaml
