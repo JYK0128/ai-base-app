@@ -9,5 +9,6 @@ const getRequiredEnv = (key: string) => {
 export const ENV = {
   RABBITMQ_URL: getRequiredEnv('RABBITMQ_URL'),
   DATABASE_URL: getRequiredEnv('DATABASE_URL'),
+  PORT: Number(process.env['PORT'] || 3000),
   NODE_ENV: process.env['NODE_ENV'] || 'development',
 } as const;
