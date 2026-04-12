@@ -4,6 +4,7 @@
     { "path": "packages/config" },
     { "path": "packages/database" },
     { "path": "packages/helper" },
-    { "path": "apps/service-auth" }
+    { "path": "apps/platform-auth-service" },
+    { "path": "apps/service-gateway" }
   ]
 }

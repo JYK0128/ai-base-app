@@ -1,4 +1,37 @@
-node_modules
-dist
+# --- Dependencies ---
+node_modules/
+.pnpm-debug.log*
+
+# --- Build / Output ---
+dist/
+build/
+*.tsbuildinfo
+.turbo/
+
+# --- OS / IDE ---
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# --- Logs & Temp ---
 *.log
-temp
+logs/
+temp/
+tmp/
+
+# --- Testing ---
+coverage/
+.nyc_output
+
+# --- Security ---
+*.pem
+*.key
+*.pub
+
+# --- Environment Variables ---
+.env
+.env.*
+!.env.example
