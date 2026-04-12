@@ -28,7 +28,7 @@
       "./src/mikro-orm.config.ts"
     ]
   },
-  "peerDependencies": {
+  "dependencies": {
     "@mikro-orm/core": "7.0.9",
     "@mikro-orm/decorators": "7.0.9",
     "@mikro-orm/entity-generator": "7.0.9",
