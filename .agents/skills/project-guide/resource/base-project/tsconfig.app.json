@@ -1,0 +1,7 @@
+{
+  "extends": "@pkg/config/typescript/bundler",
+  "compilerOptions": {
+    "outDir": "./dist"
+  },
+  "include": ["./src"]
+}
