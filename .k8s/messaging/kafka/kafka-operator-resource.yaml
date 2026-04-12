@@ -1,0 +1,37 @@
+apiVersion: kafka.strimzi.io/v1beta2
+kind: Kafka
+metadata:
+  name: kafka
+  namespace: dev-infra
+spec:
+  kafka:
+    version: 3.6.0
+    replicas: 3 # "3대의 브로커로 고가용성 구성"
+    listeners:
+      - name: plain
+        port: 9092
+        type: internal
+        tls: false
+      - name: tls
+        port: 9093
+        type: internal
+        tls: true
+    config:
+      offsets.topic.replication.factor: 3
+      transaction.state.log.replication.factor: 3
+      transaction.state.log.min.isr: 2
+      default.replication.factor: 3
+      min.insync.replicas: 2
+      inter.broker.protocol.version: "3.6"
+    storage:
+      type: jbod
+      volumes:
+      - id: 0
+        type: persistent-claim
+        size: 20Gi
+        deleteClaim: false
+    # KRaft 모드 활성화 (고도화 도구)
+    metadataVersion: "3.6-IV2"
+  entityOperator:
+    topicOperator: {}
+    userOperator: {}

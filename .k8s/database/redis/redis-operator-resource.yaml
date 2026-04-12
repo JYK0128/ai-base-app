@@ -1,0 +1,22 @@
+apiVersion: redis.otterize.com/v1alpha1 # 예시: OT-Container-Kit 스타일의 보편적 포맷
+kind: Redis
+metadata:
+  name: redis
+  namespace: dev-infra
+spec:
+  mode: Sentinel # "고가용성을 위해 센티널 모드로 자동 구축"
+  size: 3
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 256Mi
+  storage:
+    volumeClaimTemplate:
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 5Gi

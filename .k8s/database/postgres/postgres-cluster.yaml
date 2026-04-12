@@ -1,0 +1,27 @@
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: postgres
+  namespace: dev-infra
+spec:
+  instances: 3 # "전용 오퍼레이터가 알아서 마스터 1, 슬레이브 2로 관리"
+  
+  # 데이터베이스 및 유저는 기존 시크릿 활용
+  bootstrap:
+    initdb:
+      database: platform_db
+      owner: postgres
+      secret:
+        name: postgres-secret
+
+  # 스토리지 설정 (PVC를 오퍼레이터가 자동 생성)
+  storage:
+    size: 10Gi
+
+  # 모니터링: Prometheus 익스포터 자동 내장
+  monitoring:
+    enablePodMonitor: true
+
+  # 백업 설정 (예시: S3 등으로 확장 가능)
+  backup:
+    retentionPolicy: "7d"

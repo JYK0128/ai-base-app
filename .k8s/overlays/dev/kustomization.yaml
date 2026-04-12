@@ -1,40 +1,68 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
-# [진짜 대통합] 모든 리소스를 여기서 한 번에 관리합니다.
 resources:
-  # 1. Namespaces & Policies (기초 공사)
   - ../../namespaces
   - ../../network-policies
-  
-  # 2. Apps (핵심 비즈니스)
   - ../../apps/service-gateway
   - ../../apps/platform-auth-service
-  
-  # 3. Infra (DB / Messaging)
   - ../../database/postgres
   - ../../database/redis
   - ../../messaging/rabbitmq
   - ../../messaging/kafka
-  
-  # 4. Monitoring (LGTM Stack)
   - ../../monitoring/loki
   - ../../monitoring/mimir
   - ../../monitoring/tempo
   - ../../monitoring/grafana
   - ../../monitoring/promtail
-  
-  # 5. Networking (Istio)
   - ../../networking
 
 commonLabels:
   env: dev
 
+# [개발 환경 다이어트] 모든 복제본을 1개로 축소
 patches:
+  # 1. 일반 앱 (Deployment)
   - target:
       kind: Deployment
       labelSelector: "app in (service-gateway, platform-auth-service)"
     patch: |-
       - op: replace
         path: /spec/replicas
+        value: 1
+
+  # 2. Postgres (CloudNativePG Cluster)
+  - target:
+      kind: Cluster
+      name: postgres
+    patch: |-
+      - op: replace
+        path: /spec/instances
+        value: 1
+
+  # 3. RabbitMQ (RabbitmqCluster)
+  - target:
+      kind: RabbitmqCluster
+      name: rabbitmq
+    patch: |-
+      - op: replace
+        path: /spec/replicas
+        value: 1
+
+  # 4. Redis (Redis Operator)
+  - target:
+      kind: Redis
+      name: redis
+    patch: |-
+      - op: replace
+        path: /spec/size
+        value: 1
+
+  # 5. Kafka (Strimzi)
+  - target:
+      kind: Kafka
+      name: kafka
+    patch: |-
+      - op: replace
+        path: /spec/kafka/replicas
         value: 1

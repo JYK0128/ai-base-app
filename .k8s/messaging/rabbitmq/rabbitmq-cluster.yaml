@@ -1,0 +1,31 @@
+apiVersion: rabbitmq.com/v1beta1
+kind: RabbitmqCluster
+metadata:
+  name: rabbitmq
+  namespace: dev-infra
+spec:
+  replicas: 3 # "오퍼레이터가 자동 클러스터링 수행"
+  
+  rabbitmq:
+    additionalConfig: |
+      cluster_partition_handling = pause_minority
+      vm_memory_high_watermark_paging_ratio = 0.99
+    
+  # 이미지 및 리소스 설정
+  image: rabbitmq:3-management
+  
+  resources:
+    requests:
+      cpu: 500m
+      memory: 1Gi
+    limits:
+      cpu: 1000m
+      memory: 2Gi
+
+  # 영속성 설정
+  persistence:
+    storage: 10Gi
+    
+  # 모니터링 활성화
+  prometheus:
+    enable: true
