@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: postgres
-  namespace: default
+  namespace: dev-infra
 spec:
   replicas: 1
   selector:
@@ -16,6 +16,13 @@ spec:
       containers:
         - name: postgres
           image: postgres:17-alpine
+          resources:
+            requests:
+              cpu: 250m
+              memory: 512Mi
+            limits:
+              cpu: 500m
+              memory: 1Gi
           ports:
             - containerPort: 5432
           envFrom:

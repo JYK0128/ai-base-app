@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: platform-auth-service
+  namespace: dev-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: platform-auth-service
+  template:
+    metadata:
+      labels:
+        app: platform-auth-service
+    spec:
+      containers:
+      - name: platform-auth-service
+        image: platform-auth-service:latest
+        imagePullPolicy: IfNotPresent
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 300m
+            memory: 256Mi
+        envFrom:
+        - configMapRef:
+            name: platform-auth-service-config
+        ports:
+        - containerPort: 3000

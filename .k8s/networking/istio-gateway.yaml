@@ -1,0 +1,15 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: service-gateway-ingress
+  namespace: dev-web
+spec:
+  selector:
+    istio: ingressgateway # Istio의 기본 IngressGateway 사용
+  servers:
+  - port:
+      number: 80
+      name: http
+      protocol: HTTP
+    hosts:
+    - "*" # 모든 호스트의 요청을 수락 (나중에 도메인 지정 가능)

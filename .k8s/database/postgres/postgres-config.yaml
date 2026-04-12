@@ -2,7 +2,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: postgres-init-script
-  namespace: default
+  namespace: dev-infra
 data:
   init-db.sql: |
     CREATE SCHEMA IF NOT EXISTS platform;
