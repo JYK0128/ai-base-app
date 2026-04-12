@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: dev-api
+  labels:
+    app.kubernetes.io/part-of: ai-base-app
+    environment: dev
+    team: api

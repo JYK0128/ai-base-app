@@ -5,4 +5,5 @@ metadata:
   namespace: dev-api
 data:
   RABBITMQ_URL: "amqp://rabbitmq.dev-infra.svc.cluster.local:5672"
+  DATABASE_URL: "postgres://postgres:postgrespassword@postgres-service.dev-infra.svc.cluster.local:5432/platform_db"
   NODE_ENV: "development"

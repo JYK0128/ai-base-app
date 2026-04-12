@@ -1,0 +1,49 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: postgres-backup
+  namespace: dev-infra
+spec:
+  schedule: "0 3 * * *" # 매일 새벽 3시 실행
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 70
+            fsGroup: 70
+          containers:
+          - name: postgres-backup
+            image: postgres:17-alpine
+            command: ["/bin/sh", "-c"]
+            args:
+            - |
+              set -e
+              DATE=$(date +%Y%m%d_%H%M%S)
+              FILENAME="/backups/postgres_backup_${DATE}.sql.gz"
+              echo "Starting backup to ${FILENAME}..."
+              
+              # pg_dump와 gzip을 한 번에 실행
+              pg_dump -h postgres-service -U ${POSTGRES_USER} ${POSTGRES_DB} | gzip > ${FILENAME}
+              
+              echo "Backup completed successfully."
+              
+              # 7일 이상 된 백업 파일 삭제 (오래된 데이터 정리)
+              echo "Cleaning up old backups..."
+              find /backups -name "postgres_backup_*.sql.gz" -mtime +7 -delete
+              echo "Cleanup done."
+            envFrom:
+            - secretRef:
+                name: postgres-secret
+            - configMapRef:
+                name: postgres-config
+            volumeMounts:
+            - name: backup-volume
+              mountPath: /backups
+          restartPolicy: OnFailure
+          volumes:
+          - name: backup-volume
+            persistentVolumeClaim:
+              claimName: postgres-backup-pvc
