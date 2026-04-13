@@ -25,7 +25,7 @@ patches:
   # 1. 일반 앱 (Deployment)
   - target:
       kind: Deployment
-      labelSelector: "app in (service-gateway, platform-auth-service)"
+      labelSelector: "app.kubernetes.io/name in (service-gateway, platform-auth-service)"
     patch: |-
       - op: replace
         path: /spec/replicas
@@ -55,7 +55,7 @@ patches:
       name: redis
     patch: |-
       - op: replace
-        path: /spec/size
+        path: /spec/clusterSize
         value: 1
 
   # 5. Kafka (Strimzi)

@@ -1,17 +1,20 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: platform-auth-service
-  namespace: dev-api
+  name: service-gateway-deploy
+  namespace: dev-web
+  labels:
+    app.kubernetes.io/name: service-gateway
+    app.kubernetes.io/part-of: ai-base-app
 spec:
   replicas: 2
   selector:
     matchLabels:
-      app: platform-auth-service
+      app.kubernetes.io/name: service-gateway
   template:
     metadata:
       labels:
-        app: platform-auth-service
+        app.kubernetes.io/name: service-gateway
     spec:
       securityContext:
         runAsNonRoot: true
@@ -27,11 +30,11 @@ spec:
             podAffinityTerm:
               labelSelector:
                 matchLabels:
-                  app: platform-auth-service
+                  app: service-gateway
               topologyKey: "kubernetes.io/hostname"
       containers:
-      - name: platform-auth-service
-        image: platform-auth-service:latest
+      - name: service-gateway
+        image: service-gateway:latest
         imagePullPolicy: IfNotPresent
         securityContext:
           readOnlyRootFilesystem: true
@@ -51,7 +54,7 @@ spec:
             memory: 256Mi
         envFrom:
         - configMapRef:
-            name: platform-auth-service-config
+            name: service-gateway-cm
         ports:
         - containerPort: 3000
         startupProbe:

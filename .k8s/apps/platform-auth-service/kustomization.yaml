@@ -2,8 +2,8 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
 resources:
-  - platform-auth-service-deployment.yaml
-  - platform-auth-service-service.yaml
-  - platform-auth-service-config.yaml
+  - platform-auth-service-deploy.yaml
+  - platform-auth-service-svc.yaml
+  - platform-auth-service-cm.yaml
   - platform-auth-service-hpa.yaml
   - platform-auth-service-pdb.yaml

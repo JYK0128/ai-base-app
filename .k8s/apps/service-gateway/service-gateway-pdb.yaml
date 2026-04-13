@@ -3,8 +3,11 @@ kind: PodDisruptionBudget
 metadata:
   name: service-gateway-pdb
   namespace: dev-web
+  labels:
+    app.kubernetes.io/name: service-gateway
+    app.kubernetes.io/part-of: ai-base-app
 spec:
   minAvailable: 1
   selector:
     matchLabels:
-      app: service-gateway
+      app.kubernetes.io/name: service-gateway

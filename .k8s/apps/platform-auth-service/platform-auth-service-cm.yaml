@@ -1,8 +1,11 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: platform-auth-service-config
+  name: platform-auth-service-cm
   namespace: dev-api
+  labels:
+    app.kubernetes.io/name: platform-auth-service
+    app.kubernetes.io/part-of: ai-base-app
 data:
   RABBITMQ_URL: "amqp://rabbitmq.dev-infra.svc.cluster.local:5672"
   DATABASE_URL: "postgres://postgres:postgrespassword@postgres-service.dev-infra.svc.cluster.local:5432/platform_db"

@@ -1,8 +1,11 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: service-gateway-config
+  name: service-gateway-cm
   namespace: dev-web
+  labels:
+    app.kubernetes.io/name: service-gateway
+    app.kubernetes.io/part-of: ai-base-app
 data:
   RABBITMQ_URL: "amqp://rabbitmq.dev-infra.svc.cluster.local:5672"
   NODE_ENV: "development"

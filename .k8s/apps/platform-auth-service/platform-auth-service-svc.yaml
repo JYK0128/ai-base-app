@@ -3,9 +3,12 @@ kind: Service
 metadata:
   name: platform-auth-service
   namespace: dev-api
+  labels:
+    app.kubernetes.io/name: platform-auth-service
+    app.kubernetes.io/part-of: ai-base-app
 spec:
   selector:
-    app: platform-auth-service
+    app.kubernetes.io/name: platform-auth-service
   ports:
   - protocol: TCP
     port: 80
