@@ -27,13 +27,14 @@ spec:
       containers:
       - name: mimir
         image: grafana/mimir:2.12.0
+        workingDir: /tmp
         args:
         - "-config.file=/etc/mimir/mimir.yaml"
         - "-target=all"
         ports:
         - containerPort: 8080
         securityContext:
-          readOnlyRootFilesystem: true
+          readOnlyRootFilesystem: false
           allowPrivilegeEscalation: false
           capabilities:
             drop:

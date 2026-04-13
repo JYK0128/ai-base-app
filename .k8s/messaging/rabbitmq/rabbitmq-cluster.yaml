@@ -6,6 +6,11 @@ metadata:
 spec:
   replicas: 3 # "오퍼레이터가 자동 클러스터링 수행"
   
+  # 정적 계정 정보 사용 (RABBITMQ_DEFAULT_USER, PASS)
+  secretBackend:
+    externalSecret:
+      name: rabbitmq-secret
+  
   rabbitmq:
     additionalConfig: |
       cluster_partition_handling = pause_minority

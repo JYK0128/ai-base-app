@@ -88,10 +88,10 @@ spec:
         emptyDir: {}
       - name: datasources
         configMap:
-          name: grafana-sts-datasources
+          name: grafana-datasources-cm
       - name: dashboards-provisioning
         configMap:
-          name: grafana-sts-dashboards-provisioning
+          name: grafana-provisioning-cm
       - name: sc-dashboard-volume
         emptyDir: {}
   volumeClaimTemplates:

@@ -61,3 +61,133 @@ patches:
       - op: replace
         path: /spec/kafka/replicas
         value: 1
+
+  # 6. HPA (Diet)
+  - target:
+      kind: HorizontalPodAutoscaler
+      labelSelector: "app.kubernetes.io/name in (service-gateway, platform-auth-service)"
+    patch: |-
+      - op: replace
+        path: /spec/minReplicas
+        value: 1
+
+  # 7. 모니터링 스택 영속성 제거 (emptyDir 전환)
+  - target:
+      kind: StatefulSet
+      name: loki-sts
+    patch: |-
+      - op: replace
+        path: /spec/template/spec/volumes
+        value:
+          - name: config
+            configMap:
+              name: loki-cm
+          - name: tmp
+            emptyDir: {}
+          - name: data
+            emptyDir: {}
+      - op: remove
+        path: /spec/volumeClaimTemplates
+
+  - target:
+      kind: StatefulSet
+      name: mimir-sts
+    patch: |-
+      - op: replace
+        path: /spec/template/spec/volumes
+        value:
+          - name: config
+            configMap:
+              name: mimir-cm
+          - name: alert-rules
+            configMap:
+              name: monitoring-alerts-cm
+              items:
+              - key: monitoring-rules.yaml
+                path: monitoring-rules.yaml
+          - name: tmp
+            emptyDir: {}
+          - name: data
+            emptyDir: {}
+      - op: remove
+        path: /spec/volumeClaimTemplates
+
+  - target:
+      kind: StatefulSet
+      name: tempo-sts
+    patch: |-
+      - op: replace
+        path: /spec/template/spec/volumes
+        value:
+          - name: config
+            configMap:
+              name: tempo-cm
+          - name: tmp
+            emptyDir: {}
+          - name: data
+            emptyDir: {}
+      - op: remove
+        path: /spec/volumeClaimTemplates
+
+  - target:
+      kind: StatefulSet
+      name: grafana-sts
+    patch: |-
+      - op: replace
+        path: /spec/template/spec/volumes
+        value:
+          - name: tmp
+            emptyDir: {}
+          - name: datasources
+            configMap:
+              name: grafana-datasources-cm
+          - name: dashboards-provisioning
+            configMap:
+              name: grafana-provisioning-cm
+          - name: sc-dashboard-volume
+            emptyDir: {}
+          - name: data
+            emptyDir: {}
+      - op: remove
+        path: /spec/volumeClaimTemplates
+
+  # 8. RabbitMQ 영속성 제거 및 미러 적용
+  - target:
+      kind: RabbitmqCluster
+      name: rabbitmq
+    patch: |-
+      - op: remove
+        path: /spec/persistence
+      - op: replace
+        path: /spec/replicas
+        value: 1
+
+  # 9. Postgres 백업 제거 및 휘발성 최적화
+  - target:
+      kind: Cluster
+      name: postgres
+    patch: |-
+      - op: remove
+        path: /spec/backup
+      - op: replace
+        path: /spec/instances
+        value: 1
+      - op: replace
+        path: /spec/storage/size
+        value: "1Gi"
+
+  # 10. 이미지 미러링 (Docker Hub Rate Limit 우회)
+  - target:
+      kind: RedisCluster
+      name: redis
+    patch: |-
+      - op: replace
+        path: /spec/kubernetesConfig/image
+        value: "public.ecr.aws/docker/library/redis:7.0.12"
+
+  - target:
+      kind: StatefulSet
+      name: grafana-sts
+    patch: |-
+      - op: remove
+        path: /spec/template/spec/containers/1

@@ -27,7 +27,7 @@ spec:
       - name: tempo-sts
         image: grafana/tempo:2.4.1
         args:
-        - "-config.file=/etc/tempo/tempo-local.yaml"
+        - "-config.file=/etc/tempo/tempo.yaml"
         ports:
         - containerPort: 3200   # HTTP
         - containerPort: 4317   # OTLP gRPC
