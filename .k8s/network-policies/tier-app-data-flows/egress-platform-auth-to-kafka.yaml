@@ -1,0 +1,23 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: egress-platform-auth-to-kafka
+  namespace: dev-api
+spec:
+  podSelector:
+    matchLabels:
+      app: platform-auth-service
+  policyTypes:
+  - Egress
+  egress:
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: dev-infra
+      podSelector:
+        matchLabels:
+          app: kafka
+    ports:
+    - protocol: TCP
+      port: 9092
+

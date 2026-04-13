@@ -1,0 +1,16 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - egress-platform-auth-to-rabbitmq.yaml
+  - egress-service-gateway-to-rabbitmq.yaml
+  - ingress-rabbitmq-from-apps.yaml
+  - egress-platform-auth-to-postgres.yaml
+  - egress-platform-auth-to-redis.yaml
+  - egress-platform-auth-to-kafka.yaml
+  - egress-service-gateway-to-postgres.yaml
+  - egress-service-gateway-to-redis.yaml
+  - egress-service-gateway-to-kafka.yaml
+  - ingress-postgres-from-apps.yaml
+  - ingress-redis-from-apps.yaml
+  - ingress-kafka-from-apps.yaml
