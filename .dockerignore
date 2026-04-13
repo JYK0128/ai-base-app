@@ -28,9 +28,13 @@ Thumbs.db
 *.log
 *.log*
 log/
+.log/
 logs/
+.logs/
 tmp/
+.tmp/
 temp/
+.temp/
 
 # --- Testing ---
 coverage/
