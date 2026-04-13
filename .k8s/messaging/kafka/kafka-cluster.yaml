@@ -1,8 +1,11 @@
 apiVersion: kafka.strimzi.io/v1beta2
 kind: Kafka
 metadata:
-  name: kafka
+  name: kafka-cluster
   namespace: dev-infra
+  labels:
+    app.kubernetes.io/name: kafka
+    app.kubernetes.io/part-of: ai-base-app
 spec:
   kafka:
     version: 3.6.0

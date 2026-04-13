@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: grafana-dashboard-infra
+  name: grafana-dashboard-cm
   namespace: monitoring
   labels:
     grafana_dashboard: "1" # 사이드카가 인식하기 위한 라벨

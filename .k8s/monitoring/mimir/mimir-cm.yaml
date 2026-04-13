@@ -1,8 +1,11 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: mimir-config
+  name: mimir-cm
   namespace: monitoring
+  labels:
+    app.kubernetes.io/name: mimir
+    app.kubernetes.io/part-of: ai-base-app
 data:
   mimir.yaml: |
     multitenancy_enabled: false

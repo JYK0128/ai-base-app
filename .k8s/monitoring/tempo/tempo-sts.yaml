@@ -1,20 +1,20 @@
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: mimir
+  name: tempo-sts
   namespace: monitoring
   labels:
-    app: mimir
+    app.kubernetes.io/name: tempo
 spec:
-  serviceName: "mimir"
+  serviceName: "tempo"
   replicas: 1
   selector:
     matchLabels:
-      app: mimir
+      app.kubernetes.io/name: tempo
   template:
     metadata:
       labels:
-        app: mimir
+        app.kubernetes.io/name: tempo
     spec:
       securityContext:
         runAsNonRoot: true
@@ -24,13 +24,13 @@ spec:
         seccompProfile:
           type: RuntimeDefault
       containers:
-      - name: mimir
-        image: grafana/mimir:2.12.0
+      - name: tempo-sts
+        image: grafana/tempo:2.4.1
         args:
-        - "-config.file=/etc/mimir/mimir.yaml"
-        - "-target=all"
+        - "-config.file=/etc/tempo/tempo-local.yaml"
         ports:
-        - containerPort: 8080
+        - containerPort: 3200   # HTTP
+        - containerPort: 4317   # OTLP gRPC
         securityContext:
           readOnlyRootFilesystem: true
           allowPrivilegeEscalation: false
@@ -40,42 +40,33 @@ spec:
         readinessProbe:
           httpGet:
             path: /ready
-            port: 8080
+            port: 3200
           initialDelaySeconds: 20
           periodSeconds: 10
         livenessProbe:
           httpGet:
             path: /ready
-            port: 8080
+            port: 3200
           initialDelaySeconds: 40
           periodSeconds: 15
         resources:
           requests:
-            cpu: 200m
-            memory: 256Mi
+            cpu: 100m
+            memory: 128Mi
           limits:
-            cpu: 1000m
-            memory: 1Gi
+            cpu: 500m
+            memory: 512Mi
         volumeMounts:
         - name: config
-          mountPath: /etc/mimir
+          mountPath: /etc/tempo
         - name: data
-          mountPath: /data/mimir
-        - name: alert-rules
-          mountPath: /data/mimir/rules/anonymous
-          readOnly: true
+          mountPath: /var/tempo
         - name: tmp
           mountPath: /tmp
       volumes:
       - name: config
         configMap:
-          name: mimir-config
-      - name: alert-rules
-        configMap:
-          name: monitoring-alert-rules
-          items:
-          - key: monitoring-rules.yaml
-            path: monitoring-rules.yaml
+          name: tempo-sts-config
       - name: tmp
         emptyDir: {}
   volumeClaimTemplates:
@@ -85,4 +76,4 @@ spec:
       accessModes: [ "ReadWriteOnce" ]
       resources:
         requests:
-          storage: 20Gi
+          storage: 10Gi

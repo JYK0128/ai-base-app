@@ -1,20 +1,21 @@
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: loki
+  name: mimir-sts
   namespace: monitoring
   labels:
-    app: loki
+    app.kubernetes.io/name: mimir
+    app.kubernetes.io/part-of: ai-base-app
 spec:
-  serviceName: "loki"
+  serviceName: "mimir"
   replicas: 1
   selector:
     matchLabels:
-      app: loki
+      app.kubernetes.io/name: mimir
   template:
     metadata:
       labels:
-        app: loki
+        app.kubernetes.io/name: mimir
     spec:
       securityContext:
         runAsNonRoot: true
@@ -24,12 +25,13 @@ spec:
         seccompProfile:
           type: RuntimeDefault
       containers:
-      - name: loki
-        image: grafana/loki:2.9.8
+      - name: mimir
+        image: grafana/mimir:2.12.0
         args:
-        - "-config.file=/etc/loki/local-config.yaml"
+        - "-config.file=/etc/mimir/mimir.yaml"
+        - "-target=all"
         ports:
-        - containerPort: 3100
+        - containerPort: 8080
         securityContext:
           readOnlyRootFilesystem: true
           allowPrivilegeEscalation: false
@@ -39,14 +41,14 @@ spec:
         readinessProbe:
           httpGet:
             path: /ready
-            port: 3100
-          initialDelaySeconds: 15
+            port: 8080
+          initialDelaySeconds: 20
           periodSeconds: 10
         livenessProbe:
           httpGet:
             path: /ready
-            port: 3100
-          initialDelaySeconds: 30
+            port: 8080
+          initialDelaySeconds: 40
           periodSeconds: 15
         resources:
           requests:
@@ -57,15 +59,24 @@ spec:
             memory: 1Gi
         volumeMounts:
         - name: config
-          mountPath: /etc/loki
+          mountPath: /etc/mimir
         - name: data
-          mountPath: /loki
+          mountPath: /data/mimir
+        - name: alert-rules
+          mountPath: /data/mimir/rules/anonymous
+          readOnly: true
         - name: tmp
           mountPath: /tmp
       volumes:
       - name: config
         configMap:
-          name: loki-config
+          name: mimir-cm
+      - name: alert-rules
+        configMap:
+          name: monitoring-alert-rules
+          items:
+          - key: monitoring-rules.yaml
+            path: monitoring-rules.yaml
       - name: tmp
         emptyDir: {}
   volumeClaimTemplates:
@@ -75,4 +86,4 @@ spec:
       accessModes: [ "ReadWriteOnce" ]
       resources:
         requests:
-          storage: 10Gi
+          storage: 20Gi

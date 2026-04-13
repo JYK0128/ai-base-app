@@ -4,10 +4,11 @@ metadata:
   name: mimir
   namespace: monitoring
   labels:
-    app: mimir
+    app.kubernetes.io/name: mimir
+    app.kubernetes.io/part-of: ai-base-app
 spec:
   selector:
-    app: mimir
+    app.kubernetes.io/name: mimir
   ports:
-  - port: 9009
+  - port: 8080
     targetPort: 8080

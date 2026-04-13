@@ -2,6 +2,6 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
 resources:
-  - tempo-statefulset.yaml
-  - tempo-service.yaml
-  - tempo-config.yaml
+  - tempo-sts.yaml
+  - tempo-svc.yaml
+  - tempo-cm.yaml

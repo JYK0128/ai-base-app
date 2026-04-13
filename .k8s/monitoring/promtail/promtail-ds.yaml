@@ -1,18 +1,18 @@
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
-  name: promtail
+  name: promtail-ds
   namespace: monitoring
   labels:
-    app: promtail
+    app.kubernetes.io/name: promtail
 spec:
   selector:
     matchLabels:
-      app: promtail
+      app.kubernetes.io/name: promtail
   template:
     metadata:
       labels:
-        app: promtail
+        app.kubernetes.io/name: promtail
     spec:
       serviceAccountName: promtail
       # 보안 표준화: 비루트 권한 적용 (Promtail은 로그를 읽어야 하므로 UID 확인 필요)
@@ -21,7 +21,7 @@ spec:
         runAsUser: 0 # 잠시만요, Promtail은 /var/log를 읽어야 하므로 보통 root 권한이 필요할 수 있습니다. 
                      # 일단 capabilities drop을 최대한 적용하겠습니다.
       containers:
-      - name: promtail
+      - name: promtail-ds
         image: grafana/promtail:latest
         args:
         - "-config.file=/etc/promtail/promtail.yaml"
@@ -44,4 +44,4 @@ spec:
           path: /var/log/pods
       - name: config
         configMap:
-          name: promtail-config
+          name: promtail-ds-config

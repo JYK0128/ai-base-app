@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: promtail-config
+  name: promtail-cm
   namespace: monitoring
 data:
   promtail.yaml: |
