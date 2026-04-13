@@ -2,6 +2,7 @@
   "extends": "@pkg/config/typescript/bundler",
   "compilerOptions": {
     "outDir": "./dist",
+    "sourceMap": true,
     "types": ["node"]
   },
   "include": ["./src"]
