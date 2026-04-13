@@ -6,7 +6,7 @@ metadata:
 spec:
   clusterSize: 3 # OpsTree Sentinel/Cluster 구성을 위한 사이즈
   kubernetesConfig:
-    image: redis:7.0.12
+    image: public.ecr.aws/docker/library/redis:7.0.12
     imagePullPolicy: IfNotPresent
     resources:
       requests:

@@ -10,13 +10,10 @@ spec:
     spec:
       template:
         spec:
-          securityContext:
-            runAsNonRoot: true
-            runAsUser: 70
-            fsGroup: 70
           containers:
           - name: postgres-backup
-            image: postgres:17-alpine
+            image: public.ecr.aws/docker/library/postgres:17-alpine
+            imagePullPolicy: IfNotPresent
             command: ["/bin/sh", "-c"]
             args:
             - |

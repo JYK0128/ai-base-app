@@ -16,27 +16,15 @@ spec:
       labels:
         app.kubernetes.io/name: tempo
     spec:
-      securityContext:
-        runAsNonRoot: true
-        runAsUser: 10001
-        runAsGroup: 10001
-        fsGroup: 10001
-        seccompProfile:
-          type: RuntimeDefault
       containers:
       - name: tempo-sts
-        image: grafana/tempo:2.4.1
+        image: public.ecr.aws/bitnami/grafana-tempo:latest
+        imagePullPolicy: IfNotPresent
         args:
         - "-config.file=/etc/tempo/tempo.yaml"
         ports:
         - containerPort: 3200   # HTTP
         - containerPort: 4317   # OTLP gRPC
-        securityContext:
-          readOnlyRootFilesystem: true
-          allowPrivilegeEscalation: false
-          capabilities:
-            drop:
-            - ALL
         readinessProbe:
           httpGet:
             path: /ready

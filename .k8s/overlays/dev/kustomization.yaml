@@ -1,6 +1,7 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
+# 1. 공통 리소스 정의
 resources:
   - ../../namespaces
   - ../../network-policies
@@ -10,14 +11,18 @@ resources:
   - ../../monitoring
   - ../../networking
 
+# 2. 공통 라벨 주입
 labels:
   - includeSelectors: true
     pairs:
       env: dev
 
-# [개발 환경 다이어트] 모든 복제본을 1개로 축소
+# 3. 개발 환경 최적화 패치 (Diet & Ephemeral)
 patches:
-  # 1. 일반 앱 (Deployment)
+  
+  # --- [SECTION 1: RESOURCE DIET] ---
+
+  # 어플리케이션 복제본 1개로 축소
   - target:
       kind: Deployment
       labelSelector: "app.kubernetes.io/name in (service-gateway, platform-auth-service)"
@@ -26,7 +31,7 @@ patches:
         path: /spec/replicas
         value: 1
 
-  # 2. Postgres (CloudNativePG Cluster)
+  # Postgres 인스턴스 축소 및 백업 기능 제거
   - target:
       kind: Cluster
       name: postgres
@@ -34,8 +39,10 @@ patches:
       - op: replace
         path: /spec/instances
         value: 1
+      - op: remove
+        path: /spec/backup
 
-  # 3. RabbitMQ (RabbitmqCluster)
+  # RabbitMQ 복제본 축소 및 영속성(Persistence) 제거
   - target:
       kind: RabbitmqCluster
       name: rabbitmq
@@ -43,8 +50,10 @@ patches:
       - op: replace
         path: /spec/replicas
         value: 1
+      - op: remove
+        path: /spec/persistence
 
-  # 4. Redis (Redis Operator)
+  # Redis 클러스터 크기 축소
   - target:
       kind: RedisCluster
       name: redis
@@ -53,7 +62,7 @@ patches:
         path: /spec/clusterSize
         value: 1
 
-  # 5. Kafka (Strimzi)
+  # Kafka 복제본 축소
   - target:
       kind: Kafka
       name: kafka
@@ -62,7 +71,7 @@ patches:
         path: /spec/kafka/replicas
         value: 1
 
-  # 6. HPA (Diet)
+  # HPA 최소 복제본 1개로 고정
   - target:
       kind: HorizontalPodAutoscaler
       labelSelector: "app.kubernetes.io/name in (service-gateway, platform-auth-service)"
@@ -71,7 +80,17 @@ patches:
         path: /spec/minReplicas
         value: 1
 
-  # 7. 모니터링 스택 영속성 제거 (emptyDir 전환)
+  # --- [SECTION 2: EPHEMERAL STORAGE (휘발성 환경)] ---
+
+  # 모니터링 모든 컴포넌트의 PVC(volumeClaimTemplates) 제거
+  - target:
+      kind: StatefulSet
+      labelSelector: "app.kubernetes.io/name in (loki, mimir, tempo, grafana)"
+    patch: |-
+      - op: remove
+        path: /spec/volumeClaimTemplates
+
+  # Loki 볼륨 구성: emptyDir 사용
   - target:
       kind: StatefulSet
       name: loki-sts
@@ -86,9 +105,8 @@ patches:
             emptyDir: {}
           - name: data
             emptyDir: {}
-      - op: remove
-        path: /spec/volumeClaimTemplates
-
+            
+  # Mimir 볼륨 구성: emptyDir 및 얼럿 규칙 CM 연결
   - target:
       kind: StatefulSet
       name: mimir-sts
@@ -103,15 +121,14 @@ patches:
             configMap:
               name: monitoring-alerts-cm
               items:
-              - key: monitoring-rules.yaml
-                path: monitoring-rules.yaml
+                - key: monitoring-rules.yaml
+                  path: monitoring-rules.yaml
           - name: tmp
             emptyDir: {}
           - name: data
             emptyDir: {}
-      - op: remove
-        path: /spec/volumeClaimTemplates
 
+  # Tempo 볼륨 구성: emptyDir 사용
   - target:
       kind: StatefulSet
       name: tempo-sts
@@ -126,9 +143,8 @@ patches:
             emptyDir: {}
           - name: data
             emptyDir: {}
-      - op: remove
-        path: /spec/volumeClaimTemplates
 
+  # Grafana 구성: 사이드카 컨테이너 제거 및 볼륨을 emptyDir로 전환
   - target:
       kind: StatefulSet
       name: grafana-sts
@@ -144,50 +160,5 @@ patches:
           - name: dashboards-provisioning
             configMap:
               name: grafana-provisioning-cm
-          - name: sc-dashboard-volume
-            emptyDir: {}
           - name: data
             emptyDir: {}
-      - op: remove
-        path: /spec/volumeClaimTemplates
-
-  # 8. RabbitMQ 영속성 제거 및 미러 적용
-  - target:
-      kind: RabbitmqCluster
-      name: rabbitmq
-    patch: |-
-      - op: remove
-        path: /spec/persistence
-      - op: replace
-        path: /spec/replicas
-        value: 1
-
-  # 9. Postgres 백업 제거 및 휘발성 최적화
-  - target:
-      kind: Cluster
-      name: postgres
-    patch: |-
-      - op: remove
-        path: /spec/backup
-      - op: replace
-        path: /spec/instances
-        value: 1
-      - op: replace
-        path: /spec/storage/size
-        value: "1Gi"
-
-  # 10. 이미지 미러링 (Docker Hub Rate Limit 우회)
-  - target:
-      kind: RedisCluster
-      name: redis
-    patch: |-
-      - op: replace
-        path: /spec/kubernetesConfig/image
-        value: "public.ecr.aws/docker/library/redis:7.0.12"
-
-  - target:
-      kind: StatefulSet
-      name: grafana-sts
-    patch: |-
-      - op: remove
-        path: /spec/template/spec/containers/1

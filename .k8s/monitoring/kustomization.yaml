@@ -6,5 +6,5 @@ resources:
   - mimir
   - tempo
   - grafana
-  - promtail
+  - alloy
   - monitoring-alerts-cm.yaml

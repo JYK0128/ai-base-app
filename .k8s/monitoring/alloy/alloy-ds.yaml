@@ -1,36 +1,41 @@
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
-  name: promtail-ds
+  name: alloy-ds
   namespace: monitoring
   labels:
-    app.kubernetes.io/name: promtail
+    app.kubernetes.io/name: alloy
 spec:
   selector:
     matchLabels:
-      app.kubernetes.io/name: promtail
+      app.kubernetes.io/name: alloy
   template:
     metadata:
       labels:
-        app.kubernetes.io/name: promtail
+        app.kubernetes.io/name: alloy
     spec:
-      serviceAccountName: promtail
+      serviceAccountName: alloy
       containers:
-      - name: promtail-ds
-        image: public.ecr.aws/bitnami/promtail:latest
+      - name: alloy
+        image: public.ecr.aws/bitnami/grafana-alloy:latest
         imagePullPolicy: IfNotPresent
         args:
-        - "-config.file=/etc/promtail/promtail.yaml"
+        - run
+        - --storage.path=/tmp/alloy
+        - /etc/alloy/config.alloy
         volumeMounts:
         - name: logs
           mountPath: /var/log/pods
           readOnly: true
         - name: config
-          mountPath: /etc/promtail
+          mountPath: /etc/alloy
+        ports:
+        - containerPort: 12345
+          name: http-metrics
       volumes:
       - name: logs
         hostPath:
           path: /var/log/pods
       - name: config
         configMap:
-          name: promtail-cm
+          name: alloy-cm

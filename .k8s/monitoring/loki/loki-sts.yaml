@@ -16,26 +16,15 @@ spec:
       labels:
         app.kubernetes.io/name: loki
     spec:
-      securityContext:
-        runAsNonRoot: true
-        runAsUser: 10001
-        runAsGroup: 10001
-        fsGroup: 10001
-        seccompProfile:
-          type: RuntimeDefault
       containers:
       - name: loki-sts
-        image: grafana/loki:2.9.8
+        image: public.ecr.aws/bitnami/grafana-loki:latest
+        imagePullPolicy: IfNotPresent
         args:
         - "-config.file=/etc/loki/loki.yaml"
+        - "-validation.allow-structured-metadata=false"
         ports:
         - containerPort: 3100
-        securityContext:
-          readOnlyRootFilesystem: true
-          allowPrivilegeEscalation: false
-          capabilities:
-            drop:
-            - ALL
         readinessProbe:
           httpGet:
             path: /ready

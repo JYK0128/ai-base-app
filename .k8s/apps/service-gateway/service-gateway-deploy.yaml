@@ -16,13 +16,6 @@ spec:
       labels:
         app.kubernetes.io/name: service-gateway
     spec:
-      securityContext:
-        runAsNonRoot: true
-        runAsUser: 1000
-        runAsGroup: 1000
-        fsGroup: 1000
-        seccompProfile:
-          type: RuntimeDefault
       affinity:
         podAntiAffinity:
           preferredDuringSchedulingIgnoredDuringExecution:
@@ -36,12 +29,6 @@ spec:
       - name: service-gateway
         image: service-gateway:latest
         imagePullPolicy: IfNotPresent
-        securityContext:
-          readOnlyRootFilesystem: true
-          allowPrivilegeEscalation: false
-          capabilities:
-            drop:
-            - ALL
         volumeMounts:
         - name: tmp
           mountPath: /tmp

@@ -17,28 +17,16 @@ spec:
       labels:
         app.kubernetes.io/name: mimir
     spec:
-      securityContext:
-        runAsNonRoot: true
-        runAsUser: 10001
-        runAsGroup: 10001
-        fsGroup: 10001
-        seccompProfile:
-          type: RuntimeDefault
       containers:
       - name: mimir
-        image: grafana/mimir:2.12.0
+        image: public.ecr.aws/bitnami/grafana-mimir:latest
+        imagePullPolicy: IfNotPresent
         workingDir: /tmp
         args:
         - "-config.file=/etc/mimir/mimir.yaml"
         - "-target=all"
         ports:
         - containerPort: 8080
-        securityContext:
-          readOnlyRootFilesystem: false
-          allowPrivilegeEscalation: false
-          capabilities:
-            drop:
-            - ALL
         readinessProbe:
           httpGet:
             path: /ready

@@ -17,7 +17,8 @@ spec:
       vm_memory_high_watermark_paging_ratio = 0.99
     
   # 이미지 및 리소스 설정
-  image: rabbitmq:3-management
+  image: public.ecr.aws/docker/library/rabbitmq:3-management
+  imagePullPolicy: IfNotPresent
   
   resources:
     requests:
