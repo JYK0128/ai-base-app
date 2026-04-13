@@ -1,12 +1,18 @@
 # --- Dependencies ---
 node_modules/
+**/node_modules/
 .pnpm-debug.log*
+.npm/
 
 # --- Build / Output ---
 dist/
+**/dist/
 build/
+**/build/
 *.tsbuildinfo
 .turbo/
+.next/
+out/
 
 # --- OS / IDE ---
 .DS_Store
@@ -15,12 +21,16 @@ Thumbs.db
 .idea/
 *.sublime-project
 *.sublime-workspace
+*.swp
+*.swo
 
 # --- Logs & Temp ---
 *.log
+*.log*
+log/
 logs/
-temp/
 tmp/
+temp/
 
 # --- Testing ---
 coverage/

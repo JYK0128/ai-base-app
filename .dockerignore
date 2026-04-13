@@ -1,35 +1,54 @@
-# Dependency (CRITICAL for build speed)
+# --- Dependencies ---
 node_modules/
 **/node_modules/
+.pnpm-debug.log*
 .npm/
 
-# Build artifacts
+# --- Build / Output ---
 dist/
 **/dist/
 build/
 **/build/
+*.tsbuildinfo
 .turbo/
 .next/
 out/
 
-# Version control
-.git/
-.gitignore
-.dockerignore
-.agents/
-
-# Environment and Logs
-.env*
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-
-# OS and Editors
+# --- OS / IDE ---
 .DS_Store
 Thumbs.db
 .vscode/
 .idea/
+*.sublime-project
+*.sublime-workspace
 *.swp
 *.swo
+
+# --- Logs & Temp ---
+*.log
+*.log*
+log/
+logs/
+tmp/
+temp/
+
+# --- Testing ---
+coverage/
+.nyc_output
+
+# --- Security ---
+*.pem
+*.key
+*.pub
+
+# --- Docker Only Ignore ---
+.agents/
+.docs/
+.github/
+.k8s/
+.git/
+.gitignore
+.dockerignore
+.env
+.env.*
+!.env.example
