@@ -4,17 +4,10 @@ kind: Kustomization
 resources:
   - ../../namespaces
   - ../../network-policies
-  - ../../apps/service-gateway
-  - ../../apps/platform-auth-service
-  - ../../database/postgres
-  - ../../database/redis
-  - ../../messaging/rabbitmq
-  - ../../messaging/kafka
-  - ../../monitoring/loki
-  - ../../monitoring/mimir
-  - ../../monitoring/tempo
-  - ../../monitoring/grafana
-  - ../../monitoring/promtail
+  - ../../apps
+  - ../../database
+  - ../../messaging
+  - ../../monitoring
   - ../../networking
 
 commonLabels:

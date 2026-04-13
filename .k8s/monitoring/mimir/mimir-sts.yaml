@@ -73,7 +73,7 @@ spec:
           name: mimir-cm
       - name: alert-rules
         configMap:
-          name: monitoring-alert-rules
+          name: monitoring-alerts-cm
           items:
           - key: monitoring-rules.yaml
             path: monitoring-rules.yaml

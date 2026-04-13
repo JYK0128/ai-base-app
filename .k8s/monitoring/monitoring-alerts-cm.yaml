@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: monitoring-alert-rules
+  name: monitoring-alerts-cm
   namespace: monitoring
 data:
   monitoring-rules.yaml: |
