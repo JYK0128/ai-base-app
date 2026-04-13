@@ -5,3 +5,7 @@ resources:
   - egress-dev-web-to-dns.yaml
   - egress-dev-api-to-dns.yaml
   - egress-dev-infra-to-dns.yaml
+  - egress-monitoring-to-dns.yaml
+  - egress-monitoring-to-monitoring.yaml
+  - egress-monitoring-to-kube-system-https.yaml
+  - ingress-monitoring-from-monitoring.yaml
