@@ -18,7 +18,7 @@ spec:
     spec:
       containers:
       - name: grafana-sts
-        image: public.ecr.aws/bitnami/grafana:latest
+        image: public.ecr.aws/bitnami/grafana@sha256:1c6fe13c802cbbddb116d84565163822a8aa201a1e5424188c6c840878257bd0
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 3000
