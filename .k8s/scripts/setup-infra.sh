@@ -24,11 +24,9 @@ helm upgrade --install cnpg cnpg/cloudnative-pg \
   --create-namespace \
   --wait
 
-echo "Installing RabbitMQ Cluster Operator..."
-helm upgrade --install rabbitmq-operator bitnami/rabbitmq-cluster-operator \
-  --namespace rabbitmq-system \
-  --create-namespace \
-  --wait
+echo "Installing RabbitMQ Cluster Operator (Official)..."
+kubectl apply -f "https://github.com/rabbitmq/cluster-operator/releases/latest/download/cluster-operator.yml"
+kubectl wait --for=condition=available --timeout=300s deployment/rabbitmq-cluster-operator -n rabbitmq-system
 
 echo "Installing Strimzi Kafka Operator..."
 helm upgrade --install strimzi strimzi/strimzi-kafka-operator \
@@ -41,5 +39,8 @@ helm upgrade --install redis-operator ot-container-kit/redis-operator \
   --namespace redis-operator \
   --create-namespace \
   --wait
+
+echo "Installing Telepresence Traffic Manager..."
+telepresence helm install
 
 echo "All extensions installed successfully!"

@@ -25,7 +25,3 @@ spec:
   # 영속성 설정
   persistence:
     storage: 10Gi
-    
-  # 모니터링 활성화
-  prometheus:
-    enable: true

@@ -65,7 +65,7 @@ spec:
       volumes:
       - name: config
         configMap:
-          name: loki-sts-config
+          name: loki-cm
       - name: tmp
         emptyDir: {}
   volumeClaimTemplates:

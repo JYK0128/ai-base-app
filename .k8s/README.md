@@ -67,6 +67,44 @@ kubectl apply -k .k8s/overlays/dev
 kubectl apply -k .k8s/overlays/prod
 ```
 
+### Telepresence 사용 가이드 (CLI)
+
+로컬 환경에서 클러스터 내부 서비스에 접근하거나, 트래픽을 로컬로 가로채기 위해 사용합니다.
+
+#### 1. 클러스터 연결
+
+```bash
+# 클러스터 연결 (기본)
+telepresence connect
+
+# 연결 상태 확인
+telepresence status
+```
+
+#### 2. 서비스 가로채기 (Intercept)
+
+개발 중인 로컬 서비스를 클러스터 내부의 특정 서비스 대신 동작하게 합니다.
+
+```bash
+# 구문: telepresence intercept [서비스명] --port [로컬포트]
+# 예: order-service를 로컬 8080포트로 가로채기
+telepresence intercept order-service --port 8080
+```
+
+#### 3. 연결 종료
+
+```bash
+# Telepresence 데몬 종료 및 연결 해제
+telepresence quit
+```
+
+#### 4. Windows 자동 연결 설정
+
+윈도우 시작 시 자동으로 연결되도록 설정하려면 다음 스크립트를 작업 스케줄러나 시작 프로그램에 등록하세요.
+
+- **스크립트 경로**: `.k8s/scripts/windows-connect-telepresence.ps1`
+- **실행 인수**: `powershell.exe -ExecutionPolicy Bypass -File "[절대경로]\.k8s\scripts\windows-connect-telepresence.ps1"`
+
 ---
 
 ## 📜 주요 정책 및 표준

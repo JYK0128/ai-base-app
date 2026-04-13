@@ -10,8 +10,10 @@ resources:
   - ../../monitoring
   - ../../networking
 
-commonLabels:
-  env: dev
+labels:
+  - includeSelectors: true
+    pairs:
+      env: dev
 
 # [개발 환경 다이어트] 모든 복제본을 1개로 축소
 patches:
@@ -44,7 +46,7 @@ patches:
 
   # 4. Redis (Redis Operator)
   - target:
-      kind: Redis
+      kind: RedisCluster
       name: redis
     patch: |-
       - op: replace
