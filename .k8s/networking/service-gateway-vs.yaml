@@ -11,7 +11,7 @@ spec:
   http:
   - match:
     - uri:
-        prefix: / # 하위 모든 경로를 게이트웨이 서비스로 라우팅
+        prefix: /
     route:
     - destination:
         host: service-gateway

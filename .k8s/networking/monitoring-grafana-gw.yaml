@@ -5,11 +5,11 @@ metadata:
   namespace: monitoring
 spec:
   selector:
-    istio: ingressgateway
+    istio: ingress
   servers:
   - port:
       number: 80
       name: http-grafana
       protocol: HTTP
     hosts:
-    - "grafana.local"
+    - "*"

@@ -5,13 +5,15 @@ metadata:
   namespace: monitoring
 spec:
   hosts:
-  - "grafana.local"
+  - "*"
   gateways:
   - monitoring-grafana-gw
   http:
   - match:
     - uri:
-        prefix: /
+        prefix: /grafana/
+    - uri:
+        exact: /grafana
     route:
     - destination:
         host: grafana.monitoring.svc.cluster.local

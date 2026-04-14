@@ -27,6 +27,10 @@ spec:
           value: "true"
         - name: GF_AUTH_ANONYMOUS_ORG_ROLE
           value: Admin
+        - name: GF_SERVER_ROOT_URL
+          value: "/grafana/"
+        - name: GF_SERVER_SERVE_FROM_SUB_PATH
+          value: "true"
         - name: GF_PATHS_PROVISIONING
           value: "/etc/grafana/provisioning"
         volumeMounts:
@@ -37,6 +41,9 @@ spec:
         - name: datasources
           mountPath: /etc/grafana/provisioning/datasources
           readOnly: true
+        - name: dashboards
+          mountPath: /etc/grafana/dashboards
+          readOnly: true
         - name: dashboards-provisioning
           mountPath: /etc/grafana/provisioning/dashboards
           readOnly: true
@@ -46,10 +53,13 @@ spec:
       - name: datasources
         configMap:
           name: grafana-datasources-cm
+      - name: dashboards
+        configMap:
+          name: grafana-dashboard-cm
       - name: dashboards-provisioning
         configMap:
           name: grafana-provisioning-cm
-      - name: sc-dashboard-volume # 사이드카는 제거했지만 마운트 해제 누락 방지를 위해 유지 또는 제거 가능
+      - name: sc-dashboard-volume
         emptyDir: {}
   volumeClaimTemplates:
   - metadata:
@@ -58,4 +68,4 @@ spec:
       accessModes: [ "ReadWriteOnce" ]
       resources:
         requests:
-          storage: 5Gi
+          storage: 1Gi
