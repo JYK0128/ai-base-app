@@ -4,7 +4,7 @@ import { CallHandler, ExecutionContext, HttpException, Injectable, Logger, NestI
 import { Observable, throwError } from 'rxjs';
 import { catchError, tap } from 'rxjs/operators';
 
-import { ExtendedRequest } from './common/types/request.type';
+import { ExtendedRequest } from '@/common/types/request.type';
 
 @Injectable()
 export class EventLogInterceptor implements NestInterceptor {

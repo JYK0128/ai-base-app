@@ -1,13 +1,11 @@
 import { Controller, Get } from '@nestjs/common';
 import { Transport } from '@nestjs/microservices';
-import {
-  HealthCheck,
-  HealthCheckService,
-  MemoryHealthIndicator,
-  MicroserviceHealthIndicator,
-} from '@nestjs/terminus';
+import { HealthCheck,
+         HealthCheckService,
+         MemoryHealthIndicator,
+         MicroserviceHealthIndicator } from '@nestjs/terminus';
 
-import { ENV } from './env.js';
+import { ENV } from '@/common/env';
 
 @Controller('health')
 export class HealthController {
@@ -21,7 +19,7 @@ export class HealthController {
   @HealthCheck()
   live() {
     return this.health.check([
-      () => this.memory.checkHeap('memory_heap', { thresholdPercent: 0.98 }),
+      () => this.memory.checkHeap('memory_heap', 300 * 1024 * 1024),
     ]);
   }
 

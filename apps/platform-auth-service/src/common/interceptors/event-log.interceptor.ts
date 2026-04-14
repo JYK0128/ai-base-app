@@ -4,7 +4,7 @@ import { CallHandler, ExecutionContext, Injectable, Logger, NestInterceptor } fr
 import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
 
-import type { ExtendedRequest } from './common/types/request.type';
+import type { ExtendedRequest } from '@/common/types/request.type';
 
 @Injectable()
 export class EventLogInterceptor implements NestInterceptor {

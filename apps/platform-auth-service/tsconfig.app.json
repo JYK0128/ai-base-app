@@ -3,7 +3,16 @@
   "compilerOptions": {
     "outDir": "./dist",
     "sourceMap": true,
-    "types": ["node", "express"]
+    "types": [
+      "node",
+      "express"
+    ],
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"]
+    }
   },
-  "include": ["./src"]
+  "include": [
+    "./src"
+  ]
 }

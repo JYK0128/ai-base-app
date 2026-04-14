@@ -17,8 +17,6 @@
     "@nestjs/terminus": "11.1.1",
     "@pkg/config": "workspace:*",
     "@pkg/database": "workspace:*",
-    "@sentry/nestjs": "10.48.0",
-    "@sentry/profiling-node": "10.48.0",
     "amqp-connection-manager": "4.1.14",
     "amqplib": "0.10.5",
     "reflect-metadata": "0.2.2",
