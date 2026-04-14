@@ -1,10 +1,9 @@
-import { Entity, PrimaryKey, Property } from '@mikro-orm/decorators/legacy';
+import { Entity, Property } from '@mikro-orm/decorators/legacy';
+
+import { BaseEntity } from './BaseEntity';
 
 @Entity({ schema: 'tenant' })
-export class TenantUser {
-  @PrimaryKey()
-  id!: string;
-
+export class TenantUser extends BaseEntity {
   @Property()
   tenantAccountId!: string; // Reference to Tenant Account
 
@@ -13,10 +12,4 @@ export class TenantUser {
 
   @Property({ default: 'EndUser' })
   role: string = 'EndUser';
-
-  @Property()
-  createdAt: Date = new Date();
-
-  @Property({ onUpdate: () => new Date() })
-  updatedAt: Date = new Date();
 }
