@@ -1,8 +1,7 @@
 {
-  "extends": "@pkg/config/typescript/bundler",
+  "extends": "@pkg/config/typescript/react",
   "compilerOptions": {
-    "outDir": "./dist",
-    "types": ["node"]
+    "outDir": "./dist"
   },
-  "include": ["src/**/*"]
+  "include": ["./src"]
 }

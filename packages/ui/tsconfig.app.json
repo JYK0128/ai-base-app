@@ -1,0 +1,10 @@
+{
+  "extends": "@pkg/config/typescript/react",
+  "compilerOptions": {
+    "paths": {
+      "@/*": ["src/*"]
+    },
+    "types": ["vite/client"]
+  },
+  "include": ["src"]
+}

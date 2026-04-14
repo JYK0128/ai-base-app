@@ -1,8 +1,7 @@
 {
   "extends": "./typescript/node.json",
   "compilerOptions": {
-    "baseUrl": "./"
+    "outDir": "dist"
   },
-  "include": ["eslint", "stylelint"],
-  "exclude": ["node_modules", "dist"]
+  "include": ["eslint", "stylelint"]
 }

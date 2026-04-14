@@ -1,4 +1,6 @@
 {
   "extends": "@pkg/config/typescript/node",
-  "files": ["eslint.config.js"]
+  "files": [
+    "eslint.config.js"
+  ]
 }

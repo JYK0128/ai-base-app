@@ -8,6 +8,7 @@
     "./stylelint": "./stylelint/index.js"
   },
   "devDependencies": {
+    "@types/node": "22.13.9",
     "@stylistic/eslint-plugin": "5.10.0",
     "@stylistic/stylelint-config": "5.0.0",
     "eslint": "9.39.4",

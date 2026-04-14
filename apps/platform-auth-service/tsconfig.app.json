@@ -1,18 +1,12 @@
 {
   "extends": "@pkg/config/typescript/bundler",
   "compilerOptions": {
-    "outDir": "./dist",
+    "outDir": "dist",
     "sourceMap": true,
-    "types": [
-      "node",
-      "express"
-    ],
-    "baseUrl": ".",
+    "types": ["node", "express"],
     "paths": {
       "@/*": ["src/*"]
     }
   },
-  "include": [
-    "./src"
-  ]
+  "include": ["src"]
 }
