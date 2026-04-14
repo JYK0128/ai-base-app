@@ -3,7 +3,7 @@
   "references": [
     { "path": "packages/config" },
     { "path": "packages/database" },
-    { "path": "packages/helper" },
+    { "path": "packages/utils" },
     { "path": "apps/platform-auth-service" },
     { "path": "apps/service-gateway" }
   ]

@@ -1,19 +1,12 @@
-import { Entity, PrimaryKey, Property } from '@mikro-orm/decorators/legacy';
+import { Entity, Property } from '@mikro-orm/decorators/legacy';
+
+import { BaseEntity } from './BaseEntity';
 
 @Entity({ schema: 'tenant' })
-export class TenantAccount {
-  @PrimaryKey()
-  id!: string;
-
+export class TenantAccount extends BaseEntity {
   @Property({ unique: true })
   email!: string;
 
   @Property({ hidden: true })
   password!: string;
-
-  @Property()
-  createdAt: Date = new Date();
-
-  @Property({ onUpdate: () => new Date() })
-  updatedAt: Date = new Date();
 }
