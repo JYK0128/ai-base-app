@@ -1,5 +1,6 @@
-import type { Opt } from '@mikro-orm/core';
-import { Entity, Enum, PrimaryKey, Property } from '@mikro-orm/decorators/legacy';
+import { Entity, Enum, Property } from '@mikro-orm/decorators/legacy';
+
+import { BaseEntity } from './BaseEntity';
 
 export enum PlatformRole {
   PLATFORM_ADMIN = 'PLATFORM_ADMIN',
@@ -9,10 +10,7 @@ export enum PlatformRole {
 }
 
 @Entity({ schema: 'platform' })
-export class PlatformUser {
-  @PrimaryKey()
-  id!: string;
-
+export class PlatformUser extends BaseEntity {
   @Property()
   platformAccountId!: string;
 
@@ -21,10 +19,4 @@ export class PlatformUser {
 
   @Property({ nullable: true })
   partnerId?: string;
-
-  @Property()
-  createdAt: Date & Opt = new Date();
-
-  @Property({ onUpdate: () => new Date() })
-  updatedAt: Date & Opt = new Date();
 }
