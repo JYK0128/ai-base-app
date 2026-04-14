@@ -279,6 +279,28 @@ importers:
         specifier: 6.0.2
         version: 6.0.2
 
+  packages/utils:
+    dependencies:
+      '@mikro-orm/core':
+        specifier: 7.0.9
+        version: 7.0.9
+      '@pkg/database':
+        specifier: workspace:*
+        version: link:../database
+    devDependencies:
+      '@pkg/config':
+        specifier: workspace:*
+        version: link:../config
+      '@types/node':
+        specifier: 25.6.0
+        version: 25.6.0
+      eslint:
+        specifier: 9.39.4
+        version: 9.39.4
+      typescript:
+        specifier: 6.0.2
+        version: 6.0.2
+
 packages:
 
   '@acuminous/bitsyntax@0.1.2':
