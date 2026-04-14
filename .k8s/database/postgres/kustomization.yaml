@@ -3,7 +3,4 @@ kind: Kustomization
 
 resources:
   - postgres-cluster.yaml
-  - postgres-cm.yaml
   - postgres-secret.yaml
-  - postgres-backup-storage.yaml
-  - postgres-backup-cronjob.yaml

@@ -3,14 +3,9 @@ kind: Service
 metadata:
   name: service-gateway
   namespace: dev-web
-  labels:
-    app.kubernetes.io/name: service-gateway
-    app.kubernetes.io/part-of: ai-base-app
 spec:
-  type: ClusterIP  # 다시 내부용으로 변경
   selector:
     app.kubernetes.io/name: service-gateway
   ports:
-  - protocol: TCP
-    port: 80
+  - port: 80
     targetPort: 3000

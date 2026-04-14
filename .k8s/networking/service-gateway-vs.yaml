@@ -7,7 +7,7 @@ spec:
   hosts:
   - "*"
   gateways:
-  - service-gateway-ingress
+  - service-gateway-gw
   http:
   - match:
     - uri:

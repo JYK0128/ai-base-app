@@ -4,7 +4,7 @@ metadata:
   name: redis
   namespace: dev-infra
 spec:
-  clusterSize: 3 # OpsTree Sentinel/Cluster 구성을 위한 사이즈
+  clusterSize: 1 # dev 단일 인스턴스 구성
   kubernetesConfig:
     image: public.ecr.aws/bitnami/redis@sha256:204a12ace951df11e155b8570ecf215b3975b1496cc0da6edacca531fc2286cc
     imagePullPolicy: IfNotPresent

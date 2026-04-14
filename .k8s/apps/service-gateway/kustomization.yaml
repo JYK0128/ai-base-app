@@ -5,5 +5,3 @@ resources:
   - service-gateway-deploy.yaml
   - service-gateway-svc.yaml
   - service-gateway-cm.yaml
-  - service-gateway-hpa.yaml
-  - service-gateway-pdb.yaml

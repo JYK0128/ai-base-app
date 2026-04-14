@@ -8,5 +8,7 @@ metadata:
     app.kubernetes.io/part-of: ai-base-app
 data:
   RABBITMQ_URL: "amqp://rabbitmq.dev-infra.svc.cluster.local:5672"
+  AUTH_SERVICE_HOST: "platform-auth-service.dev-api.svc.cluster.local"
+  AUTH_SERVICE_PORT: "3001"
   NODE_ENV: "development"
   PORT: "3000"

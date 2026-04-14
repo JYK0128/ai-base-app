@@ -5,6 +5,16 @@
 
 set -e
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+DEPLOY_ENV="${DEPLOY_ENV:-dev}"
+ISTIO_INGRESS_VALUES_FILE="${SCRIPT_DIR}/../helm/istio-ingress-${DEPLOY_ENV}-values.yaml"
+ISTIO_INGRESS_ARGS=()
+
+if [[ -f "${ISTIO_INGRESS_VALUES_FILE}" ]]; then
+  echo "Using Istio ingress values: ${ISTIO_INGRESS_VALUES_FILE}"
+  ISTIO_INGRESS_ARGS+=(-f "${ISTIO_INGRESS_VALUES_FILE}")
+fi
+
 echo "Adding Helm repositories..."
 helm repo add cnpg https://cloudnative-pg.github.io/charts
 helm repo add bitnami https://charts.bitnami.com/bitnami
@@ -16,7 +26,7 @@ helm repo update
 echo "Installing Istio Service Mesh (Engine)..."
 helm upgrade --install istio-base istio/base -n istio-system --create-namespace --wait
 helm upgrade --install istiod istio/istiod -n istio-system --wait
-helm upgrade --install istio-ingress istio/gateway -n istio-system --wait
+helm upgrade --install istio-ingress istio/gateway -n istio-system --wait "${ISTIO_INGRESS_ARGS[@]}"
 
 echo "Installing CloudNativePG (Postgres Operator)..."
 helm upgrade --install cnpg cnpg/cloudnative-pg \

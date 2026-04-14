@@ -2,17 +2,14 @@ apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
   name: platform-auth-service-hpa
-  namespace: dev-api
-  labels:
-    app.kubernetes.io/name: platform-auth-service
-    app.kubernetes.io/part-of: ai-base-app
+  namespace: prod-api
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
     name: platform-auth-service-deploy
-  minReplicas: 1
-  maxReplicas: 1
+  minReplicas: 3
+  maxReplicas: 6
   metrics:
   - type: Resource
     resource:

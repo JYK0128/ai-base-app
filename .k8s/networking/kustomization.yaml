@@ -4,5 +4,3 @@ kind: Kustomization
 resources:
   - service-gateway-gw.yaml
   - service-gateway-vs.yaml
-  - monitoring-grafana-gw.yaml
-  - monitoring-grafana-vs.yaml

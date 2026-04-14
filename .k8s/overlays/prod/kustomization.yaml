@@ -2,33 +2,282 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
 resources:
-  - ../../namespaces
-  - ../../network-policies
   - ../../apps
   - ../../database
   - ../../messaging
-  - ../../monitoring
   - ../../networking
+  - prod-api-namespace.yaml
+  - prod-infra-namespace.yaml
+  - prod-web-namespace.yaml
+  - service-gateway-hpa.yaml
+  - service-gateway-pdb.yaml
+  - platform-auth-service-hpa.yaml
+  - platform-auth-service-pdb.yaml
 
 commonLabels:
   env: prod
 
+generatorOptions:
+  disableNameSuffixHash: true
+
+secretGenerator:
+  - name: postgres-secret
+    envs:
+      - secrets/postgres-secret.env
+  - name: rabbitmq-secret
+    envs:
+      - secrets/rabbitmq-secret.env
+    files:
+      - default_user.conf=secrets/rabbitmq-default_user.conf
+
 patches:
+  - path: delete-postgres-secret.yaml
+  - path: delete-rabbitmq-secret.yaml
   - target:
       kind: Deployment
-      labelSelector: "app in (service-gateway, platform-auth-service)"
+      name: service-gateway-deploy
     patch: |-
+      - op: replace
+        path: /metadata/namespace
+        value: prod-web
       - op: replace
         path: /spec/replicas
         value: 3
-  
+      - op: add
+        path: /spec/template/spec/containers/0/resources
+        value:
+          requests:
+            cpu: "250m"
+            memory: "256Mi"
+          limits:
+            cpu: "500m"
+            memory: "512Mi"
+      - op: add
+        path: /spec/template/spec/topologySpreadConstraints
+        value:
+          - maxSkew: 1
+            topologyKey: kubernetes.io/hostname
+            whenUnsatisfiable: ScheduleAnyway
+            labelSelector:
+              matchLabels:
+                app.kubernetes.io/name: service-gateway
+                env: prod
+      - op: add
+        path: /spec/template/spec/affinity
+        value:
+          podAntiAffinity:
+            preferredDuringSchedulingIgnoredDuringExecution:
+              - weight: 100
+                podAffinityTerm:
+                  topologyKey: kubernetes.io/hostname
+                  labelSelector:
+                    matchLabels:
+                      app.kubernetes.io/name: service-gateway
+                      env: prod
+
   - target:
       kind: Deployment
+      name: platform-auth-service-deploy
+    patch: |-
+      - op: replace
+        path: /metadata/namespace
+        value: prod-api
+      - op: replace
+        path: /spec/replicas
+        value: 3
+      - op: add
+        path: /spec/template/spec/containers/0/resources
+        value:
+          requests:
+            cpu: "250m"
+            memory: "256Mi"
+          limits:
+            cpu: "500m"
+            memory: "512Mi"
+      - op: add
+        path: /spec/template/spec/topologySpreadConstraints
+        value:
+          - maxSkew: 1
+            topologyKey: kubernetes.io/hostname
+            whenUnsatisfiable: ScheduleAnyway
+            labelSelector:
+              matchLabels:
+                app.kubernetes.io/name: platform-auth-service
+                env: prod
+      - op: add
+        path: /spec/template/spec/affinity
+        value:
+          podAntiAffinity:
+            preferredDuringSchedulingIgnoredDuringExecution:
+              - weight: 100
+                podAffinityTerm:
+                  topologyKey: kubernetes.io/hostname
+                  labelSelector:
+                    matchLabels:
+                      app.kubernetes.io/name: platform-auth-service
+                      env: prod
+
+  - target:
+      kind: Service
       name: service-gateway
     patch: |-
       - op: replace
-        path: /spec/template/spec/containers/0/resources/limits/cpu
-        value: "500m"
+        path: /metadata/namespace
+        value: prod-web
+
+  - target:
+      kind: Service
+      name: platform-auth-service
+    patch: |-
       - op: replace
-        path: /spec/template/spec/containers/0/resources/limits/memory
-        value: "512Mi"
+        path: /metadata/namespace
+        value: prod-api
+
+  - target:
+      kind: ConfigMap
+      name: service-gateway-cm
+    patch: |-
+      - op: replace
+        path: /metadata/namespace
+        value: prod-web
+      - op: replace
+        path: /data/AUTH_SERVICE_HOST
+        value: platform-auth-service.prod-api.svc.cluster.local
+      - op: replace
+        path: /data/AUTH_SERVICE_PORT
+        value: "3001"
+      - op: replace
+        path: /data/NODE_ENV
+        value: production
+      - op: replace
+        path: /data/RABBITMQ_URL
+        value: amqp://rabbitmq.prod-infra.svc.cluster.local:5672
+
+  - target:
+      kind: ConfigMap
+      name: platform-auth-service-cm
+    patch: |-
+      - op: replace
+        path: /metadata/namespace
+        value: prod-api
+      - op: replace
+        path: /data/NODE_ENV
+        value: production
+      - op: replace
+        path: /data/RABBITMQ_URL
+        value: amqp://prod_rabbitmq_user:CHANGE_ME_PROD_RABBITMQ_PASSWORD@rabbitmq.prod-infra.svc.cluster.local:5672
+      - op: replace
+        path: /data/DATABASE_URL
+        value: postgres://prod_platform_user:CHANGE_ME_PROD_POSTGRES_PASSWORD@postgres-rw.prod-infra.svc.cluster.local:5432/platform_db
+
+  - target:
+      kind: Secret
+      name: postgres-secret
+    patch: |-
+      - op: replace
+        path: /metadata/namespace
+        value: prod-infra
+
+  - target:
+      kind: Secret
+      name: rabbitmq-secret
+    patch: |-
+      - op: replace
+        path: /metadata/namespace
+        value: prod-infra
+
+  - target:
+      kind: Gateway
+      name: service-gateway-gw
+    patch: |-
+      - op: replace
+        path: /metadata/namespace
+        value: prod-web
+
+  - target:
+      kind: VirtualService
+      name: service-gateway-vs
+    patch: |-
+      - op: replace
+        path: /metadata/namespace
+        value: prod-web
+
+  - target:
+      kind: Cluster
+      name: postgres
+    patch: |-
+      - op: replace
+        path: /metadata/namespace
+        value: prod-infra
+      - op: replace
+        path: /spec/instances
+        value: 3
+      - op: replace
+        path: /spec/storage/size
+        value: 20Gi
+
+  - target:
+      kind: RedisCluster
+      name: redis
+    patch: |-
+      - op: replace
+        path: /metadata/namespace
+        value: prod-infra
+      - op: replace
+        path: /spec/clusterSize
+        value: 3
+
+  - target:
+      kind: Kafka
+      name: kafka-cluster
+    patch: |-
+      - op: replace
+        path: /metadata/namespace
+        value: prod-infra
+      - op: replace
+        path: /spec/kafka/replicas
+        value: 3
+      - op: replace
+        path: /spec/kafka/config/offsets.topic.replication.factor
+        value: 3
+      - op: replace
+        path: /spec/kafka/config/transaction.state.log.replication.factor
+        value: 3
+      - op: replace
+        path: /spec/kafka/config/transaction.state.log.min.isr
+        value: 2
+      - op: replace
+        path: /spec/kafka/config/default.replication.factor
+        value: 3
+      - op: replace
+        path: /spec/kafka/config/min.insync.replicas
+        value: 2
+
+  - target:
+      kind: RabbitmqCluster
+      name: rabbitmq
+    patch: |-
+      - op: replace
+        path: /metadata/namespace
+        value: prod-infra
+      - op: replace
+        path: /spec/replicas
+        value: 3
+      - op: replace
+        path: /spec/persistence/storage
+        value: 20Gi
+      - op: add
+        path: /spec/rabbitmq
+        value:
+          additionalConfig: |
+            cluster_partition_handling = pause_minority
+            vm_memory_high_watermark_paging_ratio = 0.99
+      - op: add
+        path: /spec/resources
+        value:
+          requests:
+            cpu: "500m"
+            memory: "1Gi"
+          limits:
+            cpu: "1000m"
+            memory: "2Gi"

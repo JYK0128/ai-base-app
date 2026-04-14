@@ -7,7 +7,7 @@ metadata:
     app.kubernetes.io/name: platform-auth-service
     app.kubernetes.io/part-of: ai-base-app
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app.kubernetes.io/name: platform-auth-service
@@ -16,15 +16,6 @@ spec:
       labels:
         app.kubernetes.io/name: platform-auth-service
     spec:
-      affinity:
-        podAntiAffinity:
-          preferredDuringSchedulingIgnoredDuringExecution:
-          - weight: 100
-            podAffinityTerm:
-              labelSelector:
-                matchLabels:
-                  app: platform-auth-service
-              topologyKey: "kubernetes.io/hostname"
       containers:
       - name: platform-auth-service
         image: platform-auth-service:latest
@@ -32,36 +23,20 @@ spec:
         volumeMounts:
         - name: tmp
           mountPath: /tmp
-        resources:
-          requests:
-            cpu: 100m
-            memory: 128Mi
-          limits:
-            cpu: 300m
-            memory: 256Mi
         envFrom:
         - configMapRef:
             name: platform-auth-service-cm
         ports:
         - containerPort: 3000
-        startupProbe:
-          httpGet:
-            path: /health/live
-            port: 3000
-          periodSeconds: 5
-          failureThreshold: 24
+        - containerPort: 3001
         readinessProbe:
           httpGet:
             path: /health/ready
             port: 3000
-          periodSeconds: 15
-          failureThreshold: 3
         livenessProbe:
           httpGet:
             path: /health/live
             port: 3000
-          periodSeconds: 10
-          failureThreshold: 3
       volumes:
       - name: tmp
         emptyDir: {}
