@@ -7,6 +7,6 @@ metadata:
     app.kubernetes.io/name: platform-auth-service
     app.kubernetes.io/part-of: ai-base-app
 data:
-  RABBITMQ_URL: "amqp://guest:guest@rabbitmq.dev-infra.svc.cluster.local:5672"
+  RABBITMQ_URL: "amqp://dev_rabbitmq_user:dev_rabbitmq_password@rabbitmq.dev-infra.svc.cluster.local:5672?frameMax=8192"
   DATABASE_URL: "postgres://postgres:postgrespassword@postgres-rw.dev-infra.svc.cluster.local:5432/platform_db"
   NODE_ENV: "development"

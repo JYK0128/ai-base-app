@@ -7,7 +7,7 @@ metadata:
     app.kubernetes.io/name: service-gateway
     app.kubernetes.io/part-of: ai-base-app
 data:
-  RABBITMQ_URL: "amqp://rabbitmq.dev-infra.svc.cluster.local:5672"
+  RABBITMQ_URL: "amqp://dev_rabbitmq_user:dev_rabbitmq_password@rabbitmq.dev-infra.svc.cluster.local:5672?frameMax=8192"
   AUTH_SERVICE_HOST: "platform-auth-service.dev-api.svc.cluster.local"
   AUTH_SERVICE_PORT: "3001"
   NODE_ENV: "development"

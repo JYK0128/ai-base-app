@@ -8,6 +8,9 @@ spec:
   kubernetesConfig:
     image: public.ecr.aws/bitnami/redis@sha256:204a12ace951df11e155b8570ecf215b3975b1496cc0da6edacca531fc2286cc
     imagePullPolicy: IfNotPresent
+    redisSecret:
+      name: redis-secret
+      key: password
     resources:
       requests:
         cpu: 100m

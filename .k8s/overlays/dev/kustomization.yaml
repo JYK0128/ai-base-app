@@ -15,3 +15,68 @@ resources:
 labels:
   - pairs:
       env: dev
+
+patches:
+  - target:
+      kind: Cluster
+      name: postgres
+    patch: |-
+      - op: replace
+        path: /spec/storage/size
+        value: 2Gi
+
+  - target:
+      kind: RabbitmqCluster
+      name: rabbitmq
+    patch: |-
+      - op: replace
+        path: /spec/persistence/storage
+        value: 2Gi
+
+  - target:
+      kind: RedisCluster
+      name: redis
+    patch: |-
+      - op: replace
+        path: /spec/storage/volumeClaimTemplate/spec/resources/requests/storage
+        value: 1Gi
+
+  - target:
+      kind: Kafka
+      name: kafka-cluster
+    patch: |-
+      - op: replace
+        path: /spec/kafka/storage/volumes/0/size
+        value: 5Gi
+
+  - target:
+      kind: StatefulSet
+      name: grafana-sts
+    patch: |-
+      - op: replace
+        path: /spec/volumeClaimTemplates/0/spec/resources/requests/storage
+        value: 1Gi
+
+  - target:
+      kind: StatefulSet
+      name: loki-sts
+    patch: |-
+      - op: replace
+        path: /spec/volumeClaimTemplates/0/spec/resources/requests/storage
+        value: 2Gi
+
+  - target:
+      kind: StatefulSet
+      name: mimir-sts
+    patch: |-
+      - op: replace
+        path: /spec/volumeClaimTemplates/0/spec/resources/requests/storage
+        value: 2Gi
+
+  - target:
+      kind: StatefulSet
+      name: tempo-sts
+    patch: |-
+      - op: replace
+        path: /spec/volumeClaimTemplates/0/spec/resources/requests/storage
+        value: 2Gi
