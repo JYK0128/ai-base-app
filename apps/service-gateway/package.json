@@ -31,7 +31,12 @@
     "@nestjs/testing": "11.0.11",
     "@swc/cli": "0.6.0",
     "@swc/core": "1.15.24",
+    "@types/express": "5.0.6",
+    "@types/mime": "4.0.0",
     "@types/node": "22.13.9",
+    "@types/qs": "6.15.0",
+    "@types/range-parser": "1.2.7",
+    "@types/serve-static": "2.2.0",
     "eslint": "9.39.4",
     "typescript": "6.0.2"
   }
