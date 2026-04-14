@@ -3,10 +3,13 @@ import { Entity, Property } from '@mikro-orm/decorators/legacy';
 import { BaseEntity } from './BaseEntity';
 
 @Entity({ schema: 'platform' })
-export class PlatformAccount extends BaseEntity {
+export class RbacPermission extends BaseEntity {
   @Property({ unique: true })
-  email!: string;
+  code!: string;
 
-  @Property({ hidden: true })
-  password!: string;
+  @Property()
+  name!: string;
+
+  @Property({ nullable: true })
+  description?: string;
 }
