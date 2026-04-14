@@ -2,20 +2,23 @@ import { randomUUID } from 'node:crypto';
 
 import type { EntityManager } from '@mikro-orm/core';
 
-import { I18nMessage } from '../entities';
+import { CoreRepository } from '../core/core.repository';
+import { Message } from './message.entity';
 
-export interface I18nMessageRecord {
-  locale: string;
-  namespace: string;
-  key: string;
-  message: string;
+export interface MessageRecord {
+  locale: string
+  namespace: string
+  key: string
+  message: string
 }
 
-export class MikroOrmI18nMessageStore {
-  constructor(private readonly em: EntityManager) {}
+export class MessageRepository extends CoreRepository<Message> {
+  constructor(em: EntityManager) {
+    super(em, Message);
+  }
 
-  async findMany(params?: { locale?: string; namespace?: string }): Promise<I18nMessageRecord[]> {
-    const rows = await this.em.find(I18nMessage, {
+  async findMany(params?: { locale?: string, namespace?: string }): Promise<MessageRecord[]> {
+    const rows = await this.em.find(Message, {
       ...(params?.locale ? { locale: params.locale } : {}),
       ...(params?.namespace ? { namespace: params.namespace } : {}),
     });
@@ -28,13 +31,13 @@ export class MikroOrmI18nMessageStore {
     }));
   }
 
-  async upsertMany(records: I18nMessageRecord[]): Promise<void> {
+  async upsertMany(records: MessageRecord[]): Promise<void> {
     if (!records.length) {
       return;
     }
 
     for (const record of records) {
-      const found = await this.em.findOne(I18nMessage, {
+      const found = await this.em.findOne(Message, {
         locale: record.locale,
         namespace: record.namespace,
         key: record.key,
@@ -45,7 +48,7 @@ export class MikroOrmI18nMessageStore {
         continue;
       }
 
-      const created = this.em.create(I18nMessage, {
+      const created = this.em.create(Message, {
         id: randomUUID(),
         locale: record.locale,
         namespace: record.namespace,
@@ -60,6 +63,6 @@ export class MikroOrmI18nMessageStore {
   }
 }
 
-export const createMikroOrmI18nMessageStore = (
+export const createMessageRepository = (
   em: EntityManager,
-): MikroOrmI18nMessageStore => new MikroOrmI18nMessageStore(em);
+): MessageRepository => new MessageRepository(em);

@@ -1,3 +1,2 @@
-export * from './entities';
-export * from './repositories';
+export * from './domains';
 export { default as config } from './mikro-orm.config';

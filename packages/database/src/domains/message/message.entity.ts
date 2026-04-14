@@ -1,10 +1,10 @@
 import { Entity, Property, Unique } from '@mikro-orm/decorators/legacy';
 
-import { BaseEntity } from './BaseEntity';
+import { CoreEntity } from '../core/core.entity';
 
 @Entity({ schema: 'platform' })
 @Unique({ properties: ['locale', 'namespace', 'key'] })
-export class I18nMessage extends BaseEntity {
+export class Message extends CoreEntity {
   @Property()
   locale!: string;
 

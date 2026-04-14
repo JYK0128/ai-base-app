@@ -9,11 +9,11 @@ import { TsMorphMetadataProvider } from '@mikro-orm/reflection';
 import { SeedManager } from '@mikro-orm/seeder';
 import { SqlHighlighter } from '@mikro-orm/sql-highlighter';
 
-import * as Entities from './entities';
 import { CamelCaseNamingStrategy } from './mikro-orm.naming';
 
 export default defineConfig({
-  entities: Object.values(Entities).filter((e) => typeof e === 'function'),
+  entities: ['./dist/domains/**/*.entity.js'],
+  entitiesTs: ['./src/domains/**/*.entity.ts'],
   driver: PostgreSqlDriver,
   clientUrl: process.env.DATABASE_URL,
   metadataProvider: TsMorphMetadataProvider,

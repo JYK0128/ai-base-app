@@ -1,2 +1,3 @@
-export * from './i18n-message-manager';
-export * from './rbac-manager';
+export * from './core';
+export * from './message';
+export * from './rbac';

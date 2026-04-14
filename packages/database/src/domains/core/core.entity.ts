@@ -1,0 +1,59 @@
+import { type EntityData, type FromEntityType, type Opt, RequestContext, type RequiredEntityData } from '@mikro-orm/core';
+import { PrimaryKey, Property } from '@mikro-orm/decorators/legacy';
+
+export abstract class CoreEntity {
+  @PrimaryKey()
+  id!: string;
+
+  @Property()
+  createdAt: Date & Opt = new Date();
+
+  @Property({ nullable: true })
+  createdBy?: string;
+
+  @Property({ onUpdate: () => new Date() })
+  updatedAt: Date & Opt = new Date();
+
+  @Property({ nullable: true })
+  updatedBy?: string;
+
+  @Property({ nullable: true })
+  deletedAt?: Date | null = null;
+
+  @Property({ nullable: true })
+  deletedBy?: string | null = null;
+
+  static create<T extends CoreEntity>(
+    this: new () => T,
+    data: RequiredEntityData<T>,
+  ) {
+    const em = RequestContext.getEntityManager();
+    if (!em) throw new Error('EntityManager not found in RequestContext.');
+    return em.create(this, data);
+  }
+
+  update(data: EntityData<FromEntityType<this>>) {
+    const em = RequestContext.getEntityManager();
+    if (!em) throw new Error('EntityManager not found in RequestContext.');
+    em.assign(this, data);
+    return this;
+  }
+
+  delete(hard: boolean = false) {
+    if (hard) this.hardDelete();
+    else this.softDelete();
+    return this;
+  }
+
+  private hardDelete() {
+    const em = RequestContext.getEntityManager();
+    if (!em) throw new Error('EntityManager not found in RequestContext.');
+    em.remove(this);
+    return this;
+  }
+
+  private softDelete() {
+    this.deletedAt = new Date();
+    return this;
+  }
+}

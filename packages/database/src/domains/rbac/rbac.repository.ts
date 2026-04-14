@@ -2,56 +2,54 @@ import { randomUUID } from 'node:crypto';
 
 import type { EntityManager } from '@mikro-orm/core';
 
-import {
-  RbacPermission,
-  RbacRole,
-  RbacRolePermission,
-  RbacRoleScope,
-  RbacUserRole,
-} from '../entities';
+import { RbacPermission,
+         RbacRole,
+         RbacRolePermission,
+         RbacRoleScope,
+         RbacUserRole } from './rbac.entity';
 
 export interface RbacRoleRecord {
-  id: string;
-  code: string;
-  name: string;
-  scope: RbacRoleScope;
-  description?: string;
+  id: string
+  code: string
+  name: string
+  scope: RbacRoleScope
+  description?: string
 }
 
 export interface RbacPermissionRecord {
-  id: string;
-  code: string;
-  name: string;
-  description?: string;
+  id: string
+  code: string
+  name: string
+  description?: string
 }
 
 export interface CreateRbacRoleInput {
-  code: string;
-  name: string;
-  scope?: RbacRoleScope;
-  description?: string;
-  actorId?: string;
+  code: string
+  name: string
+  scope?: RbacRoleScope
+  description?: string
+  actorId?: string
 }
 
 export interface UpdateRbacRoleInput {
-  id: string;
-  name?: string;
-  description?: string;
-  actorId?: string;
+  id: string
+  name?: string
+  description?: string
+  actorId?: string
 }
 
 export interface CreateRbacPermissionInput {
-  code: string;
-  name: string;
-  description?: string;
-  actorId?: string;
+  code: string
+  name: string
+  description?: string
+  actorId?: string
 }
 
 export interface UpdateRbacPermissionInput {
-  id: string;
-  name?: string;
-  description?: string;
-  actorId?: string;
+  id: string
+  name?: string
+  description?: string
+  actorId?: string
 }
 
 const toRoleRecord = (row: RbacRole): RbacRoleRecord => ({
@@ -69,7 +67,7 @@ const toPermissionRecord = (row: RbacPermission): RbacPermissionRecord => ({
   ...(row.description ? { description: row.description } : {}),
 });
 
-export class MikroOrmRbacStore {
+export class RbacRepository {
   constructor(private readonly em: EntityManager) {}
 
   async listRoles(): Promise<RbacRoleRecord[]> {
@@ -117,7 +115,7 @@ export class MikroOrmRbacStore {
     return toRoleRecord(found);
   }
 
-  async deleteRole(params: { id: string; actorId?: string }): Promise<void> {
+  async deleteRole(params: { id: string, actorId?: string }): Promise<void> {
     const found = await this.em.findOne(RbacRole, { id: params.id });
     if (!found) {
       return;
@@ -178,7 +176,7 @@ export class MikroOrmRbacStore {
     return toPermissionRecord(found);
   }
 
-  async deletePermission(params: { id: string; actorId?: string }): Promise<void> {
+  async deletePermission(params: { id: string, actorId?: string }): Promise<void> {
     const found = await this.em.findOne(RbacPermission, { id: params.id });
     if (!found) {
       return;
@@ -198,7 +196,7 @@ export class MikroOrmRbacStore {
     await this.em.flush();
   }
 
-  async assignPermissionToRole(params: { roleId: string; permissionId: string; actorId?: string }): Promise<void> {
+  async assignPermissionToRole(params: { roleId: string, permissionId: string, actorId?: string }): Promise<void> {
     const found = await this.em.findOne(RbacRolePermission, {
       roleId: params.roleId,
       permissionId: params.permissionId,
@@ -225,7 +223,7 @@ export class MikroOrmRbacStore {
     await this.em.flush();
   }
 
-  async revokePermissionFromRole(params: { roleId: string; permissionId: string; actorId?: string }): Promise<void> {
+  async revokePermissionFromRole(params: { roleId: string, permissionId: string, actorId?: string }): Promise<void> {
     const found = await this.em.findOne(RbacRolePermission, {
       roleId: params.roleId,
       permissionId: params.permissionId,
@@ -241,7 +239,7 @@ export class MikroOrmRbacStore {
     await this.em.flush();
   }
 
-  async assignRoleToUser(params: { userId: string; roleId: string; tenantId?: string; actorId?: string }): Promise<void> {
+  async assignRoleToUser(params: { userId: string, roleId: string, tenantId?: string, actorId?: string }): Promise<void> {
     const found = await this.em.findOne(RbacUserRole, {
       userId: params.userId,
       roleId: params.roleId,
@@ -270,7 +268,7 @@ export class MikroOrmRbacStore {
     await this.em.flush();
   }
 
-  async revokeRoleFromUser(params: { userId: string; roleId: string; tenantId?: string; actorId?: string }): Promise<void> {
+  async revokeRoleFromUser(params: { userId: string, roleId: string, tenantId?: string, actorId?: string }): Promise<void> {
     const found = await this.em.findOne(RbacUserRole, {
       userId: params.userId,
       roleId: params.roleId,
@@ -287,7 +285,7 @@ export class MikroOrmRbacStore {
     await this.em.flush();
   }
 
-  async getPermissionCodesByUser(params: { userId: string; tenantId?: string }): Promise<string[]> {
+  async getPermissionCodesByUser(params: { userId: string, tenantId?: string }): Promise<string[]> {
     const userRoles = await this.em.find(RbacUserRole, {
       userId: params.userId,
       ...(params.tenantId !== undefined ? { tenantId: params.tenantId } : {}),
@@ -308,6 +306,6 @@ export class MikroOrmRbacStore {
   }
 }
 
-export const createMikroOrmRbacStore = (em: EntityManager): MikroOrmRbacStore => (
-  new MikroOrmRbacStore(em)
+export const createRbacRepository = (em: EntityManager): RbacRepository => (
+  new RbacRepository(em)
 );
