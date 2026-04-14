@@ -42,7 +42,7 @@ export interface UpdateRbacPermissionInput {
   actorId?: string;
 }
 
-export interface RbacRepository {
+export interface RbacStore {
   listRoles(): Promise<RbacRoleRecord[]>;
   listPermissions(): Promise<RbacPermissionRecord[]>;
   createRole(input: CreateRbacRoleInput): Promise<RbacRoleRecord>;
@@ -66,19 +66,19 @@ interface RbacCache {
 
 const makeUserPermissionKey = (userId: string, tenantId?: string): string => `${userId}::${tenantId ?? ''}`;
 
-export class DatabaseRbacManager {
+export class RbacService {
   private readonly cache: RbacCache = {
     roles: new Map(),
     permissions: new Map(),
     userPermissions: new Map(),
   };
 
-  constructor(private readonly repository: RbacRepository) {}
+  constructor(private readonly store: RbacStore) {}
 
   async syncFromDatabase(): Promise<void> {
     const [roles, permissions] = await Promise.all([
-      this.repository.listRoles(),
-      this.repository.listPermissions(),
+      this.store.listRoles(),
+      this.store.listPermissions(),
     ]);
 
     this.cache.roles = new Map(roles.map((role) => [role.id, role]));
@@ -95,60 +95,60 @@ export class DatabaseRbacManager {
   }
 
   async createRole(input: CreateRbacRoleInput): Promise<RbacRoleRecord> {
-    const created = await this.repository.createRole(input);
+    const created = await this.store.createRole(input);
     this.cache.roles.set(created.id, created);
     return created;
   }
 
   async updateRole(input: UpdateRbacRoleInput): Promise<RbacRoleRecord> {
-    const updated = await this.repository.updateRole(input);
+    const updated = await this.store.updateRole(input);
     this.cache.roles.set(updated.id, updated);
     this.cache.userPermissions.clear();
     return updated;
   }
 
   async deleteRole(params: { id: string; actorId?: string }): Promise<void> {
-    await this.repository.deleteRole(params);
+    await this.store.deleteRole(params);
     this.cache.roles.delete(params.id);
     this.cache.userPermissions.clear();
   }
 
   async createPermission(input: CreateRbacPermissionInput): Promise<RbacPermissionRecord> {
-    const created = await this.repository.createPermission(input);
+    const created = await this.store.createPermission(input);
     this.cache.permissions.set(created.id, created);
     return created;
   }
 
   async updatePermission(input: UpdateRbacPermissionInput): Promise<RbacPermissionRecord> {
-    const updated = await this.repository.updatePermission(input);
+    const updated = await this.store.updatePermission(input);
     this.cache.permissions.set(updated.id, updated);
     this.cache.userPermissions.clear();
     return updated;
   }
 
   async deletePermission(params: { id: string; actorId?: string }): Promise<void> {
-    await this.repository.deletePermission(params);
+    await this.store.deletePermission(params);
     this.cache.permissions.delete(params.id);
     this.cache.userPermissions.clear();
   }
 
   async assignPermissionToRole(params: { roleId: string; permissionId: string; actorId?: string }): Promise<void> {
-    await this.repository.assignPermissionToRole(params);
+    await this.store.assignPermissionToRole(params);
     this.cache.userPermissions.clear();
   }
 
   async revokePermissionFromRole(params: { roleId: string; permissionId: string; actorId?: string }): Promise<void> {
-    await this.repository.revokePermissionFromRole(params);
+    await this.store.revokePermissionFromRole(params);
     this.cache.userPermissions.clear();
   }
 
   async assignRoleToUser(params: { userId: string; roleId: string; tenantId?: string; actorId?: string }): Promise<void> {
-    await this.repository.assignRoleToUser(params);
+    await this.store.assignRoleToUser(params);
     this.cache.userPermissions.delete(makeUserPermissionKey(params.userId, params.tenantId));
   }
 
   async revokeRoleFromUser(params: { userId: string; roleId: string; tenantId?: string; actorId?: string }): Promise<void> {
-    await this.repository.revokeRoleFromUser(params);
+    await this.store.revokeRoleFromUser(params);
     this.cache.userPermissions.delete(makeUserPermissionKey(params.userId, params.tenantId));
   }
 
@@ -160,7 +160,7 @@ export class DatabaseRbacManager {
       return cached.has(params.permissionCode);
     }
 
-    const permissionCodes = await this.repository.getPermissionCodesByUser({
+    const permissionCodes = await this.store.getPermissionCodesByUser({
       userId: params.userId,
       tenantId: params.tenantId,
     });
@@ -170,6 +170,6 @@ export class DatabaseRbacManager {
   }
 }
 
-export const createDatabaseRbacManager = (repository: RbacRepository): DatabaseRbacManager => (
-  new DatabaseRbacManager(repository)
+export const createRbacService = (store: RbacStore): RbacService => (
+  new RbacService(store)
 );

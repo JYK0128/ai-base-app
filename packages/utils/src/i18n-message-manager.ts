@@ -17,7 +17,7 @@ export interface I18nMessageRecord {
   message: string;
 }
 
-export interface I18nMessageRepository {
+export interface I18nMessageStore {
   findMany(params?: { locale?: string; namespace?: string }): Promise<I18nMessageRecord[]>;
   upsertMany(records: I18nMessageRecord[]): Promise<void>;
 }
@@ -144,7 +144,7 @@ const flattenMessages = (
   return records;
 };
 
-export class I18nMessageManager {
+export class I18nMessageRegistry {
   protected readonly locales = new Map<string, MessageEntry>();
 
   register({ locale, namespace, messages }: MessageSource): void {
@@ -226,13 +226,13 @@ export class I18nMessageManager {
   }
 }
 
-export class DatabaseI18nMessageManager extends I18nMessageManager {
-  constructor(private readonly repository: I18nMessageRepository) {
+export class I18nMessageService extends I18nMessageRegistry {
+  constructor(private readonly store: I18nMessageStore) {
     super();
   }
 
   async syncFromDatabase(params?: { locale?: string; namespace?: string }): Promise<void> {
-    const records = await this.repository.findMany(params);
+    const records = await this.store.findMany(params);
     const grouped = new Map<string, I18nMessageRecord[]>();
 
     for (const record of records) {
@@ -255,7 +255,7 @@ export class DatabaseI18nMessageManager extends I18nMessageManager {
   async registerAndPersist(source: MessageSource): Promise<void> {
     this.register(source);
     const records = flattenMessages(source.locale, source.namespace, source.messages);
-    await this.repository.upsertMany(records);
+    await this.store.upsertMany(records);
   }
 
   async registerManyAndPersist(sources: MessageSource[]): Promise<void> {
@@ -264,12 +264,12 @@ export class DatabaseI18nMessageManager extends I18nMessageManager {
       flattenMessages(source.locale, source.namespace, source.messages)
     ));
 
-    await this.repository.upsertMany(records);
+    await this.store.upsertMany(records);
   }
 }
 
-export const createI18nMessageManager = (): I18nMessageManager => new I18nMessageManager();
+export const createI18nMessageRegistry = (): I18nMessageRegistry => new I18nMessageRegistry();
 
-export const createDatabaseI18nMessageManager = (
-  repository: I18nMessageRepository,
-): DatabaseI18nMessageManager => new DatabaseI18nMessageManager(repository);
+export const createI18nMessageService = (
+  store: I18nMessageStore,
+): I18nMessageService => new I18nMessageService(store);

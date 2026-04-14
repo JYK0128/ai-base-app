@@ -19,8 +19,5 @@
     "eslint": "9.39.4",
     "typescript": "6.0.2"
   },
-  "dependencies": {
-    "@pkg/database": "workspace:*",
-    "@mikro-orm/core": "7.0.9"
-  }
+  "dependencies": {}
 }
