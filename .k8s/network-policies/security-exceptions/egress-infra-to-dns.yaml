@@ -1,8 +1,8 @@
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: egress-dev-web-to-dns
-  namespace: dev-web
+  name: egress-infra-to-dns
+  namespace: dev-infra
 spec:
   podSelector: {}
   policyTypes:

@@ -6,7 +6,7 @@ metadata:
 spec:
   podSelector:
     matchLabels:
-      app: service-gateway
+      app.kubernetes.io/name: service-gateway
   policyTypes:
   - Ingress
   ingress:

@@ -6,7 +6,7 @@ metadata:
 spec:
   podSelector:
     matchLabels:
-      app: platform-auth-service
+      app.kubernetes.io/name: platform-auth-service
   policyTypes:
   - Ingress
   ingress:
@@ -16,7 +16,7 @@ spec:
           kubernetes.io/metadata.name: dev-web
       podSelector:
         matchLabels:
-          app: service-gateway
+          app.kubernetes.io/name: service-gateway
     ports:
     - protocol: TCP
       port: 3000

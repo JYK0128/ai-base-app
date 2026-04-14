@@ -5,7 +5,10 @@ resources:
   - ../../apps
   - ../../database
   - ../../messaging
+  - ../../monitoring
+  - ../../network-policies
   - ../../networking
+  - monitoring-namespace.yaml
   - prod-api-namespace.yaml
   - prod-infra-namespace.yaml
   - prod-web-namespace.yaml
@@ -281,3 +284,228 @@ patches:
           limits:
             cpu: "1000m"
             memory: "2Gi"
+
+  - target:
+      kind: NetworkPolicy
+      name: egress-service-gateway-to-platform-auth
+    patch: |-
+      - op: replace
+        path: /metadata/namespace
+        value: prod-web
+      - op: replace
+        path: /spec/egress/0/to/0/namespaceSelector/matchLabels/kubernetes.io~1metadata.name
+        value: prod-api
+
+  - target:
+      kind: NetworkPolicy
+      name: ingress-platform-auth-from-service-gateway
+    patch: |-
+      - op: replace
+        path: /metadata/namespace
+        value: prod-api
+      - op: replace
+        path: /spec/ingress/0/from/0/namespaceSelector/matchLabels/kubernetes.io~1metadata.name
+        value: prod-web
+
+  - target:
+      kind: NetworkPolicy
+      name: egress-platform-auth-to-kafka
+    patch: |-
+      - op: replace
+        path: /metadata/namespace
+        value: prod-api
+      - op: replace
+        path: /spec/egress/0/to/0/namespaceSelector/matchLabels/kubernetes.io~1metadata.name
+        value: prod-infra
+
+  - target:
+      kind: NetworkPolicy
+      name: egress-platform-auth-to-postgres
+    patch: |-
+      - op: replace
+        path: /metadata/namespace
+        value: prod-api
+      - op: replace
+        path: /spec/egress/0/to/0/namespaceSelector/matchLabels/kubernetes.io~1metadata.name
+        value: prod-infra
+
+  - target:
+      kind: NetworkPolicy
+      name: egress-platform-auth-to-rabbitmq
+    patch: |-
+      - op: replace
+        path: /metadata/namespace
+        value: prod-api
+      - op: replace
+        path: /spec/egress/0/to/0/namespaceSelector/matchLabels/kubernetes.io~1metadata.name
+        value: prod-infra
+
+  - target:
+      kind: NetworkPolicy
+      name: egress-platform-auth-to-redis
+    patch: |-
+      - op: replace
+        path: /metadata/namespace
+        value: prod-api
+      - op: replace
+        path: /spec/egress/0/to/0/namespaceSelector/matchLabels/kubernetes.io~1metadata.name
+        value: prod-infra
+
+  - target:
+      kind: NetworkPolicy
+      name: egress-service-gateway-to-kafka
+    patch: |-
+      - op: replace
+        path: /metadata/namespace
+        value: prod-web
+      - op: replace
+        path: /spec/egress/0/to/0/namespaceSelector/matchLabels/kubernetes.io~1metadata.name
+        value: prod-infra
+
+  - target:
+      kind: NetworkPolicy
+      name: egress-service-gateway-to-postgres
+    patch: |-
+      - op: replace
+        path: /metadata/namespace
+        value: prod-web
+      - op: replace
+        path: /spec/egress/0/to/0/namespaceSelector/matchLabels/kubernetes.io~1metadata.name
+        value: prod-infra
+
+  - target:
+      kind: NetworkPolicy
+      name: egress-service-gateway-to-rabbitmq
+    patch: |-
+      - op: replace
+        path: /metadata/namespace
+        value: prod-web
+      - op: replace
+        path: /spec/egress/0/to/0/namespaceSelector/matchLabels/kubernetes.io~1metadata.name
+        value: prod-infra
+
+  - target:
+      kind: NetworkPolicy
+      name: egress-service-gateway-to-redis
+    patch: |-
+      - op: replace
+        path: /metadata/namespace
+        value: prod-web
+      - op: replace
+        path: /spec/egress/0/to/0/namespaceSelector/matchLabels/kubernetes.io~1metadata.name
+        value: prod-infra
+
+  - target:
+      kind: NetworkPolicy
+      name: ingress-kafka-from-apps
+    patch: |-
+      - op: replace
+        path: /metadata/namespace
+        value: prod-infra
+      - op: replace
+        path: /spec/ingress/0/from/0/namespaceSelector/matchLabels/kubernetes.io~1metadata.name
+        value: prod-api
+      - op: replace
+        path: /spec/ingress/0/from/1/namespaceSelector/matchLabels/kubernetes.io~1metadata.name
+        value: prod-web
+
+  - target:
+      kind: NetworkPolicy
+      name: ingress-postgres-from-apps
+    patch: |-
+      - op: replace
+        path: /metadata/namespace
+        value: prod-infra
+      - op: replace
+        path: /spec/ingress/0/from/0/namespaceSelector/matchLabels/kubernetes.io~1metadata.name
+        value: prod-api
+      - op: replace
+        path: /spec/ingress/0/from/1/namespaceSelector/matchLabels/kubernetes.io~1metadata.name
+        value: prod-web
+
+  - target:
+      kind: NetworkPolicy
+      name: ingress-rabbitmq-from-apps
+    patch: |-
+      - op: replace
+        path: /metadata/namespace
+        value: prod-infra
+      - op: replace
+        path: /spec/ingress/0/from/0/namespaceSelector/matchLabels/kubernetes.io~1metadata.name
+        value: prod-api
+      - op: replace
+        path: /spec/ingress/0/from/1/namespaceSelector/matchLabels/kubernetes.io~1metadata.name
+        value: prod-web
+
+  - target:
+      kind: NetworkPolicy
+      name: ingress-redis-from-apps
+    patch: |-
+      - op: replace
+        path: /metadata/namespace
+        value: prod-infra
+      - op: replace
+        path: /spec/ingress/0/from/0/namespaceSelector/matchLabels/kubernetes.io~1metadata.name
+        value: prod-api
+      - op: replace
+        path: /spec/ingress/0/from/1/namespaceSelector/matchLabels/kubernetes.io~1metadata.name
+        value: prod-web
+
+  - target:
+      kind: NetworkPolicy
+      name: ingress-service-gateway-from-istio-ingress
+    patch: |-
+      - op: replace
+        path: /metadata/namespace
+        value: prod-web
+
+  - target:
+      kind: NetworkPolicy
+      name: default-deny-all
+      namespace: dev-api
+    patch: |-
+      - op: replace
+        path: /metadata/namespace
+        value: prod-api
+
+  - target:
+      kind: NetworkPolicy
+      name: default-deny-all
+      namespace: dev-infra
+    patch: |-
+      - op: replace
+        path: /metadata/namespace
+        value: prod-infra
+
+  - target:
+      kind: NetworkPolicy
+      name: default-deny-all
+      namespace: dev-web
+    patch: |-
+      - op: replace
+        path: /metadata/namespace
+        value: prod-web
+
+  - target:
+      kind: NetworkPolicy
+      name: egress-api-to-dns
+    patch: |-
+      - op: replace
+        path: /metadata/namespace
+        value: prod-api
+
+  - target:
+      kind: NetworkPolicy
+      name: egress-infra-to-dns
+    patch: |-
+      - op: replace
+        path: /metadata/namespace
+        value: prod-infra
+
+  - target:
+      kind: NetworkPolicy
+      name: egress-web-to-dns
+    patch: |-
+      - op: replace
+        path: /metadata/namespace
+        value: prod-web

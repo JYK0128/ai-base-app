@@ -4,9 +4,7 @@ metadata:
   name: ingress-kafka-from-apps
   namespace: dev-infra
 spec:
-  podSelector:
-    matchLabels:
-      app: kafka
+  podSelector: {}
   policyTypes:
   - Ingress
   ingress:
@@ -16,13 +14,13 @@ spec:
           kubernetes.io/metadata.name: dev-api
       podSelector:
         matchLabels:
-          app: platform-auth-service
+          app.kubernetes.io/name: platform-auth-service
     - namespaceSelector:
         matchLabels:
           kubernetes.io/metadata.name: dev-web
       podSelector:
         matchLabels:
-          app: service-gateway
+          app.kubernetes.io/name: service-gateway
     ports:
     - protocol: TCP
       port: 9092

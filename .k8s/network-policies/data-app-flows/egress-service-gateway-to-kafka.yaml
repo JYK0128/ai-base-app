@@ -6,7 +6,7 @@ metadata:
 spec:
   podSelector:
     matchLabels:
-      app: service-gateway
+      app.kubernetes.io/name: service-gateway
   policyTypes:
   - Egress
   egress:
@@ -14,9 +14,6 @@ spec:
     - namespaceSelector:
         matchLabels:
           kubernetes.io/metadata.name: dev-infra
-      podSelector:
-        matchLabels:
-          app: kafka
     ports:
     - protocol: TCP
       port: 9092
