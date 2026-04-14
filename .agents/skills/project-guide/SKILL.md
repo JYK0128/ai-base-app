@@ -26,10 +26,15 @@ description: 모노레포 내 신규 프로젝트/패키지 생성 시 "base-pro
 - **TypeScript (tsconfig)**
   - 모노레포 호환성을 위해 템플릿의 `tsconfig` 구조를 엄격히 준수
 
-### 2.2 핵심 의존성 (Core Dependencies)
+### 2.2 의존성 관리 (Dependencies)
 
-- **@pkg/config**: 공유 툴체인 및 환경 설정용
-- **@pkg/database**: 시스템 공통 데이터베이스 패턴 적용용
+- **공통 필수**:
+  - `@pkg/config`: 공유 툴체인 및 환경 설정용
+  - `@pkg/utils`: 공통 유틸리티 및 헬퍼 함수용
+- **백엔드 서비스 전용**:
+  - `@pkg/database`: 시스템 공통 데이터베이스 패턴 적용 시에만 추가
+- **프론트엔드 앱**:
+  - `@pkg/database`는 **절대로** 포함하지 않음 (API를 통한 통신 원칙)
 
 ### 2.3 헬스체크 표준 (Health Check)
 

@@ -5,6 +5,7 @@
     { "path": "packages/database" },
     { "path": "packages/utils" },
     { "path": "apps/platform-auth-service" },
-    { "path": "apps/service-gateway" }
+    { "path": "apps/service-gateway" },
+    { "path": "web/platform-admin-web" }
   ]
 }
