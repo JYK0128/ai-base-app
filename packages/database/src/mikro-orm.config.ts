@@ -1,23 +1,25 @@
 import 'reflect-metadata';
 
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 import { EntityGenerator } from '@mikro-orm/entity-generator';
 import { Migrator } from '@mikro-orm/migrations';
-import { defineConfig, type Options, PostgreSqlDriver } from '@mikro-orm/postgresql';
+import { defineConfig, EntityCaseNamingStrategy, type Options, PostgreSqlDriver } from '@mikro-orm/postgresql';
 import { TsMorphMetadataProvider } from '@mikro-orm/reflection';
 import { SeedManager } from '@mikro-orm/seeder';
 import { SqlHighlighter } from '@mikro-orm/sql-highlighter';
 
-import { CamelCaseNamingStrategy } from './mikro-orm.naming';
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 export default defineConfig({
-  entities: ['./dist/domains/**/*.entity.js'],
-  entitiesTs: ['./src/domains/**/*.entity.ts'],
+  entities: ['./dist/domains'],
+  entitiesTs: ['./src/domains'],
   driver: PostgreSqlDriver,
   clientUrl: process.env.DATABASE_URL,
   metadataProvider: TsMorphMetadataProvider,
-  namingStrategy: CamelCaseNamingStrategy,
+  namingStrategy: EntityCaseNamingStrategy,
   filters: {
     softDelete: {
       cond: { deletedAt: { $eq: null } },

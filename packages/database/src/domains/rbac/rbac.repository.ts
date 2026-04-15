@@ -6,7 +6,7 @@ import { RbacPermission,
          RbacRole,
          RbacRolePermission,
          RbacRoleScope,
-         RbacUserRole } from './rbac.entity';
+         RbacUserRole } from '@/domains/rbac/rbac.entity';
 
 export interface RbacRoleRecord {
   id: string

@@ -2,10 +2,10 @@ import type { Rel } from '@mikro-orm/core';
 import { Collection } from '@mikro-orm/core';
 import { Entity, ManyToOne, OneToMany, Property } from '@mikro-orm/decorators/legacy';
 
-import { CoreEntity } from '../core/core.entity';
+import { BaseEntity } from '@/domains/core/base.entity';
 
 @Entity({ schema: 'tenant' })
-export class TenantAccount extends CoreEntity {
+export class TenantAccount extends BaseEntity {
   @Property({ unique: true })
   email!: string;
 
@@ -17,7 +17,7 @@ export class TenantAccount extends CoreEntity {
 }
 
 @Entity({ schema: 'tenant' })
-export class TenantUser extends CoreEntity {
+export class TenantUser extends BaseEntity {
   @ManyToOne(() => TenantAccount)
   tenantAccount!: Rel<TenantAccount>;
 

@@ -3,30 +3,34 @@
   "version": "0.1.0",
   "type": "module",
   "private": true,
-  "main": "src/index.ts",
-  "types": "src/index.ts",
+  "main": "./dist/index.ts",
+  "types": "./dist/index.d.ts",
   "exports": {
     ".": {
-      "types": "./src/index.ts",
-      "import": "./src/index.ts",
-      "require": "./src/index.ts",
-      "default": "./src/index.ts"
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs",
+      "default": "./dist/index.js"
     },
-    "./*": {
-      "types": "./src/*.ts",
-      "import": "./src/*.ts",
-      "require": "./src/*.ts",
-      "default": "./src/*.ts"
+    "./domains": {
+      "types": "./dist/domains.d.ts",
+      "default": "./dist/domains.js"
     }
-  },
-  "scripts": {
-    "mikro-orm": "npx mikro-orm"
   },
   "mikro-orm": {
     "useTsNode": true,
     "configPaths": [
       "./src/mikro-orm.config.ts"
     ]
+  },
+  "scripts": {
+    "mikro-orm": "npx mikro-orm",
+    "dev": "bunchee --watch",
+    "build": "bunchee --clean",
+    "test": "pnpm run test:example",
+    "test:integration": "vitest run src/test/example.test.ts",
+    "test:temp": "vitest run src/temp.test.ts",
+    "test:example": "vitest run src/test/example.test.ts"
   },
   "dependencies": {
     "@mikro-orm/core": "7.0.9",
@@ -41,10 +45,14 @@
     "reflect-metadata": "0.2.2"
   },
   "devDependencies": {
-    "@pkg/config": "workspace:*",
     "@mikro-orm/cli": "7.0.9",
+    "@pkg/config": "workspace:*",
     "@types/node": "25.6.0",
+    "@testcontainers/postgresql": "11.14.0",
+    "bunchee": "6.10.0",
     "eslint": "9.39.4",
-    "typescript": "6.0.2"
+    "testcontainers": "11.14.0",
+    "typescript": "6.0.2",
+    "vitest": "4.1.4"
   }
 }

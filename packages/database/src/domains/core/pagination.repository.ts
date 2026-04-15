@@ -1,12 +1,6 @@
-import type { Cursor,
-              EntityManager,
-              EntityName,
-              FilterQuery,
-              FindByCursorOptions,
-              FindOptions,
-              Loaded } from '@mikro-orm/core';
+import type { Cursor, EntityManager, EntityName, FilterQuery, FindByCursorOptions, FindOptions, Loaded } from '@mikro-orm/core';
 
-import { CoreEntity } from './core.entity';
+import { BaseEntity } from './base.entity';
 
 export interface PaginatedResult<T> {
   items: T[]
@@ -16,7 +10,7 @@ export interface PaginatedResult<T> {
   totalPages: number
 }
 
-export abstract class PaginationRepository<T extends CoreEntity> {
+export abstract class PaginationRepository<T extends BaseEntity> {
   constructor(
     protected readonly em: EntityManager,
     protected readonly entityName: EntityName<T>,

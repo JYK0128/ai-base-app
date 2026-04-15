@@ -2,8 +2,8 @@ import type { Opt } from '@mikro-orm/core';
 import { Collection } from '@mikro-orm/core';
 import { Entity, Enum, OneToMany, Property } from '@mikro-orm/decorators/legacy';
 
-import { CoreEntity } from '../core/core.entity';
-import { PlatformUser } from '../platform/platform.entity';
+import { BaseEntity } from '@/domains/core/base.entity';
+import type { PlatformUser } from '@/domains/platform/platform.entity';
 
 export enum PartnerStatus {
   PENDING = 'PENDING',
@@ -12,7 +12,7 @@ export enum PartnerStatus {
 }
 
 @Entity({ schema: 'platform' })
-export class Partner extends CoreEntity {
+export class Partner extends BaseEntity {
   @Property()
   name!: string;
 
@@ -22,6 +22,6 @@ export class Partner extends CoreEntity {
   @Enum(() => PartnerStatus)
   status: PartnerStatus & Opt = PartnerStatus.PENDING;
 
-  @OneToMany(() => PlatformUser, (u) => u.partner)
+  @OneToMany({ mappedBy: 'partner' })
   platformUsers = new Collection<PlatformUser>(this);
 }

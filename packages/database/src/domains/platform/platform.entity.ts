@@ -2,11 +2,11 @@ import type { Rel } from '@mikro-orm/core';
 import { Collection } from '@mikro-orm/core';
 import { Entity, Enum, ManyToOne, OneToMany, Property } from '@mikro-orm/decorators/legacy';
 
-import { CoreEntity } from '../core/core.entity';
-import { Partner } from '../partner/partner.entity';
+import { BaseEntity } from '@/domains/core/base.entity';
+import type { Partner } from '@/domains/partner/partner.entity';
 
 @Entity({ schema: 'platform' })
-export class PlatformAccount extends CoreEntity {
+export class PlatformAccount extends BaseEntity {
   @Property({ unique: true })
   email!: string;
 
@@ -25,13 +25,13 @@ export enum PlatformRole {
 }
 
 @Entity({ schema: 'platform' })
-export class PlatformUser extends CoreEntity {
+export class PlatformUser extends BaseEntity {
   @ManyToOne(() => PlatformAccount)
   platformAccount!: Rel<PlatformAccount>;
 
   @Enum(() => PlatformRole)
   role!: PlatformRole;
 
-  @ManyToOne(() => Partner, { nullable: true })
+  @ManyToOne({ nullable: true })
   partner?: Rel<Partner>;
 }

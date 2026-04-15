@@ -2,8 +2,8 @@ import { randomUUID } from 'node:crypto';
 
 import type { EntityManager } from '@mikro-orm/core';
 
-import { CoreRepository } from '../core/core.repository';
-import { Message } from './message.entity';
+import { BaseRepository } from '@/domains/core/base.repository';
+import { Message } from '@/domains/message/message.entity';
 
 export interface MessageRecord {
   locale: string
@@ -12,7 +12,7 @@ export interface MessageRecord {
   message: string
 }
 
-export class MessageRepository extends CoreRepository<Message> {
+export class MessageRepository extends BaseRepository<Message> {
   constructor(em: EntityManager) {
     super(em, Message);
   }

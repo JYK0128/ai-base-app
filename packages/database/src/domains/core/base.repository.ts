@@ -1,9 +1,9 @@
 import type { EntityData, FilterQuery, FromEntityType, Primary, RequiredEntityData } from '@mikro-orm/core';
 
-import { CoreEntity } from './core.entity';
+import { BaseEntity } from './base.entity';
 import { PaginationRepository } from './pagination.repository';
 
-export abstract class CoreRepository<T extends CoreEntity> extends PaginationRepository<T> {
+export abstract class BaseRepository<T extends BaseEntity> extends PaginationRepository<T> {
   async findAll(): Promise<T[]> {
     return this.em.find(this.entityName, {});
   }

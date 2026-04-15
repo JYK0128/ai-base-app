@@ -1,7 +1,7 @@
 import { type EntityData, type FromEntityType, type Opt, RequestContext, type RequiredEntityData } from '@mikro-orm/core';
 import { PrimaryKey, Property } from '@mikro-orm/decorators/legacy';
 
-export abstract class CoreEntity {
+export abstract class BaseEntity {
   @PrimaryKey()
   id!: string;
 
@@ -23,7 +23,7 @@ export abstract class CoreEntity {
   @Property({ nullable: true })
   deletedBy?: string | null = null;
 
-  static create<T extends CoreEntity>(
+  static create<T extends BaseEntity>(
     this: new () => T,
     data: RequiredEntityData<T>,
   ) {
