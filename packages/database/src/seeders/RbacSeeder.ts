@@ -5,7 +5,7 @@ import { Seeder } from '@mikro-orm/seeder';
 
 import { RbacRoleScope, Role } from '@/domains/rbac/role.entity';
 import { Permission } from '@/domains/rbac/permission.entity';
-import { RolePermission } from '@/domains/rbac/role-permission.entity';
+import { RolePermission } from '@/domains/rbac/role.permission.entity';
 
 const roleSeeds = [
   {

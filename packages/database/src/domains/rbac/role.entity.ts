@@ -2,9 +2,9 @@ import { Collection } from '@mikro-orm/core';
 import { Entity, Enum, Index, OneToMany, Property } from '@mikro-orm/decorators/legacy';
 
 import { CoreEntity } from '../core/core.entity';
-import { ManagerRole } from './manager-role.entity';
+import { ManagerRole } from './manager.role.entity';
+import { RolePermission } from './role.permission.entity';
 import { RoleRepository } from './role.repository';
-import { RolePermission } from './role-permission.entity';
 
 export enum RbacRoleScope {
   PLATFORM = 'PLATFORM',

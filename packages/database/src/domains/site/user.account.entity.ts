@@ -4,8 +4,8 @@ import { Entity, Index, ManyToOne, OneToMany, Property, Unique } from '@mikro-or
 
 import { CoreEntity } from '../core/core.entity';
 import type { Site } from './site.entity';
+import { UserAccountRepository } from './user.account.repository';
 import { User } from './user.entity';
-import { UserAccountRepository } from './user-account.repository';
 
 @Entity({ schema: 'site', repository: () => UserAccountRepository })
 @Unique({ properties: ['site', 'email'] })

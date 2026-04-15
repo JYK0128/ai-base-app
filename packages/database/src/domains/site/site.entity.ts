@@ -6,7 +6,7 @@ import { CoreEntity } from '../core/core.entity';
 import { Organization } from '../organization/organization.entity';
 import { SiteRepository } from './site.repository';
 import { User } from './user.entity';
-import { UserAccount } from './user-account.entity';
+import { UserAccount } from './user.account.entity';
 
 @Entity({ schema: 'site', repository: () => SiteRepository })
 @Unique({ properties: ['organization', 'code'] })

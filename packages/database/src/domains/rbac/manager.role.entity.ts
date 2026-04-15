@@ -3,7 +3,7 @@ import { Entity, Index, ManyToOne, Property, Unique } from '@mikro-orm/decorator
 
 import { CoreEntity } from '../core/core.entity';
 import type { Organization } from '../organization/organization.entity';
-import { ManagerRoleRepository } from './manager-role.repository';
+import { ManagerRoleRepository } from './manager.role.repository';
 import type { Role } from './role.entity';
 
 @Entity({ schema: 'platform', repository: () => ManagerRoleRepository })
