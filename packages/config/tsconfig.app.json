@@ -1,6 +1,7 @@
 {
   "extends": "./typescript/node.json",
   "compilerOptions": {
+    "baseUrl": "./",
     "outDir": "dist"
   },
   "include": ["eslint", "stylelint"]

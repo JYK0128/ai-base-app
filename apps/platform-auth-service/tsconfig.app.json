@@ -3,7 +3,7 @@
   "compilerOptions": {
     "outDir": "dist",
     "sourceMap": true,
-    "baseUrl": ".",
+    "baseUrl": "./",
     "types": ["node", "express"],
     "paths": {
       "@/*": ["src/*"]
