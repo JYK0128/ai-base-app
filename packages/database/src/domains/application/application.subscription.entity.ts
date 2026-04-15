@@ -3,7 +3,7 @@ import { Collection } from '@mikro-orm/core';
 import { Entity, Enum, Index, ManyToOne, OneToMany, Property, Unique } from '@mikro-orm/decorators/legacy';
 
 import { CoreEntity } from '../core/core.entity';
-import type { Organization } from '../organization/organization.entity';
+import type { Organization } from '../platform/organization/organization.entity';
 import type { Application } from './application.entity';
 import { ApplicationMembership } from './application.membership.entity';
 import type { ApplicationPlan } from './application.plan.entity';

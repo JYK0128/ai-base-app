@@ -1,7 +1,7 @@
 import { Collection } from '@mikro-orm/core';
 import { Entity, OneToMany, Property } from '@mikro-orm/decorators/legacy';
 
-import { CoreEntity } from '../core/core.entity';
+import { CoreEntity } from '../../core/core.entity';
 import { PermissionRepository } from './permission.repository';
 import { RolePermission } from './role.permission.entity';
 

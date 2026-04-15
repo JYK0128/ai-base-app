@@ -1,7 +1,7 @@
 import type { Rel } from '@mikro-orm/core';
 import { Entity, Index, ManyToOne, Property, Unique } from '@mikro-orm/decorators/legacy';
 
-import { CoreEntity } from '../core/core.entity';
+import { CoreEntity } from '../../core/core.entity';
 import type { Organization } from '../organization/organization.entity';
 import { ManagerRoleRepository } from './manager.role.repository';
 import type { Role } from './role.entity';

@@ -1,6 +1,6 @@
 import { Entity, Property, Unique } from '@mikro-orm/decorators/legacy';
 
-import { CoreEntity } from '../core/core.entity';
+import { CoreEntity } from '../../core/core.entity';
 import { MessageRepository } from './message.repository';
 
 @Entity({ schema: 'platform', repository: () => MessageRepository })

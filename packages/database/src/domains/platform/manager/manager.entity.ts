@@ -2,7 +2,7 @@ import type { Rel } from '@mikro-orm/core';
 import { Collection } from '@mikro-orm/core';
 import { Entity, Enum, Index, ManyToOne, OneToMany, Unique } from '@mikro-orm/decorators/legacy';
 
-import { CoreEntity } from '../core/core.entity';
+import { CoreEntity } from '../../core/core.entity';
 import type { Organization } from '../organization/organization.entity';
 import { ManagerAccount } from './manager.account.entity';
 import { ManagerInvite } from './manager.invite.entity';

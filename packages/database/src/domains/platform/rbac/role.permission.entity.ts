@@ -1,7 +1,7 @@
 import type { Rel } from '@mikro-orm/core';
 import { Entity, ManyToOne, Unique } from '@mikro-orm/decorators/legacy';
 
-import { CoreEntity } from '../core/core.entity';
+import { CoreEntity } from '../../core/core.entity';
 import type { Permission } from './permission.entity';
 import type { Role } from './role.entity';
 import { RolePermissionRepository } from './role.permission.repository';

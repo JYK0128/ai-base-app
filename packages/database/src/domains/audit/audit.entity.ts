@@ -2,7 +2,7 @@ import type { Opt, Rel } from '@mikro-orm/core';
 import { Entity, Enum, Index, ManyToOne, Property } from '@mikro-orm/decorators/legacy';
 
 import { CoreEntity } from '../core/core.entity';
-import type { Organization } from '../organization/organization.entity';
+import type { Organization } from '../platform/organization/organization.entity';
 import { AuditRepository } from './audit.repository';
 
 export enum AuditEventType {

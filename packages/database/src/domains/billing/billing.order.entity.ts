@@ -4,7 +4,7 @@ import { Entity, Enum, Index, ManyToOne, OneToMany, Property } from '@mikro-orm/
 
 import type { ApplicationSubscription } from '../application/application.subscription.entity';
 import { CoreEntity } from '../core/core.entity';
-import type { Organization } from '../organization/organization.entity';
+import type { Organization } from '../platform/organization/organization.entity';
 import { BillingOrderRepository } from './billing.order.repository';
 import { BillingPayment } from './billing.payment.entity';
 import type { BillingProfile } from './billing.profile.entity';
