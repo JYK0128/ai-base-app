@@ -12,7 +12,7 @@ spec:
         spec:
           containers:
           - name: postgres-backup
-            image: public.ecr.aws/bitnami/postgresql@sha256:9e853faacdab0b956935bc0c18d4d9f50e3f83288c327d680adba79e632d3244
+            image: postgres:17
             imagePullPolicy: IfNotPresent
             command: ["/bin/sh", "-c"]
             args:

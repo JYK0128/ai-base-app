@@ -8,6 +8,6 @@ spec:
   secretBackend:
     externalSecret:
       name: rabbitmq-secret
-  image: public.ecr.aws/bitnami/rabbitmq@sha256:1b0b2dd8fcbb3883c1e951d47606f7c0d4d1b9ac08a799bc9da63103aa414726
+  image: rabbitmq:4-management
   persistence:
     storage: 5Gi

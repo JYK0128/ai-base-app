@@ -18,7 +18,7 @@ spec:
     spec:
       containers:
       - name: loki-sts
-        image: public.ecr.aws/bitnami/grafana-loki@sha256:2a931b47e7499af4293247b67e16371e2afc64d8caafd0054eb2df82e729f6df
+        image: grafana/loki:3
         imagePullPolicy: IfNotPresent
         args:
         - "-config.file=/etc/loki/loki.yaml"

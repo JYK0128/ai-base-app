@@ -17,7 +17,7 @@ spec:
       serviceAccountName: alloy
       containers:
       - name: alloy
-        image: public.ecr.aws/bitnami/grafana-alloy@sha256:8f417b591d9ffbd3dea0a3445d2e3269d87d2c29ef3eb17d55fdd04e61ad32b4
+        image: grafana/alloy:v1.15.1
         imagePullPolicy: IfNotPresent
         args:
         - run

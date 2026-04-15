@@ -19,7 +19,7 @@ spec:
     spec:
       containers:
       - name: mimir
-        image: public.ecr.aws/bitnami/grafana-mimir@sha256:f63911ad83ab46342835acdee87c762df2c495546cfaf943bace0d3e6c93ed8a
+        image: grafana/mimir:2.17.9
         imagePullPolicy: IfNotPresent
         workingDir: /tmp
         args:

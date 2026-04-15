@@ -18,7 +18,7 @@ spec:
     spec:
       containers:
       - name: tempo-sts
-        image: public.ecr.aws/bitnami/grafana-tempo@sha256:40ec80b4484edb8c13247f3078834be90ab1a627b9caeb3b460baef69428912b
+        image: grafana/tempo:2.10.4
         imagePullPolicy: IfNotPresent
         args:
         - "-config.file=/etc/tempo/tempo.yaml"
