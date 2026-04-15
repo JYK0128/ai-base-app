@@ -1,7 +1,7 @@
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import { Module } from '@nestjs/common';
 import { APP_INTERCEPTOR } from '@nestjs/core';
-import databaseConfig from '@pkg/database/src/mikro-orm.config';
+import { databaseConfig } from '@pkg/database';
 
 import { EventLogInterceptor } from '@/common/interceptors/event-log.interceptor';
 import { AuthModule } from '@/modules/auth/auth.module';

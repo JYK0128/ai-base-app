@@ -1,9 +1,6 @@
 import { Controller, Get } from '@nestjs/common';
 import { Transport } from '@nestjs/microservices';
-import { HealthCheck,
-         HealthCheckService,
-         MemoryHealthIndicator,
-         MicroserviceHealthIndicator } from '@nestjs/terminus';
+import { HealthCheck, HealthCheckService, MemoryHealthIndicator, MicroserviceHealthIndicator } from '@nestjs/terminus';
 
 import { ENV } from '@/common/env';
 

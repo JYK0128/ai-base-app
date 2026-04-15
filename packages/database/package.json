@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "type": "module",
   "private": true,
-  "main": "./dist/index.ts",
+  "main": "./dist/index.cjs",
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
@@ -13,8 +13,10 @@
       "default": "./dist/index.js"
     },
     "./domains": {
-      "types": "./dist/domains.d.ts",
-      "default": "./dist/domains.js"
+      "types": "./dist/domains/index.d.ts",
+      "import": "./dist/domains/index.js",
+      "require": "./dist/domains/index.cjs",
+      "default": "./dist/domains/index.js"
     }
   },
   "mikro-orm": {
@@ -36,8 +38,15 @@
     "migration:list": "pnpm exec mikro-orm migration:list",
     "migration:pending": "pnpm exec mikro-orm migration:pending",
     "seed": "pnpm exec mikro-orm seeder:run",
-    "seed:reset": "pnpm exec mikro-orm schema:refresh --run"
+    "seed:reset": "pnpm exec mikro-orm schema:refresh --run",
+    "prebuild": "pnpm exec mikro-orm cache:generate --combined"
+
+
+
+
+
   },
+
   "dependencies": {
     "@mikro-orm/core": "7.0.9",
     "@mikro-orm/decorators": "7.0.9",
@@ -48,8 +57,10 @@
     "@mikro-orm/seeder": "7.0.9",
     "@mikro-orm/sql-highlighter": "1.0.1",
     "@pkg/config": "workspace:*",
+    "@swc/helpers": "0.5.15",
     "reflect-metadata": "0.2.2"
   },
+
   "devDependencies": {
     "@mikro-orm/cli": "7.0.9",
     "@pkg/config": "workspace:*",

@@ -1,10 +1,8 @@
-/* eslint-disable @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access */
 import { InjectRepository } from '@mikro-orm/nestjs';
 import type { EntityRepository } from '@mikro-orm/postgresql';
 import { NotFoundException } from '@nestjs/common';
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
-import { ManagerAccount } from '@pkg/database/src/domains/manager/manager.account.entity';
-import { UserAccount } from '@pkg/database/src/domains/site/user.account.entity';
+import { ManagerAccount, UserAccount } from '@pkg/database/domains';
 
 export class GetUserInfoQuery {
   constructor(public readonly userId: string) {}
