@@ -29,10 +29,13 @@ export default defineConfig({
   extensions: [SeedManager, EntityGenerator, Migrator],
   migrations: {
     path: path.resolve(__dirname, './migrations'),
+    pathTs: path.resolve(__dirname, './migrations'),
+    glob: '!(*.d).{js,ts}',
     safe: true,
   },
   seeder: {
     path: path.resolve(__dirname, './seeders'),
+    pathTs: path.resolve(__dirname, './seeders'),
     defaultSeeder: 'DatabaseSeeder',
     glob: '!(*.d).{js,ts}',
   },

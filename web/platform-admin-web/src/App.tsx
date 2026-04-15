@@ -6,8 +6,8 @@ type LoginResult = {
   user: {
     id: string
     role: string
-    partnerId: string | null
-    partnerName: string | null
+    organizationId: string | null
+    organizationName: string | null
   }
   clientIp: string
   loggedInAt: string
@@ -18,7 +18,7 @@ type UserProfile = {
   role: string
   email: string
   accountId: string
-  partner: {
+  organization: {
     id: string
     name: string
   } | null
@@ -222,8 +222,8 @@ function App() {
                 <strong>{profile?.role || session.user.role}</strong>
               </article>
               <article className="info-card">
-                <span>Partner</span>
-                <strong>{profile?.partner?.name || session.user.partnerName || 'None'}</strong>
+                <span>Organization</span>
+                <strong>{profile?.organization?.name || session.user.organizationName || 'None'}</strong>
               </article>
             </div>
 

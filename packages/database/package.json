@@ -24,13 +24,19 @@
     ]
   },
   "scripts": {
-    "mikro-orm": "npx mikro-orm",
+    "mikro-orm": "pnpm exec mikro-orm",
     "dev": "bunchee --watch",
     "build": "bunchee --clean",
     "test": "pnpm run test:example",
-    "test:integration": "vitest run src/test/example.test.ts",
-    "test:temp": "vitest run src/temp.test.ts",
-    "test:example": "vitest run src/test/example.test.ts"
+    "test:example": "vitest run src/test/example.test.ts",
+    "migration:create": "pnpm exec mikro-orm migration:create --ts",
+    "migration:create:blank": "pnpm exec mikro-orm migration:create --blank --ts",
+    "migration:up": "pnpm exec mikro-orm migration:up",
+    "migration:down": "pnpm exec mikro-orm migration:down",
+    "migration:list": "pnpm exec mikro-orm migration:list",
+    "migration:pending": "pnpm exec mikro-orm migration:pending",
+    "seed": "pnpm exec mikro-orm seeder:run",
+    "seed:reset": "pnpm exec mikro-orm schema:refresh --run"
   },
   "dependencies": {
     "@mikro-orm/core": "7.0.9",

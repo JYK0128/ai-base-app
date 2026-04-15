@@ -1,24 +1,19 @@
+export { createManagerAccountRepository,
+  ManagerAccountRepository } from '@/domains/platform/platform.account.repository';
 import type { EntityManager } from '@mikro-orm/core';
 
 import { BaseRepository } from '@/domains/core/base.repository';
-import { PlatformAccount, PlatformUser } from '@/domains/platform/platform.entity';
+import { Manager } from '@/domains/platform/platform.entity';
 
-export class PlatformAccountRepository extends BaseRepository<PlatformAccount> {
+export class ManagerRepository extends BaseRepository<Manager> {
   constructor(em: EntityManager) {
-    super(em, PlatformAccount);
+    super(em, Manager);
   }
 }
 
-export class PlatformUserRepository extends BaseRepository<PlatformUser> {
-  constructor(em: EntityManager) {
-    super(em, PlatformUser);
-  }
-}
-
-export const createPlatformAccountRepository = (
+export const createManagerRepository = (
   em: EntityManager,
-): PlatformAccountRepository => new PlatformAccountRepository(em);
+): ManagerRepository => new ManagerRepository(em);
 
-export const createPlatformUserRepository = (
-  em: EntityManager,
-): PlatformUserRepository => new PlatformUserRepository(em);
+export { createManagerInviteRepository,
+  ManagerInviteRepository } from '@/domains/platform/platform.invite.repository';

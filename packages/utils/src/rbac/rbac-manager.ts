@@ -97,24 +97,24 @@ export class RbacService {
   }
 
   /** 사용자에게 역할을 할당하고 해당 사용자의 캐시를 삭제합니다. */
-  async assignRoleToUser(params: { userId: string, roleId: string, tenantId?: string, actorId?: string }): Promise<void> {
+  async assignRoleToUser(params: { userId: string, roleId: string, workspaceId?: string, actorId?: string }): Promise<void> {
     await this.store.assignRoleToUser(params);
-    this.cache.userPermissions.delete(KeyHelper.join(params.userId, params.tenantId));
+    this.cache.userPermissions.delete(KeyHelper.join(params.userId, params.workspaceId));
   }
 
   /** 사용자로부터 역할을 철회하고 해당 사용자의 캐시를 삭제합니다. */
-  async revokeRoleFromUser(params: { userId: string, roleId: string, tenantId?: string, actorId?: string }): Promise<void> {
+  async revokeRoleFromUser(params: { userId: string, roleId: string, workspaceId?: string, actorId?: string }): Promise<void> {
     await this.store.revokeRoleFromUser(params);
-    this.cache.userPermissions.delete(KeyHelper.join(params.userId, params.tenantId));
+    this.cache.userPermissions.delete(KeyHelper.join(params.userId, params.workspaceId));
   }
 
   /**
    * 사용자가 특정 권한을 가지고 있는지 확인합니다 (캐시 지원).
-   * @param params 사용자 ID, 확인할 권한 코드, 테넌트 ID
+   * @param params 사용자 ID, 확인할 권한 코드, 워크스페이스 ID
    * @returns 권한 보유 여부
    */
-  async hasPermission(params: { userId: string, permissionCode: string, tenantId?: string }): Promise<boolean> {
-    const userPermissionKey = KeyHelper.join(params.userId, params.tenantId);
+  async hasPermission(params: { userId: string, permissionCode: string, workspaceId?: string }): Promise<boolean> {
+    const userPermissionKey = KeyHelper.join(params.userId, params.workspaceId);
     const cached = this.cache.userPermissions.get(userPermissionKey);
 
     if (cached) {
@@ -124,7 +124,7 @@ export class RbacService {
     // 캐시 미스 시 DB에서 로드하여 캐싱 (Lazy Loading)
     const permissionCodes = await this.store.getPermissionCodesByUser({
       userId: params.userId,
-      tenantId: params.tenantId,
+      workspaceId: params.workspaceId,
     });
     this.cache.userPermissions.set(userPermissionKey, new Set(permissionCodes));
 
