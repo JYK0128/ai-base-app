@@ -11,5 +11,12 @@ spec:
       owner: postgres
       secret:
         name: postgres-secret
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
   storage:
     size: 5Gi

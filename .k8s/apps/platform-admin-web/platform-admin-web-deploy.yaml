@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: platform-admin-web-deploy
+  namespace: dev-web
+  labels:
+    app.kubernetes.io/name: platform-admin-web
+    app.kubernetes.io/part-of: ai-base-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: platform-admin-web
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: platform-admin-web
+    spec:
+      containers:
+      - name: platform-admin-web
+        image: platform-admin-web:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 80
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 200m
+            memory: 256Mi
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 80
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 80

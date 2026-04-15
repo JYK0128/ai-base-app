@@ -29,6 +29,13 @@ spec:
         ports:
         - containerPort: 3000
         - containerPort: 3001
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 300m
+            memory: 256Mi
         readinessProbe:
           httpGet:
             path: /health/ready
