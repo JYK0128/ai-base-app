@@ -23,8 +23,8 @@ export class GatewayService {
     return 'Hello from Gateway API!';
   }
 
-  async login(data: { userId: string, clientIp: string }) {
-    this.logger.log(`Forwarding login for ${data.userId} to Auth Service`);
+  async login(data: { email: string, password: string, clientIp: string }) {
+    this.logger.log(`Forwarding login for ${data.email} to Auth Service`);
     const payload = {
       ...data,
       traceId: this.request.traceId,

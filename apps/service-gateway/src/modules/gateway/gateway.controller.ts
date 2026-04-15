@@ -13,10 +13,11 @@ export class GatewayController {
   }
 
   @Post('login')
-  async login(@Body() data: { userId: string }, @Req() req: Request) {
+  async login(@Body() data: { email: string, password: string }, @Req() req: Request) {
     const clientIp = req.ip || req.socket.remoteAddress || 'unknown';
     return this.gatewayService.login({
-      userId: data.userId,
+      email: data.email,
+      password: data.password,
       clientIp,
     });
   }

@@ -1,4 +1,4 @@
-import { Controller } from '@nestjs/common';
+import { Controller, Logger } from '@nestjs/common';
 import { CommandBus, EventBus, QueryBus } from '@nestjs/cqrs';
 import { EventPattern, MessagePattern, Payload } from '@nestjs/microservices';
 
@@ -8,6 +8,8 @@ import { GetUserInfoQuery } from './queries/get-user-info.handler';
 
 @Controller()
 export class AuthController {
+  private readonly logger = new Logger(AuthController.name);
+
   constructor(
     private readonly commandBus: CommandBus,
     private readonly queryBus: QueryBus,
@@ -15,9 +17,9 @@ export class AuthController {
   ) {}
 
   @MessagePattern('auth.login')
-  async handleLogin(@Payload() data: { userId: string, clientIp: string }) {
+  async handleLogin(@Payload() data: { email: string, password: string, clientIp: string }) {
     return this.commandBus.execute(
-      new LoginCommand(data.userId, data.clientIp),
+      new LoginCommand(data.email, data.password, data.clientIp),
     );
   }
 
@@ -28,7 +30,7 @@ export class AuthController {
 
   @EventPattern('auth_event')
   handleAuthEvent(@Payload() data: Record<string, unknown>) {
-    console.log('Received external auth event via RMQ. Broadcasting internally...');
+    this.logger.log('Received external auth event via RMQ. Broadcasting internally...');
     this.eventBus.publish(new AuthNotifiedEvent(data));
   }
 }

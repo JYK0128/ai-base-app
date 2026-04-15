@@ -3,7 +3,8 @@ import { CommandHandler, EventBus, ICommandHandler } from '@nestjs/cqrs';
 
 export class LoginCommand {
   constructor(
-    public readonly userId: string,
+    public readonly email: string,
+    public readonly password: string,
     public readonly clientIp: string,
   ) {}
 }
@@ -15,12 +16,12 @@ export class LoginHandler implements ICommandHandler<LoginCommand> {
   constructor(private readonly eventBus: EventBus) {}
 
   async execute(command: LoginCommand) {
-    const { userId } = command;
-    this.logger.log(`Executing LoginCommand for user: ${userId}`);
+    const { email, password, clientIp } = command;
+    this.logger.log(`Executing LoginCommand for user: ${email}`);
 
     // 비즈니스 로직 (예: 마지막 로그인 시간 업데이트 등)
     // ...
 
-    return { success: true, userId };
+    return { success: true, email };
   }
 }
