@@ -1,4 +1,4 @@
 import { CoreRepository } from '../core/core.repository';
-import type { Payment } from './billing.payment.entity';
+import type { BillingPayment } from './billing.payment.entity';
 
-export class PaymentRepository extends CoreRepository<Payment> {}
+export class BillingPaymentRepository extends CoreRepository<BillingPayment> {}

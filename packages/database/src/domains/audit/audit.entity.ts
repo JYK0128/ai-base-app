@@ -3,7 +3,7 @@ import { Entity, Enum, Index, ManyToOne, Property } from '@mikro-orm/decorators/
 
 import { CoreEntity } from '../core/core.entity';
 import type { Organization } from '../organization/organization.entity';
-import { AuditLogRepository } from './audit.repository';
+import { AuditRepository } from './audit.repository';
 
 export enum AuditEventType {
   MANAGER_ROLE_ASSIGNED = 'MANAGER_ROLE_ASSIGNED',
@@ -13,8 +13,8 @@ export enum AuditEventType {
   USER_APPLICATION_WITHDRAWN = 'USER_APPLICATION_WITHDRAWN',
 }
 
-@Entity({ schema: 'audit', repository: () => AuditLogRepository })
-export class AuditLog extends CoreEntity<AuditLog> {
+@Entity({ schema: 'audit', repository: () => AuditRepository })
+export class Audit extends CoreEntity<Audit> {
   @Index()
   @Enum(() => AuditEventType)
   eventType!: AuditEventType;

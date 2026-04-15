@@ -4,7 +4,7 @@ import { Entity, Index, ManyToOne, OneToMany, Property, Unique } from '@mikro-or
 
 import { CoreEntity } from '../core/core.entity';
 import type { Application } from './application.entity';
-import { UserApplicationMembership } from './application.membership.entity';
+import { ApplicationMembership } from './application.membership.entity';
 import { ApplicationReleaseRepository } from './application.release.repository';
 
 @Entity({ schema: 'application', repository: () => ApplicationReleaseRepository })
@@ -23,6 +23,6 @@ export class ApplicationRelease extends CoreEntity<ApplicationRelease> {
   @Property({ default: false })
   isStable: boolean & Opt = false;
 
-  @OneToMany(() => UserApplicationMembership, (membership) => membership.release)
-  memberships = new Collection<UserApplicationMembership>(this);
+  @OneToMany(() => ApplicationMembership, (membership) => membership.release)
+  memberships = new Collection<ApplicationMembership>(this);
 }

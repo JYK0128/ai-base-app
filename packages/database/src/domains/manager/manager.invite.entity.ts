@@ -3,8 +3,8 @@ import { Entity, Enum, Index, ManyToOne, Property, Unique } from '@mikro-orm/dec
 
 import { CoreEntity } from '../core/core.entity';
 import type { Organization } from '../organization/organization.entity';
-import type { Manager } from './platform.entity';
-import { ManagerInviteRepository } from './platform.invite.repository';
+import type { Manager } from './manager.entity';
+import { ManagerInviteRepository } from './manager.invite.repository';
 
 export enum ManagerInviteStatus {
   PENDING = 'PENDING',

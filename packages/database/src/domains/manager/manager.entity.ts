@@ -4,9 +4,9 @@ import { Entity, Enum, Index, ManyToOne, OneToMany, Unique } from '@mikro-orm/de
 
 import { CoreEntity } from '../core/core.entity';
 import type { Organization } from '../organization/organization.entity';
-import { ManagerAccount } from './platform.account.entity';
-import { ManagerInvite } from './platform.invite.entity';
-import { ManagerRepository } from './platform.repository';
+import { ManagerAccount } from './manager.account.entity';
+import { ManagerInvite } from './manager.invite.entity';
+import { ManagerRepository } from './manager.repository';
 
 export enum PlatformRole {
   PLATFORM_ADMIN = 'PLATFORM_ADMIN',

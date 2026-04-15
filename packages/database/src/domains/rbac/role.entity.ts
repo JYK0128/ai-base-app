@@ -2,16 +2,16 @@ import { Collection } from '@mikro-orm/core';
 import { Entity, Enum, Index, OneToMany, Property } from '@mikro-orm/decorators/legacy';
 
 import { CoreEntity } from '../core/core.entity';
-import { ManagerRole } from './rbac.manager-role.entity';
-import { RbacRoleRepository } from './rbac.role.repository';
-import { RolePermission } from './rbac.role-permission.entity';
+import { ManagerRole } from './manager-role.entity';
+import { RoleRepository } from './role.repository';
+import { RolePermission } from './role-permission.entity';
 
 export enum RbacRoleScope {
   PLATFORM = 'PLATFORM',
   ORGANIZATION = 'ORGANIZATION',
 }
 
-@Entity({ schema: 'platform', repository: () => RbacRoleRepository })
+@Entity({ schema: 'platform', repository: () => RoleRepository })
 export class Role extends CoreEntity<Role> {
   @Property({ unique: true })
   code!: string;

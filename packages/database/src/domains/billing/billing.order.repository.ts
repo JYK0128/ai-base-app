@@ -1,4 +1,4 @@
 import { CoreRepository } from '../core/core.repository';
-import type { Order } from './billing.order.entity';
+import type { BillingOrder } from './billing.order.entity';
 
-export class OrderRepository extends CoreRepository<Order> {}
+export class BillingOrderRepository extends CoreRepository<BillingOrder> {}

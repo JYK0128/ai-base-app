@@ -5,9 +5,9 @@ import { Entity, Enum, Index, ManyToOne, OneToMany, Property } from '@mikro-orm/
 import type { ApplicationSubscription } from '../application/application.subscription.entity';
 import { CoreEntity } from '../core/core.entity';
 import type { Organization } from '../organization/organization.entity';
-import type { OrganizationBillingProfile } from './billing.entity';
-import { OrderRepository } from './billing.order.repository';
-import { Payment } from './billing.payment.entity';
+import { BillingOrderRepository } from './billing.order.repository';
+import { BillingPayment } from './billing.payment.entity';
+import type { BillingProfile } from './billing.profile.entity';
 
 export enum OrderStatus {
   PENDING = 'PENDING',
@@ -16,8 +16,8 @@ export enum OrderStatus {
   FAILED = 'FAILED',
 }
 
-@Entity({ schema: 'billing', repository: () => OrderRepository })
-export class Order extends CoreEntity<Order> {
+@Entity({ schema: 'billing', repository: () => BillingOrderRepository })
+export class BillingOrder extends CoreEntity<BillingOrder> {
   @Index()
   @ManyToOne()
   organization!: Rel<Organization>;
@@ -28,7 +28,7 @@ export class Order extends CoreEntity<Order> {
 
   @Index()
   @ManyToOne()
-  billingProfile!: Rel<OrganizationBillingProfile>;
+  billingProfile!: Rel<BillingProfile>;
 
   @Property()
   billingName!: string;
@@ -57,6 +57,6 @@ export class Order extends CoreEntity<Order> {
   @Enum(() => OrderStatus)
   status: OrderStatus & Opt = OrderStatus.PENDING;
 
-  @OneToMany(() => Payment, (payment) => payment.order)
-  payments = new Collection<Payment>(this);
+  @OneToMany(() => BillingPayment, (payment) => payment.order)
+  payments = new Collection<BillingPayment>(this);
 }

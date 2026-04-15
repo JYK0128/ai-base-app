@@ -2,8 +2,8 @@ import { Collection } from '@mikro-orm/core';
 import { Entity, OneToMany, Property } from '@mikro-orm/decorators/legacy';
 
 import { CoreEntity } from '../core/core.entity';
-import { ManagerAccountRepository } from './platform.account.repository';
-import { Manager } from './platform.entity';
+import { ManagerAccountRepository } from './manager.account.repository';
+import { Manager } from './manager.entity';
 
 @Entity({ schema: 'platform', repository: () => ManagerAccountRepository })
 export class ManagerAccount extends CoreEntity<ManagerAccount> {

@@ -4,12 +4,12 @@ import { Entity, Index, ManyToOne, OneToMany, Property, Unique } from '@mikro-or
 
 import { CoreEntity } from '../core/core.entity';
 import type { Organization } from '../organization/organization.entity';
-import { Order } from './billing.order.entity';
-import { OrganizationBillingProfileRepository } from './billing.repository';
+import { BillingOrder } from './billing.order.entity';
+import { BillingProfileRepository } from './billing.profile.repository';
 
-@Entity({ schema: 'billing', repository: () => OrganizationBillingProfileRepository })
+@Entity({ schema: 'billing', repository: () => BillingProfileRepository })
 @Unique({ properties: ['organization'] })
-export class OrganizationBillingProfile extends CoreEntity<OrganizationBillingProfile> {
+export class BillingProfile extends CoreEntity<BillingProfile> {
   @Index()
   @ManyToOne()
   organization!: Rel<Organization>;
@@ -29,6 +29,6 @@ export class OrganizationBillingProfile extends CoreEntity<OrganizationBillingPr
   @Property({ nullable: true })
   billingEmail?: string;
 
-  @OneToMany(() => Order, (order) => order.billingProfile)
-  orders = new Collection<Order>(this);
+  @OneToMany(() => BillingOrder, (order) => order.billingProfile)
+  orders = new Collection<BillingOrder>(this);
 }

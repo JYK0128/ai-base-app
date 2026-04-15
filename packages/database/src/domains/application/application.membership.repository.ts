@@ -1,4 +1,4 @@
 import { CoreRepository } from '../core/core.repository';
-import type { UserApplicationMembership } from './application.membership.entity';
+import type { ApplicationMembership } from './application.membership.entity';
 
-export class UserApplicationMembershipRepository extends CoreRepository<UserApplicationMembership> {}
+export class ApplicationMembershipRepository extends CoreRepository<ApplicationMembership> {}

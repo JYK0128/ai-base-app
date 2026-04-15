@@ -5,7 +5,7 @@ import { Entity, Enum, Index, ManyToOne, OneToMany, Property, Unique } from '@mi
 import { CoreEntity } from '../core/core.entity';
 import type { Organization } from '../organization/organization.entity';
 import type { Application } from './application.entity';
-import { UserApplicationMembership } from './application.membership.entity';
+import { ApplicationMembership } from './application.membership.entity';
 import type { ApplicationPlan } from './application.plan.entity';
 import { ApplicationSubscriptionRepository } from './application.subscription.repository';
 
@@ -40,6 +40,6 @@ export class ApplicationSubscription extends CoreEntity<ApplicationSubscription>
   @Property({ nullable: true })
   endedAt?: Date;
 
-  @OneToMany(() => UserApplicationMembership, (membership) => membership.subscription)
-  memberships = new Collection<UserApplicationMembership>(this);
+  @OneToMany(() => ApplicationMembership, (membership) => membership.subscription)
+  memberships = new Collection<ApplicationMembership>(this);
 }
