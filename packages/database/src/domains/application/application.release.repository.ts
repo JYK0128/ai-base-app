@@ -1,14 +1,4 @@
-import type { EntityManager } from '@mikro-orm/core';
+import { CoreRepository } from '../core/core.repository';
+import type { ApplicationRelease } from './application.release.entity';
 
-import { ApplicationRelease } from '@/domains/application/application.release.entity';
-import { BaseRepository } from '@/domains/core/base.repository';
-
-export class ApplicationReleaseRepository extends BaseRepository<ApplicationRelease> {
-  constructor(em: EntityManager) {
-    super(em, ApplicationRelease);
-  }
-}
-
-export const createApplicationReleaseRepository = (
-  em: EntityManager,
-): ApplicationReleaseRepository => new ApplicationReleaseRepository(em);
+export class ApplicationReleaseRepository extends CoreRepository<ApplicationRelease> {}

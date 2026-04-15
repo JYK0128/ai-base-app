@@ -1,11 +1,12 @@
 import { Collection } from '@mikro-orm/core';
 import { Entity, OneToMany, Property } from '@mikro-orm/decorators/legacy';
 
-import { BaseEntity } from '@/domains/core/base.entity';
-import { RolePermission } from '@/domains/rbac/rbac.role-permission.entity';
+import { CoreEntity } from '../core/core.entity';
+import { RbacPermissionRepository } from './rbac.permission.repository';
+import { RolePermission } from './rbac.role-permission.entity';
 
-@Entity({ schema: 'platform' })
-export class Permission extends BaseEntity {
+@Entity({ schema: 'platform', repository: () => RbacPermissionRepository })
+export class Permission extends CoreEntity<Permission> {
   @Property({ unique: true })
   code!: string;
 

@@ -1,14 +1,5 @@
-import type { EntityManager } from '@mikro-orm/core';
+import { CoreRepository } from '../core/core.repository';
+import type { Organization } from './organization.entity';
 
-import { BaseRepository } from '@/domains/core/base.repository';
-import { Organization } from '@/domains/organization/organization.entity';
-
-export class OrganizationRepository extends BaseRepository<Organization> {
-  constructor(em: EntityManager) {
-    super(em, Organization);
-  }
+export class OrganizationRepository extends CoreRepository<Organization> {
 }
-
-export const createOrganizationRepository = (
-  em: EntityManager,
-): OrganizationRepository => new OrganizationRepository(em);

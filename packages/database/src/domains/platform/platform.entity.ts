@@ -2,10 +2,11 @@ import type { Rel } from '@mikro-orm/core';
 import { Collection } from '@mikro-orm/core';
 import { Entity, Enum, Index, ManyToOne, OneToMany, Unique } from '@mikro-orm/decorators/legacy';
 
-import { BaseEntity } from '@/domains/core/base.entity';
-import type { Organization } from '@/domains/organization/organization.entity';
-import { ManagerAccount } from '@/domains/platform/platform.account.entity';
-import { ManagerInvite } from '@/domains/platform/platform.invite.entity';
+import { CoreEntity } from '../core/core.entity';
+import type { Organization } from '../organization/organization.entity';
+import { ManagerAccount } from './platform.account.entity';
+import { ManagerInvite } from './platform.invite.entity';
+import { ManagerRepository } from './platform.repository';
 
 export enum PlatformRole {
   PLATFORM_ADMIN = 'PLATFORM_ADMIN',
@@ -14,9 +15,9 @@ export enum PlatformRole {
   ORGANIZATION_STAFF = 'ORGANIZATION_STAFF',
 }
 
-@Entity({ schema: 'platform' })
+@Entity({ schema: 'platform', repository: () => ManagerRepository })
 @Unique({ properties: ['managerAccount', 'organization', 'role'] })
-export class Manager extends BaseEntity {
+export class Manager extends CoreEntity<Manager> {
   @Index()
   @ManyToOne()
   managerAccount!: Rel<ManagerAccount>;

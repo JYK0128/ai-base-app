@@ -1,18 +1,13 @@
 import type { Opt, Rel } from '@mikro-orm/core';
 import { Collection } from '@mikro-orm/core';
-import { Entity,
-         Enum,
-         Index,
-         ManyToOne,
-         OneToMany,
-         Property,
-         Unique } from '@mikro-orm/decorators/legacy';
+import { Entity, Enum, Index, ManyToOne, OneToMany, Property, Unique } from '@mikro-orm/decorators/legacy';
 
-import { ApplicationPlan } from '@/domains/application/application.plan.entity';
-import { ApplicationRelease } from '@/domains/application/application.release.entity';
-import { ApplicationSubscription } from '@/domains/application/application.subscription.entity';
-import { BaseEntity } from '@/domains/core/base.entity';
-import type { Organization } from '@/domains/organization/organization.entity';
+import { CoreEntity } from '../core/core.entity';
+import type { Organization } from '../organization/organization.entity';
+import { ApplicationPlan } from './application.plan.entity';
+import { ApplicationRelease } from './application.release.entity';
+import { ApplicationRepository } from './application.repository';
+import { ApplicationSubscription } from './application.subscription.entity';
 
 export enum ApplicationStatus {
   DRAFT = 'DRAFT',
@@ -20,9 +15,9 @@ export enum ApplicationStatus {
   SUSPENDED = 'SUSPENDED',
 }
 
-@Entity({ schema: 'application' })
+@Entity({ schema: 'application', repository: () => ApplicationRepository })
 @Unique({ properties: ['providerOrganization', 'code'] })
-export class Application extends BaseEntity {
+export class Application extends CoreEntity<Application> {
   @Index()
   @ManyToOne()
   providerOrganization!: Rel<Organization>;

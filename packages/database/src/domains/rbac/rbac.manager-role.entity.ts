@@ -1,13 +1,14 @@
 import type { Rel } from '@mikro-orm/core';
 import { Entity, Index, ManyToOne, Property, Unique } from '@mikro-orm/decorators/legacy';
 
-import { BaseEntity } from '@/domains/core/base.entity';
-import type { Organization } from '@/domains/organization/organization.entity';
-import type { Role } from '@/domains/rbac/rbac.entity';
+import { CoreEntity } from '../core/core.entity';
+import type { Organization } from '../organization/organization.entity';
+import type { Role } from './rbac.entity';
+import { ManagerRoleRepository } from './rbac.manager-role.repository';
 
-@Entity({ schema: 'platform' })
+@Entity({ schema: 'platform', repository: () => ManagerRoleRepository })
 @Unique({ properties: ['managerId', 'role', 'organization'] })
-export class ManagerRole extends BaseEntity {
+export class ManagerRole extends CoreEntity<ManagerRole> {
   @Index()
   @Property()
   managerId!: string;

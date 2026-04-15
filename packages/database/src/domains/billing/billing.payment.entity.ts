@@ -1,8 +1,9 @@
 import type { Opt, Rel } from '@mikro-orm/core';
 import { Entity, Enum, Index, ManyToOne, Property } from '@mikro-orm/decorators/legacy';
 
-import type { Order } from '@/domains/billing/billing.order.entity';
-import { BaseEntity } from '@/domains/core/base.entity';
+import { CoreEntity } from '../core/core.entity';
+import type { Order } from './billing.order.entity';
+import { PaymentRepository } from './billing.payment.repository';
 
 export enum PaymentStatus {
   PENDING = 'PENDING',
@@ -11,8 +12,8 @@ export enum PaymentStatus {
   REFUNDED = 'REFUNDED',
 }
 
-@Entity({ schema: 'billing' })
-export class Payment extends BaseEntity {
+@Entity({ schema: 'billing', repository: () => PaymentRepository })
+export class Payment extends CoreEntity<Payment> {
   @Index()
   @ManyToOne()
   order!: Rel<Order>;

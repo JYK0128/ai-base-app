@@ -1,14 +1,4 @@
-import type { EntityManager } from '@mikro-orm/core';
+import { CoreRepository } from '../core/core.repository';
+import type { UserApplicationMembership } from './application.membership.entity';
 
-import { UserApplicationMembership } from '@/domains/application/application.membership.entity';
-import { BaseRepository } from '@/domains/core/base.repository';
-
-export class UserApplicationMembershipRepository extends BaseRepository<UserApplicationMembership> {
-  constructor(em: EntityManager) {
-    super(em, UserApplicationMembership);
-  }
-}
-
-export const createUserApplicationMembershipRepository = (
-  em: EntityManager,
-): UserApplicationMembershipRepository => new UserApplicationMembershipRepository(em);
+export class UserApplicationMembershipRepository extends CoreRepository<UserApplicationMembership> {}

@@ -1,13 +1,14 @@
 import type { Rel } from '@mikro-orm/core';
 import { Entity, ManyToOne, Unique } from '@mikro-orm/decorators/legacy';
 
-import { BaseEntity } from '@/domains/core/base.entity';
-import type { Role } from '@/domains/rbac/rbac.entity';
-import type { Permission } from '@/domains/rbac/rbac.permission.entity';
+import { CoreEntity } from '../core/core.entity';
+import type { Role } from './rbac.entity';
+import type { Permission } from './rbac.permission.entity';
+import { RolePermissionRepository } from './rbac.role-permission.repository';
 
-@Entity({ schema: 'platform' })
+@Entity({ schema: 'platform', repository: () => RolePermissionRepository })
 @Unique({ properties: ['role', 'permission'] })
-export class RolePermission extends BaseEntity {
+export class RolePermission extends CoreEntity<RolePermission> {
   @ManyToOne()
   role!: Rel<Role>;
 

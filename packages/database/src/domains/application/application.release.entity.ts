@@ -2,13 +2,14 @@ import type { Opt, Rel } from '@mikro-orm/core';
 import { Collection } from '@mikro-orm/core';
 import { Entity, Index, ManyToOne, OneToMany, Property, Unique } from '@mikro-orm/decorators/legacy';
 
-import type { Application } from '@/domains/application/application.entity';
-import { UserApplicationMembership } from '@/domains/application/application.membership.entity';
-import { BaseEntity } from '@/domains/core/base.entity';
+import { CoreEntity } from '../core/core.entity';
+import type { Application } from './application.entity';
+import { UserApplicationMembership } from './application.membership.entity';
+import { ApplicationReleaseRepository } from './application.release.repository';
 
-@Entity({ schema: 'application' })
+@Entity({ schema: 'application', repository: () => ApplicationReleaseRepository })
 @Unique({ properties: ['application', 'version'] })
-export class ApplicationRelease extends BaseEntity {
+export class ApplicationRelease extends CoreEntity<ApplicationRelease> {
   @Index()
   @ManyToOne()
   application!: Rel<Application>;

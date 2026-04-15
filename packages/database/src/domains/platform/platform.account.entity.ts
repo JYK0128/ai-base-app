@@ -1,11 +1,12 @@
 import { Collection } from '@mikro-orm/core';
 import { Entity, OneToMany, Property } from '@mikro-orm/decorators/legacy';
 
-import { BaseEntity } from '@/domains/core/base.entity';
-import { Manager } from '@/domains/platform/platform.entity';
+import { CoreEntity } from '../core/core.entity';
+import { ManagerAccountRepository } from './platform.account.repository';
+import { Manager } from './platform.entity';
 
-@Entity({ schema: 'platform' })
-export class ManagerAccount extends BaseEntity {
+@Entity({ schema: 'platform', repository: () => ManagerAccountRepository })
+export class ManagerAccount extends CoreEntity<ManagerAccount> {
   @Property({ unique: true })
   email!: string;
 

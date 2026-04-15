@@ -2,14 +2,15 @@ import type { Opt, Rel } from '@mikro-orm/core';
 import { Collection } from '@mikro-orm/core';
 import { Entity, Index, ManyToOne, OneToMany, Property, Unique } from '@mikro-orm/decorators/legacy';
 
-import { BaseEntity } from '@/domains/core/base.entity';
-import { Organization } from '@/domains/organization/organization.entity';
-import { User } from '@/domains/site/site.user.entity';
-import { UserAccount } from '@/domains/site/site.user-account.entity';
+import { CoreEntity } from '../core/core.entity';
+import { Organization } from '../organization/organization.entity';
+import { SiteRepository } from './site.repository';
+import { User } from './site.user.entity';
+import { UserAccount } from './site.user-account.entity';
 
-@Entity({ schema: 'site' })
+@Entity({ schema: 'site', repository: () => SiteRepository })
 @Unique({ properties: ['organization', 'code'] })
-export class Site extends BaseEntity {
+export class Site extends CoreEntity<Site> {
   @Index()
   @ManyToOne()
   organization!: Rel<Organization>;

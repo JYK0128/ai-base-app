@@ -1,7 +1,15 @@
-import { type EntityData, type FromEntityType, type Opt, RequestContext, type RequiredEntityData } from '@mikro-orm/core';
+import { BaseEntity, type EntityData, EntityRepositoryType, type FromEntityType, type Opt, OptionalProps, RequestContext, type RequiredEntityData } from '@mikro-orm/core';
 import { PrimaryKey, Property } from '@mikro-orm/decorators/legacy';
 
-export abstract class BaseEntity {
+import type { CoreRepository } from './core.repository';
+
+export abstract class CoreEntity<
+  Entity extends BaseEntity = BaseEntity,
+  Optional extends keyof Entity = never,
+> extends BaseEntity {
+  [EntityRepositoryType]?: CoreRepository<Entity>;
+  [OptionalProps]?: 'createdAt' | 'updatedAt' | Optional;
+
   @PrimaryKey()
   id!: string;
 

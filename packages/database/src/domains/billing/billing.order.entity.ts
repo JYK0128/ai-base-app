@@ -2,11 +2,12 @@ import type { Opt, Rel } from '@mikro-orm/core';
 import { Collection } from '@mikro-orm/core';
 import { Entity, Enum, Index, ManyToOne, OneToMany, Property } from '@mikro-orm/decorators/legacy';
 
-import type { ApplicationSubscription } from '@/domains/application/application.subscription.entity';
-import type { OrganizationBillingProfile } from '@/domains/billing/billing.entity';
-import { Payment } from '@/domains/billing/billing.payment.entity';
-import { BaseEntity } from '@/domains/core/base.entity';
-import type { Organization } from '@/domains/organization/organization.entity';
+import type { ApplicationSubscription } from '../application/application.subscription.entity';
+import { CoreEntity } from '../core/core.entity';
+import type { Organization } from '../organization/organization.entity';
+import type { OrganizationBillingProfile } from './billing.entity';
+import { OrderRepository } from './billing.order.repository';
+import { Payment } from './billing.payment.entity';
 
 export enum OrderStatus {
   PENDING = 'PENDING',
@@ -15,8 +16,8 @@ export enum OrderStatus {
   FAILED = 'FAILED',
 }
 
-@Entity({ schema: 'billing' })
-export class Order extends BaseEntity {
+@Entity({ schema: 'billing', repository: () => OrderRepository })
+export class Order extends CoreEntity<Order> {
   @Index()
   @ManyToOne()
   organization!: Rel<Organization>;

@@ -1,14 +1,5 @@
-import type { EntityManager } from '@mikro-orm/core';
+import { CoreRepository } from '../core/core.repository';
+import type { ManagerInvite } from './platform.invite.entity';
 
-import { BaseRepository } from '@/domains/core/base.repository';
-import { ManagerInvite } from '@/domains/platform/platform.invite.entity';
-
-export class ManagerInviteRepository extends BaseRepository<ManagerInvite> {
-  constructor(em: EntityManager) {
-    super(em, ManagerInvite);
-  }
+export class ManagerInviteRepository extends CoreRepository<ManagerInvite> {
 }
-
-export const createManagerInviteRepository = (
-  em: EntityManager,
-): ManagerInviteRepository => new ManagerInviteRepository(em);

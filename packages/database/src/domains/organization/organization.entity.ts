@@ -2,10 +2,11 @@ import type { Opt } from '@mikro-orm/core';
 import { Collection } from '@mikro-orm/core';
 import { Entity, Enum, OneToMany, Property } from '@mikro-orm/decorators/legacy';
 
-import { BaseEntity } from '@/domains/core/base.entity';
-import type { Manager } from '@/domains/platform/platform.entity';
-import type { ManagerInvite } from '@/domains/platform/platform.invite.entity';
-import type { Site } from '@/domains/site/site.entity';
+import { CoreEntity } from '../core/core.entity';
+import type { Manager } from '../platform/platform.entity';
+import { ManagerInvite } from '../platform/platform.invite.entity';
+import { Site } from '../site/site.entity';
+import { OrganizationRepository } from './organization.repository';
 
 export enum OrganizationStatus {
   PENDING = 'PENDING',
@@ -13,8 +14,8 @@ export enum OrganizationStatus {
   SUSPENDED = 'SUSPENDED',
 }
 
-@Entity({ schema: 'platform' })
-export class Organization extends BaseEntity {
+@Entity({ schema: 'platform', repository: () => OrganizationRepository })
+export class Organization extends CoreEntity<Organization> {
   @Property({ unique: true })
   code!: string;
 

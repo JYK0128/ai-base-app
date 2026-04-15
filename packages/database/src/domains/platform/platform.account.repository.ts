@@ -1,14 +1,5 @@
-import type { EntityManager } from '@mikro-orm/core';
+import { CoreRepository } from '../core/core.repository';
+import type { ManagerAccount } from './platform.account.entity';
 
-import { BaseRepository } from '@/domains/core/base.repository';
-import { ManagerAccount } from '@/domains/platform/platform.account.entity';
-
-export class ManagerAccountRepository extends BaseRepository<ManagerAccount> {
-  constructor(em: EntityManager) {
-    super(em, ManagerAccount);
-  }
+export class ManagerAccountRepository extends CoreRepository<ManagerAccount> {
 }
-
-export const createManagerAccountRepository = (
-  em: EntityManager,
-): ManagerAccountRepository => new ManagerAccountRepository(em);

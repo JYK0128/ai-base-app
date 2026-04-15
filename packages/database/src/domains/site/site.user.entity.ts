@@ -1,13 +1,14 @@
 import type { Rel } from '@mikro-orm/core';
 import { Entity, Index, ManyToOne, Property, Unique } from '@mikro-orm/decorators/legacy';
 
-import { BaseEntity } from '@/domains/core/base.entity';
-import type { Site } from '@/domains/site/site.entity';
-import type { UserAccount } from '@/domains/site/site.user-account.entity';
+import { CoreEntity } from '../core/core.entity';
+import type { Site } from './site.entity';
+import { UserRepository } from './site.user.repository';
+import type { UserAccount } from './site.user-account.entity';
 
-@Entity({ schema: 'site' })
+@Entity({ schema: 'site', repository: () => UserRepository })
 @Unique({ properties: ['site', 'userAccount'] })
-export class User extends BaseEntity {
+export class User extends CoreEntity<User> {
   @Index()
   @ManyToOne()
   site!: Rel<Site>;

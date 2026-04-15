@@ -1,9 +1,10 @@
 import type { Rel } from '@mikro-orm/core';
 import { Entity, Enum, Index, ManyToOne, Property, Unique } from '@mikro-orm/decorators/legacy';
 
-import { BaseEntity } from '@/domains/core/base.entity';
-import type { Organization } from '@/domains/organization/organization.entity';
-import type { Manager } from '@/domains/platform/platform.entity';
+import { CoreEntity } from '../core/core.entity';
+import type { Organization } from '../organization/organization.entity';
+import type { Manager } from './platform.entity';
+import { ManagerInviteRepository } from './platform.invite.repository';
 
 export enum ManagerInviteStatus {
   PENDING = 'PENDING',
@@ -12,9 +13,9 @@ export enum ManagerInviteStatus {
   CANCELED = 'CANCELED',
 }
 
-@Entity({ schema: 'platform' })
+@Entity({ schema: 'platform', repository: () => ManagerInviteRepository })
 @Unique({ properties: ['token'] })
-export class ManagerInvite extends BaseEntity {
+export class ManagerInvite extends CoreEntity<ManagerInvite> {
   @Index()
   @ManyToOne()
   organization!: Rel<Organization>;

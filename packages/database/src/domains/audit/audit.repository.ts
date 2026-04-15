@@ -1,14 +1,4 @@
-import type { EntityManager } from '@mikro-orm/core';
+import { CoreRepository } from '../core/core.repository';
+import type { AuditLog } from './audit.entity';
 
-import { AuditLog } from '@/domains/audit/audit.entity';
-import { BaseRepository } from '@/domains/core/base.repository';
-
-export class AuditLogRepository extends BaseRepository<AuditLog> {
-  constructor(em: EntityManager) {
-    super(em, AuditLog);
-  }
-}
-
-export const createAuditLogRepository = (
-  em: EntityManager,
-): AuditLogRepository => new AuditLogRepository(em);
+export class AuditLogRepository extends CoreRepository<AuditLog> {}
