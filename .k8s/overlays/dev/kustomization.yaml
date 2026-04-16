@@ -42,11 +42,11 @@ patches:
         value: 1Gi
 
   - target:
-      kind: Kafka
-      name: kafka-cluster
+      kind: KafkaNodePool
+      name: dual-role
     patch: |-
       - op: replace
-        path: /spec/kafka/storage/volumes/0/size
+        path: /spec/storage/volumes/0/size
         value: 5Gi
 
   - target:

@@ -1,15 +1,39 @@
-apiVersion: kafka.strimzi.io/v1beta2
+apiVersion: kafka.strimzi.io/v1
+kind: KafkaNodePool
+metadata:
+  name: dual-role
+  namespace: dev-infra
+  labels:
+    app.kubernetes.io/name: kafka
+    app.kubernetes.io/part-of: ai-base-app
+    strimzi.io/cluster: kafka-cluster
+spec:
+  replicas: 1 # dev 단일 운영을 위한 축소
+  roles:
+    - broker
+    - controller
+  storage:
+    type: jbod
+    volumes:
+    - id: 0
+      type: persistent-claim
+      size: 20Gi
+      deleteClaim: false
+---
+apiVersion: kafka.strimzi.io/v1
 kind: Kafka
 metadata:
   name: kafka-cluster
   namespace: dev-infra
+  annotations:
+    strimzi.io/node-pools: enabled
+    strimzi.io/kraft: enabled
   labels:
     app.kubernetes.io/name: kafka
     app.kubernetes.io/part-of: ai-base-app
 spec:
   kafka:
     version: 3.6.0
-    replicas: 1 # dev 단일 브로커 구성
     listeners:
       - name: plain
         port: 9092
@@ -26,14 +50,6 @@ spec:
       default.replication.factor: 1
       min.insync.replicas: 1
       inter.broker.protocol.version: "3.6"
-    storage:
-      type: jbod
-      volumes:
-      - id: 0
-        type: persistent-claim
-        size: 20Gi
-        deleteClaim: false
-    # KRaft 모드 활성화 (고도화 도구)
     metadataVersion: "3.6-IV2"
   entityOperator:
     topicOperator: {}
