@@ -3,7 +3,7 @@ import { randomUUID } from 'node:crypto';
 import type { EntityManager } from '@mikro-orm/core';
 import { Seeder } from '@mikro-orm/seeder';
 
-import { Organization } from '@/domains/organization/organization.entity';
+import { Organization } from '@/domains/platform/organization/organization.entity';
 import { Site } from '@/domains/site/site.entity';
 
 const siteSeeds = [

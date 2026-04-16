@@ -3,7 +3,7 @@ import { randomUUID } from 'node:crypto';
 import type { EntityManager } from '@mikro-orm/core';
 import { Seeder } from '@mikro-orm/seeder';
 
-import { Message } from '@/domains/message/message.entity';
+import { Message } from '@/domains/platform/message/message.entity';
 
 const messageSeeds = [
   {

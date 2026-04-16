@@ -34,7 +34,7 @@
   "scripts": {
     "mikro-orm": "pnpm exec mikro-orm",
     "dev": "bunchee --watch",
-    "build": "bunchee --clean && pnpm run build:lib",
+    "build": "bunchee --clean",
     "build:lib": "tsc -p tsconfig.app.json",
     "test": "pnpm run test:example",
     "test:example": "vitest run src/test/example.test.ts",
@@ -46,7 +46,7 @@
     "migration:pending": "pnpm exec mikro-orm migration:pending",
     "seed": "pnpm exec mikro-orm seeder:run",
     "seed:reset": "pnpm exec mikro-orm schema:refresh --run",
-    "prebuild": "pnpm run build:lib && dotenvx run --env=development --convention=nextjs -- mikro-orm cache:generate --combined --config src/mikro-orm.config.ts"
+    "prebuild": "dotenvx run --env=development --convention=nextjs -- mikro-orm cache:generate --ts --combined --config src/mikro-orm.config.ts"
   },
   "dependencies": {
     "@mikro-orm/core": "7.0.10",

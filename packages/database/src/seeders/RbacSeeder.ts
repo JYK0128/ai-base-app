@@ -3,9 +3,9 @@ import { randomUUID } from 'node:crypto';
 import type { EntityManager } from '@mikro-orm/core';
 import { Seeder } from '@mikro-orm/seeder';
 
-import { RbacRoleScope, Role } from '@/domains/rbac/role.entity';
-import { Permission } from '@/domains/rbac/permission.entity';
-import { RolePermission } from '@/domains/rbac/role.permission.entity';
+import { Permission } from '@/domains/platform/rbac/permission.entity';
+import { RbacRoleScope, Role } from '@/domains/platform/rbac/role.entity';
+import { RolePermission } from '@/domains/platform/rbac/role.permission.entity';
 
 const roleSeeds = [
   {
