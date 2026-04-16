@@ -10,8 +10,8 @@ import { TsMorphMetadataProvider } from '@mikro-orm/reflection';
 import { SeedManager } from '@mikro-orm/seeder';
 import { SqlHighlighter } from '@mikro-orm/sql-highlighter';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const filename = fileURLToPath(import.meta.url);
+const dirname = path.dirname(filename);
 
 export default defineConfig({
   entities: ['./dist/domains'],
@@ -28,14 +28,14 @@ export default defineConfig({
   },
   extensions: [SeedManager, EntityGenerator, Migrator],
   migrations: {
-    path: path.resolve(__dirname, './migrations'),
-    pathTs: path.resolve(__dirname, './migrations'),
+    path: path.resolve(dirname, './migrations'),
+    pathTs: path.resolve(dirname, './migrations'),
     glob: '!(*.d).{js,ts}',
     safe: true,
   },
   seeder: {
-    path: path.resolve(__dirname, './seeders'),
-    pathTs: path.resolve(__dirname, './seeders'),
+    path: path.resolve(dirname, './seeders'),
+    pathTs: path.resolve(dirname, './seeders'),
     defaultSeeder: 'DatabaseSeeder',
     glob: '!(*.d).{js,ts}',
   },

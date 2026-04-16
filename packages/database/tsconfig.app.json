@@ -1,11 +1,13 @@
 {
   "extends": "@pkg/config/typescript/bundler",
   "compilerOptions": {
-    "baseUrl": "./",
-    "outDir": "dist",
+    "rootDir": "./src",
+    "outDir": "./dist",
+    "noEmit": false,
+    "noEmitOnError": false,
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": ["./src/*"]
     }
   },
-  "include": ["src"]
+  "include": ["./src"]
 }

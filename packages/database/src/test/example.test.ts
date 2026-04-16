@@ -1,6 +1,6 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
-import { MessageRepository } from '@/domains/message/message.repository';
+import { Message, MessageRepository } from '@/domains';
 import type { PostgresTestContext } from '@/test/context';
 import { createPostgresTestContext, destroyPostgresTestContext } from '@/test/context';
 
@@ -10,7 +10,7 @@ describe('example query test', () => {
 
   beforeAll(async () => {
     Object.assign(context, await createPostgresTestContext());
-    repository = new MessageRepository(context.orm!.em.fork());
+    repository = context.orm!.em.getRepository(Message);
   }, 120_000);
 
   afterAll(async () => {
@@ -33,7 +33,7 @@ describe('example query test', () => {
       },
     ]);
 
-    const records = await repository.findMany({ locale: 'ko' });
+    const records = await repository.find({ locale: 'ko' });
     expect(records).toEqual([
       {
         locale: 'ko',
