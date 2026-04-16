@@ -5,7 +5,6 @@ metadata:
   namespace: monitoring
   labels:
     app.kubernetes.io/name: mimir
-    app.kubernetes.io/part-of: ai-base-app
 spec:
   serviceName: "mimir"
   replicas: 1
@@ -18,13 +17,11 @@ spec:
         app.kubernetes.io/name: mimir
     spec:
       containers:
-      - name: mimir
-        image: grafana/mimir:2.17.9
+      - name: mimir-sts
+        image: grafana/mimir:2.10.4
         imagePullPolicy: IfNotPresent
-        workingDir: /tmp
         args:
         - "-config.file=/etc/mimir/mimir.yaml"
-        - "-target=all"
         ports:
         - containerPort: 8080
         readinessProbe:
@@ -42,7 +39,7 @@ spec:
         resources:
           requests:
             cpu: 200m
-            memory: 256Mi
+            memory: 512Mi
           limits:
             cpu: 1000m
             memory: 1Gi
@@ -50,29 +47,14 @@ spec:
         - name: config
           mountPath: /etc/mimir
         - name: data
-          mountPath: /data/mimir
-        - name: alert-rules
-          mountPath: /data/mimir/rules/anonymous
-          readOnly: true
+          mountPath: /data
         - name: tmp
           mountPath: /tmp
       volumes:
       - name: config
         configMap:
           name: mimir-cm
-      - name: alert-rules
-        configMap:
-          name: monitoring-alerts-cm
-          items:
-          - key: monitoring-rules.yaml
-            path: monitoring-rules.yaml
       - name: tmp
         emptyDir: {}
-  volumeClaimTemplates:
-  - metadata:
-      name: data
-    spec:
-      accessModes: [ "ReadWriteOnce" ]
-      resources:
-        requests:
-          storage: 20Gi
+      - name: data
+        emptyDir: {}

@@ -16,7 +16,6 @@ data:
             annotations:
               summary: "Monitoring component is down"
               description: "{{ $labels.job }} in namespace {{ $labels.namespace }} has been down for more than 3 minutes."
-
           - alert: KafkaExporterNoMetrics
             expr: absent(kafka_brokers)
             for: 5m
@@ -25,7 +24,6 @@ data:
             annotations:
               summary: "Kafka exporter metrics missing"
               description: "kafka-exporter has not exposed kafka_brokers metric for over 5 minutes."
-
           - alert: MimirHighErrorRate
             expr: |
               (
@@ -39,7 +37,6 @@ data:
             annotations:
               summary: "Mimir 5xx error ratio is high"
               description: "Mimir 5xx ratio exceeded 5% over the last 10 minutes."
-
           - alert: LokiIngestionMissing
             expr: absent(rate(loki_distributor_lines_received_total[5m]))
             for: 10m
@@ -48,7 +45,6 @@ data:
             annotations:
               summary: "Loki ingestion metrics missing"
               description: "No loki_distributor_lines_received_total samples were observed in the last 10 minutes."
-
           - alert: TempoSpansMissing
             expr: absent(rate(tempo_distributor_spans_received_total[5m]))
             for: 10m

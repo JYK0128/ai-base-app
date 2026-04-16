@@ -10,4 +10,4 @@ spec:
       name: rabbitmq-secret
   image: rabbitmq:4-management
   persistence:
-    storage: 5Gi
+    storage: "0"

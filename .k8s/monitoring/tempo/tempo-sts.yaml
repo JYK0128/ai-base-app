@@ -23,8 +23,8 @@ spec:
         args:
         - "-config.file=/etc/tempo/tempo.yaml"
         ports:
-        - containerPort: 3200   # HTTP
-        - containerPort: 4317   # OTLP gRPC
+        - containerPort: 3200
+        - containerPort: 4317
         readinessProbe:
           httpGet:
             path: /ready
@@ -57,11 +57,5 @@ spec:
           name: tempo-cm
       - name: tmp
         emptyDir: {}
-  volumeClaimTemplates:
-  - metadata:
-      name: data
-    spec:
-      accessModes: [ "ReadWriteOnce" ]
-      resources:
-        requests:
-          storage: 10Gi
+      - name: data
+        emptyDir: {}

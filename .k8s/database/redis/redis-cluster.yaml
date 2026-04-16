@@ -4,7 +4,7 @@ metadata:
   name: redis
   namespace: dev-infra
 spec:
-  clusterSize: 1 # dev 단일 인스턴스 구성
+  clusterSize: 1
   kubernetesConfig:
     image: redis:7
     imagePullPolicy: IfNotPresent
@@ -18,10 +18,3 @@ spec:
       limits:
         cpu: 500m
         memory: 256Mi
-  storage:
-    volumeClaimTemplate:
-      spec:
-        accessModes: ["ReadWriteOnce"]
-        resources:
-          requests:
-            storage: 5Gi

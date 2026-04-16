@@ -4,7 +4,7 @@ metadata:
   name: grafana-dashboard-cm
   namespace: monitoring
   labels:
-    grafana_dashboard: "1" # 사이드카가 인식하기 위한 라벨
+    grafana_dashboard: "1"
 data:
   infra-overview.json: |
     {
@@ -28,7 +28,7 @@ data:
       "links": [],
       "panels": [
         {
-          "content": "# Infrastructure Overview\n\nWelcome to your automated monitoring dashboard.\n\n- **Metrics**: Mimir\n- **Logs**: Loki\n- **Traces**: Tempo",
+          "content": "
           "gridPos": { "h": 6, "w": 24, "x": 0, "y": 0 },
           "id": 1,
           "mode": "markdown",

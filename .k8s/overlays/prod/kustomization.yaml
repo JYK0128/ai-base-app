@@ -1,6 +1,5 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
-
 resources:
   - ../../apps
   - ../../database
@@ -16,13 +15,10 @@ resources:
   - service-gateway-pdb.yaml
   - platform-auth-service-hpa.yaml
   - platform-auth-service-pdb.yaml
-
 commonLabels:
   env: prod
-
 generatorOptions:
   disableNameSuffixHash: true
-
 secretGenerator:
   - name: postgres-secret
     envs:
@@ -32,7 +28,6 @@ secretGenerator:
       - secrets/rabbitmq-secret.env
     files:
       - default_user.conf=secrets/rabbitmq-default_user.conf
-
 patches:
   - path: delete-postgres-secret.yaml
   - path: delete-rabbitmq-secret.yaml
@@ -77,7 +72,6 @@ patches:
                     matchLabels:
                       app.kubernetes.io/name: service-gateway
                       env: prod
-
   - target:
       kind: Deployment
       name: platform-auth-service-deploy
@@ -119,7 +113,6 @@ patches:
                     matchLabels:
                       app.kubernetes.io/name: platform-auth-service
                       env: prod
-
   - target:
       kind: Service
       name: service-gateway
@@ -127,7 +120,6 @@ patches:
       - op: replace
         path: /metadata/namespace
         value: prod-web
-
   - target:
       kind: Service
       name: platform-auth-service
@@ -135,7 +127,6 @@ patches:
       - op: replace
         path: /metadata/namespace
         value: prod-api
-
   - target:
       kind: ConfigMap
       name: service-gateway-cm
@@ -155,7 +146,6 @@ patches:
       - op: replace
         path: /data/RABBITMQ_URL
         value: amqp://rabbitmq.prod-infra.svc.cluster.local:5672
-
   - target:
       kind: ConfigMap
       name: platform-auth-service-cm
@@ -172,7 +162,6 @@ patches:
       - op: replace
         path: /data/DATABASE_URL
         value: postgres://prod_platform_user:CHANGE_ME_PROD_POSTGRES_PASSWORD@postgres-rw.prod-infra.svc.cluster.local:5432/platform_db
-
   - target:
       kind: Secret
       name: postgres-secret
@@ -180,7 +169,6 @@ patches:
       - op: replace
         path: /metadata/namespace
         value: prod-infra
-
   - target:
       kind: Secret
       name: rabbitmq-secret
@@ -188,7 +176,6 @@ patches:
       - op: replace
         path: /metadata/namespace
         value: prod-infra
-
   - target:
       kind: Gateway
       name: service-gateway-gw
@@ -196,7 +183,6 @@ patches:
       - op: replace
         path: /metadata/namespace
         value: prod-web
-
   - target:
       kind: VirtualService
       name: service-gateway-vs
@@ -204,7 +190,6 @@ patches:
       - op: replace
         path: /metadata/namespace
         value: prod-web
-
   - target:
       kind: Cluster
       name: postgres
@@ -218,7 +203,6 @@ patches:
       - op: replace
         path: /spec/storage/size
         value: 20Gi
-
   - target:
       kind: RedisCluster
       name: redis
@@ -229,7 +213,6 @@ patches:
       - op: replace
         path: /spec/clusterSize
         value: 3
-
   - target:
       kind: Kafka
       name: kafka-cluster
@@ -255,7 +238,6 @@ patches:
       - op: replace
         path: /spec/kafka/config/min.insync.replicas
         value: 2
-
   - target:
       kind: RabbitmqCluster
       name: rabbitmq
@@ -284,7 +266,6 @@ patches:
           limits:
             cpu: "1000m"
             memory: "2Gi"
-
   - target:
       kind: NetworkPolicy
       name: egress-service-gateway-to-platform-auth
@@ -295,7 +276,6 @@ patches:
       - op: replace
         path: /spec/egress/0/to/0/namespaceSelector/matchLabels/kubernetes.io~1metadata.name
         value: prod-api
-
   - target:
       kind: NetworkPolicy
       name: ingress-platform-auth-from-service-gateway
@@ -306,7 +286,6 @@ patches:
       - op: replace
         path: /spec/ingress/0/from/0/namespaceSelector/matchLabels/kubernetes.io~1metadata.name
         value: prod-web
-
   - target:
       kind: NetworkPolicy
       name: egress-platform-auth-to-kafka
@@ -317,7 +296,6 @@ patches:
       - op: replace
         path: /spec/egress/0/to/0/namespaceSelector/matchLabels/kubernetes.io~1metadata.name
         value: prod-infra
-
   - target:
       kind: NetworkPolicy
       name: egress-platform-auth-to-postgres
@@ -328,7 +306,6 @@ patches:
       - op: replace
         path: /spec/egress/0/to/0/namespaceSelector/matchLabels/kubernetes.io~1metadata.name
         value: prod-infra
-
   - target:
       kind: NetworkPolicy
       name: egress-platform-auth-to-rabbitmq
@@ -339,7 +316,6 @@ patches:
       - op: replace
         path: /spec/egress/0/to/0/namespaceSelector/matchLabels/kubernetes.io~1metadata.name
         value: prod-infra
-
   - target:
       kind: NetworkPolicy
       name: egress-platform-auth-to-redis
@@ -350,7 +326,6 @@ patches:
       - op: replace
         path: /spec/egress/0/to/0/namespaceSelector/matchLabels/kubernetes.io~1metadata.name
         value: prod-infra
-
   - target:
       kind: NetworkPolicy
       name: egress-service-gateway-to-kafka
@@ -361,7 +336,6 @@ patches:
       - op: replace
         path: /spec/egress/0/to/0/namespaceSelector/matchLabels/kubernetes.io~1metadata.name
         value: prod-infra
-
   - target:
       kind: NetworkPolicy
       name: egress-service-gateway-to-postgres
@@ -372,7 +346,6 @@ patches:
       - op: replace
         path: /spec/egress/0/to/0/namespaceSelector/matchLabels/kubernetes.io~1metadata.name
         value: prod-infra
-
   - target:
       kind: NetworkPolicy
       name: egress-service-gateway-to-rabbitmq
@@ -383,7 +356,6 @@ patches:
       - op: replace
         path: /spec/egress/0/to/0/namespaceSelector/matchLabels/kubernetes.io~1metadata.name
         value: prod-infra
-
   - target:
       kind: NetworkPolicy
       name: egress-service-gateway-to-redis
@@ -394,7 +366,6 @@ patches:
       - op: replace
         path: /spec/egress/0/to/0/namespaceSelector/matchLabels/kubernetes.io~1metadata.name
         value: prod-infra
-
   - target:
       kind: NetworkPolicy
       name: ingress-kafka-from-apps
@@ -408,7 +379,6 @@ patches:
       - op: replace
         path: /spec/ingress/0/from/1/namespaceSelector/matchLabels/kubernetes.io~1metadata.name
         value: prod-web
-
   - target:
       kind: NetworkPolicy
       name: ingress-postgres-from-apps
@@ -422,7 +392,6 @@ patches:
       - op: replace
         path: /spec/ingress/0/from/1/namespaceSelector/matchLabels/kubernetes.io~1metadata.name
         value: prod-web
-
   - target:
       kind: NetworkPolicy
       name: ingress-rabbitmq-from-apps
@@ -436,7 +405,6 @@ patches:
       - op: replace
         path: /spec/ingress/0/from/1/namespaceSelector/matchLabels/kubernetes.io~1metadata.name
         value: prod-web
-
   - target:
       kind: NetworkPolicy
       name: ingress-redis-from-apps
@@ -450,7 +418,6 @@ patches:
       - op: replace
         path: /spec/ingress/0/from/1/namespaceSelector/matchLabels/kubernetes.io~1metadata.name
         value: prod-web
-
   - target:
       kind: NetworkPolicy
       name: ingress-service-gateway-from-istio-ingress
@@ -458,7 +425,6 @@ patches:
       - op: replace
         path: /metadata/namespace
         value: prod-web
-
   - target:
       kind: NetworkPolicy
       name: default-deny-all
@@ -467,7 +433,6 @@ patches:
       - op: replace
         path: /metadata/namespace
         value: prod-api
-
   - target:
       kind: NetworkPolicy
       name: default-deny-all
@@ -476,7 +441,6 @@ patches:
       - op: replace
         path: /metadata/namespace
         value: prod-infra
-
   - target:
       kind: NetworkPolicy
       name: default-deny-all
@@ -485,7 +449,6 @@ patches:
       - op: replace
         path: /metadata/namespace
         value: prod-web
-
   - target:
       kind: NetworkPolicy
       name: egress-api-to-dns
@@ -493,7 +456,6 @@ patches:
       - op: replace
         path: /metadata/namespace
         value: prod-api
-
   - target:
       kind: NetworkPolicy
       name: egress-infra-to-dns
@@ -501,7 +463,6 @@ patches:
       - op: replace
         path: /metadata/namespace
         value: prod-infra
-
   - target:
       kind: NetworkPolicy
       name: egress-web-to-dns
@@ -509,3 +470,77 @@ patches:
       - op: replace
         path: /metadata/namespace
         value: prod-web
+  - target:
+      kind: KafkaNodePool
+      name: dual-role
+    patch: |-
+      - op: replace
+        path: /metadata/namespace
+        value: prod-infra
+      - op: replace
+        path: /spec/storage/volumes/0/size
+        value: 20Gi
+  - target:
+      kind: StatefulSet
+      name: loki-sts
+    patch: |-
+      - op: remove
+        path: /spec/template/spec/volumes/2
+      - op: add
+        path: /spec/volumeClaimTemplates
+        value:
+          - metadata:
+              name: data
+            spec:
+              accessModes: [ "ReadWriteOnce" ]
+              resources:
+                requests:
+                  storage: 10Gi
+  - target:
+      kind: StatefulSet
+      name: tempo-sts
+    patch: |-
+      - op: remove
+        path: /spec/template/spec/volumes/2
+      - op: add
+        path: /spec/volumeClaimTemplates
+        value:
+          - metadata:
+              name: data
+            spec:
+              accessModes: [ "ReadWriteOnce" ]
+              resources:
+                requests:
+                  storage: 10Gi
+  - target:
+      kind: StatefulSet
+      name: mimir-sts
+    patch: |-
+      - op: remove
+        path: /spec/template/spec/volumes/2
+      - op: add
+        path: /spec/volumeClaimTemplates
+        value:
+          - metadata:
+              name: data
+            spec:
+              accessModes: [ "ReadWriteOnce" ]
+              resources:
+                requests:
+                  storage: 10Gi
+  - target:
+      kind: StatefulSet
+      name: grafana-sts
+    patch: |-
+      - op: remove
+        path: /spec/template/spec/volumes/1
+      - op: add
+        path: /spec/volumeClaimTemplates
+        value:
+          - metadata:
+              name: data
+            spec:
+              accessModes: [ "ReadWriteOnce" ]
+              resources:
+                requests:
+                  storage: 5Gi

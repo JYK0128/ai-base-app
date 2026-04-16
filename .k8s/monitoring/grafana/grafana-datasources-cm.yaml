@@ -23,7 +23,6 @@ data:
       url: http://tempo.monitoring.svc.cluster.local:3100
       access: proxy
       editable: true
-      # Loki와 Tempo 연합 (로그에서 트레이스로 바로 가기)
       jsonData:
         lokiSearch:
           datasourceUid: 'Loki'

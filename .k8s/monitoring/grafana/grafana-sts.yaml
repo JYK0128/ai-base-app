@@ -16,56 +16,25 @@ spec:
       labels:
         app.kubernetes.io/name: grafana
     spec:
+      securityContext:
+        fsGroup: 472
       containers:
-      - name: grafana-sts
-        image: grafana/grafana:11.6.14
+      - name: grafana
+        image: grafana/grafana:10.2.1
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 3000
         env:
-        - name: GF_AUTH_ANONYMOUS_ENABLED
-          value: "true"
-        - name: GF_AUTH_ANONYMOUS_ORG_ROLE
-          value: Admin
-        - name: GF_SERVER_ROOT_URL
-          value: "/grafana/"
-        - name: GF_SERVER_SERVE_FROM_SUB_PATH
-          value: "true"
         - name: GF_PATHS_PROVISIONING
-          value: "/etc/grafana/provisioning"
+          value: /etc/grafana/provisioning
         volumeMounts:
+        - name: config
+          mountPath: /etc/grafana/provisioning
         - name: data
           mountPath: /var/lib/grafana
-        - name: tmp
-          mountPath: /tmp
-        - name: datasources
-          mountPath: /etc/grafana/provisioning/datasources
-          readOnly: true
-        - name: dashboards
-          mountPath: /etc/grafana/dashboards
-          readOnly: true
-        - name: dashboards-provisioning
-          mountPath: /etc/grafana/provisioning/dashboards
-          readOnly: true
       volumes:
-      - name: tmp
-        emptyDir: {}
-      - name: datasources
-        configMap:
-          name: grafana-datasources-cm
-      - name: dashboards
-        configMap:
-          name: grafana-dashboard-cm
-      - name: dashboards-provisioning
+      - name: config
         configMap:
           name: grafana-provisioning-cm
-      - name: sc-dashboard-volume
+      - name: data
         emptyDir: {}
-  volumeClaimTemplates:
-  - metadata:
-      name: data
-    spec:
-      accessModes: [ "ReadWriteOnce" ]
-      resources:
-        requests:
-          storage: 1Gi

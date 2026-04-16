@@ -8,7 +8,7 @@ metadata:
     app.kubernetes.io/part-of: ai-base-app
     strimzi.io/cluster: kafka-cluster
 spec:
-  replicas: 1 # dev 단일 운영을 위한 축소
+  replicas: 1
   roles:
     - broker
     - controller
@@ -16,9 +16,7 @@ spec:
     type: jbod
     volumes:
     - id: 0
-      type: persistent-claim
-      size: 20Gi
-      deleteClaim: false
+      type: ephemeral
 ---
 apiVersion: kafka.strimzi.io/v1
 kind: Kafka
