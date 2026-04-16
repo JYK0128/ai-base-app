@@ -28,17 +28,6 @@
 
 인프라 구축 및 개발을 위해 아래 도구들이 로컬 PC에 설치되어 있어야 합니다.
 
-#### 0. Curl (다운로드 도구)
-
-```bash
-# Windows
-# 최신 Windows 10/11에는 기본적으로 포함되어 있습니다.
-# 만약 동작하지 않는다면: choco install curl
-
-# MacOS (Homebrew)
-brew install curl
-```
-
 #### 1. Helm (패키지 매니저)
 
 인프라 엔진 설치를 위해 Helm 3 이상의 버전이 필요합니다.
@@ -53,7 +42,23 @@ brew install curl
 
 ### Step 1: 인프라 확장 설치 (Infrastructure Extensions)
 
-오퍼레이터 및 서비스 메쉬 등 기반 엔진을 Helm을 통해 설치합니다.
+오퍼레이터 및 서비스 메쉬 등 기반 엔진을 Helm을 통해 설치합니다. (이 과정을 누락하면 애플리케이션 배포 시 CRD를 찾을 수 없다는 에러가 발생합니다.)
+
+제공된 스크립트를 사용하여 필수 오퍼레이터(Istio, DB, 메시징 큐 등)를 일괄 설치할 수 있습니다:
+
+```bash
+# 프로젝트 루트 디렉토리에서 실행 (Git Bash 또는 Linux/WSL 환경)
+bash .k8s/scripts/setup-infra.sh
+```
+
+### Step 1.5: 애플리케이션 빌드 (선택)
+
+로컬 개발 환경에서는 배포 전 파드에서 사용할 애플리케이션 도커 이미지를 빌드해야 합니다.
+
+```bash
+# 프로젝트 루트 디렉토리에서 전체 모노레포 앱 빌드
+bash .k8s/scripts/build-apps.sh
+```
 
 ### Step 2: 리소스 배포 (Kustomize)
 

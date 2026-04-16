@@ -15,3 +15,6 @@ echo ""
 echo "All images built successfully!"
 echo "If you are using Docker Desktop, these images are now available to your local Kubernetes cluster."
 echo "If you are using Minikube, remember to run 'eval \$(minikube docker-env)' before building, or use 'minikube image load <image_name>'."
+
+echo ""
+read -p "Press [Enter] to exit..."

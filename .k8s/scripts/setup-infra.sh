@@ -44,3 +44,6 @@ echo "Installing Telepresence Traffic Manager..."
 telepresence helm install
 
 echo "All extensions installed successfully!"
+
+echo ""
+read -p "Press [Enter] to exit..."

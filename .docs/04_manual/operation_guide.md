@@ -4,6 +4,17 @@
 
 ## 1. 표준 배포 순서
 
+### 1.1 Kustomize 통합 배포 (권장)
+
+전체 인프라 및 애플리케이션을 한 번에 배포하고자 할 때는 overlays 폴더를 활용하여 통합 배포합니다.
+
+- 개발(dev) 환경: `kubectl apply -k .k8s/overlays/dev`
+- 운영(prod) 환경: `kubectl apply -k .k8s/overlays/prod`
+
+### 1.2 단계별 인프라/앱 수동 배포 (문제 발생 시 확인용)
+
+부분적인 리소스 관리나 컴포넌트별 세부 점검이 필요할 때는 아래의 순서로 순차 배포합니다.
+
 1. 네임스페이스 생성
    - `kubectl apply -f .k8s/namespaces`
 2. 네트워크 정책 적용
