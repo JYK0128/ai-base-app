@@ -188,6 +188,28 @@ importers:
         specifier: 6.0.2
         version: 6.0.2
 
+  packages/auth-sdk:
+    dependencies:
+      '@pkg/config':
+        specifier: workspace:*
+        version: link:../config
+      '@pkg/utils':
+        specifier: workspace:*
+        version: link:../utils
+      react:
+        specifier: ^19.0.0
+        version: 19.2.5
+    devDependencies:
+      '@types/react':
+        specifier: 19.2.14
+        version: 19.2.14
+      eslint:
+        specifier: 9.39.4
+        version: 9.39.4(jiti@2.6.1)
+      typescript:
+        specifier: 6.0.2
+        version: 6.0.2
+
   packages/config:
     devDependencies:
       '@stylistic/eslint-plugin':

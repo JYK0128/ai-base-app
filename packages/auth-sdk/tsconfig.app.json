@@ -1,0 +1,8 @@
+{
+  "extends": "@pkg/config/typescript/react",
+  "compilerOptions": {
+    "baseUrl": "./",
+    "outDir": "dist"
+  },
+  "include": ["src"]
+}
