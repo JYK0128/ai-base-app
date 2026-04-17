@@ -32,48 +32,41 @@ export abstract class CoreEntity<
   @Property({ nullable: true })
   deletedBy?: string | null = null;
 
-  static getReference<T extends BaseEntity>(
-    this: new () => T,
-    id: Primary<T>,
-  ): T {
-    const em = RequestContext.getEntityManager();
-    if (!em) throw new Error('EntityManager not found in RequestContext.');
-    return em.getReference(this, id);
-  }
-
   static create<T extends BaseEntity>(
     this: new () => T,
     data: RequiredEntityData<T>,
-  ): T {
+  ) {
     const em = RequestContext.getEntityManager();
     if (!em) throw new Error('EntityManager not found in RequestContext.');
-    const entity = em.create(this, data) as T;
+    const entity = em.create<T>(this, data);
     em.persist(entity);
     return entity;
   }
 
-  update(data: EntityData<FromEntityType<this>>) {
+  static read<T extends BaseEntity>(
+    this: new () => T,
+    id: Primary<T>,
+  ) {
     const em = RequestContext.getEntityManager();
     if (!em) throw new Error('EntityManager not found in RequestContext.');
-    em.assign(this, data);
+    const entity = em.getReference<T>(this, id);
+    return entity;
+  }
+
+  update(data: EntityData<FromEntityType<this>>) {
+    this.assign(data);
     return this;
   }
 
   delete(hard: boolean = false) {
-    if (hard) this.hardDelete();
-    else this.softDelete();
-    return this;
-  }
-
-  private hardDelete() {
-    const em = RequestContext.getEntityManager();
-    if (!em) throw new Error('EntityManager not found in RequestContext.');
-    em.remove(this);
-    return this;
-  }
-
-  private softDelete() {
-    this.deletedAt = new Date();
+    if (hard) {
+      const em = RequestContext.getEntityManager();
+      if (!em) throw new Error('EntityManager not found in RequestContext.');
+      em.remove(this);
+    }
+    else {
+      this.deletedAt = new Date();
+    }
     return this;
   }
 }

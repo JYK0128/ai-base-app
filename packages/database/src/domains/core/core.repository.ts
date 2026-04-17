@@ -1,10 +1,10 @@
 import { type BaseEntity, type EntityData, type FilterQuery, type FromEntityType, type Primary, type RequiredEntityData } from '@mikro-orm/core';
 
-import { PaginationRepository } from './pagination.repository';
+import { SearchableRepository } from './searchable.repository';
 
 export abstract class CoreRepository<
   T extends BaseEntity = BaseEntity,
-> extends PaginationRepository<T> {
+> extends SearchableRepository<T> {
   override create(data: RequiredEntityData<T>): T {
     const entity = super.create(data);
     this.em.persist(entity);
