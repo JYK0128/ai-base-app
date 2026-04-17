@@ -1,12 +1,15 @@
-import { type BaseEntity as BaseEntity, type EntityData, type FilterQuery, type FromEntityType, type Primary } from '@mikro-orm/core';
+import { type BaseEntity, type EntityData, type FilterQuery, type FromEntityType, type Primary, type RequiredEntityData } from '@mikro-orm/core';
 
 import { PaginationRepository } from './pagination.repository';
 
 export abstract class CoreRepository<
-  T extends BaseEntity,
+  T extends BaseEntity = BaseEntity,
 > extends PaginationRepository<T> {
-  // findAll
-  // finAndCount
+  override create(data: RequiredEntityData<T>): T {
+    const entity = super.create(data);
+    this.em.persist(entity);
+    return entity;
+  }
 
   async findById(id: Primary<T>): Promise<T | null> {
     return this.em.findOne(this.entityName, { id } as FilterQuery<T>);

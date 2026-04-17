@@ -1,18 +1,21 @@
 import { RequestContext } from '@mikro-orm/core';
-import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 
-import { Message, MessageRepository } from '@/domains';
+import { Message } from '@/domains';
 import type { PostgresTestContext } from '@/test/context';
 import { createPostgresTestContext, destroyPostgresTestContext } from '@/test/context';
 
 describe('example query test', () => {
   const context: Partial<PostgresTestContext> = {};
-  let repository: MessageRepository;
 
   beforeAll(async () => {
     Object.assign(context, await createPostgresTestContext());
-    repository = context.orm!.em.getRepository(Message);
   }, 120_000);
+
+  beforeEach(async () => {
+    const em = context.orm!.em.fork();
+    await em.createQueryBuilder(Message).delete().execute();
+  });
 
   afterAll(async () => {
     await destroyPostgresTestContext(context);
@@ -40,6 +43,7 @@ describe('example query test', () => {
       {
         onConflictFields: ['locale', 'namespace', 'key'],
         onConflictAction: 'merge',
+        onConflictMergeFields: ['message', 'updatedAt', 'updatedBy'],
       },
     );
 
@@ -61,9 +65,8 @@ describe('example query test', () => {
   });
 
   it('example: static Entity.create check', async () => {
-    const em = context.orm!.em.fork();
-
-    await RequestContext.create(em, async () => {
+    await RequestContext.create(context.orm!.em, async () => {
+      const em = RequestContext.getEntityManager()!;
       // CoreEntity의 정적 create 메소드는 내부적으로 RequestContext.getEntityManager()를 사용함
       const msg = Message.create({
         locale: 'ko',
@@ -76,7 +79,6 @@ describe('example query test', () => {
       expect(msg.key).toBe('static_test');
       expect(msg.id).toBeDefined();
 
-      em.persist(msg);
       await em.flush();
 
       const found = await em.findOne(Message, { key: 'static_test' });

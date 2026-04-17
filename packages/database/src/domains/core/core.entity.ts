@@ -1,4 +1,4 @@
-import { BaseEntity, type EntityData, EntityRepositoryType, type FromEntityType, type Opt, OptionalProps, RequestContext, type RequiredEntityData } from '@mikro-orm/core';
+import { BaseEntity, type EntityData, EntityRepositoryType, type FromEntityType, type Opt, OptionalProps, type Primary, RequestContext, type RequiredEntityData } from '@mikro-orm/core';
 import { PrimaryKey, Property } from '@mikro-orm/decorators/legacy';
 import { uuidv7 } from 'uuidv7';
 
@@ -32,13 +32,24 @@ export abstract class CoreEntity<
   @Property({ nullable: true })
   deletedBy?: string | null = null;
 
+  static getReference<T extends BaseEntity>(
+    this: new () => T,
+    id: Primary<T>,
+  ): T {
+    const em = RequestContext.getEntityManager();
+    if (!em) throw new Error('EntityManager not found in RequestContext.');
+    return em.getReference(this, id);
+  }
+
   static create<T extends BaseEntity>(
     this: new () => T,
     data: RequiredEntityData<T>,
   ): T {
     const em = RequestContext.getEntityManager();
     if (!em) throw new Error('EntityManager not found in RequestContext.');
-    return em.create(this, data);
+    const entity = em.create(this, data) as T;
+    em.persist(entity);
+    return entity;
   }
 
   update(data: EntityData<FromEntityType<this>>) {
