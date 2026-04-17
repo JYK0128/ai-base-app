@@ -9,7 +9,7 @@ import { HealthModule } from '@/modules/health/health.module';
 
 @Module({
   imports: [
-    MikroOrmModule.forRoot(databaseConfig as Parameters<typeof MikroOrmModule.forRoot>[0]),
+    MikroOrmModule.forRoot(databaseConfig),
     AuthModule,
     HealthModule,
   ],

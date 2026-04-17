@@ -1,10 +1,8 @@
 import { createHash } from 'node:crypto';
 
-import { InjectRepository } from '@mikro-orm/nestjs';
-import type { EntityRepository } from '@mikro-orm/postgresql';
 import { Logger, UnauthorizedException } from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { ManagerAccount, UserAccount } from '@pkg/database/domains';
+import { ManagerAccountRepository, UserAccountRepository } from '@pkg/database';
 
 export class LoginCommand {
   constructor(
@@ -19,10 +17,8 @@ export class LoginHandler implements ICommandHandler<LoginCommand> {
   private readonly logger = new Logger(LoginHandler.name);
 
   constructor(
-    @InjectRepository(ManagerAccount)
-    private readonly managerAccountRepository: EntityRepository<ManagerAccount>,
-    @InjectRepository(UserAccount)
-    private readonly userAccountRepository: EntityRepository<UserAccount>,
+    private readonly managerAccountRepository: ManagerAccountRepository,
+    private readonly userAccountRepository: UserAccountRepository,
   ) {}
 
   async execute(command: LoginCommand) {
@@ -66,7 +62,6 @@ export class LoginHandler implements ICommandHandler<LoginCommand> {
       .digest('hex');
 
     return {
-      success: true,
       userId: account.id,
       email: account.email,
       accountType: account.accountType,

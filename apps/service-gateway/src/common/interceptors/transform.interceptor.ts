@@ -11,7 +11,7 @@ export class TransformInterceptor<T> implements NestInterceptor<T, ApiResponse<T
     const request = context.switchToHttp().getRequest<ExtendedRequest>();
 
     return next.handle().pipe(
-      map((data) => ({
+      map((data: T): ApiResponse<T> => ({
         success: true,
         data,
         timestamp: new Date().toISOString(),

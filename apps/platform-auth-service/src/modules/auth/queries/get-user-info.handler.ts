@@ -1,8 +1,6 @@
-import { InjectRepository } from '@mikro-orm/nestjs';
-import type { EntityRepository } from '@mikro-orm/postgresql';
 import { NotFoundException } from '@nestjs/common';
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
-import { ManagerAccount, UserAccount } from '@pkg/database/domains';
+import { ManagerAccountRepository, UserAccountRepository } from '@pkg/database';
 
 export class GetUserInfoQuery {
   constructor(public readonly userId: string) {}
@@ -11,10 +9,8 @@ export class GetUserInfoQuery {
 @QueryHandler(GetUserInfoQuery)
 export class GetUserInfoHandler implements IQueryHandler<GetUserInfoQuery> {
   constructor(
-    @InjectRepository(ManagerAccount)
-    private readonly managerAccountRepository: EntityRepository<ManagerAccount>,
-    @InjectRepository(UserAccount)
-    private readonly userAccountRepository: EntityRepository<UserAccount>,
+    private readonly managerAccountRepository: ManagerAccountRepository,
+    private readonly userAccountRepository: UserAccountRepository,
   ) {}
 
   async execute(query: GetUserInfoQuery) {
