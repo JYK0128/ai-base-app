@@ -40,7 +40,7 @@
     "dev": "npm run dx -- bunchee --watch",
     "lint": "eslint .",
     "build": "bunchee --clean",
-    "play": "npm run seed && npm run dx -- vitest run src/test/play.test.ts",
+    "play": "vitest run src/test/play.test.ts",
     "migration:create": "npm run mo -- migration:create",
     "migration:up": "npm run mo -- migration:up",
     "migration:down": "npm run mo -- migration:down",
