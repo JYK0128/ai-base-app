@@ -1,8 +1,6 @@
 import 'reflect-metadata';
 
-import path from 'node:path';
-import { fileURLToPath } from 'node:url';
-
+import { GeneratedCacheAdapter, MetadataProvider } from '@mikro-orm/core';
 import { EntityGenerator } from '@mikro-orm/entity-generator';
 import { Migrator } from '@mikro-orm/migrations';
 import { defineConfig, EntityCaseNamingStrategy, type Options, PostgreSqlDriver } from '@mikro-orm/postgresql';
@@ -10,15 +8,21 @@ import { TsMorphMetadataProvider } from '@mikro-orm/reflection';
 import { SeedManager } from '@mikro-orm/seeder';
 import { SqlHighlighter } from '@mikro-orm/sql-highlighter';
 
-const filename = fileURLToPath(import.meta.url);
-const dirname = path.dirname(filename);
+import * as entities from './domains';
+import metadata from './metadata.json' with { type: 'json' };
 
 export default defineConfig({
-  entities: ['./dist/domains'],
-  entitiesTs: ['./src/domains'],
+  entities: Object.values(entities).filter((e) => typeof e === 'function'),
   driver: PostgreSqlDriver,
   clientUrl: process.env.DATABASE_URL,
-  metadataProvider: TsMorphMetadataProvider,
+  metadataProvider: process.env.MIKRO_ORM_CLI_TS_LOADER
+    ? TsMorphMetadataProvider
+    : MetadataProvider,
+  metadataCache: {
+    enabled: true,
+    adapter: GeneratedCacheAdapter,
+    options: { data: metadata, cacheDir: './src' },
+  },
   namingStrategy: EntityCaseNamingStrategy,
   filters: {
     softDelete: {
@@ -28,14 +32,11 @@ export default defineConfig({
   },
   extensions: [SeedManager, EntityGenerator, Migrator],
   migrations: {
-    path: path.resolve(dirname, './migrations'),
-    pathTs: path.resolve(dirname, './migrations'),
-    glob: '!(*.d).{js,ts}',
+    path: './src/migrations',
     safe: true,
   },
   seeder: {
-    path: path.resolve(dirname, './seeders'),
-    pathTs: path.resolve(dirname, './seeders'),
+    path: './src/seeders',
     defaultSeeder: 'DatabaseSeeder',
     glob: '!(*.d).{js,ts}',
   },

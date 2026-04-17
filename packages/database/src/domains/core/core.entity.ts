@@ -1,5 +1,6 @@
 import { BaseEntity, type EntityData, EntityRepositoryType, type FromEntityType, type Opt, OptionalProps, RequestContext, type RequiredEntityData } from '@mikro-orm/core';
 import { PrimaryKey, Property } from '@mikro-orm/decorators/legacy';
+import { uuidv7 } from 'uuidv7';
 
 import type { CoreRepository } from './core.repository';
 
@@ -11,7 +12,7 @@ export abstract class CoreEntity<
   [OptionalProps]?: 'createdAt' | 'updatedAt' | Optional;
 
   @PrimaryKey()
-  id!: string;
+  id: string = uuidv7();
 
   @Property()
   createdAt: Date & Opt = new Date();
@@ -34,7 +35,7 @@ export abstract class CoreEntity<
   static create<T extends BaseEntity>(
     this: new () => T,
     data: RequiredEntityData<T>,
-  ) {
+  ): T {
     const em = RequestContext.getEntityManager();
     if (!em) throw new Error('EntityManager not found in RequestContext.');
     return em.create(this, data);

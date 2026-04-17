@@ -280,6 +280,9 @@ importers:
       reflect-metadata:
         specifier: 0.2.2
         version: 0.2.2
+      uuidv7:
+        specifier: 1.2.1
+        version: 1.2.1
     devDependencies:
       '@dotenvx/dotenvx':
         specifier: 1.61.0
@@ -7972,6 +7975,10 @@ packages:
 
   uuid@10.0.0:
     resolution: {integrity: sha512-8XkAphELsDnEGrDxUOHB3RGvXz6TeuYSGEZBOjtTtPm2lwhGBjLgOzLHB63IUWfBpNucQjND6d3AOudO+H3RWQ==}
+    hasBin: true
+
+  uuidv7@1.2.1:
+    resolution: {integrity: sha512-4kPkK3/XTQW9Hbm4CaqfICn+kY9LJtDVEOfgsRRra/+n2Ofg4NqzRFceAkxvQ/Ud/6BpHOPzj8cirqM7TzTN5Q==}
     hasBin: true
 
   validate-npm-package-name@7.0.2:
@@ -16361,6 +16368,8 @@ snapshots:
   utils-merge@1.0.1: {}
 
   uuid@10.0.0: {}
+
+  uuidv7@1.2.1: {}
 
   validate-npm-package-name@7.0.2: {}
 
