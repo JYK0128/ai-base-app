@@ -3,9 +3,9 @@ import { Collection } from '@mikro-orm/core';
 import { Entity, Enum, OneToMany, Property } from '@mikro-orm/decorators/legacy';
 
 import { CoreEntity } from '../../core/core.entity';
+import { Site } from '../../site/site.entity';
 import type { Manager } from '../manager/manager.entity';
 import { ManagerInvite } from '../manager/manager.invite.entity';
-import { Site } from '../../site/site.entity';
 import { OrganizationRepository } from './organization.repository';
 
 export enum OrganizationStatus {

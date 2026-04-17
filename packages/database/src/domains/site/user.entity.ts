@@ -3,8 +3,8 @@ import { Entity, Index, ManyToOne, Property, Unique } from '@mikro-orm/decorator
 
 import { CoreEntity } from '../core/core.entity';
 import type { Site } from './site.entity';
-import { UserRepository } from './user.repository';
 import type { UserAccount } from './user.account.entity';
+import { UserRepository } from './user.repository';
 
 @Entity({ schema: 'site', repository: () => UserRepository })
 @Unique({ properties: ['site', 'userAccount'] })
