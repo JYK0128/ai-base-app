@@ -579,7 +579,7 @@ importers:
         specifier: 8.0.8
         version: 8.0.8(@types/node@25.6.0)(esbuild@0.27.7)(jiti@2.6.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
 
-  web/platform-admin-login-remote:
+  web/platform-admin-auth:
     dependencies:
       '@pkg/config':
         specifier: workspace:*
