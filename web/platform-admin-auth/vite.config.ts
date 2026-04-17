@@ -8,7 +8,7 @@ export default defineConfig({
   plugins: [
     react(),
     federation({
-      name: 'platform_admin_login_remote',
+      name: 'platform_admin_auth',
       filename: 'remoteEntry.js',
       exposes: {
         './App': './src/App.tsx',

@@ -7,6 +7,7 @@
     { "path": "apps/platform-auth-service" },
     { "path": "apps/service-gateway" },
     { "path": "web/platform-admin-host" },
-    { "path": "web/platform-admin-auth" }
+    { "path": "web/platform-admin-auth" },
+    { "path": "web/platform-admin-mfe-dashboard" }
   ]
 }

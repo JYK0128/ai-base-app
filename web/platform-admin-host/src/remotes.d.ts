@@ -1,4 +1,4 @@
-declare module 'platform_admin_login_remote/App' {
+declare module 'platform_admin_auth/App' {
   import type { ComponentType } from 'react';
 
   const App: ComponentType;
