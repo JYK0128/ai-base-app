@@ -26,27 +26,29 @@
     }
   },
   "mikro-orm": {
-    "useTsNode": true,
+    "preferTs": true,
+    "tsLoader": "swc",
+    "tsConfigPath": "./tsconfig.app.json",
     "configPaths": [
       "./src/mikro-orm.config.ts"
     ]
   },
   "scripts": {
-    "mikro-orm": "pnpm exec mikro-orm",
-    "dev": "bunchee --watch",
-    "build": "bunchee --clean",
-    "build:lib": "tsc -p tsconfig.app.json",
-    "test": "pnpm run test:example",
-    "test:example": "vitest run src/test/example.test.ts",
-    "migration:create": "pnpm exec mikro-orm migration:create --ts",
-    "migration:create:blank": "pnpm exec mikro-orm migration:create --blank --ts",
-    "migration:up": "pnpm exec mikro-orm migration:up",
-    "migration:down": "pnpm exec mikro-orm migration:down",
-    "migration:list": "pnpm exec mikro-orm migration:list",
-    "migration:pending": "pnpm exec mikro-orm migration:pending",
-    "seed": "pnpm exec mikro-orm seeder:run",
-    "seed:reset": "pnpm exec mikro-orm schema:refresh --run",
-    "prebuild": "dotenvx run --env=development --convention=nextjs -- mikro-orm cache:generate --ts --combined --config src/mikro-orm.config.ts"
+    "dx": "dotenvx run --env=development --convention=nextjs --",
+    "mo": "npm run dx -- mikro-orm",
+    "predev": "npm run prebuild",
+    "dev": "npm run dx -- bunchee --watch",
+    "lint": "eslint .",
+    "build": "node ./scripts/patch-bunchee-legacy.cjs && bunchee --clean",
+    "play": "npm run seed && npm run dx -- vitest run src/test/play.test.ts",
+    "migration:create": "npm run mo -- migration:create",
+    "migration:up": "npm run mo -- migration:up",
+    "migration:down": "npm run mo -- migration:down",
+    "migration:list": "npm run mo -- migration:list",
+    "migration:pending": "npm run mo -- migration:pending",
+    "migration:blank": "npm run mo -- migration:create --blank",
+    "seed": "npm run mo -- schema:fresh --run --seed",
+    "prebuild": "npm run mo -- cache:generate --ts -c"
   },
   "dependencies": {
     "@mikro-orm/core": "7.0.10",
@@ -58,19 +60,22 @@
     "@mikro-orm/seeder": "7.0.10",
     "@mikro-orm/sql-highlighter": "1.0.1",
     "@pkg/config": "workspace:*",
-    "@swc/helpers": "0.5.15",
+    "@swc/helpers": "0.5.21",
     "reflect-metadata": "0.2.2"
   },
   "devDependencies": {
     "@dotenvx/dotenvx": "1.61.0",
     "@mikro-orm/cli": "7.0.10",
     "@pkg/config": "workspace:*",
-    "@testcontainers/postgresql": "11.14.0",
+    "@swc-node/register": "1.11.1",
+    "@swc/core": "1.15.24",
     "@types/node": "25.6.0",
     "bunchee": "6.10.0",
     "eslint": "9.39.4",
     "testcontainers": "11.14.0",
+    "tsx": "4.21.0",
     "typescript": "6.0.2",
+    "vite-tsconfig-paths": "6.1.1",
     "vitest": "4.1.4"
   }
 }
