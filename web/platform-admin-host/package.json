@@ -1,5 +1,5 @@
 {
-  "name": "platform-admin-web",
+  "name": "platform-admin-host",
   "version": "0.1.0",
   "type": "module",
   "private": true,
@@ -17,6 +17,7 @@
     "react-dom": "19.2.5"
   },
   "devDependencies": {
+    "@originjs/vite-plugin-federation": "1.4.1",
     "@types/node": "25.6.0",
     "@types/react": "19.2.14",
     "@types/react-dom": "19.2.3",

@@ -1,70 +1,33 @@
-:root {
-  font-family: "Space Grotesk", "Segoe UI", sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
-  color: #f3efe7;
+.auth-app-page {
+  min-height: 100vh;
+  padding: 24px;
   background:
     radial-gradient(circle at top left, rgba(204, 104, 54, 0.28), transparent 32%),
     radial-gradient(circle at bottom right, rgba(58, 112, 255, 0.18), transparent 34%),
     #101218;
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  --panel: rgba(16, 19, 27, 0.86);
-  --panel-border: rgba(255, 255, 255, 0.1);
-  --muted: #b8bdcb;
-  --text: #f3efe7;
-  --accent: #ff8a3d;
-  --accent-strong: #ff6a00;
-  --secondary: #6ea8fe;
-  --danger: #ff7f7f;
+  color: #f3efe7;
+  font-family: "Space Grotesk", "Segoe UI", sans-serif;
 }
 
-* {
+.auth-app-page,
+.auth-app-page * {
   box-sizing: border-box;
-}
-
-html {
-  min-width: 320px;
-}
-
-body {
-  margin: 0;
-  min-height: 100vh;
-}
-
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  background-image:
-    linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
-  background-size: 40px 40px;
-  mask-image: radial-gradient(circle at center, black 35%, transparent 80%);
-  pointer-events: none;
-}
-
-#root {
-  width: 100%;
 }
 
 .app-shell {
   display: grid;
   grid-template-columns: minmax(0, 1.1fr) minmax(320px, 480px);
   gap: 24px;
-  min-height: 100vh;
-  padding: 24px;
+  min-height: calc(100vh - 48px);
 }
 
 .hero-panel,
 .login-panel {
   position: relative;
   overflow: hidden;
-  border: 1px solid var(--panel-border);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 28px;
-  background: var(--panel);
+  background: rgba(16, 19, 27, 0.86);
   backdrop-filter: blur(18px);
   box-shadow: 0 24px 80px rgba(0, 0, 0, 0.28);
 }
@@ -89,7 +52,7 @@ body::before {
 
 .eyebrow {
   margin: 0 0 12px;
-  color: var(--accent);
+  color: #ff8a3d;
   font-size: 0.8rem;
   font-weight: 700;
   letter-spacing: 0.18em;
@@ -99,7 +62,7 @@ body::before {
 .hero-panel h1,
 .login-panel h2 {
   margin: 0;
-  color: var(--text);
+  color: #f3efe7;
   letter-spacing: -0.04em;
 }
 
@@ -112,7 +75,7 @@ body::before {
 .hero-copy {
   max-width: 58ch;
   margin: 24px 0 0;
-  color: var(--muted);
+  color: #b8bdcb;
   font-size: 1.05rem;
 }
 
@@ -138,7 +101,7 @@ body::before {
 .hero-metadata dt,
 .info-card span {
   margin-bottom: 8px;
-  color: var(--muted);
+  color: #b8bdcb;
   font-size: 0.8rem;
   text-transform: uppercase;
   letter-spacing: 0.08em;
@@ -147,7 +110,7 @@ body::before {
 .hero-metadata dd,
 .info-card strong {
   margin: 0;
-  color: var(--text);
+  color: #f3efe7;
   font-size: 1rem;
 }
 
@@ -178,7 +141,7 @@ body::before {
 }
 
 .field span {
-  color: var(--muted);
+  color: #b8bdcb;
   font-size: 0.92rem;
 }
 
@@ -188,7 +151,7 @@ body::before {
   border-radius: 16px;
   background: rgba(255, 255, 255, 0.05);
   padding: 15px 16px;
-  color: var(--text);
+  color: #f3efe7;
   font: inherit;
   transition: border-color 160ms ease, transform 160ms ease, background-color 160ms ease;
 }
@@ -212,13 +175,13 @@ body::before {
 }
 
 .primary-button {
-  background: linear-gradient(135deg, var(--accent), var(--accent-strong));
+  background: linear-gradient(135deg, #ff8a3d, #ff6a00);
   color: #111318;
 }
 
 .secondary-button {
   background: rgba(110, 168, 254, 0.14);
-  color: var(--text);
+  color: #f3efe7;
   border: 1px solid rgba(110, 168, 254, 0.22);
 }
 
@@ -240,7 +203,7 @@ body::before {
 
 .message.error {
   background: rgba(255, 127, 127, 0.12);
-  color: var(--danger);
+  color: #ff7f7f;
 }
 
 .info-grid {
@@ -299,7 +262,7 @@ body::before {
 }
 
 @media (max-width: 640px) {
-  .app-shell {
+  .auth-app-page {
     padding: 16px;
   }
 

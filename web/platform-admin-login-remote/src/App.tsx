@@ -139,20 +139,20 @@ function App() {
   return (
     <main className="app-shell">
       <section className="hero-panel">
-        <p className="eyebrow">Platform Admin</p>
-        <h1>Database-backed login for platform operators.</h1>
+        <p className="eyebrow">Auth Remote</p>
+        <h1>Login and session UI shipped as a federated remote.</h1>
         <p className="hero-copy">
-          The form calls the service gateway, which forwards the request to the auth
-          service and validates credentials against the real platform account tables.
+          This remote owns the auth interaction while the host controls shell, routing,
+          and deployment orchestration.
         </p>
         <dl className="hero-metadata">
           <div>
-            <dt>Gateway API</dt>
-            <dd>{API_BASE_URL}</dd>
+            <dt>Remote URL</dt>
+            <dd>http://localhost:3001/assets/remoteEntry.js</dd>
           </div>
           <div>
-            <dt>Auth flow</dt>
-            <dd>Gateway -&gt; RMQ -&gt; Auth Service -&gt; PostgreSQL</dd>
+            <dt>API Gateway</dt>
+            <dd>{API_BASE_URL}</dd>
           </div>
         </dl>
       </section>

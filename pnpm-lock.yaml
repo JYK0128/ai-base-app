@@ -18,14 +18,14 @@ importers:
   apps/platform-auth-service:
     dependencies:
       '@mikro-orm/core':
-        specifier: 7.0.9
-        version: 7.0.9
+        specifier: 7.0.10
+        version: 7.0.10
       '@mikro-orm/nestjs':
         specifier: 7.0.1
-        version: 7.0.1(@mikro-orm/core@7.0.9)(@nestjs/common@11.0.11(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.0.11)(reflect-metadata@0.2.2)
+        version: 7.0.1(@mikro-orm/core@7.0.10)(@nestjs/common@11.0.11(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.0.11)(reflect-metadata@0.2.2)
       '@mikro-orm/postgresql':
-        specifier: 7.0.9
-        version: 7.0.9(@mikro-orm/core@7.0.9)
+        specifier: 7.0.10
+        version: 7.0.10(@mikro-orm/core@7.0.10)
       '@nestjs/axios':
         specifier: 4.0.1
         version: 4.0.1(@nestjs/common@11.0.11(reflect-metadata@0.2.2)(rxjs@7.8.2))(axios@1.15.0)(rxjs@7.8.2)
@@ -43,7 +43,7 @@ importers:
         version: 11.0.11(@grpc/grpc-js@1.14.3)(@nestjs/common@11.0.11(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.0.11)(amqp-connection-manager@4.1.14(amqplib@0.10.5))(amqplib@0.10.5)(reflect-metadata@0.2.2)(rxjs@7.8.2)
       '@nestjs/terminus':
         specifier: 11.1.1
-        version: 11.1.1(@grpc/grpc-js@1.14.3)(@grpc/proto-loader@0.8.0)(@mikro-orm/core@7.0.9)(@mikro-orm/nestjs@7.0.1(@mikro-orm/core@7.0.9)(@nestjs/common@11.0.11(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.0.11)(reflect-metadata@0.2.2))(@nestjs/axios@4.0.1(@nestjs/common@11.0.11(reflect-metadata@0.2.2)(rxjs@7.8.2))(axios@1.15.0)(rxjs@7.8.2))(@nestjs/common@11.0.11(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.0.11)(@nestjs/microservices@11.0.11)(reflect-metadata@0.2.2)(rxjs@7.8.2)
+        version: 11.1.1(@grpc/grpc-js@1.14.3)(@grpc/proto-loader@0.8.0)(@mikro-orm/core@7.0.10)(@mikro-orm/nestjs@7.0.1(@mikro-orm/core@7.0.10)(@nestjs/common@11.0.11(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.0.11)(reflect-metadata@0.2.2))(@nestjs/axios@4.0.1(@nestjs/common@11.0.11(reflect-metadata@0.2.2)(rxjs@7.8.2))(axios@1.15.0)(rxjs@7.8.2))(@nestjs/common@11.0.11(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.0.11)(@nestjs/microservices@11.0.11)(reflect-metadata@0.2.2)(rxjs@7.8.2)
       '@pkg/config':
         specifier: workspace:*
         version: link:../../packages/config
@@ -514,7 +514,7 @@ importers:
         specifier: 6.0.2
         version: 6.0.2
 
-  web/platform-admin-web:
+  web/platform-admin-host:
     dependencies:
       '@pkg/config':
         specifier: workspace:*
@@ -532,6 +532,52 @@ importers:
         specifier: 19.2.5
         version: 19.2.5(react@19.2.5)
     devDependencies:
+      '@originjs/vite-plugin-federation':
+        specifier: 1.4.1
+        version: 1.4.1
+      '@types/node':
+        specifier: 25.6.0
+        version: 25.6.0
+      '@types/react':
+        specifier: 19.2.14
+        version: 19.2.14
+      '@types/react-dom':
+        specifier: 19.2.3
+        version: 19.2.3(@types/react@19.2.14)
+      '@vitejs/plugin-react':
+        specifier: 6.0.1
+        version: 6.0.1(vite@8.0.8(@types/node@25.6.0)(esbuild@0.27.7)(jiti@2.6.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3))
+      eslint:
+        specifier: 10.2.0
+        version: 10.2.0(jiti@2.6.1)
+      typescript:
+        specifier: 6.0.2
+        version: 6.0.2
+      vite:
+        specifier: 8.0.8
+        version: 8.0.8(@types/node@25.6.0)(esbuild@0.27.7)(jiti@2.6.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
+
+  web/platform-admin-login-remote:
+    dependencies:
+      '@pkg/config':
+        specifier: workspace:*
+        version: link:../../packages/config
+      '@pkg/utils':
+        specifier: workspace:*
+        version: link:../../packages/utils
+      lucide-react:
+        specifier: 1.8.0
+        version: 1.8.0(react@19.2.5)
+      react:
+        specifier: 19.2.5
+        version: 19.2.5
+      react-dom:
+        specifier: 19.2.5
+        version: 19.2.5(react@19.2.5)
+    devDependencies:
+      '@originjs/vite-plugin-federation':
+        specifier: 1.4.1
+        version: 1.4.1
       '@types/node':
         specifier: 25.6.0
         version: 25.6.0
@@ -1577,15 +1623,6 @@ packages:
       dataloader:
         optional: true
 
-  '@mikro-orm/core@7.0.9':
-    resolution: {integrity: sha512-WEGsjgY/eSrdk40ZedMNGzvaigZot5vQuCghiAZKxS+4pGeNfILA0pLB4jOHeynPpTwAsbKh1vLWEnpRXh/M8Q==}
-    engines: {node: '>= 22.17.0'}
-    peerDependencies:
-      dataloader: 2.2.3
-    peerDependenciesMeta:
-      dataloader:
-        optional: true
-
   '@mikro-orm/decorators@7.0.10':
     resolution: {integrity: sha512-xLnj5Z9ufoNk0zlzTuhgUqSim1Q0Qel3kntPdZ6Vd0M2jWfVbH+jz6En9RjIASLOF05GyqevyTWL2NAoibFX3Q==}
     engines: {node: '>= 22.17.0'}
@@ -1623,12 +1660,6 @@ packages:
     peerDependencies:
       '@mikro-orm/core': 7.0.10
 
-  '@mikro-orm/postgresql@7.0.9':
-    resolution: {integrity: sha512-sJ/J/zrl++UYCW1IR6MJtt7Za4fx9dgRlrrGi+s2+9JikHv6NTcbEH3sWTf4duuxT3Xpsp/B+7RZK4Tlscjo5Q==}
-    engines: {node: '>= 22.17.0'}
-    peerDependencies:
-      '@mikro-orm/core': 7.0.9
-
   '@mikro-orm/reflection@7.0.10':
     resolution: {integrity: sha512-644+rdj/q3kVUAzs6LA5xhWcYkOOQLVYfp2pqumGYAv2hrUf6rTJzP9qTgq6EwcZqT+gn+MUGk9KFgdNg8ymvg==}
     engines: {node: '>= 22.17.0'}
@@ -1650,12 +1681,6 @@ packages:
     engines: {node: '>= 22.17.0'}
     peerDependencies:
       '@mikro-orm/core': 7.0.10
-
-  '@mikro-orm/sql@7.0.9':
-    resolution: {integrity: sha512-afKsCIJdF7K3OC9F2CqwOyDTCBYEk2+0HkSnSI1VU/EUVcQsFp5+n5Xh5rEN44eoZT1XN2dQ/Q8wrEZ56/jXtA==}
-    engines: {node: '>= 22.17.0'}
-    peerDependencies:
-      '@mikro-orm/core': 7.0.9
 
   '@modelcontextprotocol/sdk@1.29.0':
     resolution: {integrity: sha512-zo37mZA9hJWpULgkRpowewez1y6ML5GsXJPY8FI0tBBCd77HEvza4jDqRKOXgHNn867PVGCyTdzqpz0izu5ZjQ==}
@@ -1990,6 +2015,10 @@ packages:
 
   '@open-draft/until@2.1.0':
     resolution: {integrity: sha512-U69T3ItWHvLwGg5eJ0n3I62nWuE6ilHlmz7zM0npLBRvPRd7e6NYmg54vvRtP5mZG7kZqZCFVdsTWo7BPtBujg==}
+
+  '@originjs/vite-plugin-federation@1.4.1':
+    resolution: {integrity: sha512-Uo08jW5pj1t58OUKuZNkmzcfTN2pqeVuAWCCiKf/75/oll4Efq4cHOqSE1FXMlvwZNGDziNdDyBbQ5IANem3CQ==}
+    engines: {node: '>=14.0.0', pnpm: '>=7.0.1'}
 
   '@oxc-project/types@0.124.0':
     resolution: {integrity: sha512-VBFWMTBvHxS11Z5Lvlr3IWgrwhMTXV+Md+EQF0Xf60+wAdsGFTBx7X7K/hP4pi8N7dcm1RvcHwDxZ16Qx8keUg==}
@@ -6258,6 +6287,10 @@ packages:
     resolution: {integrity: sha512-h5bgJWpxJNswbU7qCrV0tIKQCaS3blPDrqKWx+QxzuzL1zGUzij9XCWLrSLsJPu5t+eWA/ycetzYAO5IOMcWAQ==}
     hasBin: true
 
+  magic-string@0.27.0:
+    resolution: {integrity: sha512-8UnnX2PeRAPZuN12svgR9j7M1uWMovg/CEnIwIG0LFkXSJJe4PdfUGiTGl8V9bsBHFUtfVINcSyYxd7q+kx9fA==}
+    engines: {node: '>=12'}
+
   magic-string@0.30.17:
     resolution: {integrity: sha512-sNPKHvyjVf7gyjwS4xGTaW/mCnF8wnjtifKBEhxfZ7E/S8tQ0rssrwGNn6q8JH/ohItJfSQp9mBtQYuTlH5QnA==}
 
@@ -9393,8 +9426,6 @@ snapshots:
 
   '@mikro-orm/core@7.0.10': {}
 
-  '@mikro-orm/core@7.0.9': {}
-
   '@mikro-orm/decorators@7.0.10(@mikro-orm/core@7.0.10)(reflect-metadata@0.2.2)':
     dependencies:
       '@mikro-orm/core': 7.0.10
@@ -9417,32 +9448,11 @@ snapshots:
       '@nestjs/common': 11.0.11(reflect-metadata@0.2.2)(rxjs@7.8.2)
       '@nestjs/core': 11.0.11(@nestjs/common@11.0.11(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/microservices@11.0.11)(@nestjs/platform-express@11.0.11)(reflect-metadata@0.2.2)(rxjs@7.8.2)
       reflect-metadata: 0.2.2
-    optional: true
-
-  '@mikro-orm/nestjs@7.0.1(@mikro-orm/core@7.0.9)(@nestjs/common@11.0.11(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.0.11)(reflect-metadata@0.2.2)':
-    dependencies:
-      '@mikro-orm/core': 7.0.9
-      '@nestjs/common': 11.0.11(reflect-metadata@0.2.2)(rxjs@7.8.2)
-      '@nestjs/core': 11.0.11(@nestjs/common@11.0.11(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/microservices@11.0.11)(@nestjs/platform-express@11.0.11)(reflect-metadata@0.2.2)(rxjs@7.8.2)
-      reflect-metadata: 0.2.2
 
   '@mikro-orm/postgresql@7.0.10(@mikro-orm/core@7.0.10)':
     dependencies:
       '@mikro-orm/core': 7.0.10
       '@mikro-orm/sql': 7.0.10(@mikro-orm/core@7.0.10)
-      kysely: 0.28.15
-      pg: 8.20.0
-      pg-cursor: 2.19.0(pg@8.20.0)
-      postgres-array: 3.0.4
-      postgres-date: 2.1.0
-      postgres-interval: 4.0.2
-    transitivePeerDependencies:
-      - pg-native
-
-  '@mikro-orm/postgresql@7.0.9(@mikro-orm/core@7.0.9)':
-    dependencies:
-      '@mikro-orm/core': 7.0.9
-      '@mikro-orm/sql': 7.0.9(@mikro-orm/core@7.0.9)
       kysely: 0.28.15
       pg: 8.20.0
       pg-cursor: 2.19.0(pg@8.20.0)
@@ -9468,11 +9478,6 @@ snapshots:
   '@mikro-orm/sql@7.0.10(@mikro-orm/core@7.0.10)':
     dependencies:
       '@mikro-orm/core': 7.0.10
-      kysely: 0.28.15
-
-  '@mikro-orm/sql@7.0.9(@mikro-orm/core@7.0.9)':
-    dependencies:
-      '@mikro-orm/core': 7.0.9
       kysely: 0.28.15
 
   '@modelcontextprotocol/sdk@1.29.0(zod@3.25.76)':
@@ -9716,22 +9721,6 @@ snapshots:
       '@nestjs/axios': 4.0.1(@nestjs/common@11.0.11(reflect-metadata@0.2.2)(rxjs@7.8.2))(axios@1.15.0)(rxjs@7.8.2)
       '@nestjs/microservices': 11.0.11(@grpc/grpc-js@1.14.3)(@nestjs/common@11.0.11(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.0.11)(amqp-connection-manager@4.1.14(amqplib@0.10.5))(amqplib@0.10.5)(reflect-metadata@0.2.2)(rxjs@7.8.2)
 
-  '@nestjs/terminus@11.1.1(@grpc/grpc-js@1.14.3)(@grpc/proto-loader@0.8.0)(@mikro-orm/core@7.0.9)(@mikro-orm/nestjs@7.0.1(@mikro-orm/core@7.0.9)(@nestjs/common@11.0.11(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.0.11)(reflect-metadata@0.2.2))(@nestjs/axios@4.0.1(@nestjs/common@11.0.11(reflect-metadata@0.2.2)(rxjs@7.8.2))(axios@1.15.0)(rxjs@7.8.2))(@nestjs/common@11.0.11(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.0.11)(@nestjs/microservices@11.0.11)(reflect-metadata@0.2.2)(rxjs@7.8.2)':
-    dependencies:
-      '@nestjs/common': 11.0.11(reflect-metadata@0.2.2)(rxjs@7.8.2)
-      '@nestjs/core': 11.0.11(@nestjs/common@11.0.11(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/microservices@11.0.11)(@nestjs/platform-express@11.0.11)(reflect-metadata@0.2.2)(rxjs@7.8.2)
-      boxen: 5.1.2
-      check-disk-space: 3.4.0
-      reflect-metadata: 0.2.2
-      rxjs: 7.8.2
-    optionalDependencies:
-      '@grpc/grpc-js': 1.14.3
-      '@grpc/proto-loader': 0.8.0
-      '@mikro-orm/core': 7.0.9
-      '@mikro-orm/nestjs': 7.0.1(@mikro-orm/core@7.0.9)(@nestjs/common@11.0.11(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.0.11)(reflect-metadata@0.2.2)
-      '@nestjs/axios': 4.0.1(@nestjs/common@11.0.11(reflect-metadata@0.2.2)(rxjs@7.8.2))(axios@1.15.0)(rxjs@7.8.2)
-      '@nestjs/microservices': 11.0.11(@grpc/grpc-js@1.14.3)(@nestjs/common@11.0.11(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.0.11)(amqp-connection-manager@4.1.14(amqplib@0.10.5))(amqplib@0.10.5)(reflect-metadata@0.2.2)(rxjs@7.8.2)
-
   '@nestjs/testing@11.0.11(@nestjs/common@11.0.11(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.0.11)(@nestjs/microservices@11.0.11)(@nestjs/platform-express@11.0.11)':
     dependencies:
       '@nestjs/common': 11.0.11(reflect-metadata@0.2.2)(rxjs@7.8.2)
@@ -9773,6 +9762,11 @@ snapshots:
       outvariant: 1.4.3
 
   '@open-draft/until@2.1.0': {}
+
+  '@originjs/vite-plugin-federation@1.4.1':
+    dependencies:
+      estree-walker: 3.0.3
+      magic-string: 0.27.0
 
   '@oxc-project/types@0.124.0': {}
 
@@ -14294,6 +14288,10 @@ snapshots:
 
   lz-string@1.5.0: {}
 
+  magic-string@0.27.0:
+    dependencies:
+      '@jridgewell/sourcemap-codec': 1.5.5
+
   magic-string@0.30.17:
     dependencies:
       '@jridgewell/sourcemap-codec': 1.5.5
@@ -16441,7 +16439,7 @@ snapshots:
     dependencies:
       lightningcss: 1.32.0
       picomatch: 4.0.4
-      postcss: 8.5.9
+      postcss: 8.5.10
       rolldown: 1.0.0-rc.15
       tinyglobby: 0.2.16
     optionalDependencies:
