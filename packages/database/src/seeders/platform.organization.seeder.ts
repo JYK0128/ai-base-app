@@ -14,7 +14,7 @@ const organizationSeeds = [
   },
 ] as const;
 
-export class OrganizationSeeder extends Seeder {
+export class PlatformOrganizationSeeder extends Seeder {
   async run(em: EntityManager): Promise<void> {
     for (const organizationSeed of organizationSeeds) {
       const found = await em.findOne(Organization, { code: organizationSeed.code });

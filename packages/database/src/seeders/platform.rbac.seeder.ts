@@ -52,7 +52,7 @@ const rolePermissionMap: Record<string, string[]> = {
   organization_admin: ['organization.manage'],
 };
 
-export class RbacSeeder extends Seeder {
+export class PlatformRbacSeeder extends Seeder {
   async run(em: EntityManager): Promise<void> {
     const roles = await this.seedRoles(em);
     const permissions = await this.seedPermissions(em);

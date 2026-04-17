@@ -14,7 +14,7 @@ const messageSeeds = [
   },
 ] as const;
 
-export class MessageSeeder extends Seeder {
+export class PlatformMessageSeeder extends Seeder {
   async run(em: EntityManager): Promise<void> {
     for (const messageSeed of messageSeeds) {
       const found = await em.findOne(Message, {

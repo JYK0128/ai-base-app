@@ -12,7 +12,7 @@ const managerAccountSeeds = [
   },
 ] as const;
 
-export class AuthSeeder extends Seeder {
+export class PlatformManagerSeeder extends Seeder {
   async run(em: EntityManager): Promise<void> {
     for (const managerAccountSeed of managerAccountSeeds) {
       const found = await em.findOne(ManagerAccount, { email: managerAccountSeed.email });
