@@ -20,15 +20,14 @@ export class EventLogInterceptor implements NestInterceptor {
     request.requestId = requestId;
     request.traceId = traceId;
 
-    const { method, url, body, ip } = request;
     const startTime = Date.now();
 
     return next.handle().pipe(
       tap((data) => {
-        this.logEvent(request, body, data, startTime);
+        this.logEvent(request, data, startTime);
       }),
       catchError((error) => {
-        this.logEvent(request, body, error, startTime, true);
+        this.logEvent(request, error, startTime, true);
         return throwError(() => error);
       }),
     );
@@ -36,12 +35,11 @@ export class EventLogInterceptor implements NestInterceptor {
 
   private logEvent(
     request: ExtendedRequest,
-    requestBody: unknown,
     response: unknown,
     startTime: number,
     isError = false,
   ) {
-    const { method, url, ip, requestId, traceId } = request;
+    const { method, url, ip, requestId, traceId, body: requestBody } = request;
     const duration = Date.now() - startTime;
 
     let responseData = response;
