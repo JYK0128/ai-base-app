@@ -6,7 +6,6 @@ export interface ApiResponse<T> {
     code?: string
     details?: unknown
   }
-  timestamp: string
-  requestId: string
   traceId: string
+  requestId: string
 }

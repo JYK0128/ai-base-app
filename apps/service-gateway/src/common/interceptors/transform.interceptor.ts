@@ -1,23 +1,24 @@
 import { CallHandler, ExecutionContext, Injectable, NestInterceptor } from '@nestjs/common';
+import { ClsService } from 'nestjs-cls';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import { ExtendedRequest } from '@/common/types/request.type';
 import { ApiResponse } from '@/common/types/response.type';
 
 @Injectable()
 export class TransformInterceptor<T> implements NestInterceptor<T, ApiResponse<T>> {
-  intercept(context: ExecutionContext, next: CallHandler): Observable<ApiResponse<T>> {
-    const request = context.switchToHttp().getRequest<ExtendedRequest>();
+  constructor(private readonly cls: ClsService) {}
 
+  intercept(context: ExecutionContext, next: CallHandler): Observable<ApiResponse<T>> {
     return next.handle().pipe(
-      map((data: T): ApiResponse<T> => ({
-        success: true,
-        data,
-        timestamp: new Date().toISOString(),
-        requestId: request.requestId,
-        traceId: request.traceId,
-      })),
+      map(
+        (data: T): ApiResponse<T> => ({
+          success: true,
+          data,
+          traceId: this.cls.get('traceId'),
+          requestId: this.cls.get('requestId'),
+        }),
+      ),
     );
   }
 }

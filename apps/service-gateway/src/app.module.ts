@@ -1,14 +1,63 @@
-import { Module } from '@nestjs/common';
-import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
+import { randomUUID } from 'node:crypto';
+import { hostname } from 'node:os';
 
-import { HttpExceptionFilter } from '@/common/filters/http-exception.filter';
-import { EventLogInterceptor } from '@/common/interceptors/event-log.interceptor';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
+import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
+import { Request } from 'express';
+import { ClsModule } from 'nestjs-cls';
+import { LoggerModule } from 'nestjs-pino';
+
+import { GlobalExceptionFilter } from '@/common/filters/global-exception.filter';
 import { TransformInterceptor } from '@/common/interceptors/transform.interceptor';
+import { RequestMiddleware } from '@/common/middlewares/request.middleware';
 import { GatewayModule } from '@/modules/gateway/gateway.module';
 import { HealthModule } from '@/modules/health/health.module';
 
 @Module({
   imports: [
+    ClsModule.forRoot({
+      global: true,
+      middleware: {
+        mount: true,
+        setup: (cls, req: Request) => {
+          const context = {
+            traceId: req.headers['x-trace-id'] || randomUUID(),
+            requestId: randomUUID(),
+            sessionId: (req.cookies.sessionId as string) || '',
+            ip: req.ip || '',
+            realIp: req.headers['x-real-ip'] || req.ip || '',
+            userAgent: req.headers['user-agent'] || '',
+            referer: req.headers['referer'] || '',
+            method: req.method,
+            url: req.url,
+            startTime: Date.now(),
+            acceptLanguage: req.headers['accept-language'] || '',
+          };
+
+          Object.entries(context).forEach(([key, value]) => {
+            cls.set(key as keyof import('nestjs-cls').ClsStore, value);
+          });
+        },
+      },
+    }),
+    LoggerModule.forRoot({
+      pinoHttp: {
+        transport: process.env.NODE_ENV !== 'production'
+          ? { target: 'pino-pretty', options: { colorize: true } }
+          : undefined,
+        base: {
+          env: process.env.NODE_ENV || 'development',
+          host: hostname(),
+        },
+      },
+    }),
+    ThrottlerModule.forRoot([
+      {
+        ttl: 60000,
+        limit: 100,
+      },
+    ]),
     GatewayModule,
     HealthModule,
   ],
@@ -16,16 +65,20 @@ import { HealthModule } from '@/modules/health/health.module';
   providers: [
     {
       provide: APP_FILTER,
-      useClass: HttpExceptionFilter,
+      useClass: GlobalExceptionFilter,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
     },
     {
       provide: APP_INTERCEPTOR,
       useClass: TransformInterceptor,
     },
-    {
-      provide: APP_INTERCEPTOR,
-      useClass: EventLogInterceptor,
-    },
   ],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(RequestMiddleware).forRoutes('*');
+  }
+}

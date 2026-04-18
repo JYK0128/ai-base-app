@@ -1,33 +1,32 @@
-import { Inject, Injectable, Logger, Scope } from '@nestjs/common';
-import { REQUEST } from '@nestjs/core';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
+import { ClsService } from 'nestjs-cls';
 
-import { type ExtendedRequest } from '@/common/types/request.type';
-
-@Injectable({ scope: Scope.REQUEST })
+@Injectable()
 export class GatewayService {
   private readonly logger = new Logger(GatewayService.name);
 
   constructor(
     @Inject('AUTH_SERVICE') private client: ClientProxy,
-    @Inject(REQUEST) private request: ExtendedRequest,
+    private readonly cls: ClsService,
   ) {}
 
   getHello(): string {
     const payload = {
       message: 'Hello from Gateway!',
       timestamp: new Date(),
-      traceId: this.request.traceId,
+      traceId: this.cls.get('traceId'),
     };
     this.client.emit('auth_event', payload);
     return 'Hello from Gateway API!';
   }
 
-  async login(data: { email: string, password: string, clientIp: string }) {
+  async login(data: { email: string, password: string }) {
     this.logger.log(`Forwarding login for ${data.email} to Auth Service`);
     const payload = {
       ...data,
-      traceId: this.request.traceId,
+      clientIp: this.cls.get('ip'),
+      traceId: this.cls.get('traceId'),
     };
     return this.client.send('auth.login', payload);
   }
@@ -36,7 +35,7 @@ export class GatewayService {
     this.logger.log(`Forwarding getUser for ${userId} to Auth Service`);
     const payload = {
       userId,
-      traceId: this.request.traceId,
+      traceId: this.cls.get('traceId'),
     };
     return this.client.send('auth.get_user', payload);
   }

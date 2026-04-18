@@ -1,4 +1,4 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, VERSION_NEUTRAL } from '@nestjs/common';
 import { Transport } from '@nestjs/microservices';
 import { HealthCheck,
          HealthCheckService,
@@ -7,7 +7,10 @@ import { HealthCheck,
 
 import { ENV } from '@/common/env';
 
-@Controller('health')
+@Controller({
+  path: 'health',
+  version: VERSION_NEUTRAL,
+})
 export class HealthController {
   constructor(
     private readonly health: HealthCheckService,
