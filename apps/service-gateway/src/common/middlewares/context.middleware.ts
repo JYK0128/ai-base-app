@@ -5,7 +5,7 @@ import { NextFunction, Request, Response } from 'express';
 import { ClsService } from 'nestjs-cls';
 
 @Injectable()
-export class RequestMiddleware implements NestMiddleware {
+export class ContextMiddleware implements NestMiddleware {
   constructor(private readonly cls: ClsService) {}
 
   use(req: Request, res: Response, next: NextFunction) {
@@ -25,6 +25,7 @@ export class RequestMiddleware implements NestMiddleware {
     const traceId = this.cls.get('traceId') || randomUUID();
     const requestId = this.cls.get('requestId') || randomUUID();
 
+    // TODO: Body Or Header
     res.setHeader('x-trace-id', traceId);
     res.setHeader('x-request-id', requestId);
 

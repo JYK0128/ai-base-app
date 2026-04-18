@@ -3,6 +3,7 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
 
 import { ENV } from '@/common/env';
 
+import { AuthServiceClient } from './clients/auth-service.client';
 import { GatewayController } from './gateway.controller';
 import { GatewayService } from './gateway.service';
 
@@ -23,7 +24,7 @@ import { GatewayService } from './gateway.service';
     ]),
   ],
   controllers: [GatewayController],
-  providers: [GatewayService],
-  exports: [GatewayService],
+  providers: [GatewayService, AuthServiceClient],
+  exports: [GatewayService, AuthServiceClient],
 })
 export class GatewayModule {}

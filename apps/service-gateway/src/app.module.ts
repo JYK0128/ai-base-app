@@ -10,7 +10,7 @@ import { LoggerModule } from 'nestjs-pino';
 
 import { GlobalExceptionFilter } from '@/common/filters/global-exception.filter';
 import { TransformInterceptor } from '@/common/interceptors/transform.interceptor';
-import { RequestMiddleware } from '@/common/middlewares/request.middleware';
+import { ContextMiddleware } from '@/common/middlewares/context.middleware';
 import { GatewayModule } from '@/modules/gateway/gateway.module';
 import { HealthModule } from '@/modules/health/health.module';
 
@@ -79,6 +79,6 @@ import { HealthModule } from '@/modules/health/health.module';
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(RequestMiddleware).forRoutes('*');
+    consumer.apply(ContextMiddleware).forRoutes('*');
   }
 }

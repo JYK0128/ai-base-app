@@ -1,11 +1,14 @@
 import { NestFactory } from '@nestjs/core';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
+import { Logger } from 'nestjs-pino';
 
 import { AppModule } from '@/app.module';
 import { ENV } from '@/common/env';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, { bufferLogs: true });
+  const logger = app.get(Logger);
+  app.useLogger(logger);
 
   app.connectMicroservice<MicroserviceOptions>({
     transport: Transport.RMQ,
@@ -22,8 +25,8 @@ async function bootstrap() {
   await app.startAllMicroservices();
   await app.listen(ENV.PORT);
 
-  console.log(`Platform Auth Service health server is listening on port ${ENV.PORT}`);
-  console.log('Platform Auth Service is consuming RabbitMQ...');
+  logger.log(`Platform Auth Service health server is listening on port ${ENV.PORT}`);
+  logger.log('Platform Auth Service is consuming RabbitMQ...');
 }
 
 void bootstrap();
