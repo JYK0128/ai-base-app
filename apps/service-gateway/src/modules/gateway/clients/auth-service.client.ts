@@ -45,6 +45,16 @@ export class AuthServiceClient {
     return this.send(AUTH_SERVICE_PATTERNS.LOGIN, loginDto);
   }
 
+  async refresh(refreshToken: string) {
+    this.logger.log('Requesting token refresh');
+    return this.send(AUTH_SERVICE_PATTERNS.REFRESH, { refreshToken });
+  }
+
+  async logout(userId: string) {
+    this.logger.log(`Requesting logout for ${userId}`);
+    return this.send(AUTH_SERVICE_PATTERNS.LOGOUT, { userId });
+  }
+
   async getUser(userId: string) {
     this.logger.log(`Requesting user info for ${userId}`);
     return this.send(AUTH_SERVICE_PATTERNS.GET_USER, { userId });

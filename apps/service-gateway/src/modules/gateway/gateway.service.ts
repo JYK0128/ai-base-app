@@ -19,6 +19,16 @@ export class GatewayService {
     return this.authClient.login(loginDto);
   }
 
+  async refresh(refreshToken: string) {
+    this.logger.log('Handling token refresh');
+    return this.authClient.refresh(refreshToken);
+  }
+
+  async logout(userId: string) {
+    this.logger.log(`Handling logout for ${userId}`);
+    return this.authClient.logout(userId);
+  }
+
   async getUser(userId: string) {
     this.logger.log(`Handling getUser for ${userId}`);
     return this.authClient.getUser(userId);

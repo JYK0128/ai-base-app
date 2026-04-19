@@ -5,12 +5,14 @@ import { HealthCheck,
          MemoryHealthIndicator,
          MicroserviceHealthIndicator } from '@nestjs/terminus';
 
+import { Public } from '@/common/decorators/public.decorator';
 import { ENV } from '@/common/env';
 
 @Controller({
   path: 'health',
   version: VERSION_NEUTRAL,
 })
+@Public()
 export class HealthController {
   constructor(
     private readonly health: HealthCheckService,
