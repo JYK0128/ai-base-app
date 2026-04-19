@@ -1,8 +1,11 @@
-import { createHash } from 'node:crypto';
-
-import { Logger, UnauthorizedException } from '@nestjs/common';
+import { Inject, Logger, UnauthorizedException } from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
+import { JwtService } from '@nestjs/jwt';
 import { ManagerAccountRepository, UserAccountRepository } from '@pkg/database';
+import { Redis } from 'ioredis';
+
+import { ENV } from '@/common/env';
+import { CryptoUtil } from '@/common/utils/crypto.util';
 
 export class LoginCommand {
   constructor(
@@ -19,6 +22,8 @@ export class LoginHandler implements ICommandHandler<LoginCommand> {
   constructor(
     private readonly managerAccountRepository: ManagerAccountRepository,
     private readonly userAccountRepository: UserAccountRepository,
+    private readonly jwtService: JwtService,
+    @Inject('REDIS_CLIENT') private readonly redis: Redis,
   ) {}
 
   async execute(command: LoginCommand) {
@@ -48,18 +53,35 @@ export class LoginHandler implements ICommandHandler<LoginCommand> {
     throw new UnauthorizedException('이메일 또는 비밀번호가 일치하지 않습니다.');
   }
 
-  private buildLoginResponse(
+  private async buildLoginResponse(
     account: { id: string, email: string, password: string, accountType: 'manager' | 'user' },
     password: string,
     clientIp: string,
   ) {
-    if (account.password !== password) {
+    const isPasswordMatch = await CryptoUtil.comparePassword(password, account.password);
+    if (!isPasswordMatch) {
       throw new UnauthorizedException('이메일 또는 비밀번호가 일치하지 않습니다.');
     }
 
-    const accessToken = createHash('sha256')
-      .update(`${account.id}:${account.email}:${Date.now()}`)
-      .digest('hex');
+    const payload = {
+      sub: account.id,
+      email: account.email,
+      accountType: account.accountType,
+    };
+
+    const accessToken = await this.jwtService.signAsync(payload);
+    const refreshToken = await this.jwtService.signAsync(payload, {
+      secret: ENV.JWT_REFRESH_SECRET,
+      expiresIn: ENV.JWT_REFRESH_EXPIRES_IN,
+    });
+
+    // Redis에 Refresh Token 저장 (Key: auth:refresh:<userId>, TTL 설정)
+    await this.redis.set(
+      `auth:refresh:${account.id}`,
+      refreshToken,
+      'EX',
+      ENV.JWT_REFRESH_EXPIRES_IN,
+    );
 
     return {
       userId: account.id,
@@ -67,6 +89,7 @@ export class LoginHandler implements ICommandHandler<LoginCommand> {
       accountType: account.accountType,
       clientIp,
       accessToken,
+      refreshToken,
     };
   }
 }

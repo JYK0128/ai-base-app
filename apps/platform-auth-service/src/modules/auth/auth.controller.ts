@@ -3,6 +3,8 @@ import { CommandBus, EventBus, QueryBus } from '@nestjs/cqrs';
 import { EventPattern, MessagePattern, Payload } from '@nestjs/microservices';
 
 import { LoginCommand } from './commands/login.handler';
+import { LogoutCommand } from './commands/logout.handler';
+import { RefreshTokenCommand } from './commands/refresh-token.handler';
 import { AuthNotifiedEvent } from './events/auth-notified.handler';
 import { GetUserInfoQuery } from './queries/get-user-info.handler';
 
@@ -21,6 +23,16 @@ export class AuthController {
     return this.commandBus.execute(
       new LoginCommand(data.email, data.password, data.clientIp),
     );
+  }
+
+  @MessagePattern('auth.refresh')
+  async handleRefresh(@Payload() data: { refreshToken: string }) {
+    return this.commandBus.execute(new RefreshTokenCommand(data.refreshToken));
+  }
+
+  @MessagePattern('auth.logout')
+  async handleLogout(@Payload() data: { userId: string }) {
+    return this.commandBus.execute(new LogoutCommand(data.userId));
   }
 
   @MessagePattern('auth.get_user')

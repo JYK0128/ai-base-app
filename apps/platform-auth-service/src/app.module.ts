@@ -12,6 +12,7 @@ import { RpcLoggingInterceptor } from '@/common/interceptors/rpc-logging.interce
 import { RpcTracingInterceptor } from '@/common/interceptors/rpc-tracing.interceptor';
 import { AuthModule } from '@/modules/auth/auth.module';
 import { HealthModule } from '@/modules/health/health.module';
+import { RedisModule } from '@/modules/redis/redis.module';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { HealthModule } from '@/modules/health/health.module';
         },
       },
     }),
+    RedisModule,
     AuthModule,
     HealthModule,
   ],
