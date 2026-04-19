@@ -4,7 +4,9 @@ export interface EnvConfig {
   PORT: number
   RABBITMQ_URL: string
   JWT_ACCESS_SECRET: string
+  JWT_ACCESS_EXPIRES_IN: number
   AUTH_SERVICE_URL: string
+  REDIS_URL?: string
   NODE_ENV: string
 }
 
@@ -18,6 +20,8 @@ export const ENV: EnvConfig = {
   PORT: Number(getEnv('PORT')),
   RABBITMQ_URL: getEnv('RABBITMQ_URL'),
   JWT_ACCESS_SECRET: getEnv('JWT_ACCESS_SECRET'),
+  JWT_ACCESS_EXPIRES_IN: Number(getEnv('JWT_ACCESS_EXPIRES_IN')),
   AUTH_SERVICE_URL: getEnv('AUTH_SERVICE_URL'),
+  REDIS_URL: process.env['REDIS_URL'],
   NODE_ENV: process.env['NODE_ENV'] || 'development',
 } as const;
