@@ -1,6 +1,7 @@
-import { Inject, Logger } from '@nestjs/common';
+import { Logger } from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { Redis } from 'ioredis';
+
+import { RedisService } from '../../redis/redis.service';
 
 export class LogoutCommand {
   constructor(public readonly userId: string) {}
@@ -11,15 +12,14 @@ export class LogoutHandler implements ICommandHandler<LogoutCommand> {
   private readonly logger = new Logger(LogoutHandler.name);
 
   constructor(
-    @Inject('REDIS_CLIENT') private readonly redis: Redis,
+    private readonly redisService: RedisService,
   ) {}
 
   async execute(command: LogoutCommand) {
     const { userId } = command;
     this.logger.log(`Executing LogoutCommand for user: ${userId}`);
 
-    // Redis에서 Refresh Token 삭제
-    await this.redis.del(`auth:refresh:${userId}`);
+    await this.redisService.del(`refresh:${userId}`);
 
     return { success: true };
   }

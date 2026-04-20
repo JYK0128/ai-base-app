@@ -7,6 +7,7 @@ import { databaseConfig } from '@pkg/database';
 import { ClsModule } from 'nestjs-cls';
 import { LoggerModule } from 'nestjs-pino';
 
+import { ENV } from '@/common/env';
 import { RpcExceptionFilter } from '@/common/filters/rpc-exception.filter';
 import { RpcLoggingInterceptor } from '@/common/interceptors/rpc-logging.interceptor';
 import { RpcTracingInterceptor } from '@/common/interceptors/rpc-tracing.interceptor';
@@ -32,7 +33,12 @@ import { RedisModule } from '@/modules/redis/redis.module';
         },
       },
     }),
-    RedisModule,
+    RedisModule.forRoot({
+      host: new URL(ENV.REDIS_URL).hostname,
+      port: Number(new URL(ENV.REDIS_URL).port) || 6379,
+      password: new URL(ENV.REDIS_URL).password || undefined,
+      maxRetriesPerRequest: null,
+    }),
     AuthModule,
     HealthModule,
   ],

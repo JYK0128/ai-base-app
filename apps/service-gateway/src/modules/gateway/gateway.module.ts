@@ -12,13 +12,10 @@ import { GatewayService } from './gateway.service';
     ClientsModule.register([
       {
         name: 'AUTH_SERVICE',
-        transport: Transport.RMQ,
+        transport: Transport.TCP,
         options: {
-          urls: [ENV.RABBITMQ_URL],
-          queue: 'auth_queue',
-          queueOptions: {
-            durable: false,
-          },
+          host: ENV.AUTH_SERVICE_HOST,
+          port: ENV.AUTH_SERVICE_PORT,
         },
       },
     ]),

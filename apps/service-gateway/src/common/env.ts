@@ -2,11 +2,11 @@ import process from 'node:process';
 
 export interface EnvConfig {
   PORT: number
-  RABBITMQ_URL: string
   JWT_ACCESS_SECRET: string
   JWT_ACCESS_EXPIRES_IN: number
-  AUTH_SERVICE_URL: string
-  REDIS_URL?: string
+  AUTH_SERVICE_HOST: string
+  AUTH_SERVICE_PORT: number
+  REDIS_URL: string
   NODE_ENV: string
 }
 
@@ -18,10 +18,10 @@ const getEnv = (key: string): string => {
 
 export const ENV: EnvConfig = {
   PORT: Number(getEnv('PORT')),
-  RABBITMQ_URL: getEnv('RABBITMQ_URL'),
   JWT_ACCESS_SECRET: getEnv('JWT_ACCESS_SECRET'),
   JWT_ACCESS_EXPIRES_IN: Number(getEnv('JWT_ACCESS_EXPIRES_IN')),
-  AUTH_SERVICE_URL: getEnv('AUTH_SERVICE_URL'),
-  REDIS_URL: process.env['REDIS_URL'],
-  NODE_ENV: process.env['NODE_ENV'] || 'development',
+  AUTH_SERVICE_HOST: getEnv('AUTH_SERVICE_HOST'),
+  AUTH_SERVICE_PORT: Number(getEnv('AUTH_SERVICE_PORT')),
+  REDIS_URL: getEnv('REDIS_URL'),
+  NODE_ENV: getEnv('NODE_ENV'),
 } as const;

@@ -2,7 +2,6 @@ import process from 'node:process';
 
 export interface EnvConfig {
   PORT: number
-  RABBITMQ_URL: string
   DATABASE_URL: string
   JWT_ACCESS_SECRET: string
   JWT_REFRESH_SECRET: string
@@ -10,6 +9,7 @@ export interface EnvConfig {
   JWT_REFRESH_EXPIRES_IN: number
   REDIS_URL: string
   NODE_ENV: string
+  TCP_PORT: number
 }
 
 const getEnv = (key: string): string => {
@@ -20,12 +20,12 @@ const getEnv = (key: string): string => {
 
 export const ENV: EnvConfig = {
   PORT: Number(getEnv('PORT')),
-  RABBITMQ_URL: getEnv('RABBITMQ_URL'),
   DATABASE_URL: getEnv('DATABASE_URL'),
   JWT_ACCESS_SECRET: getEnv('JWT_ACCESS_SECRET'),
   JWT_REFRESH_SECRET: getEnv('JWT_REFRESH_SECRET'),
   JWT_ACCESS_EXPIRES_IN: Number(getEnv('JWT_ACCESS_EXPIRES_IN')),
   JWT_REFRESH_EXPIRES_IN: Number(getEnv('JWT_REFRESH_EXPIRES_IN')),
   REDIS_URL: getEnv('REDIS_URL'),
-  NODE_ENV: process.env['NODE_ENV'] || 'development',
+  NODE_ENV: getEnv('NODE_ENV'),
+  TCP_PORT: Number(getEnv('TCP_PORT')),
 } as const;

@@ -11,22 +11,19 @@ async function bootstrap() {
   app.useLogger(logger);
 
   app.connectMicroservice<MicroserviceOptions>({
-    transport: Transport.RMQ,
+    transport: Transport.TCP,
     options: {
-      urls: [ENV.RABBITMQ_URL],
-      queue: 'auth_queue',
-      queueOptions: {
-        durable: false,
-      },
+      host: '0.0.0.0',
+      port: ENV.TCP_PORT,
     },
-  });
+  }, { inheritAppConfig: true });
 
   app.enableShutdownHooks();
   await app.startAllMicroservices();
   await app.listen(ENV.PORT);
 
-  logger.log(`Platform Auth Service health server is listening on port ${ENV.PORT}`);
-  logger.log('Platform Auth Service is consuming RabbitMQ...');
+  logger.log(`Platform Auth Service Health Check is listening on port ${ENV.PORT}`);
+  logger.log(`Platform Auth Service Microservice (TCP) is listening on port ${ENV.TCP_PORT}`);
 }
 
 void bootstrap();

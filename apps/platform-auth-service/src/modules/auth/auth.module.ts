@@ -6,6 +6,7 @@ import { ManagerAccount, UserAccount } from '@pkg/database';
 
 import { ENV } from '@/common/env';
 
+import { RedisModule } from '../redis/redis.module';
 import { AuthController } from './auth.controller';
 import { Handlers } from './handlers';
 
@@ -20,6 +21,7 @@ import { Handlers } from './handlers';
       secret: ENV.JWT_ACCESS_SECRET,
       signOptions: { expiresIn: ENV.JWT_ACCESS_EXPIRES_IN },
     }),
+    RedisModule.forFeature({ namespace: 'auth' }),
   ],
   controllers: [AuthController],
   providers: [...Handlers],

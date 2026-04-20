@@ -1,10 +1,11 @@
-import { Inject, Logger, UnauthorizedException } from '@nestjs/common';
+import { Logger, UnauthorizedException } from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { JwtService } from '@nestjs/jwt';
-import { Redis } from 'ioredis';
 
 import { ENV } from '@/common/env';
 import { JWTPayload } from '@/common/types/request.type';
+
+import { RedisService } from '../../redis/redis.service';
 
 export class RefreshTokenCommand {
   constructor(public readonly refreshToken: string) {}
@@ -16,7 +17,7 @@ export class RefreshTokenHandler implements ICommandHandler<RefreshTokenCommand>
 
   constructor(
     private readonly jwtService: JwtService,
-    @Inject('REDIS_CLIENT') private readonly redis: Redis,
+    private readonly redisService: RedisService,
   ) {}
 
   async execute(command: RefreshTokenCommand) {
@@ -30,7 +31,7 @@ export class RefreshTokenHandler implements ICommandHandler<RefreshTokenCommand>
       });
 
       // 2. Redis에 저장된 토큰과 일치하는지 확인
-      const storedToken = await this.redis.get(`auth:refresh:${payload.sub}`);
+      const storedToken = await this.redisService.get(`refresh:${payload.sub}`);
       if (!storedToken || storedToken !== refreshToken) {
         throw new UnauthorizedException('유효하지 않거나 만료된 세션입니다.');
       }
@@ -49,10 +50,9 @@ export class RefreshTokenHandler implements ICommandHandler<RefreshTokenCommand>
         expiresIn: ENV.JWT_REFRESH_EXPIRES_IN,
       });
 
-      await this.redis.set(
-        `auth:refresh:${payload.sub}`,
+      await this.redisService.set(
+        `refresh:${payload.sub}`,
         newRefreshToken,
-        'EX',
         ENV.JWT_REFRESH_EXPIRES_IN,
       );
 

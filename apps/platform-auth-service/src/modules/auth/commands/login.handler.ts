@@ -1,11 +1,13 @@
-import { Inject, Logger, UnauthorizedException } from '@nestjs/common';
+import { MikroORM } from '@mikro-orm/core';
+import { Logger, UnauthorizedException } from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { JwtService } from '@nestjs/jwt';
-import { ManagerAccountRepository, UserAccountRepository } from '@pkg/database';
-import { Redis } from 'ioredis';
+import { ManagerAccount, ManagerAccountRepository, UserAccount, UserAccountRepository } from '@pkg/database';
 
 import { ENV } from '@/common/env';
 import { CryptoUtil } from '@/common/utils/crypto.util';
+
+import { RedisService } from '../../redis/redis.service';
 
 export class LoginCommand {
   constructor(
@@ -23,14 +25,17 @@ export class LoginHandler implements ICommandHandler<LoginCommand> {
     private readonly managerAccountRepository: ManagerAccountRepository,
     private readonly userAccountRepository: UserAccountRepository,
     private readonly jwtService: JwtService,
-    @Inject('REDIS_CLIENT') private readonly redis: Redis,
+    private readonly redisService: RedisService,
+    private readonly orm: MikroORM,
   ) {}
 
   async execute(command: LoginCommand) {
     const { email, password, clientIp } = command;
     this.logger.log(`Executing LoginCommand for user: ${email}`);
 
-    const managerAccount = await this.managerAccountRepository.findOne({ email });
+    const em = this.orm.em.fork();
+
+    const managerAccount = await em.findOne(ManagerAccount, { email });
     if (managerAccount) {
       return this.buildLoginResponse({
         id: managerAccount.id,
@@ -40,7 +45,7 @@ export class LoginHandler implements ICommandHandler<LoginCommand> {
       }, password, clientIp);
     }
 
-    const userAccount = await this.userAccountRepository.findOne({ email });
+    const userAccount = await em.findOne(UserAccount, { email });
     if (userAccount) {
       return this.buildLoginResponse({
         id: userAccount.id,
@@ -76,10 +81,9 @@ export class LoginHandler implements ICommandHandler<LoginCommand> {
     });
 
     // Redis에 Refresh Token 저장 (Key: auth:refresh:<userId>, TTL 설정)
-    await this.redis.set(
-      `auth:refresh:${account.id}`,
+    await this.redisService.set(
+      `refresh:${account.id}`,
       refreshToken,
-      'EX',
       ENV.JWT_REFRESH_EXPIRES_IN,
     );
 
