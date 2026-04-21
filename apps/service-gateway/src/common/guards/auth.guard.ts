@@ -2,6 +2,7 @@ import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from
 import { Reflector } from '@nestjs/core';
 import { JwtService } from '@nestjs/jwt';
 import { Request } from 'express';
+import { ClsService } from 'nestjs-cls';
 
 import { IS_PUBLIC_KEY } from '@/common/decorators/public.decorator';
 
@@ -12,6 +13,7 @@ export class AuthGuard implements CanActivate {
   constructor(
     private readonly jwtService: JwtService,
     private readonly reflector: Reflector,
+    private readonly cls: ClsService,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -35,6 +37,10 @@ export class AuthGuard implements CanActivate {
 
       // request 객체에 유저 정보 저장
       request.user = payload;
+      if (payload.tenantId) {
+        request.headers['x-tenant-id'] = payload.tenantId;
+        this.cls.set('tenantId', payload.tenantId);
+      }
     }
     catch {
       throw new UnauthorizedException('Invalid or expired token');

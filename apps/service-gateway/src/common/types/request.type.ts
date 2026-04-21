@@ -9,6 +9,10 @@ export interface JWTPayload {
   email: string
   /** 계정 유형 (manager | user) */
   accountType: 'manager' | 'user'
+  /** 활성 테넌트 식별자 */
+  tenantId?: string
+  /** 활성 테넌트 타입 */
+  tenantType?: 'organization' | 'site'
   /** 기타 페이로드 정보 */
   [key: string]: unknown
 }
@@ -29,6 +33,8 @@ declare global {
       headers: import('node:http').IncomingHttpHeaders & {
         /** 분산 트레이싱을 위한 트레이스 ID */
         'x-trace-id'?: string
+        /** 활성 테넌트 ID */
+        'x-tenant-id'?: string
         /** 클라이언트의 실제 IP 주소 */
         'x-real-ip'?: string
       }

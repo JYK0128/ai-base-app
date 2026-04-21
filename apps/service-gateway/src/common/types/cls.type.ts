@@ -19,5 +19,6 @@ declare module 'nestjs-cls' {
 
     // 4. 사용자 정보 (로그인 시 채워짐)
     userId?: string
+    tenantId?: string
   }
 }

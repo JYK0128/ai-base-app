@@ -6,7 +6,9 @@
     "dev": "dotenvx run --env=development --convention=nextjs -- nest start --watch",
     "build": "nest build",
     "start": "nest start",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "@mikro-orm/core": "7.0.10",
@@ -49,6 +51,7 @@
     "@types/range-parser": "1.2.7",
     "@types/serve-static": "2.2.0",
     "eslint": "9.39.4",
+    "vitest": "4.1.4",
     "typescript": "6.0.2"
   }
 }

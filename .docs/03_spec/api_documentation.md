@@ -28,6 +28,8 @@
   "userId": "antigravity_user",
   "email": "user@example.com",
   "accountType": "user",
+  "tenantId": "org-123",
+  "tenantType": "organization",
   "clientIp": "127.0.0.1",
   "accessToken": "eyJ...",
   "refreshToken": "eyJ..."
@@ -38,7 +40,7 @@
 
 1. `EventLogInterceptor`가 요청 정보(IP, Method, Path, Body)를 가로채 JSON 로그로 출력합니다.
 2. `AUTH_SERVICE`(RabbitMQ)로 `auth.login` 명령을 전달합니다.
-3. `platform-auth-service`에서 이메일로 계정을 조회하고 비밀번호를 검증한 뒤 JWT를 발급합니다.
+3. `platform-auth-service`에서 이메일로 계정을 조회하고 비밀번호를 검증한 뒤 JWT와 소속 tenant 정보를 발급합니다.
 
 ---
 

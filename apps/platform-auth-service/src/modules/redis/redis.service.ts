@@ -41,4 +41,16 @@ export class RedisService {
   async del(key: string): Promise<number> {
     return this.redisClient.del(this.createKey(key));
   }
+
+  async incr(key: string): Promise<number> {
+    return this.redisClient.incr(this.createKey(key));
+  }
+
+  async expire(key: string, ttl: number): Promise<number> {
+    return this.redisClient.expire(this.createKey(key), ttl);
+  }
+
+  async ttl(key: string): Promise<number> {
+    return this.redisClient.ttl(this.createKey(key));
+  }
 }

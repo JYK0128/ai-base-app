@@ -20,10 +20,12 @@ export class AuthClient {
    * 인증 마이크로서비스로 요청을 보낼 때 공통 메타데이터(traceId 등)를 주입합니다.
    */
   private send<TResult = unknown, TInput extends object = object>(pattern: string, data: TInput) {
+    const tenantId = this.cls.get('tenantId');
     const payload = {
       ...data,
       traceId: this.cls.get('traceId'),
       clientIp: this.cls.get('ip'),
+      ...(tenantId ? { tenantId } : {}),
     };
     return firstValueFrom(this.client.send<TResult>(pattern, payload));
   }

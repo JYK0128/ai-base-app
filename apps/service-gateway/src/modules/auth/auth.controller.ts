@@ -24,7 +24,7 @@ export class AuthController {
     @Body() loginDto: LoginDto,
     @Res({ passthrough: true }) res: Response,
   ) {
-    const { accessToken, refreshToken } = await this.authService.login(loginDto);
+    const { accessToken, refreshToken, ...session } = await this.authService.login(loginDto);
 
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
@@ -34,7 +34,7 @@ export class AuthController {
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
-    return { accessToken };
+    return { accessToken, ...session };
   }
 
   @Public()
@@ -49,7 +49,7 @@ export class AuthController {
       throw new UnauthorizedException('리프레시 토큰이 존재하지 않습니다.');
     }
 
-    const { accessToken, refreshToken: newRefreshToken } = await this.authService.refresh(refreshToken);
+    const { accessToken, refreshToken: newRefreshToken, ...session } = await this.authService.refresh(refreshToken);
 
     if (newRefreshToken) {
       res.cookie('refreshToken', newRefreshToken, {
@@ -61,7 +61,7 @@ export class AuthController {
       });
     }
 
-    return { accessToken };
+    return { accessToken, ...session };
   }
 
   @Post('logout')

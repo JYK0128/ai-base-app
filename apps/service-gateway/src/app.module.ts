@@ -28,6 +28,7 @@ import { HealthModule } from '@/modules/health/health.module';
             traceId: String(req.headers['x-trace-id'] || randomUUID()),
             requestId: randomUUID(),
             sessionId: String(req.cookies.sessionId || ''),
+            tenantId: String(req.headers['x-tenant-id'] || ''),
             ip: req.ip || '',
             realIp: String(req.headers['x-real-ip'] || req.ip || ''),
             userAgent: String(req.headers['user-agent'] || ''),
