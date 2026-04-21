@@ -10,7 +10,7 @@ import { ClsModule } from 'nestjs-cls';
 import { LoggerModule } from 'nestjs-pino';
 
 import { ENV } from '@/common/env';
-import { GlobalExceptionFilter } from '@/common/filters/global-exception.filter';
+import { ExceptionFilter } from '@/common/filters/exception.filter';
 import { AuthGuard } from '@/common/guards/auth.guard';
 import { TransformInterceptor } from '@/common/interceptors/transform.interceptor';
 import { ContextMiddleware } from '@/common/middlewares/context.middleware';
@@ -76,7 +76,7 @@ import { ProfileModule } from './modules/profile/profile.module';
   providers: [
     {
       provide: APP_FILTER,
-      useClass: GlobalExceptionFilter,
+      useClass: ExceptionFilter,
     },
     {
       provide: APP_GUARD,

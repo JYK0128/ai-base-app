@@ -9,8 +9,8 @@ import { LoggerModule } from 'nestjs-pino';
 
 import { ENV } from '@/common/env';
 import { RpcExceptionFilter } from '@/common/filters/rpc-exception.filter';
+import { RpcContextInterceptor } from '@/common/interceptors/rpc-context.interceptor';
 import { RpcLoggingInterceptor } from '@/common/interceptors/rpc-logging.interceptor';
-import { RpcTracingInterceptor } from '@/common/interceptors/rpc-tracing.interceptor';
 import { AuthModule } from '@/modules/auth/auth.module';
 import { HealthModule } from '@/modules/health/health.module';
 import { RedisModule } from '@/modules/redis/redis.module';
@@ -45,7 +45,7 @@ import { RedisModule } from '@/modules/redis/redis.module';
   providers: [
     {
       provide: APP_INTERCEPTOR,
-      useClass: RpcTracingInterceptor,
+      useClass: RpcContextInterceptor,
     },
     {
       provide: APP_INTERCEPTOR,

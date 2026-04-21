@@ -1,18 +1,10 @@
-import { ArgumentsHost, Catch, ExceptionFilter, HttpException, HttpStatus } from '@nestjs/common';
+import { ArgumentsHost, Catch, ExceptionFilter as NestExceptionFilter, HttpException, HttpStatus } from '@nestjs/common';
 import { Response } from 'express';
 import { ClsService } from 'nestjs-cls';
 
 import type { ApiResponse } from '../types/response.type';
 
-/** 마이크로서비스로부터 전달받은 에러 객체 인터페이스 */
-interface MicroserviceError {
-  status?: number
-  statusCode?: number
-  message?: string
-  name?: string
-  details?: unknown
-}
-
+/** 마이크로서비스가 사용하는 표준 규격 */
 interface ErrorInfo {
   status: number
   message: string
@@ -21,27 +13,25 @@ interface ErrorInfo {
 }
 
 @Catch()
-export class GlobalExceptionFilter implements ExceptionFilter {
+export class ExceptionFilter implements NestExceptionFilter {
   constructor(private readonly cls: ClsService) {}
 
   catch(exception: unknown, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
 
-    // 1. 에러 유형 판별 및 정보 추출
     let errorInfo: ErrorInfo;
 
     if (exception instanceof HttpException) {
       errorInfo = this.handleHttpException(exception);
     }
-    else if (this.isMicroserviceError(exception)) {
-      errorInfo = this.handleRpcException(exception);
+    else if (this.isServiceError(exception)) {
+      errorInfo = this.handleServiceException(exception);
     }
     else {
       errorInfo = this.handleUnknownException(exception);
     }
 
-    // 2. 표준 응답 객체 생성
     const errorResponse: ApiResponse<null> = {
       success: false,
       data: null,
@@ -54,11 +44,10 @@ export class GlobalExceptionFilter implements ExceptionFilter {
       traceId: this.cls.get('traceId') || '',
     };
 
-    // 3. 응답 전송
     response.status(errorInfo.status).json(errorResponse);
   }
 
-  /** NestJS 표준 예외 처리 */
+  /** HTTP 예외 처리 */
   private handleHttpException(exception: HttpException): ErrorInfo {
     const status = exception.getStatus();
     const res = exception.getResponse();
@@ -91,12 +80,12 @@ export class GlobalExceptionFilter implements ExceptionFilter {
   }
 
   /** 마이크로서비스 에러(RPC) 처리 */
-  private handleRpcException(error: MicroserviceError): ErrorInfo {
+  private handleServiceException(exception: ErrorInfo): ErrorInfo {
     return {
-      status: error.status || error.statusCode || HttpStatus.INTERNAL_SERVER_ERROR,
-      message: error.message || 'Internal server error',
-      code: error.name || 'RpcError',
-      details: error.details || null,
+      status: exception.status,
+      message: exception.message,
+      code: exception.code,
+      details: exception.details,
     };
   }
 
@@ -111,11 +100,11 @@ export class GlobalExceptionFilter implements ExceptionFilter {
   }
 
   /** 마이크로서비스 에러 판별 가드 */
-  private isMicroserviceError(exception: unknown): exception is MicroserviceError {
+  private isServiceError(exception: unknown): exception is ErrorInfo {
     return !!(
       exception
       && typeof exception === 'object'
-      && ('status' in exception || 'statusCode' in exception || 'message' in exception)
+      && ('status' in exception || 'code' in exception || 'message' in exception)
     );
   }
 }

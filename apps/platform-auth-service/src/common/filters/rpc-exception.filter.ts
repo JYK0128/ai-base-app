@@ -1,6 +1,14 @@
 import { Catch, ExceptionFilter, HttpException, HttpStatus } from '@nestjs/common';
+import { RpcException } from '@nestjs/microservices';
 import { ClsService } from 'nestjs-cls';
 import { throwError } from 'rxjs';
+
+interface ErrorInfo {
+  status: number
+  message: string
+  code: string
+  details: unknown
+}
 
 @Catch()
 export class RpcExceptionFilter implements ExceptionFilter {
@@ -10,41 +18,100 @@ export class RpcExceptionFilter implements ExceptionFilter {
     const traceId = this.cls.get('traceId') || 'internal';
     const requestId = this.cls.get('requestId') || 'internal';
 
-    let status = HttpStatus.INTERNAL_SERVER_ERROR;
-    let message = 'Internal server error';
-    let code = 'InternalServerError';
-    let details: unknown = null;
+    let errorInfo: ErrorInfo;
 
     if (exception instanceof HttpException) {
-      status = exception.getStatus();
-      const response = exception.getResponse();
-
-      if (typeof response === 'string') {
-        message = response;
-      }
-      else {
-        const resObj = response as Record<string, unknown>;
-        message = (resObj['message'] as string) || message;
-        code = (resObj['error'] as string) || exception.constructor.name;
-        details = resObj['message'] || null;
-      }
+      errorInfo = this.handleHttpException(exception);
     }
-    else if (exception instanceof Error) {
-      message = exception.message;
-      code = exception.name;
+    else if (exception instanceof RpcException) {
+      errorInfo = this.handleRpcException(exception);
     }
     else {
-      message = String(exception);
+      errorInfo = this.handleUnknownException(exception);
     }
 
-    // 게이트웨이가 기대하는 인터페이스 형태로 반환
     return throwError(() => ({
-      status,
-      message,
-      name: code,
-      details,
+      status: errorInfo.status,
+      message: errorInfo.message,
+      code: errorInfo.code,
+      details: errorInfo.details,
       traceId,
       requestId,
     }));
+  }
+
+  private handleHttpException(exception: HttpException): ErrorInfo {
+    const status = exception.getStatus();
+    const res = exception.getResponse();
+    let message: string;
+    let code: string = exception.constructor.name;
+    let details: unknown = null;
+
+    if (typeof res === 'string') {
+      message = res;
+    }
+    else {
+      const resObj = res as Record<string, unknown>;
+      const resMessage = resObj['message'];
+
+      message = Array.isArray(resMessage)
+        ? resMessage.join(', ')
+        : (resMessage as string) || JSON.stringify(resObj);
+
+      const resError = resObj['error'] || resObj['code'];
+      if (typeof resError === 'string') {
+        code = resError;
+      }
+
+      if (Array.isArray(resMessage)) {
+        details = resMessage;
+      }
+    }
+
+    return { status, message, code, details };
+  }
+
+  private handleRpcException(exception: RpcException): ErrorInfo {
+    const error = exception.getError();
+
+    // 기본값 (fallback)
+    const defaultError: ErrorInfo = {
+      status: 500,
+      message: 'Internal server error',
+      code: 'INTERNAL_ERROR',
+      details: null,
+    };
+
+    // 1. string 형태 (ex: "something went wrong")
+    if (typeof error === 'string') {
+      return {
+        ...defaultError,
+        message: error,
+      };
+    }
+
+    // 2. object 형태
+    if (error && typeof error === 'object') {
+      const err = error as Partial<ErrorInfo>;
+
+      return {
+        status: err.status ?? defaultError.status,
+        message: err.message ?? defaultError.message,
+        code: err.code ?? defaultError.code,
+        details: err.details ?? err,
+      };
+    }
+
+    // 3. 예상 못한 타입
+    return defaultError;
+  }
+
+  private handleUnknownException(exception: unknown): ErrorInfo {
+    return {
+      status: HttpStatus.INTERNAL_SERVER_ERROR,
+      message: exception instanceof Error ? exception.message : 'An unexpected error occurred',
+      code: exception instanceof Error ? exception.name : 'InternalServerError',
+      details: null,
+    };
   }
 }

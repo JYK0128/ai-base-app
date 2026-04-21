@@ -5,7 +5,7 @@ import { ClsService } from 'nestjs-cls';
 import { Observable } from 'rxjs';
 
 @Injectable()
-export class RpcTracingInterceptor implements NestInterceptor {
+export class RpcContextInterceptor implements NestInterceptor {
   constructor(private readonly cls: ClsService) {}
 
   intercept(context: ExecutionContext, next: CallHandler): Observable<unknown> {

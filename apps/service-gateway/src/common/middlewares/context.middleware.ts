@@ -25,7 +25,6 @@ export class ContextMiddleware implements NestMiddleware {
     const traceId = this.cls.get('traceId') || randomUUID();
     const requestId = this.cls.get('requestId') || randomUUID();
 
-    // TODO: Body Or Header
     res.setHeader('x-trace-id', traceId);
     res.setHeader('x-request-id', requestId);
 
