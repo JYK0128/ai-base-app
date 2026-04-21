@@ -13,4 +13,6 @@ export const AUTH_SERVICE_PATTERNS = {
   REFRESH: 'auth.refresh',
   /** 로그아웃 요청 */
   LOGOUT: 'auth.logout',
+  /** 권한 조회 요청 */
+  PERMISSIONS: 'auth.permissions',
 } as const;
