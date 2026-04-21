@@ -6,7 +6,6 @@ export interface EnvConfig {
   JWT_ACCESS_EXPIRES_IN: number
   AUTH_SERVICE_HOST: string
   AUTH_SERVICE_PORT: number
-  REDIS_URL: string
   NODE_ENV: string
 }
 
@@ -22,6 +21,5 @@ export const ENV: EnvConfig = {
   JWT_ACCESS_EXPIRES_IN: Number(getEnv('JWT_ACCESS_EXPIRES_IN')),
   AUTH_SERVICE_HOST: getEnv('AUTH_SERVICE_HOST'),
   AUTH_SERVICE_PORT: Number(getEnv('AUTH_SERVICE_PORT')),
-  REDIS_URL: getEnv('REDIS_URL'),
   NODE_ENV: getEnv('NODE_ENV'),
 } as const;

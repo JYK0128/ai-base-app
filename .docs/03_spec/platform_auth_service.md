@@ -17,6 +17,6 @@
 
 ## 4. 핵심 API
 
-* `login/select-tenant`: 계정 인증 및 활동 대상 테넌트 지정
+* `login/select-tenant`: 이메일/비밀번호 계정 인증 및 활동 대상 테넌트 지정
 * `invite/verify`: 운영진 초대 관리 및 자격 검증
 * `permissions`: 현재 컨텍스트에 따른 상세 접근 권한 조회

@@ -580,135 +580,6 @@ importers:
         specifier: 6.0.2
         version: 6.0.2
 
-  web/platform-admin-auth:
-    dependencies:
-      '@pkg/config':
-        specifier: workspace:*
-        version: link:../../packages/config
-      '@pkg/utils':
-        specifier: workspace:*
-        version: link:../../packages/utils
-      lucide-react:
-        specifier: 1.8.0
-        version: 1.8.0(react@19.2.5)
-      react:
-        specifier: 19.2.5
-        version: 19.2.5
-      react-dom:
-        specifier: 19.2.5
-        version: 19.2.5(react@19.2.5)
-    devDependencies:
-      '@originjs/vite-plugin-federation':
-        specifier: 1.4.1
-        version: 1.4.1
-      '@types/node':
-        specifier: 25.6.0
-        version: 25.6.0
-      '@types/react':
-        specifier: 19.2.14
-        version: 19.2.14
-      '@types/react-dom':
-        specifier: 19.2.3
-        version: 19.2.3(@types/react@19.2.14)
-      '@vitejs/plugin-react':
-        specifier: 6.0.1
-        version: 6.0.1(vite@8.0.8(@types/node@25.6.0)(esbuild@0.27.7)(jiti@2.6.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3))
-      eslint:
-        specifier: 10.2.0
-        version: 10.2.0(jiti@2.6.1)
-      typescript:
-        specifier: 6.0.2
-        version: 6.0.2
-      vite:
-        specifier: 8.0.8
-        version: 8.0.8(@types/node@25.6.0)(esbuild@0.27.7)(jiti@2.6.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
-
-  web/platform-admin-host:
-    dependencies:
-      '@pkg/config':
-        specifier: workspace:*
-        version: link:../../packages/config
-      '@pkg/utils':
-        specifier: workspace:*
-        version: link:../../packages/utils
-      lucide-react:
-        specifier: 1.8.0
-        version: 1.8.0(react@19.2.5)
-      react:
-        specifier: 19.2.5
-        version: 19.2.5
-      react-dom:
-        specifier: 19.2.5
-        version: 19.2.5(react@19.2.5)
-    devDependencies:
-      '@originjs/vite-plugin-federation':
-        specifier: 1.4.1
-        version: 1.4.1
-      '@types/node':
-        specifier: 25.6.0
-        version: 25.6.0
-      '@types/react':
-        specifier: 19.2.14
-        version: 19.2.14
-      '@types/react-dom':
-        specifier: 19.2.3
-        version: 19.2.3(@types/react@19.2.14)
-      '@vitejs/plugin-react':
-        specifier: 6.0.1
-        version: 6.0.1(vite@8.0.8(@types/node@25.6.0)(esbuild@0.27.7)(jiti@2.6.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3))
-      eslint:
-        specifier: 10.2.0
-        version: 10.2.0(jiti@2.6.1)
-      typescript:
-        specifier: 6.0.2
-        version: 6.0.2
-      vite:
-        specifier: 8.0.8
-        version: 8.0.8(@types/node@25.6.0)(esbuild@0.27.7)(jiti@2.6.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
-
-  web/platform-admin-mfe-dashboard:
-    dependencies:
-      '@pkg/config':
-        specifier: workspace:*
-        version: link:../../packages/config
-      '@pkg/utils':
-        specifier: workspace:*
-        version: link:../../packages/utils
-      lucide-react:
-        specifier: 1.8.0
-        version: 1.8.0(react@19.2.5)
-      react:
-        specifier: 19.2.5
-        version: 19.2.5
-      react-dom:
-        specifier: 19.2.5
-        version: 19.2.5(react@19.2.5)
-    devDependencies:
-      '@originjs/vite-plugin-federation':
-        specifier: 1.4.1
-        version: 1.4.1
-      '@types/node':
-        specifier: 25.6.0
-        version: 25.6.0
-      '@types/react':
-        specifier: 19.2.14
-        version: 19.2.14
-      '@types/react-dom':
-        specifier: 19.2.3
-        version: 19.2.3(@types/react@19.2.14)
-      '@vitejs/plugin-react':
-        specifier: 6.0.1
-        version: 6.0.1(vite@8.0.8(@types/node@25.6.0)(esbuild@0.27.7)(jiti@2.6.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3))
-      eslint:
-        specifier: 10.2.0
-        version: 10.2.0(jiti@2.6.1)
-      typescript:
-        specifier: 6.0.2
-        version: 6.0.2
-      vite:
-        specifier: 8.0.8
-        version: 8.0.8(@types/node@25.6.0)(esbuild@0.27.7)(jiti@2.6.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
-
 packages:
 
   '@acuminous/bitsyntax@0.1.2':
@@ -2169,10 +2040,6 @@ packages:
 
   '@open-draft/until@2.1.0':
     resolution: {integrity: sha512-U69T3ItWHvLwGg5eJ0n3I62nWuE6ilHlmz7zM0npLBRvPRd7e6NYmg54vvRtP5mZG7kZqZCFVdsTWo7BPtBujg==}
-
-  '@originjs/vite-plugin-federation@1.4.1':
-    resolution: {integrity: sha512-Uo08jW5pj1t58OUKuZNkmzcfTN2pqeVuAWCCiKf/75/oll4Efq4cHOqSE1FXMlvwZNGDziNdDyBbQ5IANem3CQ==}
-    engines: {node: '>=14.0.0', pnpm: '>=7.0.1'}
 
   '@oxc-project/types@0.124.0':
     resolution: {integrity: sha512-VBFWMTBvHxS11Z5Lvlr3IWgrwhMTXV+Md+EQF0Xf60+wAdsGFTBx7X7K/hP4pi8N7dcm1RvcHwDxZ16Qx8keUg==}
@@ -6560,18 +6427,9 @@ packages:
     peerDependencies:
       react: ^16.5.1 || ^17.0.0 || ^18.0.0 || ^19.0.0
 
-  lucide-react@1.8.0:
-    resolution: {integrity: sha512-WuvlsjngSk7TnTBJ1hsCy3ql9V9VOdcPkd3PKcSmM34vJD8KG6molxz7m7zbYFgICwsanQWmJ13JlYs4Zp7Arw==}
-    peerDependencies:
-      react: ^16.5.1 || ^17.0.0 || ^18.0.0 || ^19.0.0
-
   lz-string@1.5.0:
     resolution: {integrity: sha512-h5bgJWpxJNswbU7qCrV0tIKQCaS3blPDrqKWx+QxzuzL1zGUzij9XCWLrSLsJPu5t+eWA/ycetzYAO5IOMcWAQ==}
     hasBin: true
-
-  magic-string@0.27.0:
-    resolution: {integrity: sha512-8UnnX2PeRAPZuN12svgR9j7M1uWMovg/CEnIwIG0LFkXSJJe4PdfUGiTGl8V9bsBHFUtfVINcSyYxd7q+kx9fA==}
-    engines: {node: '>=12'}
 
   magic-string@0.30.17:
     resolution: {integrity: sha512-sNPKHvyjVf7gyjwS4xGTaW/mCnF8wnjtifKBEhxfZ7E/S8tQ0rssrwGNn6q8JH/ohItJfSQp9mBtQYuTlH5QnA==}
@@ -10179,11 +10037,6 @@ snapshots:
       outvariant: 1.4.3
 
   '@open-draft/until@2.1.0': {}
-
-  '@originjs/vite-plugin-federation@1.4.1':
-    dependencies:
-      estree-walker: 3.0.3
-      magic-string: 0.27.0
 
   '@oxc-project/types@0.124.0': {}
 
@@ -14837,15 +14690,7 @@ snapshots:
     dependencies:
       react: 19.0.0
 
-  lucide-react@1.8.0(react@19.2.5):
-    dependencies:
-      react: 19.2.5
-
   lz-string@1.5.0: {}
-
-  magic-string@0.27.0:
-    dependencies:
-      '@jridgewell/sourcemap-codec': 1.5.5
 
   magic-string@0.30.17:
     dependencies:

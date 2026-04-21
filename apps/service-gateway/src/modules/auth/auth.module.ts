@@ -3,15 +3,16 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
 
 import { ENV } from '@/common/env';
 
-import { AuthServiceClient } from './clients/auth-service.client';
-import { GatewayController } from './gateway.controller';
-import { GatewayService } from './gateway.service';
+import { AuthController } from './auth.controller';
+import { AuthService } from './auth.service';
+import { AUTH_SERVICE } from './auth.constants';
+import { AuthClient } from './auth.client';
 
 @Module({
   imports: [
     ClientsModule.register([
       {
-        name: 'AUTH_SERVICE',
+        name: AUTH_SERVICE,
         transport: Transport.TCP,
         options: {
           host: ENV.AUTH_SERVICE_HOST,
@@ -20,8 +21,8 @@ import { GatewayService } from './gateway.service';
       },
     ]),
   ],
-  controllers: [GatewayController],
-  providers: [GatewayService, AuthServiceClient],
-  exports: [GatewayService, AuthServiceClient],
+  controllers: [AuthController],
+  providers: [AuthService, AuthClient],
+  exports: [AuthService, AuthClient],
 })
-export class GatewayModule {}
+export class AuthModule {}

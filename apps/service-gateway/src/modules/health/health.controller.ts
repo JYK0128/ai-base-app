@@ -33,15 +33,11 @@ export class HealthController {
   ready() {
     return this.health.check([
       () =>
-        this.microservice.pingCheck('rabbitmq', {
-          transport: Transport.RMQ,
-          timeout: 3000,
+        this.microservice.pingCheck('auth-service', {
+          transport: Transport.TCP,
           options: {
-            urls: [ENV.RABBITMQ_URL],
-            queue: 'auth_queue',
-            queueOptions: {
-              durable: false,
-            },
+            host: ENV.AUTH_SERVICE_HOST,
+            port: ENV.AUTH_SERVICE_PORT,
           },
         }),
     ]);

@@ -6,7 +6,7 @@
     "baseUrl": "./",
     "types": ["node", "express"],
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": ["./src/*"]
     }
   },
   "include": ["src"]

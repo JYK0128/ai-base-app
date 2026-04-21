@@ -6,9 +6,9 @@
 
 ### 로그인 요청
 
-유저 ID를 기반으로 로그인을 시도하고, 감사 로그를 생성합니다.
+이메일과 비밀번호를 기반으로 로그인을 시도하고, 감사 로그를 생성합니다.
 
-- **URL**: `/auth/login`
+- **URL**: `/api/v1/auth/login`
 - **Method**: `POST`
 - **Content-Type**: `application/json`
 
@@ -16,16 +16,21 @@
 
 ```json
 {
-  "userId": "string (필수)"
+  "email": "user@example.com",
+  "password": "password123"
 }
 ```
 
-**응답 예시 (201 Created)**:
+**응답 예시 (200 OK)**:
 
 ```json
 {
-  "success": true,
-  "userId": "antigravity_user"
+  "userId": "antigravity_user",
+  "email": "user@example.com",
+  "accountType": "user",
+  "clientIp": "127.0.0.1",
+  "accessToken": "eyJ...",
+  "refreshToken": "eyJ..."
 }
 ```
 
@@ -33,7 +38,7 @@
 
 1. `EventLogInterceptor`가 요청 정보(IP, Method, Path, Body)를 가로채 JSON 로그로 출력합니다.
 2. `AUTH_SERVICE`(RabbitMQ)로 `auth.login` 명령을 전달합니다.
-3. `platform-auth-service`에서 해당 명령을 처리하고 응답을 반환합니다.
+3. `platform-auth-service`에서 이메일로 계정을 조회하고 비밀번호를 검증한 뒤 JWT를 발급합니다.
 
 ---
 

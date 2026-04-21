@@ -6,7 +6,7 @@ import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { JwtModule } from '@nestjs/jwt';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { Request } from 'express';
-import { ClsModule } from 'nestjs-cls';
+import { ClsModule, type ClsStore } from 'nestjs-cls';
 import { LoggerModule } from 'nestjs-pino';
 
 import { ENV } from '@/common/env';
@@ -14,10 +14,8 @@ import { ExceptionFilter } from '@/common/filters/exception.filter';
 import { AuthGuard } from '@/common/guards/auth.guard';
 import { TransformInterceptor } from '@/common/interceptors/transform.interceptor';
 import { ContextMiddleware } from '@/common/middlewares/context.middleware';
-import { GatewayModule } from '@/modules/gateway/gateway.module';
+import { AuthModule } from '@/modules/auth/auth.module';
 import { HealthModule } from '@/modules/health/health.module';
-
-import { ProfileModule } from './modules/profile/profile.module';
 
 @Module({
   imports: [
@@ -26,14 +24,14 @@ import { ProfileModule } from './modules/profile/profile.module';
       middleware: {
         mount: true,
         setup: (cls, req: Request) => {
-          const context = {
-            traceId: (req.headers['x-trace-id'] as string) || randomUUID(),
+          const context: ClsStore = {
+            traceId: String(req.headers['x-trace-id'] || randomUUID()),
             requestId: randomUUID(),
-            sessionId: (req.cookies.sessionId as string) || '',
+            sessionId: String(req.cookies.sessionId || ''),
             ip: req.ip || '',
-            realIp: (req.headers['x-real-ip'] as string) || req.ip || '',
-            userAgent: (req.headers['user-agent'] as string) || '',
-            referer: (req.headers['referer'] as string) || '',
+            realIp: String(req.headers['x-real-ip'] || req.ip || ''),
+            userAgent: String(req.headers['user-agent'] || ''),
+            referer: String(req.headers['referer'] || ''),
             method: req.method,
             url: req.url,
             startTime: Date.now(),
@@ -41,7 +39,7 @@ import { ProfileModule } from './modules/profile/profile.module';
           };
 
           Object.entries(context).forEach(([key, value]) => {
-            cls.set(key as keyof import('nestjs-cls').ClsStore, value);
+            cls.set(key as keyof ClsStore, value);
           });
         },
       },
@@ -68,9 +66,8 @@ import { ProfileModule } from './modules/profile/profile.module';
       secret: ENV.JWT_ACCESS_SECRET,
       signOptions: { expiresIn: ENV.JWT_ACCESS_EXPIRES_IN },
     }),
-    GatewayModule,
+    AuthModule,
     HealthModule,
-    ProfileModule,
   ],
   controllers: [],
   providers: [

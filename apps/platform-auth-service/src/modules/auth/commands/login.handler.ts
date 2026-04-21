@@ -1,8 +1,7 @@
-import { MikroORM } from '@mikro-orm/core';
 import { Logger, UnauthorizedException } from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { JwtService } from '@nestjs/jwt';
-import { ManagerAccount, ManagerAccountRepository, UserAccount, UserAccountRepository } from '@pkg/database';
+import { ManagerAccountRepository, UserAccountRepository } from '@pkg/database';
 
 import { ENV } from '@/common/env';
 import { CryptoUtil } from '@/common/utils/crypto.util';
@@ -26,16 +25,14 @@ export class LoginHandler implements ICommandHandler<LoginCommand> {
     private readonly userAccountRepository: UserAccountRepository,
     private readonly jwtService: JwtService,
     private readonly redisService: RedisService,
-    private readonly orm: MikroORM,
   ) {}
 
   async execute(command: LoginCommand) {
-    const { email, password, clientIp } = command;
+    const { password, clientIp } = command;
+    const email = this.normalizeEmail(command.email);
     this.logger.log(`Executing LoginCommand for user: ${email}`);
 
-    const em = this.orm.em.fork();
-
-    const managerAccount = await em.findOne(ManagerAccount, { email });
+    const managerAccount = await this.managerAccountRepository.findOne({ email });
     if (managerAccount) {
       return this.buildLoginResponse({
         id: managerAccount.id,
@@ -45,7 +42,7 @@ export class LoginHandler implements ICommandHandler<LoginCommand> {
       }, password, clientIp);
     }
 
-    const userAccount = await em.findOne(UserAccount, { email });
+    const userAccount = await this.userAccountRepository.findOne({ email });
     if (userAccount) {
       return this.buildLoginResponse({
         id: userAccount.id,
@@ -56,6 +53,10 @@ export class LoginHandler implements ICommandHandler<LoginCommand> {
     }
 
     throw new UnauthorizedException('이메일 또는 비밀번호가 일치하지 않습니다.');
+  }
+
+  private normalizeEmail(email: string) {
+    return email.trim().toLowerCase();
   }
 
   private async buildLoginResponse(
