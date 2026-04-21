@@ -12,7 +12,7 @@ export default defineConfig({
       name: 'platform_admin_host',
       remotes: {
         platform_admin_auth: 'http://localhost:3001/assets/remoteEntry.js',
-        platform_admin_mfe-dashboard: 'http://localhost:3002/assets/remoteEntry.js',
+        'platform_admin_mfe-dashboard': 'http://localhost:3002/assets/remoteEntry.js',
       },
       shared: ['react', 'react-dom'],
     }),

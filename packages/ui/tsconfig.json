@@ -6,9 +6,8 @@
     { "path": "./tsconfig.storybook.json" }
   ],
   "compilerOptions": {
-    "baseUrl": "./",
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": ["./src/*"]
     }
   }
 }

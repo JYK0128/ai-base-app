@@ -5,6 +5,13 @@ declare module 'platform_admin_auth/App' {
   export default App;
 }
 
+declare module 'platform_admin_mfe-dashboard/App' {
+  import type { ComponentType } from 'react';
+
+  const App: ComponentType;
+  export default App;
+}
+
 declare module 'virtual:__federation__' {
   interface IRemoteConfig {
     url: (() => Promise<string>) | string
