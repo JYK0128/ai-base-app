@@ -16,7 +16,7 @@
 
 ```json
 {
-  "email": "user@example.com",
+  "email": "admin@example.com",
   "password": "password123"
 }
 ```
@@ -26,10 +26,8 @@
 ```json
 {
   "userId": "antigravity_user",
-  "email": "user@example.com",
-  "accountType": "user",
+  "email": "admin@example.com",
   "tenantId": "org-123",
-  "tenantType": "organization",
   "clientIp": "127.0.0.1",
   "accessToken": "eyJ...",
   "refreshToken": "eyJ..."
@@ -40,7 +38,27 @@
 
 1. `EventLogInterceptor`가 요청 정보(IP, Method, Path, Body)를 가로채 JSON 로그로 출력합니다.
 2. `AUTH_SERVICE`(RabbitMQ)로 `auth.login` 명령을 전달합니다.
-3. `platform-auth-service`에서 이메일로 계정을 조회하고 비밀번호를 검증한 뒤 JWT와 소속 tenant 정보를 발급합니다.
+3. `platform-auth-service`에서 이메일로 관리자 계정을 조회하고 비밀번호를 검증한 뒤 JWT와 소속 tenant 정보를 발급합니다.
+
+### 권한 조회
+
+인증된 관리자 계정의 역할과 권한을 현재 테넌트 기준으로 조회합니다.
+
+- **URL**: `/api/v1/auth/permissions`
+- **Method**: `GET`
+- **Authorization**: `Bearer <accessToken>`
+
+**응답 예시 (200 OK)**:
+
+```json
+{
+  "userId": "antigravity_user",
+  "email": "admin@example.com",
+  "tenantId": "org-123",
+  "roles": ["platform_admin"],
+  "permissions": ["platform.manage", "organization.manage"]
+}
+```
 
 ---
 
@@ -65,9 +83,9 @@ RabbitMQ를 통해 단순 테스트용 이벤트를 발행합니다.
 }
 ```
 
-### 유저 정보 조회 (Mock)
+### 관리자 정보 조회 (Mock)
 
-특정 유저의 정보를 조회합니다.
+특정 관리자 계정의 정보를 조회합니다.
 
 - **URL**: `/user`
 - **Method**: `GET`
@@ -76,7 +94,7 @@ RabbitMQ를 통해 단순 테스트용 이벤트를 발행합니다.
 
 ```json
 {
-  "userId": "user-123"
+  "userId": "manager-123"
 }
 ```
 

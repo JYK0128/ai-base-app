@@ -1,11 +1,11 @@
 import { Logger, UnauthorizedException } from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { JwtService } from '@nestjs/jwt';
-import { ManagerAccountRepository, UserAccountRepository } from '@pkg/database';
+import { ManagerAccountRepository } from '@pkg/database';
 
 import { ENV } from '@/common/env';
-import { CryptoUtil } from '@/common/utils/crypto.util';
 import type { JWTPayload } from '@/common/types/request.type';
+import { CryptoUtil } from '@/common/utils/crypto.util';
 
 import { RedisService } from '../../redis/redis.service';
 
@@ -26,7 +26,6 @@ export class LoginHandler implements ICommandHandler<LoginCommand> {
 
   constructor(
     private readonly managerAccountRepository: ManagerAccountRepository,
-    private readonly userAccountRepository: UserAccountRepository,
     private readonly jwtService: JwtService,
     private readonly redisService: RedisService,
   ) {}
@@ -48,21 +47,6 @@ export class LoginHandler implements ICommandHandler<LoginCommand> {
         id: managerAccount.id,
         email: managerAccount.email,
         password: managerAccount.password,
-        accountType: 'manager',
-      }, password, clientIp, tenantContext);
-    }
-
-    const userAccount = await this.userAccountRepository.findOne(
-      { email },
-      { populate: ['site.organization'] },
-    );
-    if (userAccount) {
-      const tenantContext = this.resolveUserTenantContext(userAccount);
-      return this.buildLoginResponse({
-        id: userAccount.id,
-        email: userAccount.email,
-        password: userAccount.password,
-        accountType: 'user',
       }, password, clientIp, tenantContext);
     }
 
@@ -116,25 +100,15 @@ export class LoginHandler implements ICommandHandler<LoginCommand> {
     const organization = account.managers?.getItems()[0]?.organization;
     return {
       tenantId: organization?.id,
-      tenantType: organization ? 'organization' as const : undefined,
-    };
-  }
-
-  private resolveUserTenantContext(account: { site?: { organization?: { id: string } | null } | null }) {
-    const organization = account.site?.organization;
-    return {
-      tenantId: organization?.id,
-      tenantType: organization ? 'organization' as const : undefined,
     };
   }
 
   private async buildLoginResponse(
-    account: { id: string, email: string, password: string, accountType: 'manager' | 'user' },
+    account: { id: string, email: string, password: string },
     password: string,
     clientIp: string,
     tenantContext: {
       tenantId?: string
-      tenantType?: 'organization' | 'site'
     },
   ) {
     const isPasswordMatch = await CryptoUtil.comparePassword(password, account.password);
@@ -148,9 +122,7 @@ export class LoginHandler implements ICommandHandler<LoginCommand> {
     const payload: JWTPayload = {
       sub: account.id,
       email: account.email,
-      accountType: account.accountType,
       tenantId: tenantContext.tenantId,
-      tenantType: tenantContext.tenantType,
     };
 
     const accessToken = await this.jwtService.signAsync(payload);
@@ -169,10 +141,8 @@ export class LoginHandler implements ICommandHandler<LoginCommand> {
     return {
       userId: account.id,
       email: account.email,
-      accountType: account.accountType,
       clientIp,
       tenantId: tenantContext.tenantId,
-      tenantType: tenantContext.tenantType,
       accessToken,
       refreshToken,
     };

@@ -5,9 +5,7 @@ import type { Request } from 'express';
 export interface JWTPayload {
   sub: string
   email: string
-  accountType: 'manager' | 'user'
   tenantId?: string
-  tenantType?: 'organization' | 'site'
   [key: string]: unknown
 }
 

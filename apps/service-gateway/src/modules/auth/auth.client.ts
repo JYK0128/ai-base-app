@@ -4,8 +4,8 @@ import { ClsService } from 'nestjs-cls';
 import { firstValueFrom } from 'rxjs';
 
 import { AUTH_SERVICE, AUTH_SERVICE_PATTERNS } from './auth.constants';
-import { AuthRefreshResponseDto, AuthTokenResponseDto } from './dto/auth-response.dto';
 import { LoginDto } from './dto/auth-request.dto';
+import { AuthPermissionsResponseDto, AuthRefreshResponseDto, AuthTokenResponseDto } from './dto/auth-response.dto';
 
 @Injectable()
 export class AuthClient {
@@ -45,5 +45,14 @@ export class AuthClient {
   async logout(userId: string): Promise<void> {
     this.logger.log(`Requesting logout for ${userId}`);
     await this.send<void>(AUTH_SERVICE_PATTERNS.LOGOUT, { userId });
+  }
+
+  async permissions(user: { sub: string, email: string, tenantId?: string }): Promise<AuthPermissionsResponseDto> {
+    this.logger.log(`Requesting permissions for ${user.sub}`);
+    return this.send<AuthPermissionsResponseDto>(AUTH_SERVICE_PATTERNS.PERMISSIONS, {
+      userId: user.sub,
+      email: user.email,
+      tenantId: user.tenantId,
+    });
   }
 }

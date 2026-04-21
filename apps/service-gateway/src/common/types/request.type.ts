@@ -7,12 +7,8 @@ export interface JWTPayload {
   sub: string
   /** 사용자 이메일 */
   email: string
-  /** 계정 유형 (manager | user) */
-  accountType: 'manager' | 'user'
   /** 활성 테넌트 식별자 */
   tenantId?: string
-  /** 활성 테넌트 타입 */
-  tenantType?: 'organization' | 'site'
   /** 기타 페이로드 정보 */
   [key: string]: unknown
 }

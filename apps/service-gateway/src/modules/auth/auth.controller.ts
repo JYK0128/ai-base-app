@@ -8,8 +8,8 @@ import { Public } from '@/common/decorators/public.decorator';
 import type { JWTPayload } from '@/common/types/request.type';
 
 import { AuthService } from './auth.service';
-import { AuthTokenResponseDto } from './dto/auth-response.dto';
 import { LoginDto } from './dto/auth-request.dto';
+import { AuthPermissionsResponseDto, AuthTokenResponseDto } from './dto/auth-response.dto';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -35,6 +35,17 @@ export class AuthController {
     });
 
     return { accessToken, ...session };
+  }
+
+  @ApiBearerAuth()
+  @Get('permissions')
+  @ApiOperation({
+    summary: '권한 조회',
+    description: '현재 인증된 관리자 계정과 테넌트 기준으로 역할과 권한 목록을 반환합니다.',
+  })
+  @ApiResponse({ status: 200, description: '권한 조회 성공', type: AuthPermissionsResponseDto })
+  async permissions(@CurrentUser() user: JWTPayload) {
+    return this.authService.permissions(user);
   }
 
   @Public()
@@ -85,13 +96,13 @@ export class AuthController {
   @Get('me')
   @ApiOperation({
     summary: '내 정보 조회',
-    description: 'JWT 토큰을 통해 인증된 현재 사용자의 정보를 반환합니다.',
+    description: 'JWT 토큰을 통해 인증된 현재 관리자 계정의 정보를 반환합니다.',
   })
   @ApiResponse({ status: 200, description: '성공' })
   @ApiResponse({ status: 401, description: '인증 실패' })
   getMe(@CurrentUser() user: JWTPayload) {
     return {
-      message: '사용자 정보를 성공적으로 가져왔습니다.',
+      message: '관리자 정보를 성공적으로 가져왔습니다.',
       user,
     };
   }

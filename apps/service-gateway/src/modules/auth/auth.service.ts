@@ -1,8 +1,10 @@
 import { Injectable, Logger } from '@nestjs/common';
 
 import { AuthClient } from './auth.client';
-import { AuthRefreshResponseDto, AuthTokenResponseDto } from './dto/auth-response.dto';
 import { LoginDto } from './dto/auth-request.dto';
+import { AuthPermissionsResponseDto,
+         AuthRefreshResponseDto,
+         AuthTokenResponseDto } from './dto/auth-response.dto';
 
 @Injectable()
 export class AuthService {
@@ -23,5 +25,10 @@ export class AuthService {
   async logout(userId: string): Promise<void> {
     this.logger.log(`Handling logout for ${userId}`);
     return this.authClient.logout(userId);
+  }
+
+  async permissions(user: { sub: string, email: string, tenantId?: string }): Promise<AuthPermissionsResponseDto> {
+    this.logger.log(`Handling permissions for ${user.sub}`);
+    return this.authClient.permissions(user);
   }
 }

@@ -5,9 +5,6 @@
     { "path": "packages/database" },
     { "path": "packages/utils" },
     { "path": "apps/platform-auth-service" },
-    { "path": "apps/service-gateway" },
-    { "path": "web/platform-admin-host" },
-    { "path": "web/platform-admin-auth" },
-    { "path": "web/platform-admin-mfe-dashboard" }
+    { "path": "apps/service-gateway" }
   ]
 }

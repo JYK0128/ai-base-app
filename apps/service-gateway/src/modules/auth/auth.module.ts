@@ -3,10 +3,10 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
 
 import { ENV } from '@/common/env';
 
+import { AuthClient } from './auth.client';
+import { AUTH_SERVICE } from './auth.constants';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
-import { AUTH_SERVICE } from './auth.constants';
-import { AuthClient } from './auth.client';
 
 @Module({
   imports: [

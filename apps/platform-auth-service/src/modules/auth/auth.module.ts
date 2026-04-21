@@ -2,7 +2,7 @@ import { MikroOrmModule } from '@mikro-orm/nestjs';
 import { Module } from '@nestjs/common';
 import { CqrsModule } from '@nestjs/cqrs';
 import { JwtModule } from '@nestjs/jwt';
-import { ManagerAccount, UserAccount } from '@pkg/database';
+import { ManagerAccount } from '@pkg/database';
 
 import { ENV } from '@/common/env';
 
@@ -15,7 +15,6 @@ import { Handlers } from './handlers';
     CqrsModule,
     MikroOrmModule.forFeature([
       ManagerAccount,
-      UserAccount,
     ]),
     JwtModule.register({
       secret: ENV.JWT_ACCESS_SECRET,

@@ -40,9 +40,7 @@ export class RefreshTokenHandler implements ICommandHandler<RefreshTokenCommand>
       const newPayload = {
         sub: payload.sub,
         email: payload.email,
-        accountType: payload.accountType,
         tenantId: payload.tenantId,
-        tenantType: payload.tenantType,
       };
 
       // 4. 토큰 재발급 및 Redis 갱신 (Token Rotation)
@@ -62,7 +60,6 @@ export class RefreshTokenHandler implements ICommandHandler<RefreshTokenCommand>
         accessToken,
         refreshToken: newRefreshToken,
         tenantId: payload.tenantId,
-        tenantType: payload.tenantType,
       };
     }
     catch (error) {

@@ -9,9 +9,6 @@ export class AuthTokenResponseDto {
 
   @ApiProperty({ description: '활성 테넌트 ID', required: false })
   tenantId?: string;
-
-  @ApiProperty({ description: '활성 테넌트 타입', required: false, enum: ['organization', 'site'] })
-  tenantType?: 'organization' | 'site';
 }
 
 export class AuthRefreshResponseDto {
@@ -23,7 +20,21 @@ export class AuthRefreshResponseDto {
 
   @ApiProperty({ description: '활성 테넌트 ID', required: false })
   tenantId?: string;
+}
 
-  @ApiProperty({ description: '활성 테넌트 타입', required: false, enum: ['organization', 'site'] })
-  tenantType?: 'organization' | 'site';
+export class AuthPermissionsResponseDto {
+  @ApiProperty({ description: '사용자 식별자' })
+  userId!: string;
+
+  @ApiProperty({ description: '이메일' })
+  email!: string;
+
+  @ApiProperty({ description: '활성 테넌트 ID', required: false })
+  tenantId?: string;
+
+  @ApiProperty({ description: '할당된 역할 코드 목록', type: [String] })
+  roles!: string[];
+
+  @ApiProperty({ description: '할당된 권한 코드 목록', type: [String] })
+  permissions!: string[];
 }

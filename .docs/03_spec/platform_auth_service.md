@@ -18,6 +18,6 @@
 ## 4. 핵심 API
 
 * `login`: 이메일/비밀번호 계정 인증 및 소속 테넌트 정보 반환
-  * 로그인 응답에는 `tenantId`, `tenantType`이 포함됨
+  * 로그인 응답에는 `tenantId`가 포함됨
+* `permissions`: 현재 사용자와 테넌트 기준 역할/권한 조회
 * `invite/verify`: 운영진 초대 관리 및 자격 검증
-* `permissions`: 현재 컨텍스트에 따른 상세 접근 권한 조회

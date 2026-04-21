@@ -6,7 +6,7 @@ import { LoginCommand } from './commands/login.handler';
 import { LogoutCommand } from './commands/logout.handler';
 import { RefreshTokenCommand } from './commands/refresh-token.handler';
 import { AuthNotifiedEvent } from './events/auth-notified.handler';
-import { GetUserInfoQuery } from './queries/get-user-info.handler';
+import { GetPermissionsQuery } from './queries/get-permissions.handler';
 
 @Controller()
 export class AuthController {
@@ -35,9 +35,16 @@ export class AuthController {
     return this.commandBus.execute(new LogoutCommand(data.userId));
   }
 
-  @MessagePattern('auth.get_user')
-  async handleGetUser(@Payload() data: { userId: string }) {
-    return this.queryBus.execute(new GetUserInfoQuery(data.userId));
+  @MessagePattern('auth.permissions')
+  async handlePermissions(
+    @Payload() data: {
+      userId: string
+      tenantId?: string
+    },
+  ) {
+    return this.queryBus.execute(
+      new GetPermissionsQuery(data.userId, data.tenantId),
+    );
   }
 
   @EventPattern('auth_event')
