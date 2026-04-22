@@ -3,8 +3,7 @@
   "compilerOptions": {
     "rootDir": "./src",
     "outDir": "./dist",
-    "noEmit": false,
-    "noEmitOnError": false,
+    "types": ["node"],
     "paths": {
       "@/*": ["./src/*"]
     }

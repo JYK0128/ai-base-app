@@ -3,25 +3,28 @@
   "version": "0.1.0",
   "type": "module",
   "private": true,
+  "files": [
+    "dist"
+  ],
   "main": "./dist/index.cjs",
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/index.js",
       "require": "./dist/index.cjs",
+      "import": "./dist/index.js",
       "default": "./dist/index.js"
     },
     "./domains": {
       "types": "./dist/domains/index.d.ts",
-      "import": "./dist/domains/index.js",
       "require": "./dist/domains/index.cjs",
+      "import": "./dist/domains/index.js",
       "default": "./dist/domains/index.js"
     },
     "./domains/*": {
       "types": "./dist/domains/*.d.ts",
-      "import": "./dist/domains/*.js",
       "require": "./dist/domains/*.cjs",
+      "import": "./dist/domains/*.js",
       "default": "./dist/domains/*.js"
     }
   },
@@ -37,9 +40,9 @@
     "dx": "dotenvx run --env=development --convention=nextjs --",
     "mo": "npm run dx -- mikro-orm",
     "predev": "npm run prebuild",
-    "dev": "npm run dx -- bunchee --watch",
+    "dev": "node esbuild.config.js --watch",
     "lint": "eslint .",
-    "build": "bunchee --clean",
+    "build": "node esbuild.config.js",
     "play": "vitest run src/test/play.test.ts",
     "migration:create": "npm run mo -- migration:create",
     "migration:up": "npm run mo -- migration:up",
@@ -71,10 +74,15 @@
     "@swc-node/register": "1.11.1",
     "@swc/core": "1.15.24",
     "@types/node": "25.6.0",
-    "bunchee": "6.10.0",
+    "dts-bundle-generator": "9.5.1",
+    "esbuild": "0.25.5",
+    "esbuild-plugin-d.ts": "1.3.1",
+    "esbuild-plugin-dts-bundle-generator": "1.0.1",
+    "esbuild-plugin-swc": "1.0.1",
     "eslint": "9.39.4",
     "tsx": "4.21.0",
     "typescript": "6.0.2",
+    "unplugin-isolated-decl": "0.15.7",
     "vitest": "4.1.4"
   }
 }
