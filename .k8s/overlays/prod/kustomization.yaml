@@ -11,8 +11,8 @@ resources:
   - prod-api-namespace.yaml
   - prod-infra-namespace.yaml
   - prod-web-namespace.yaml
-  - service-gateway-hpa.yaml
-  - service-gateway-pdb.yaml
+  - platform-gateway-hpa.yaml
+  - platform-gateway-pdb.yaml
   - platform-auth-service-hpa.yaml
   - platform-auth-service-pdb.yaml
 commonLabels:
@@ -33,7 +33,7 @@ patches:
   - path: delete-rabbitmq-secret.yaml
   - target:
       kind: Deployment
-      name: service-gateway-deploy
+      name: platform-gateway-deploy
     patch: |-
       - op: replace
         path: /metadata/namespace
@@ -58,7 +58,7 @@ patches:
             whenUnsatisfiable: ScheduleAnyway
             labelSelector:
               matchLabels:
-                app.kubernetes.io/name: service-gateway
+                app.kubernetes.io/name: platform-gateway
                 env: prod
       - op: add
         path: /spec/template/spec/affinity
@@ -70,7 +70,7 @@ patches:
                   topologyKey: kubernetes.io/hostname
                   labelSelector:
                     matchLabels:
-                      app.kubernetes.io/name: service-gateway
+                      app.kubernetes.io/name: platform-gateway
                       env: prod
   - target:
       kind: Deployment
@@ -115,7 +115,7 @@ patches:
                       env: prod
   - target:
       kind: Service
-      name: service-gateway
+      name: platform-gateway
     patch: |-
       - op: replace
         path: /metadata/namespace
@@ -129,7 +129,7 @@ patches:
         value: prod-api
   - target:
       kind: ConfigMap
-      name: service-gateway-cm
+      name: platform-gateway-cm
     patch: |-
       - op: replace
         path: /metadata/namespace
@@ -175,14 +175,14 @@ patches:
         value: prod-infra
   - target:
       kind: Gateway
-      name: service-gateway-gw
+      name: platform-gateway-gw
     patch: |-
       - op: replace
         path: /metadata/namespace
         value: prod-web
   - target:
       kind: VirtualService
-      name: service-gateway-vs
+      name: platform-gateway-vs
     patch: |-
       - op: replace
         path: /metadata/namespace
@@ -265,7 +265,7 @@ patches:
             memory: "2Gi"
   - target:
       kind: NetworkPolicy
-      name: egress-service-gateway-to-platform-auth
+      name: egress-platform-gateway-to-platform-auth
     patch: |-
       - op: replace
         path: /metadata/namespace
@@ -275,7 +275,7 @@ patches:
         value: prod-api
   - target:
       kind: NetworkPolicy
-      name: ingress-platform-auth-from-service-gateway
+      name: ingress-platform-auth-from-platform-gateway
     patch: |-
       - op: replace
         path: /metadata/namespace
@@ -325,7 +325,7 @@ patches:
         value: prod-infra
   - target:
       kind: NetworkPolicy
-      name: egress-service-gateway-to-kafka
+      name: egress-platform-gateway-to-kafka
     patch: |-
       - op: replace
         path: /metadata/namespace
@@ -335,7 +335,7 @@ patches:
         value: prod-infra
   - target:
       kind: NetworkPolicy
-      name: egress-service-gateway-to-postgres
+      name: egress-platform-gateway-to-postgres
     patch: |-
       - op: replace
         path: /metadata/namespace
@@ -345,7 +345,7 @@ patches:
         value: prod-infra
   - target:
       kind: NetworkPolicy
-      name: egress-service-gateway-to-rabbitmq
+      name: egress-platform-gateway-to-rabbitmq
     patch: |-
       - op: replace
         path: /metadata/namespace
@@ -355,7 +355,7 @@ patches:
         value: prod-infra
   - target:
       kind: NetworkPolicy
-      name: egress-service-gateway-to-redis
+      name: egress-platform-gateway-to-redis
     patch: |-
       - op: replace
         path: /metadata/namespace
@@ -417,7 +417,7 @@ patches:
         value: prod-web
   - target:
       kind: NetworkPolicy
-      name: ingress-service-gateway-from-istio-ingress
+      name: ingress-platform-gateway-from-istio-ingress
     patch: |-
       - op: replace
         path: /metadata/namespace

@@ -1,10 +1,10 @@
 apiVersion: policy/v1
 kind: PodDisruptionBudget
 metadata:
-  name: service-gateway-pdb
+  name: platform-gateway-pdb
   namespace: prod-web
 spec:
   minAvailable: 2
   selector:
     matchLabels:
-      app.kubernetes.io/name: service-gateway
+      app.kubernetes.io/name: platform-gateway

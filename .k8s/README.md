@@ -115,7 +115,7 @@ telepresence quit
 ## 📜 주요 정책 및 표준
 
 1. **Naming Convention**: 모든 파일과 리소스는 `[기술명]-[리소스종류].yaml` 형식을 따릅니다.
-    - 예: `mimir-cm.yaml`, `service-gateway-svc.yaml`
+    - 예: `mimir-cm.yaml`, `platform-gateway-svc.yaml`
 2. **Hybrid Management**:
     - **Helm**: 제어 계층(Operators, Istio) 설치에 사용.
     - **Kustomize**: 데이터 계층(Clusters, Instances), 애플리케이션 및 환경별 수정에 사용.

@@ -13,9 +13,9 @@ echo "--------------------------------------------------"
 echo "📦 Building platform-auth-service..."
 docker build -t platform-auth-service:latest -f apps/platform-auth-service/Dockerfile .
 
-# Build service-gateway
-echo "📦 Building service-gateway..."
-docker build -t service-gateway:latest -f apps/service-gateway/Dockerfile .
+# Build platform-gateway
+echo "📦 Building platform-gateway..."
+docker build -t platform-gateway:latest -f apps/platform-gateway/Dockerfile .
 
 echo ""
 echo "✅ All images built successfully!"

@@ -1,31 +1,31 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: service-gateway-deploy
+  name: platform-gateway-deploy
   namespace: dev-web
   labels:
-    app.kubernetes.io/name: service-gateway
+    app.kubernetes.io/name: platform-gateway
     app.kubernetes.io/part-of: ai-base-app
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app.kubernetes.io/name: service-gateway
+      app.kubernetes.io/name: platform-gateway
   template:
     metadata:
       labels:
-        app.kubernetes.io/name: service-gateway
+        app.kubernetes.io/name: platform-gateway
     spec:
       containers:
-      - name: service-gateway
-        image: service-gateway:latest
+      - name: platform-gateway
+        image: platform-gateway:latest
         imagePullPolicy: IfNotPresent
         volumeMounts:
         - name: tmp
           mountPath: /tmp
         envFrom:
         - configMapRef:
-            name: service-gateway-cm
+            name: platform-gateway-cm
         ports:
         - containerPort: 3000
         resources:

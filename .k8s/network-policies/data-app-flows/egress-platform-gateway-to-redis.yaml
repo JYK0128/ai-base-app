@@ -1,12 +1,12 @@
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: egress-service-gateway-to-postgres
+  name: egress-platform-gateway-to-redis
   namespace: dev-web
 spec:
   podSelector:
     matchLabels:
-      app.kubernetes.io/name: service-gateway
+      app.kubernetes.io/name: platform-gateway
   policyTypes:
   - Egress
   egress:
@@ -16,4 +16,4 @@ spec:
           kubernetes.io/metadata.name: dev-infra
     ports:
     - protocol: TCP
-      port: 5432
+      port: 6379

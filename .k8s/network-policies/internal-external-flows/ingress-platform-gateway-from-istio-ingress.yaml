@@ -1,22 +1,22 @@
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: ingress-platform-auth-from-service-gateway
-  namespace: dev-api
+  name: ingress-platform-gateway-from-istio-ingress
+  namespace: dev-web
 spec:
   podSelector:
     matchLabels:
-      app.kubernetes.io/name: platform-auth-service
+      app.kubernetes.io/name: platform-gateway
   policyTypes:
   - Ingress
   ingress:
   - from:
     - namespaceSelector:
         matchLabels:
-          kubernetes.io/metadata.name: dev-web
+          kubernetes.io/metadata.name: istio-system
       podSelector:
         matchLabels:
-          app.kubernetes.io/name: service-gateway
+          istio: ingress
     ports:
     - protocol: TCP
-      port: 3001
+      port: 3000

@@ -1,16 +1,16 @@
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
-  name: service-gateway-hpa
+  name: platform-gateway-hpa
   namespace: dev-web
   labels:
-    app.kubernetes.io/name: service-gateway
+    app.kubernetes.io/name: platform-gateway
     app.kubernetes.io/part-of: ai-base-app
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: service-gateway-deploy
+    name: platform-gateway-deploy
   minReplicas: 1
   maxReplicas: 1
   metrics:
