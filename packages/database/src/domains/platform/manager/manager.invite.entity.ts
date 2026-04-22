@@ -34,7 +34,7 @@ export class ManagerInvite extends CoreEntity<ManagerInvite> {
   expiresAt!: Date;
 
   @Property({ nullable: true })
-  acceptedAt?: Date;
+  acceptedAt?: Date | null;
 
   @Enum(() => ManagerInviteStatus)
   status: ManagerInviteStatus = ManagerInviteStatus.PENDING;

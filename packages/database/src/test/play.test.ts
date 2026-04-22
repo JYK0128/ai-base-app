@@ -1,7 +1,7 @@
 import { RequestContext } from '@mikro-orm/core';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 
-import { Message } from '@/domains';
+import { Message, Organization, Site } from '@/domains';
 import type { PostgresTestContext } from '@/test/context';
 import { createPostgresTestContext, destroyPostgresTestContext } from '@/test/context';
 
@@ -15,6 +15,8 @@ describe('Database Infrastructure Examples', () => {
   beforeEach(async () => {
     const em = context.orm.em.fork();
     await em.createQueryBuilder(Message).delete().execute();
+    await em.createQueryBuilder(Site).delete().execute();
+    await em.createQueryBuilder(Organization).delete().execute();
   });
 
   afterAll(async () => {
@@ -43,6 +45,11 @@ describe('Database Infrastructure Examples', () => {
       // Read (Identity lookup via Entity)
       const readRef = Message.read(msg.id);
       expect(readRef.id).toBe(msg.id);
+
+      // Find (DB lookup via Entity)
+      const foundByEntity = await Message.find({ key: 'welcome' });
+      expect(foundByEntity).toHaveLength(1);
+      expect(foundByEntity[0]?.id).toBe(msg.id);
 
       // Filter lookup via Repository
       const repo = em.getRepository(Message);
@@ -135,5 +142,39 @@ describe('Database Infrastructure Examples', () => {
     const result = await em.getConnection().execute('SELECT 1 as val');
     expect(result).toBeDefined();
     expect(result[0].val).toBe(1);
+  });
+
+  /**
+   * 5. Entity.find()가 MikroORM find()처럼 Loaded 타입을 보존하는 예제
+   */
+  it('should preserve populated relation typing via Entity.find()', async () => {
+    await RequestContext.create(context.orm.em, async () => {
+      const em = RequestContext.getEntityManager()!;
+
+      const organization = em.create(Organization, {
+        code: 'acme-loaded',
+        name: 'Acme Loaded',
+        email: 'loaded@acme.example',
+      });
+      em.persist(organization);
+
+      const site = em.create(Site, {
+        organization,
+        code: 'hq-loaded',
+        name: 'HQ Loaded',
+        isActive: true,
+      });
+      em.persist(site);
+      await em.flush();
+
+      const sites = await Site.find(
+        { code: 'hq-loaded' },
+        { populate: ['organization'], fields: ['code'] },
+      );
+
+      expect(sites).toHaveLength(1);
+      expect(sites[0]?.code).toBe('hq-loaded');
+      expect(sites[0]?.organization.name).toBe('Acme Loaded');
+    });
   });
 });

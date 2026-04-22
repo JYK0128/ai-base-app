@@ -1,4 +1,4 @@
-import { BaseEntity, type EntityData, EntityRepositoryType, type FromEntityType, type Opt, OptionalProps, type Primary, RequestContext, type RequiredEntityData } from '@mikro-orm/core';
+import { BaseEntity, type EntityData, EntityRepositoryType, type FilterQuery, type FindOptions, type FromEntityType, type Loaded, type Opt, OptionalProps, type Primary, RequestContext, type RequiredEntityData } from '@mikro-orm/core';
 import { PrimaryKey, Property } from '@mikro-orm/decorators/legacy';
 import { uuidv7 } from 'uuidv7';
 
@@ -51,6 +51,21 @@ export abstract class CoreEntity<
     if (!em) throw new Error('EntityManager not found in RequestContext.');
     const entity = em.getReference<T>(this, id);
     return entity;
+  }
+
+  static async find<
+    T extends BaseEntity,
+    Hint extends string = never,
+    Fields extends string = never,
+    Excludes extends string = never,
+  >(
+    this: new () => T,
+    where: FilterQuery<T>,
+    options: FindOptions<T, Hint, Fields, Excludes> = {},
+  ): Promise<Loaded<T, Hint, Fields, Excludes>[]> {
+    const em = RequestContext.getEntityManager();
+    if (!em) throw new Error('EntityManager not found in RequestContext.');
+    return em.find<T, Hint, Fields, Excludes>(this, where, options);
   }
 
   update(data: EntityData<FromEntityType<this>>) {

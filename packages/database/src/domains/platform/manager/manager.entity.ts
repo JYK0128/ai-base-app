@@ -15,6 +15,11 @@ export enum PlatformRole {
   ORGANIZATION_STAFF = 'ORGANIZATION_STAFF',
 }
 
+export enum ManagerStatus {
+  ACTIVE = 'ACTIVE',
+  INACTIVE = 'INACTIVE',
+}
+
 @Entity({ schema: 'platform', repository: () => ManagerRepository })
 @Unique({ properties: ['managerAccount', 'organization', 'role'] })
 export class Manager extends CoreEntity<Manager> {
@@ -25,9 +30,12 @@ export class Manager extends CoreEntity<Manager> {
   @Enum(() => PlatformRole)
   role!: PlatformRole;
 
+  @Enum(() => ManagerStatus)
+  status: ManagerStatus = ManagerStatus.ACTIVE;
+
   @Index()
   @ManyToOne({ nullable: true })
-  organization?: Rel<Organization>;
+  organization?: Rel<Organization> | null;
 
   @OneToMany(() => ManagerInvite, (invite) => invite.invitedBy)
   sentInvites = new Collection<ManagerInvite>(this);
