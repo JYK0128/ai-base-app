@@ -1,6 +1,7 @@
 import { Logger, UnauthorizedException } from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { JwtService } from '@nestjs/jwt';
+import { ManagerAccountRepository } from '@pkg/database';
 
 import { ENV } from '@/common/env';
 import { JWTPayload } from '@/common/types/request.type';
@@ -18,6 +19,7 @@ export class RefreshTokenHandler implements ICommandHandler<RefreshTokenCommand>
   constructor(
     private readonly jwtService: JwtService,
     private readonly redisService: RedisService,
+    private readonly managerAccountRepository: ManagerAccountRepository,
   ) {}
 
   async execute(command: RefreshTokenCommand) {
@@ -36,11 +38,20 @@ export class RefreshTokenHandler implements ICommandHandler<RefreshTokenCommand>
         throw new UnauthorizedException('유효하지 않거나 만료된 세션입니다.');
       }
 
+      const account = await this.managerAccountRepository.findOne({ id: payload.sub });
+      if (!account) {
+        throw new UnauthorizedException('계정을 찾을 수 없습니다.');
+      }
+
+      const passwordChangeRequired = account.forcePasswordChange || this.isPasswordExpired(account.nextPasswordChangeAt);
+
       // 3. 새로운 토큰 페이로드 준비
       const newPayload = {
         sub: payload.sub,
         email: payload.email,
+        sid: payload.sid,
         tenantId: payload.tenantId,
+        passwordChangeRequired,
       };
 
       // 4. 토큰 재발급 및 Redis 갱신 (Token Rotation)
@@ -60,11 +71,16 @@ export class RefreshTokenHandler implements ICommandHandler<RefreshTokenCommand>
         accessToken,
         refreshToken: newRefreshToken,
         tenantId: payload.tenantId,
+        passwordChangeRequired,
       };
     }
     catch (error) {
       this.logger.error('Invalid refresh token', error);
       throw new UnauthorizedException('유효하지 않거나 만료된 리프레시 토큰입니다.');
     }
+  }
+
+  private isPasswordExpired(nextPasswordChangeAt: Date) {
+    return Date.now() > nextPasswordChangeAt.getTime();
   }
 }

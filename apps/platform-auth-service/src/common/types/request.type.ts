@@ -6,6 +6,8 @@ export interface JWTPayload {
   sub: string
   email: string
   tenantId?: string
+  sid: string // Session ID for single session enforcement
+  passwordChangeRequired?: boolean
   [key: string]: unknown
 }
 

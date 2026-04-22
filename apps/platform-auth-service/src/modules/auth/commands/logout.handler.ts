@@ -19,7 +19,10 @@ export class LogoutHandler implements ICommandHandler<LogoutCommand> {
     const { userId } = command;
     this.logger.log(`Executing LogoutCommand for user: ${userId}`);
 
-    await this.redisService.del(`refresh:${userId}`);
+    await Promise.all([
+      this.redisService.del(`refresh:${userId}`),
+      this.redisService.del(`active_session:${userId}`),
+    ]);
 
     return { success: true };
   }
