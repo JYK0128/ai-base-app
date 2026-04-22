@@ -38,7 +38,7 @@ spec:
             memory: 256Mi
         readinessProbe:
           httpGet:
-            path: /health/ready
+            path: /health/live
             port: 3000
         livenessProbe:
           httpGet:

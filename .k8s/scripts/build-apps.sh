@@ -5,16 +5,36 @@
 
 set -e
 
-echo "Building platform-auth-service..."
+echo "--------------------------------------------------"
+echo "🚀 Building application Docker images..."
+echo "--------------------------------------------------"
+
+# Build platform-auth-service
+echo "📦 Building platform-auth-service..."
 docker build -t platform-auth-service:latest -f apps/platform-auth-service/Dockerfile .
 
-echo "Building service-gateway..."
+# Build service-gateway
+echo "📦 Building service-gateway..."
 docker build -t service-gateway:latest -f apps/service-gateway/Dockerfile .
 
 echo ""
-echo "All images built successfully!"
-echo "If you are using Docker Desktop, these images are now available to your local Kubernetes cluster."
-echo "If you are using Minikube, remember to run 'eval \$(minikube docker-env)' before building, or use 'minikube image load <image_name>'."
+echo "✅ All images built successfully!"
+echo "--------------------------------------------------"
+
+# Optional deployment
+read -p "❓ Do you want to deploy these images to Kubernetes now? (y/N) " -n 1 -r
+echo ""
+if [[ $REPLY =~ ^[Yy]$ ]]
+then
+    echo "🚀 Deploying to Kubernetes..."
+    kubectl apply -k .k8s/apps
+    echo "✅ Deployment commands sent!"
+    echo "Check status with: kubectl get pods -n dev-api"
+else
+    echo "⏭️ Skipping deployment."
+    echo "If you are using Docker Desktop, these images are now available to your local Kubernetes cluster."
+    echo "If you are using Minikube, remember to run 'eval \$(minikube docker-env)' before building, or use 'minikube image load <image_name>'."
+fi
 
 echo ""
 read -p "Press [Enter] to exit..."

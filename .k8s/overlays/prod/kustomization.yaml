@@ -157,9 +157,6 @@ patches:
         path: /data/NODE_ENV
         value: production
       - op: replace
-        path: /data/RABBITMQ_URL
-        value: amqp://prod_rabbitmq_user:CHANGE_ME_PROD_RABBITMQ_PASSWORD@rabbitmq.prod-infra.svc.cluster.local:5672
-      - op: replace
         path: /data/DATABASE_URL
         value: postgres://prod_platform_user:CHANGE_ME_PROD_POSTGRES_PASSWORD@postgres-rw.prod-infra.svc.cluster.local:5432/platform_db
   - target:

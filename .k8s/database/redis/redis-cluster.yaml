@@ -6,7 +6,7 @@ metadata:
 spec:
   clusterSize: 1
   kubernetesConfig:
-    image: redis:7
+    image: public.ecr.aws/docker/library/redis:7
     imagePullPolicy: IfNotPresent
     redisSecret:
       name: redis-secret

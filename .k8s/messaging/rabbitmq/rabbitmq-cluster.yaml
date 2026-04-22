@@ -8,6 +8,6 @@ spec:
   secretBackend:
     externalSecret:
       name: rabbitmq-secret
-  image: rabbitmq:4-management
+  image: public.ecr.aws/docker/library/rabbitmq:4-management
   persistence:
     storage: "0"
