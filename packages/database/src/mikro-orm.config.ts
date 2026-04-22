@@ -40,7 +40,7 @@ export default defineConfig({
     defaultSeeder: 'DatabaseSeeder',
     glob: '!(*.d).{js,ts}',
   },
-  debug: process.env.NODE_ENV !== 'development',
+  debug: process.env.NODE_ENV !== 'production',
   highlighter: new SqlHighlighter(),
   ignoreUndefinedInQuery: true,
 }) satisfies Options;

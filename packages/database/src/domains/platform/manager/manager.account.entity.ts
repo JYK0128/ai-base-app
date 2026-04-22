@@ -13,6 +13,9 @@ export class ManagerAccount extends CoreEntity<ManagerAccount> {
   @Property({ hidden: true })
   password!: string;
 
+  @Property({ nullable: true })
+  lastLoginAt?: Date;
+
   @OneToMany(() => Manager, (manager) => manager.managerAccount)
   managers = new Collection<Manager>(this);
 }
