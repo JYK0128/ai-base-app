@@ -3,7 +3,7 @@ FROM node:24-alpine AS pruner
 RUN corepack enable && corepack prepare pnpm@9.15.9 --activate
 WORKDIR /app
 COPY . .
-RUN npx -y turbo@latest prune service-gateway --docker
+RUN npx -y turbo@latest prune platform-gateway --docker
 
 # Stage 2: Builder (실제 빌드 수행)
 FROM node:24-alpine AS builder
@@ -17,10 +17,10 @@ RUN pnpm install --frozen-lockfile
 
 # 실제 소스 코드 복사 및 빌드
 COPY --from=pruner /app/out/full/ .
-RUN npx turbo build --filter=service-gateway
+RUN npx turbo build --filter=platform-gateway
 
 # 실행에 필요한 핵심 파일만 추출 (격리 배포)
-RUN pnpm --filter service-gateway --prod deploy /app/deploy --ignore-scripts --loglevel error
+RUN pnpm --filter platform-gateway --prod deploy /app/deploy --ignore-scripts --loglevel error
 
 # Stage 3: Runner (최종 실행 이미지)
 FROM node:24-alpine
