@@ -19,4 +19,4 @@ spec:
           app.kubernetes.io/name: service-gateway
     ports:
     - protocol: TCP
-      port: 3000
+      port: 3001
