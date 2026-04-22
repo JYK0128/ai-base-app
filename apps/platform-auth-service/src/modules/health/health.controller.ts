@@ -1,14 +1,10 @@
 import { Controller, Get } from '@nestjs/common';
-import { Transport } from '@nestjs/microservices';
-import { HealthCheck, HealthCheckService, MemoryHealthIndicator, MicroserviceHealthIndicator } from '@nestjs/terminus';
-
-import { ENV } from '@/common/env';
+import { HealthCheck, HealthCheckService, MemoryHealthIndicator } from '@nestjs/terminus';
 
 @Controller('health')
 export class HealthController {
   constructor(
     private readonly health: HealthCheckService,
-    private readonly microservice: MicroserviceHealthIndicator,
     private readonly memory: MemoryHealthIndicator,
   ) {}
 
@@ -24,19 +20,7 @@ export class HealthController {
   @HealthCheck()
   ready() {
     return this.health.check([
-      () =>
-        this.microservice.pingCheck('rabbitmq', {
-          transport: Transport.RMQ,
-          timeout: 3000,
-          options: {
-            urls: [ENV.RABBITMQ_URL],
-            queue: 'auth_queue',
-            queueOptions: {
-              durable: false,
-              arguments: { 'x-queue-type': 'classic' },
-            },
-          },
-        }),
+      () => this.memory.checkHeap('memory_heap', 300 * 1024 * 1024),
     ]);
   }
 }

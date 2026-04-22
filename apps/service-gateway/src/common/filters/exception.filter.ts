@@ -80,12 +80,22 @@ export class ExceptionFilter implements NestExceptionFilter {
   }
 
   /** 마이크로서비스 에러(RPC) 처리 */
-  private handleServiceException(exception: ErrorInfo): ErrorInfo {
+  private handleServiceException(exception: Partial<ErrorInfo>): ErrorInfo {
+    const status = typeof exception.status === 'number'
+      ? exception.status
+      : HttpStatus.INTERNAL_SERVER_ERROR;
+    const message = typeof exception.message === 'string'
+      ? exception.message
+      : 'Internal service error';
+    const code = typeof exception.code === 'string'
+      ? exception.code
+      : 'ServiceError';
+
     return {
-      status: exception.status,
-      message: exception.message,
-      code: exception.code,
-      details: exception.details,
+      status,
+      message,
+      code,
+      details: exception.details ?? null,
     };
   }
 
@@ -100,7 +110,7 @@ export class ExceptionFilter implements NestExceptionFilter {
   }
 
   /** 마이크로서비스 에러 판별 가드 */
-  private isServiceError(exception: unknown): exception is ErrorInfo {
+  private isServiceError(exception: unknown): exception is Partial<ErrorInfo> {
     return !!(
       exception
       && typeof exception === 'object'

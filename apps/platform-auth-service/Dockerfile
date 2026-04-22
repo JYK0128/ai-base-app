@@ -17,7 +17,7 @@ RUN pnpm install --frozen-lockfile
 
 # 실제 소스 코드 복사 및 빌드
 COPY --from=pruner /app/out/full/ .
-RUN pnpm --filter platform-auth-service build
+RUN npx turbo build --filter=platform-auth-service
 
 # 실행에 필요한 핵심 파일만 추출 (격리 배포)
 RUN pnpm --filter platform-auth-service --prod deploy /app/deploy --ignore-scripts --loglevel error
