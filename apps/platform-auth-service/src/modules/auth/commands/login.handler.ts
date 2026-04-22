@@ -1,3 +1,4 @@
+import { Transactional } from '@mikro-orm/decorators/legacy';
 import { Logger, UnauthorizedException } from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { JwtService } from '@nestjs/jwt';
@@ -6,8 +7,7 @@ import { ManagerAccountRepository } from '@pkg/database';
 import { ENV } from '@/common/env';
 import type { JWTPayload } from '@/common/types/request.type';
 import { CryptoUtil } from '@/common/utils/crypto.util';
-
-import { RedisService } from '../../redis/redis.service';
+import { RedisService } from '@/modules/redis/redis.service';
 
 export class LoginCommand {
   constructor(
@@ -30,6 +30,7 @@ export class LoginHandler implements ICommandHandler<LoginCommand> {
     private readonly redisService: RedisService,
   ) {}
 
+  @Transactional()
   async execute(command: LoginCommand) {
     const { password, clientIp } = command;
     const email = this.normalizeEmail(command.email);
@@ -42,6 +43,9 @@ export class LoginHandler implements ICommandHandler<LoginCommand> {
       { populate: ['managers.organization'] },
     );
     if (managerAccount) {
+      // 마지막 로그인 시각 업데이트 (@Transactional에 의해 자동 저장됨)
+      managerAccount.lastLoginAt = new Date();
+
       const tenantContext = this.resolveManagerTenantContext(managerAccount);
       return this.buildLoginResponse({
         id: managerAccount.id,

@@ -16,6 +16,7 @@
   },
   "dependencies": {
     "@mikro-orm/core": "7.0.10",
+    "@mikro-orm/decorators": "7.0.10",
     "@mikro-orm/nestjs": "7.0.1",
     "@mikro-orm/postgresql": "7.0.10",
     "@nestjs/axios": "4.0.1",
@@ -55,7 +56,7 @@
     "@types/range-parser": "1.2.7",
     "@types/serve-static": "2.2.0",
     "eslint": "9.39.4",
-    "vitest": "4.1.4",
-    "typescript": "6.0.2"
+    "typescript": "6.0.2",
+    "vitest": "4.1.4"
   }
 }
