@@ -1,12 +1,10 @@
-import { randomUUID } from 'node:crypto';
 import { hostname } from 'node:os';
 
-import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { JwtModule } from '@nestjs/jwt';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
-import { Request } from 'express';
-import { ClsModule, type ClsStore } from 'nestjs-cls';
+import { ClsModule } from 'nestjs-cls';
 import { LoggerModule } from 'nestjs-pino';
 
 import { ENV } from '@/common/env';
@@ -14,6 +12,7 @@ import { ExceptionFilter } from '@/common/filters/exception.filter';
 import { AuthGuard } from '@/common/guards/auth.guard';
 import { TransformInterceptor } from '@/common/interceptors/transform.interceptor';
 import { ContextMiddleware } from '@/common/middlewares/context.middleware';
+import { createClsMiddlewareOptions } from '@/common/middlewares/cls.middleware-options';
 import { AuthModule } from '@/modules/auth/auth.module';
 import { HealthModule } from '@/modules/health/health.module';
 
@@ -21,29 +20,7 @@ import { HealthModule } from '@/modules/health/health.module';
   imports: [
     ClsModule.forRoot({
       global: true,
-      middleware: {
-        mount: true,
-        setup: (cls, req: Request) => {
-          const context: ClsStore = {
-            traceId: String(req.headers['x-trace-id'] || randomUUID()),
-            requestId: randomUUID(),
-            sessionId: String(req.cookies.sessionId || ''),
-            tenantId: String(req.headers['x-tenant-id'] || ''),
-            ip: req.ip || '',
-            realIp: String(req.headers['x-real-ip'] || req.ip || ''),
-            userAgent: String(req.headers['user-agent'] || ''),
-            referer: String(req.headers['referer'] || ''),
-            method: req.method,
-            url: req.url,
-            startTime: Date.now(),
-            acceptLanguage: String(req.headers['accept-language'] || ''),
-          };
-
-          Object.entries(context).forEach(([key, value]) => {
-            cls.set(key as keyof ClsStore, value);
-          });
-        },
-      },
+      middleware: createClsMiddlewareOptions(),
     }),
     LoggerModule.forRoot({
       pinoHttp: {
@@ -88,10 +65,11 @@ import { HealthModule } from '@/modules/health/health.module';
       provide: APP_INTERCEPTOR,
       useClass: TransformInterceptor,
     },
+    {
+      provide: ContextMiddleware,
+      useClass: ContextMiddleware,
+    },
   ],
 })
-export class AppModule implements NestModule {
-  configure(consumer: MiddlewareConsumer) {
-    consumer.apply(ContextMiddleware).forRoutes('*');
-  }
+export class AppModule {
 }

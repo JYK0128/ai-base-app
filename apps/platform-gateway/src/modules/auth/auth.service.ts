@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 
 import { AuthClient } from './auth.client';
-import { LoginDto } from './dto/auth-request.dto';
+import { ChangePasswordDto, LoginDto } from './dto/auth-request.dto';
 import { AuthPermissionsResponseDto,
          AuthRefreshResponseDto,
          AuthTokenResponseDto } from './dto/auth-response.dto';
@@ -30,5 +30,15 @@ export class AuthService {
   async permissions(user: { sub: string, email: string, tenantId?: string }): Promise<AuthPermissionsResponseDto> {
     this.logger.log(`Handling permissions for ${user.sub}`);
     return this.authClient.permissions(user);
+  }
+
+  async deferPasswordChange(userId: string): Promise<void> {
+    this.logger.log(`Handling password change deferment for ${userId}`);
+    return this.authClient.deferPasswordChange(userId);
+  }
+
+  async changePassword(userId: string, data: ChangePasswordDto): Promise<void> {
+    this.logger.log(`Handling password change for ${userId}`);
+    return this.authClient.changePassword(userId, data);
   }
 }

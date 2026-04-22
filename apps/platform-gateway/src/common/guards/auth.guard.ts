@@ -4,7 +4,9 @@ import { JwtService } from '@nestjs/jwt';
 import { Request } from 'express';
 import { ClsService } from 'nestjs-cls';
 
+import { ALLOW_EXPIRED_PASSWORD_KEY } from '@/common/decorators/allow-expired-password.decorator';
 import { IS_PUBLIC_KEY } from '@/common/decorators/public.decorator';
+import { AuthClient } from '@/modules/auth/auth.client';
 
 import type { JWTPayload } from '../types/request.type';
 
@@ -14,6 +16,7 @@ export class AuthGuard implements CanActivate {
     private readonly jwtService: JwtService,
     private readonly reflector: Reflector,
     private readonly cls: ClsService,
+    private readonly authClient: AuthClient,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -41,8 +44,32 @@ export class AuthGuard implements CanActivate {
         request.headers['x-tenant-id'] = payload.tenantId;
         this.cls.set('tenantId', payload.tenantId);
       }
+
+      // 단일 세션 검증: Auth Service에 세션 유효성 확인 요청
+      const isValidSession = await this.authClient.validateSession(payload.sub, payload.sid);
+      if (!isValidSession) {
+        throw new UnauthorizedException('Session is invalid or has been expired by another login');
+      }
+
+      // 비밀번호 변경 정책 검증
+      if (payload.passwordChangeRequired) {
+        const isAllowExpired = this.reflector.getAllAndOverride<boolean>(ALLOW_EXPIRED_PASSWORD_KEY, [
+          context.getHandler(),
+          context.getClass(),
+        ]);
+
+        if (!isAllowExpired) {
+          throw new UnauthorizedException({
+            message: 'Password change is required',
+            code: 'PASSWORD_CHANGE_REQUIRED',
+          });
+        }
+      }
     }
-    catch {
+    catch (error) {
+      if (error instanceof UnauthorizedException) {
+        throw error;
+      }
       throw new UnauthorizedException('Invalid or expired token');
     }
 

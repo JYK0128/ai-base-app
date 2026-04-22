@@ -15,4 +15,11 @@ export const AUTH_SERVICE_PATTERNS = {
   LOGOUT: 'auth.logout',
   /** 권한 조회 요청 */
   PERMISSIONS: 'auth.permissions',
+  /** 세션 유효성 검증 */
+  VALIDATE_SESSION: 'auth.validate_session',
+  /** 비밀번호 변경 연장 */
+  // eslint-disable-next-line sonarjs/no-hardcoded-passwords
+  DEFER_PASSWORD_CHANGE: 'auth.defer_password_change',
+  /** 비밀번호 변경 */
+  CHANGE_PASSWORD: 'auth.change_password',
 } as const;

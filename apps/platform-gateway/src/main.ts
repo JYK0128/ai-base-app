@@ -1,20 +1,24 @@
 import 'reflect-metadata';
 
-import { ValidationPipe, VersioningType } from '@nestjs/common';
+import { RequestMethod, ValidationPipe, VersioningType } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import cookieParser from 'cookie-parser';
 import { json, urlencoded } from 'express';
 import helmet from 'helmet';
+import { ClsMiddleware } from 'nestjs-cls';
 import { Logger } from 'nestjs-pino';
 
 import { AppModule } from '@/app.module';
 import { ENV } from '@/common/env';
+import { ContextMiddleware } from '@/common/middlewares/context.middleware';
+import { createClsMiddlewareOptions } from '@/common/middlewares/cls.middleware-options';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, { bufferLogs: true });
   const logger = app.get(Logger);
+  const expressApp = app.getHttpAdapter().getInstance();
   app.useLogger(logger);
 
   const isProduction = process.env.NODE_ENV === 'production';
@@ -25,10 +29,15 @@ async function bootstrap() {
   }
 
   app.setGlobalPrefix('api', {
-    exclude: ['health/(.*)'],
+    exclude: [
+      { path: 'health/live', method: RequestMethod.GET },
+      { path: 'health/ready', method: RequestMethod.GET },
+    ],
   });
 
-  app.use(cookieParser());
+  expressApp.use(cookieParser());
+  expressApp.use(new ClsMiddleware(createClsMiddlewareOptions()).use);
+  expressApp.use(app.get(ContextMiddleware).use.bind(app.get(ContextMiddleware)));
 
   app.enableVersioning({
     type: VersioningType.URI,

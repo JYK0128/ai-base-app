@@ -55,4 +55,16 @@ export class AuthClient {
       tenantId: user.tenantId,
     });
   }
+
+  async validateSession(userId: string, sid: string): Promise<boolean> {
+    return this.send<boolean>(AUTH_SERVICE_PATTERNS.VALIDATE_SESSION, { userId, sid });
+  }
+
+  async deferPasswordChange(userId: string): Promise<void> {
+    await this.send<void>(AUTH_SERVICE_PATTERNS.DEFER_PASSWORD_CHANGE, { userId });
+  }
+
+  async changePassword(userId: string, data: { currentPassword: string, newPassword: string }): Promise<void> {
+    await this.send<void>(AUTH_SERVICE_PATTERNS.CHANGE_PASSWORD, { userId, ...data });
+  }
 }

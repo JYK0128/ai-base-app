@@ -2,13 +2,14 @@ import { Body, Controller, Get, Post, Req, Res, UnauthorizedException } from '@n
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import type { Request, Response } from 'express';
 
+import { AllowExpiredPassword } from '@/common/decorators/allow-expired-password.decorator';
 import { Cookies } from '@/common/decorators/cookies.decorator';
 import { CurrentUser } from '@/common/decorators/current-user.decorator';
 import { Public } from '@/common/decorators/public.decorator';
 import type { JWTPayload } from '@/common/types/request.type';
 
 import { AuthService } from './auth.service';
-import { LoginDto } from './dto/auth-request.dto';
+import { ChangePasswordDto, LoginDto } from './dto/auth-request.dto';
 import { AuthPermissionsResponseDto, AuthTokenResponseDto } from './dto/auth-response.dto';
 
 @ApiTags('Auth')
@@ -75,6 +76,7 @@ export class AuthController {
     return { accessToken, ...session };
   }
 
+  @AllowExpiredPassword()
   @Post('logout')
   @ApiOperation({ summary: '로그아웃', description: '세션을 종료하고 리프레시 토큰 쿠키를 제거합니다.' })
   @ApiResponse({ status: 200, description: '로그아웃 성공' })
@@ -105,5 +107,26 @@ export class AuthController {
       message: '관리자 정보를 성공적으로 가져왔습니다.',
       user,
     };
+  }
+
+  @ApiBearerAuth()
+  @AllowExpiredPassword()
+  @Post('password/defer')
+  @ApiOperation({ summary: '비밀번호 변경 연장', description: '비밀번호 변경 안내를 확인하고 90일 연장합니다.' })
+  @ApiResponse({ status: 200, description: '연장 성공' })
+  async deferPasswordChange(@CurrentUser() user: JWTPayload) {
+    return this.authService.deferPasswordChange(user.sub);
+  }
+
+  @ApiBearerAuth()
+  @AllowExpiredPassword()
+  @Post('password/change')
+  @ApiOperation({ summary: '비밀번호 변경', description: '현재 비밀번호를 확인하고 새로운 비밀번호로 변경합니다.' })
+  @ApiResponse({ status: 200, description: '변경 성공' })
+  async changePassword(
+    @CurrentUser() user: JWTPayload,
+    @Body() changePasswordDto: ChangePasswordDto,
+  ) {
+    return this.authService.changePassword(user.sub, changePasswordDto);
   }
 }

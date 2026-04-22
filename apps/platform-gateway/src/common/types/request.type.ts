@@ -9,6 +9,10 @@ export interface JWTPayload {
   email: string
   /** 활성 테넌트 식별자 */
   tenantId?: string
+  /** 세션 식별자 (단일 세션 검증용) */
+  sid: string
+  /** 비밀번호 변경 필요 여부 */
+  passwordChangeRequired?: boolean
   /** 기타 페이로드 정보 */
   [key: string]: unknown
 }
