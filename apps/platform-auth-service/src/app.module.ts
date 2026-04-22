@@ -36,6 +36,7 @@ import { RedisModule } from '@/modules/redis/redis.module';
     RedisModule.forRoot({
       host: new URL(ENV.REDIS_URL).hostname,
       port: Number(new URL(ENV.REDIS_URL).port) || 6379,
+      username: new URL(ENV.REDIS_URL).username || undefined,
       password: new URL(ENV.REDIS_URL).password || undefined,
       maxRetriesPerRequest: null,
     }),
