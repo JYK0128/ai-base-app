@@ -33,6 +33,7 @@ const sharedOptions = {
         },
         target: 'es2022',
         keepClassNames: true,
+        externalHelpers: true,
         transform: {
           legacyDecorator: true,
           decoratorMetadata: true,
