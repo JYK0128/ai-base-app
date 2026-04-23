@@ -11,8 +11,8 @@ import { ENV } from '@/common/env';
 import { ExceptionFilter } from '@/common/filters/exception.filter';
 import { AuthGuard } from '@/common/guards/auth.guard';
 import { TransformInterceptor } from '@/common/interceptors/transform.interceptor';
-import { ContextMiddleware } from '@/common/middlewares/context.middleware';
 import { createClsMiddlewareOptions } from '@/common/middlewares/cls.middleware-options';
+import { ContextMiddleware } from '@/common/middlewares/context.middleware';
 import { AuthModule } from '@/modules/auth/auth.module';
 import { HealthModule } from '@/modules/health/health.module';
 
