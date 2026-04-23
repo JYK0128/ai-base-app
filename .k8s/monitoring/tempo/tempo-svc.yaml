@@ -10,6 +10,9 @@ spec:
   selector:
     app.kubernetes.io/name: tempo
   ports:
+  - name: http
+    port: 3200
+    targetPort: 3200
   - name: zipkin
     port: 9411
     targetPort: 9411

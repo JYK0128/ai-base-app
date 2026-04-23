@@ -9,7 +9,7 @@ data:
     datasources:
     - name: Mimir
       type: prometheus
-      url: http://mimir.monitoring.svc.cluster.local:9009/prometheus
+      url: http://mimir.monitoring.svc.cluster.local:8080/prometheus
       access: proxy
       isDefault: true
       editable: true
@@ -20,7 +20,7 @@ data:
       editable: true
     - name: Tempo
       type: tempo
-      url: http://tempo.monitoring.svc.cluster.local:3100
+      url: http://tempo.monitoring.svc.cluster.local:3200
       access: proxy
       editable: true
       jsonData:
