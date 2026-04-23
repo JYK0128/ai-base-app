@@ -55,7 +55,9 @@
     "@types/qs": "6.15.0",
     "@types/range-parser": "1.2.7",
     "@types/serve-static": "2.2.0",
+    "@types/supertest": "7.2.0",
     "eslint": "9.39.4",
+    "supertest": "7.2.2",
     "typescript": "6.0.2",
     "vitest": "4.1.4"
   }
