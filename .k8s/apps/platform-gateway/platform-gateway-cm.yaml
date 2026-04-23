@@ -9,8 +9,7 @@ metadata:
 data:
   NODE_ENV: "development"
   PORT: "3000"
-  AUTH_SERVICE_HOST: "platform-auth-service.dev-api.svc.cluster.local"
-  AUTH_SERVICE_PORT: "3001"
+  AUTH_SERVICE_URL: "platform-auth-service.dev-api.svc.cluster.local:3001"
   JWT_ACCESS_SECRET: "dev_access_secret_key_1234567890"
   JWT_ACCESS_EXPIRES_IN: "3600"
   RABBITMQ_URL: "amqp://dev_rabbitmq_user:dev_rabbitmq_password@rabbitmq.dev-infra.svc.cluster.local:5672?frameMax=8192"
