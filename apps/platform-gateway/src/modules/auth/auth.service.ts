@@ -2,9 +2,12 @@ import { Injectable, Logger } from '@nestjs/common';
 
 import { AuthClient } from './auth.client';
 import { ChangePasswordDto, LoginDto } from './dto/auth-request.dto';
-import { AuthPermissionsResponseDto,
-         AuthRefreshResponseDto,
-         AuthTokenResponseDto } from './dto/auth-response.dto';
+import { AuthPermissionsResponseDto } from './dto/auth-response.dto';
+
+export interface LoginResult {
+  accessToken: string
+  refreshToken: string
+}
 
 @Injectable()
 export class AuthService {
@@ -12,33 +15,33 @@ export class AuthService {
 
   constructor(private readonly authClient: AuthClient) {}
 
-  async login(loginDto: LoginDto): Promise<AuthTokenResponseDto> {
+  async login(loginDto: LoginDto): Promise<LoginResult> {
     this.logger.log(`Handling login for ${loginDto.email}`);
     return this.authClient.login(loginDto);
   }
 
-  async refresh(refreshToken: string): Promise<AuthRefreshResponseDto> {
+  async refresh(refreshToken: string): Promise<LoginResult> {
     this.logger.log('Handling token refresh');
     return this.authClient.refresh(refreshToken);
   }
 
-  async logout(userId: string): Promise<void> {
-    this.logger.log(`Handling logout for ${userId}`);
-    return this.authClient.logout(userId);
+  async logout(): Promise<void> {
+    this.logger.log('Handling logout');
+    return this.authClient.logout();
   }
 
-  async permissions(user: { sub: string, email: string, tenantId?: string }): Promise<AuthPermissionsResponseDto> {
-    this.logger.log(`Handling permissions for ${user.sub}`);
-    return this.authClient.permissions(user);
+  async permissions(): Promise<AuthPermissionsResponseDto> {
+    this.logger.log('Handling permissions');
+    return this.authClient.permissions();
   }
 
-  async deferPasswordChange(userId: string): Promise<void> {
-    this.logger.log(`Handling password change deferment for ${userId}`);
-    return this.authClient.deferPasswordChange(userId);
+  async deferPasswordChange(): Promise<void> {
+    this.logger.log('Handling password change deferment');
+    return this.authClient.deferPasswordChange();
   }
 
-  async changePassword(userId: string, data: ChangePasswordDto): Promise<void> {
-    this.logger.log(`Handling password change for ${userId}`);
-    return this.authClient.changePassword(userId, data);
+  async changePassword(changePasswordDto: ChangePasswordDto): Promise<void> {
+    this.logger.log('Handling password change');
+    return this.authClient.changePassword(changePasswordDto);
   }
 }

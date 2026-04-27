@@ -1,31 +1,26 @@
-import { randomUUID } from 'node:crypto';
-
 import { Transactional } from '@mikro-orm/decorators/legacy';
-import { Logger, UnauthorizedException } from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { JwtService } from '@nestjs/jwt';
-import { AccountStatus, ManagerAccount, ManagerAccountRepository } from '@pkg/database';
+import { AccountStatus, ManagerAccount, ManagerAccountRepository, ManagerStatus, OrganizationStatus } from '@pkg/database';
 
 import { ENV } from '@/common/env';
-import type { JWTPayload } from '@/common/types/request.type';
 import { CryptoUtil } from '@/common/utils/crypto.util';
+import { TokenUtil } from '@/common/utils/token.util';
 import { RedisService } from '@/modules/redis/redis.service';
 
-export class LoginCommand {
-  constructor(
-    public readonly email: string,
-    public readonly password: string,
-    public readonly clientIp: string,
-  ) {}
-}
+import { LoginAsserter, LoginCommand } from './login.handler.types';
 
+/**
+ * 로그인 처리 핸들러
+ */
 @CommandHandler(LoginCommand)
 export class LoginHandler implements ICommandHandler<LoginCommand> {
-  private readonly logger = new Logger(LoginHandler.name);
-  private readonly maxLoginAttempts = 5;
-  private readonly loginAttemptTtlSeconds = 15 * 60;
-  private readonly loginLockTtlSeconds = 15 * 60;
-  private readonly passwordExpiryDays = 90;
+  private readonly loginKeys = RedisService.for('login');
+  private readonly LoginGuard = LoginAsserter.onFail(({ code, context }) => {
+    if (code === 'INVALID_CREDENTIALS' && context) {
+      return this.trackRateLimit(context.email);
+    }
+  });
 
   constructor(
     private readonly managerAccountRepository: ManagerAccountRepository,
@@ -34,185 +29,103 @@ export class LoginHandler implements ICommandHandler<LoginCommand> {
   ) {}
 
   @Transactional()
-  async execute(command: LoginCommand) {
-    const { password, clientIp } = command;
-    const email = this.normalizeEmail(command.email);
-    this.logger.log(`Executing LoginCommand for user: ${email}`);
+  async execute({ email, password, clientIp }: LoginCommand) {
+    const account = await this.identifyAccount(email);
+    await this.validatePolicies(account);
+    await this.verifyCredentials(account, password);
 
-    // 1. Redis 기반 일시적 차단 확인 (Rate Limiting 용도)
-    await this.assertLoginNotLocked(email);
+    return this.processLoginSuccess(account, clientIp);
+  }
 
-    // 2. 계정 정보 조회 (상태 필드 포함)
-    const managerAccount = await this.managerAccountRepository.findOne(
-      { email },
-      { populate: ['managers.organization'] },
+  // --- 1. 식별 및 계정 확보 ---
+
+  private async identifyAccount(email: string) {
+    const lockTtl = await this.redisService.ttl(this.loginKeys.build('lock', email));
+    await this.LoginGuard.throwIf(lockTtl > 0, 'ACCOUNT_LOCKED', {
+      metadata: {
+        remainingAttempts: 0,
+        retryAfterSeconds: lockTtl,
+        lockedUntil: new Date(Date.now() + lockTtl * 1000).toISOString(),
+      },
+    });
+
+    return this.LoginGuard.assert(
+      await this.managerAccountRepository.findOne(
+        { email },
+        { populate: ['manager.organization'] },
+      ),
+      'INVALID_CREDENTIALS',
+      { context: { email } },
+    );
+  }
+
+  // --- 2. 정책 검증 ---
+
+  private async validatePolicies(account: ManagerAccount) {
+    await this.LoginGuard.throwIf(
+      account.status === AccountStatus.INACTIVE,
+      'INACTIVE_ACCOUNT',
+    );
+    await this.LoginGuard.throwIf(
+      account.manager?.status === ManagerStatus.INACTIVE,
+      'INACTIVE_MANAGER',
+    );
+    await this.LoginGuard.throwIf(
+      account.manager?.organization?.status === OrganizationStatus.INACTIVE,
+      'INACTIVE_ORGANIZATION',
     );
 
-    if (!managerAccount) {
-      await this.recordLoginFailure(email);
-      throw new UnauthorizedException('이메일 또는 비밀번호가 일치하지 않습니다.');
-    }
-
-    // 3. 계정 정책 검증
-    this.validateAccountStatus(managerAccount);
-
-    // 4. 비밀번호 검증 및 응답 빌드
-    const tenantContext = this.resolveManagerTenantContext(managerAccount);
-    return this.buildLoginResponse(managerAccount, password, clientIp, tenantContext);
-  }
-
-  private validateAccountStatus(account: ManagerAccount) {
-    // 활성 상태 확인
-    if (account.status === AccountStatus.INACTIVE) {
-      throw new UnauthorizedException('비활성화된 계정입니다. 관리자에게 문의하세요.');
-    }
-
-    // 잠금 상태 확인 및 자동 해제 로직
-    if (account.status === AccountStatus.LOCKED) {
-      if (account.lockUntil && account.lockUntil < new Date()) {
-        // 잠금 시간 경과 시 자동 해제
-        account.status = AccountStatus.ACTIVE;
-        account.loginAttempts = 0;
-        account.lockUntil = null;
-      }
-      else {
-        throw new UnauthorizedException('로그인 시도가 너무 많아 계정이 잠겼습니다. 잠시 후 다시 시도하세요.');
-      }
+    // 휴면 계정 확인
+    if (account.lastLoginAt) {
+      const dormancyPeriodMs = 90 * 24 * 60 * 60 * 1000;
+      const isDormant = Date.now() - account.lastLoginAt.getTime() > dormancyPeriodMs;
+      await this.LoginGuard.throwIf(isDormant, 'DORMANT_ACCOUNT');
     }
   }
 
-  private async recordLoginFailure(email: string, account?: ManagerAccount) {
-    // 1. Redis 기반 실패 기록 (일시적 차단용)
-    const attemptKey = this.createLoginAttemptKey(email);
-    const lockKey = this.createLoginLockKey(email);
+  // --- 3. 자격 증명 확인 ---
 
-    const attempts = await this.redisService.incr(attemptKey);
-    if (attempts === 1) {
-      await this.redisService.expire(attemptKey, this.loginAttemptTtlSeconds);
-    }
-
-    if (attempts >= this.maxLoginAttempts) {
-      await this.redisService.set(lockKey, 'locked', this.loginLockTtlSeconds);
-      await this.redisService.del(attemptKey);
-    }
-
-    // 2. DB 기반 실패 기록 (영구/계정 잠금용)
-    if (account) {
-      account.loginAttempts += 1;
-      if (account.loginAttempts >= this.maxLoginAttempts) {
-        account.status = AccountStatus.LOCKED;
-        account.lockUntil = new Date(Date.now() + this.loginLockTtlSeconds * 1000);
-      }
-    }
+  private async verifyCredentials(account: ManagerAccount, password: string) {
+    const isPasswordValid = await CryptoUtil.comparePassword(password, account.password);
+    await this.LoginGuard.assert(isPasswordValid, 'INVALID_CREDENTIALS', { context: { email: account.email } });
   }
 
-  private async resetLoginFailures(email: string, account: ManagerAccount) {
-    // 1. Redis 초기화
+  // --- 4. 성공 처리 및 응답 ---
+
+  private async processLoginSuccess(account: ManagerAccount, clientIp: string) {
+    // 실패 이력 초기화
     await Promise.all([
-      this.redisService.del(this.createLoginAttemptKey(email)),
-      this.redisService.del(this.createLoginLockKey(email)),
+      this.redisService.del(this.loginKeys.build('attempt', account.email)),
+      this.redisService.del(this.loginKeys.build('lock', account.email)),
     ]);
 
-    // 2. DB 초기화
-    account.loginAttempts = 0;
-    account.lockUntil = null;
-    account.status = AccountStatus.ACTIVE;
-  }
-
-  private async buildLoginResponse(
-    account: ManagerAccount,
-    password: string,
-    clientIp: string,
-    tenantContext: {
-      tenantId?: string
-    },
-  ) {
-    const isPasswordMatch = await CryptoUtil.comparePassword(password, account.password);
-    if (!isPasswordMatch) {
-      await this.recordLoginFailure(account.email, account);
-      throw new UnauthorizedException('이메일 또는 비밀번호가 일치하지 않습니다.');
-    }
-
-    // 성공 시 실패 기록 초기화 및 마지막 로그인 갱신
-    await this.resetLoginFailures(account.email, account);
+    // 접속 정보 업데이트
     account.lastLoginAt = new Date();
     account.lastLoginIp = clientIp;
 
-    // 비밀번호 정책 체크 (만료 여부)
-    const isPasswordExpired = this.checkPasswordExpiry(account);
-    const passwordChangeRequired = account.forcePasswordChange || isPasswordExpired;
-
-    const sid = randomUUID();
-    const payload: JWTPayload = {
-      sub: account.id,
-      email: account.email,
-      tenantId: tenantContext.tenantId,
-      sid,
-      passwordChangeRequired,
-    };
-
-    // 단일 세션 보장: Redis에 현재 유효한 세션 ID 저장
-    await this.redisService.set(
-      `active_session:${account.id}`,
-      sid,
-      ENV.JWT_REFRESH_EXPIRES_IN,
+    // 비밀번호 만료 확인
+    const isPasswordExpired = account.nextPasswordChangeAt.getTime() < Date.now();
+    await this.LoginGuard.throwIf(
+      account.forcePasswordChange || isPasswordExpired,
+      'PASSWORD_CHANGE_REQUIRED',
     );
 
-    const accessToken = await this.jwtService.signAsync(payload);
-    const refreshToken = await this.jwtService.signAsync(payload, {
-      secret: ENV.JWT_REFRESH_SECRET,
-      expiresIn: ENV.JWT_REFRESH_EXPIRES_IN,
-    });
-
-    await this.redisService.set(
-      `refresh:${account.id}`,
-      refreshToken,
-      ENV.JWT_REFRESH_EXPIRES_IN,
-    );
-
-    return {
-      userId: account.id,
-      email: account.email,
-      clientIp,
-      tenantId: tenantContext.tenantId,
-      accessToken,
-      refreshToken,
-      passwordChangeRequired,
-    };
+    // 토큰 생성 및 응답
+    const tenantId = account.manager?.organization?.id;
+    return TokenUtil.generateTokens(this.jwtService, account.id, { tenantId });
   }
 
-  private checkPasswordExpiry(account: ManagerAccount): boolean {
-    const now = Date.now();
-    const targetTime = account.nextPasswordChangeAt.getTime();
-    return now > targetTime;
-  }
+  // --- 실패 처리 부수 효과 ---
 
-  private createLoginAttemptKey(email: string) {
-    return `login_attempt:${email}`;
-  }
+  private async trackRateLimit(email: string) {
+    const attemptKey = this.loginKeys.build('attempt', email);
 
-  private createLoginLockKey(email: string) {
-    return `login_lock:${email}`;
-  }
+    const attempts = await this.redisService.incr(attemptKey);
+    if (attempts === 1) await this.redisService.expire(attemptKey, ENV.LOGIN_ATTEMPT_TTL);
 
-  private normalizeEmail(email: string) {
-    return email.trim().toLowerCase();
-  }
-
-  private async assertLoginNotLocked(email: string) {
-    const lockKey = this.createLoginLockKey(email);
-    const lockTtl = await this.redisService.ttl(lockKey);
-    if (lockTtl > 0) {
-      throw new UnauthorizedException('로그인 시도가 너무 많습니다. 잠시 후 다시 시도하세요.');
+    if (attempts >= ENV.LOGIN_MAX_ATTEMPTS) {
+      await this.redisService.set(this.loginKeys.build('lock', email), 'locked', ENV.LOGIN_LOCK_TTL);
+      await this.redisService.del(attemptKey);
     }
-  }
-
-  private resolveManagerTenantContext(account: ManagerAccount) {
-    // 활성 상태인 매니저 정보만 필터링
-    const activeManagers = account.managers?.getItems().filter((m) => m.status === 'ACTIVE') || [];
-    const organization = activeManagers[0]?.organization;
-    return {
-      tenantId: organization?.id,
-    };
   }
 }

@@ -5,6 +5,12 @@ declare module 'nestjs-cls' {
     /** 요청 ID (서비스 내부 고유) */
     requestId: string
     /** 사용자 IP */
-    ip: string
+    clientIp: string
+    /** 브라우저 세션 ID (쿠키) */
+    sid: string
+    /** 사용자 고유 ID (UUID) */
+    id?: string
+    /** 테넌트 ID */
+    tenantId?: string
   }
 }

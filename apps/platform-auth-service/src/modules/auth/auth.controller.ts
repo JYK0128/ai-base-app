@@ -2,14 +2,13 @@ import { Controller, Logger } from '@nestjs/common';
 import { CommandBus, EventBus, QueryBus } from '@nestjs/cqrs';
 import { EventPattern, MessagePattern, Payload } from '@nestjs/microservices';
 
+import { ChangePasswordCommand } from './commands/change-password.handler';
+import { DeferPasswordChangeCommand } from './commands/defer-password-change.handler';
 import { LoginCommand } from './commands/login.handler';
 import { LogoutCommand } from './commands/logout.handler';
 import { RefreshTokenCommand } from './commands/refresh-token.handler';
-import { DeferPasswordChangeCommand } from './commands/defer-password-change.handler';
-import { ChangePasswordCommand } from './commands/change-password.handler';
 import { AuthNotifiedEvent } from './events/auth-notified.handler';
 import { GetPermissionsQuery } from './queries/get-permissions.handler';
-import { ValidateSessionQuery } from './queries/validate-session.handler';
 
 @Controller()
 export class AuthController {
@@ -34,38 +33,31 @@ export class AuthController {
   }
 
   @MessagePattern('auth.logout')
-  async handleLogout(@Payload() data: { userId: string }) {
-    return this.commandBus.execute(new LogoutCommand(data.userId));
+  async handleLogout(@Payload() data: { id: string }) {
+    return this.commandBus.execute(new LogoutCommand(data.id));
   }
 
   @MessagePattern('auth.defer_password_change')
-  async handleDeferPasswordChange(@Payload() data: { userId: string }) {
-    return this.commandBus.execute(new DeferPasswordChangeCommand(data.userId));
+  async handleDeferPasswordChange(@Payload() data: { id: string }) {
+    return this.commandBus.execute(new DeferPasswordChangeCommand(data.id));
   }
 
   @MessagePattern('auth.change_password')
-  async handleChangePassword(@Payload() data: { userId: string, currentPassword: string, newPassword: string }) {
+  async handleChangePassword(@Payload() data: { id: string, currentPassword: string, newPassword: string }) {
     return this.commandBus.execute(
-      new ChangePasswordCommand(data.userId, data.currentPassword, data.newPassword),
+      new ChangePasswordCommand(data.id, data.currentPassword, data.newPassword),
     );
   }
 
   @MessagePattern('auth.permissions')
   async handlePermissions(
     @Payload() data: {
-      userId: string
+      id: string
       tenantId?: string
     },
   ) {
     return this.queryBus.execute(
-      new GetPermissionsQuery(data.userId, data.tenantId),
-    );
-  }
-
-  @MessagePattern('auth.validate_session')
-  async handleValidateSession(@Payload() data: { userId: string, sid: string }) {
-    return this.queryBus.execute(
-      new ValidateSessionQuery(data.userId, data.sid),
+      new GetPermissionsQuery(data.id, data.tenantId),
     );
   }
 

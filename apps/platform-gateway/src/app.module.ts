@@ -1,6 +1,6 @@
 import { hostname } from 'node:os';
 
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { JwtModule } from '@nestjs/jwt';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
@@ -11,7 +11,6 @@ import { ENV } from '@/common/env';
 import { ExceptionFilter } from '@/common/filters/exception.filter';
 import { AuthGuard } from '@/common/guards/auth.guard';
 import { TransformInterceptor } from '@/common/interceptors/transform.interceptor';
-import { createClsMiddlewareOptions } from '@/common/middlewares/cls.middleware-options';
 import { ContextMiddleware } from '@/common/middlewares/context.middleware';
 import { AuthModule } from '@/modules/auth/auth.module';
 import { HealthModule } from '@/modules/health/health.module';
@@ -20,7 +19,7 @@ import { HealthModule } from '@/modules/health/health.module';
   imports: [
     ClsModule.forRoot({
       global: true,
-      middleware: createClsMiddlewareOptions(),
+      middleware: { mount: true },
     }),
     LoggerModule.forRoot({
       pinoHttp: {
@@ -71,5 +70,8 @@ import { HealthModule } from '@/modules/health/health.module';
     },
   ],
 })
-export class AppModule {
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(ContextMiddleware).forRoutes('*');
+  }
 }

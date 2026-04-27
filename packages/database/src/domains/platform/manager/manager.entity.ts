@@ -1,6 +1,6 @@
 import type { Rel } from '@mikro-orm/core';
 import { Collection } from '@mikro-orm/core';
-import { Entity, Enum, Index, ManyToOne, OneToMany, Unique } from '@mikro-orm/decorators/legacy';
+import { Entity, Enum, Index, ManyToOne, OneToMany, OneToOne, Unique } from '@mikro-orm/decorators/legacy';
 
 import { CoreEntity } from '../../core/core.entity';
 import type { Organization } from '../organization/organization.entity';
@@ -21,12 +21,7 @@ export enum ManagerStatus {
 }
 
 @Entity({ schema: 'platform', repository: () => ManagerRepository })
-@Unique({ properties: ['managerAccount', 'organization', 'role'] })
 export class Manager extends CoreEntity<Manager> {
-  @Index()
-  @ManyToOne()
-  managerAccount!: Rel<ManagerAccount>;
-
   @Enum(() => PlatformRole)
   role!: PlatformRole;
 
@@ -36,6 +31,9 @@ export class Manager extends CoreEntity<Manager> {
   @Index()
   @ManyToOne({ nullable: true })
   organization?: Rel<Organization> | null;
+
+  @OneToMany(() => ManagerAccount, (account) => account.manager)
+  accounts = new Collection<ManagerAccount>(this);
 
   @OneToMany(() => ManagerInvite, (invite) => invite.invitedBy)
   sentInvites = new Collection<ManagerInvite>(this);

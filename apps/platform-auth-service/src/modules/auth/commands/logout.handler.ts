@@ -1,27 +1,21 @@
-import { Logger } from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 
-import { RedisService } from '../../redis/redis.service';
+import { RedisService } from '@/modules/redis/redis.service';
 
 export class LogoutCommand {
-  constructor(public readonly userId: string) {}
+  constructor(public readonly id: string) {}
 }
 
 @CommandHandler(LogoutCommand)
 export class LogoutHandler implements ICommandHandler<LogoutCommand> {
-  private readonly logger = new Logger(LogoutHandler.name);
-
   constructor(
     private readonly redisService: RedisService,
   ) {}
 
   async execute(command: LogoutCommand) {
-    const { userId } = command;
-    this.logger.log(`Executing LogoutCommand for user: ${userId}`);
-
+    const { id } = command;
     await Promise.all([
-      this.redisService.del(`refresh:${userId}`),
-      this.redisService.del(`active_session:${userId}`),
+      this.redisService.del(`refresh:${id}`),
     ]);
 
     return { success: true };

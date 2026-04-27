@@ -10,6 +10,9 @@ export interface EnvConfig {
   REDIS_URL: string
   NODE_ENV: string
   TCP_PORT: number
+  LOGIN_MAX_ATTEMPTS: number
+  LOGIN_ATTEMPT_TTL: number
+  LOGIN_LOCK_TTL: number
 }
 
 const getEnv = (key: string): string => {
@@ -28,4 +31,7 @@ export const ENV: EnvConfig = {
   REDIS_URL: getEnv('REDIS_URL'),
   NODE_ENV: getEnv('NODE_ENV'),
   TCP_PORT: Number(getEnv('TCP_PORT')),
+  LOGIN_MAX_ATTEMPTS: Number(getEnv('LOGIN_MAX_ATTEMPTS')),
+  LOGIN_ATTEMPT_TTL: Number(getEnv('LOGIN_ATTEMPT_TTL')),
+  LOGIN_LOCK_TTL: Number(getEnv('LOGIN_LOCK_TTL')),
 } as const;

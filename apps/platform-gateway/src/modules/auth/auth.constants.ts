@@ -21,5 +21,6 @@ export const AUTH_SERVICE_PATTERNS = {
   // eslint-disable-next-line sonarjs/no-hardcoded-passwords
   DEFER_PASSWORD_CHANGE: 'auth.defer_password_change',
   /** 비밀번호 변경 */
+  // eslint-disable-next-line sonarjs/no-hardcoded-passwords
   CHANGE_PASSWORD: 'auth.change_password',
 } as const;

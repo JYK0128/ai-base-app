@@ -9,9 +9,8 @@ import { ManagerInvite } from '../manager/manager.invite.entity';
 import { OrganizationRepository } from './organization.repository';
 
 export enum OrganizationStatus {
-  PENDING = 'PENDING',
   ACTIVE = 'ACTIVE',
-  SUSPENDED = 'SUSPENDED',
+  INACTIVE = 'INACTIVE',
 }
 
 @Entity({ schema: 'platform', repository: () => OrganizationRepository })
@@ -26,7 +25,7 @@ export class Organization extends CoreEntity<Organization> {
   email!: string;
 
   @Enum(() => OrganizationStatus)
-  status: OrganizationStatus & Opt = OrganizationStatus.PENDING;
+  status: OrganizationStatus & Opt = OrganizationStatus.ACTIVE;
 
   @OneToMany({ mappedBy: 'organization' })
   managers = new Collection<Manager>(this);

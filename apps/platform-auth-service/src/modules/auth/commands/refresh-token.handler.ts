@@ -1,12 +1,11 @@
 import { Logger, UnauthorizedException } from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { JwtService } from '@nestjs/jwt';
-import { ManagerAccountRepository } from '@pkg/database';
+import { AccountStatus, ManagerAccountRepository, ManagerStatus, OrganizationStatus } from '@pkg/database';
 
 import { ENV } from '@/common/env';
 import { JWTPayload } from '@/common/types/request.type';
-
-import { RedisService } from '../../redis/redis.service';
+import { RedisService } from '@/modules/redis/redis.service';
 
 export class RefreshTokenCommand {
   constructor(public readonly refreshToken: string) {}
@@ -38,20 +37,35 @@ export class RefreshTokenHandler implements ICommandHandler<RefreshTokenCommand>
         throw new UnauthorizedException('유효하지 않거나 만료된 세션입니다.');
       }
 
-      const account = await this.managerAccountRepository.findOne({ id: payload.sub });
+      const account = await this.managerAccountRepository.findOne(
+        { id: payload.sub },
+        { populate: ['manager.organization'] },
+      );
       if (!account) {
         throw new UnauthorizedException('계정을 찾을 수 없습니다.');
       }
 
+      if (account.status === AccountStatus.INACTIVE) {
+        throw new UnauthorizedException('비활성화된 계정입니다. 관리자에게 문의하세요.');
+      }
+
+      if (account.manager?.status === ManagerStatus.INACTIVE) {
+        throw new UnauthorizedException('조직 권한이 비활성화되었습니다. 관리자에게 문의하세요.');
+      }
+
+      if (account.manager?.organization?.status !== OrganizationStatus.ACTIVE) {
+        throw new UnauthorizedException('소속 조직이 활성화 상태가 아닙니다. 관리자에게 문의하세요.');
+      }
+
       const passwordChangeRequired = account.forcePasswordChange || this.isPasswordExpired(account.nextPasswordChangeAt);
+      if (passwordChangeRequired) {
+        throw new UnauthorizedException('비밀번호 변경이 필요합니다.');
+      }
 
       // 3. 새로운 토큰 페이로드 준비
-      const newPayload = {
+      const newPayload: JWTPayload = {
         sub: payload.sub,
-        email: payload.email,
-        sid: payload.sid,
         tenantId: payload.tenantId,
-        passwordChangeRequired,
       };
 
       // 4. 토큰 재발급 및 Redis 갱신 (Token Rotation)
@@ -68,10 +82,10 @@ export class RefreshTokenHandler implements ICommandHandler<RefreshTokenCommand>
       );
 
       return {
+        id: payload.sub,
         accessToken,
         refreshToken: newRefreshToken,
         tenantId: payload.tenantId,
-        passwordChangeRequired,
       };
     }
     catch (error) {

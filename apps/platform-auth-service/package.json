@@ -6,7 +6,7 @@
     "dist"
   ],
   "scripts": {
-    "dev": "dotenvx run --env=development --convention=nextjs -- nest start --watch",
+    "dev": "dotenvx run --env=development --convention=nextjs -- nest start --debug=9230 --watch",
     "build": "nest build",
     "start": "nest start",
     "lint": "eslint .",

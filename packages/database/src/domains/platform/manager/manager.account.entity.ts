@@ -1,5 +1,4 @@
-import { Collection } from '@mikro-orm/core';
-import { Entity, Enum, OneToMany, Property } from '@mikro-orm/decorators/legacy';
+import { Entity, Enum, ManyToOne, Property } from '@mikro-orm/decorators/legacy';
 
 import { CoreEntity } from '../../core/core.entity';
 import { ManagerAccountRepository } from './manager.account.repository';
@@ -8,12 +7,11 @@ import { Manager } from './manager.entity';
 export enum AccountStatus {
   ACTIVE = 'ACTIVE',
   INACTIVE = 'INACTIVE',
-  LOCKED = 'LOCKED',
 }
 
 @Entity({ schema: 'platform', repository: () => ManagerAccountRepository })
 export class ManagerAccount
-  extends CoreEntity<ManagerAccount, 'status' | 'loginAttempts' | 'passwordChangedAt' | 'nextPasswordChangeAt' | 'forcePasswordChange'> {
+  extends CoreEntity<ManagerAccount, 'status' | 'passwordChangedAt' | 'nextPasswordChangeAt' | 'forcePasswordChange'> {
   @Property({ unique: true })
   email!: string;
 
@@ -29,11 +27,7 @@ export class ManagerAccount
   @Enum(() => AccountStatus)
   status: AccountStatus = AccountStatus.ACTIVE;
 
-  @Property({ default: 0 })
-  loginAttempts: number = 0;
 
-  @Property({ nullable: true })
-  lockUntil?: Date | null;
 
   @Property()
   passwordChangedAt: Date = new Date();
@@ -44,6 +38,6 @@ export class ManagerAccount
   @Property()
   forcePasswordChange: boolean = false;
 
-  @OneToMany(() => Manager, (manager) => manager.managerAccount)
-  managers = new Collection<Manager>(this);
+  @ManyToOne(() => Manager)
+  manager!: Manager;
 }

@@ -7,13 +7,10 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import cookieParser from 'cookie-parser';
 import { json, urlencoded } from 'express';
 import helmet from 'helmet';
-import { ClsMiddleware } from 'nestjs-cls';
 import { Logger } from 'nestjs-pino';
 
 import { AppModule } from '@/app.module';
 import { ENV } from '@/common/env';
-import { createClsMiddlewareOptions } from '@/common/middlewares/cls.middleware-options';
-import { ContextMiddleware } from '@/common/middlewares/context.middleware';
 
 export function configureApp(app: NestExpressApplication) {
   const expressApp = app.getHttpAdapter().getInstance();
@@ -31,8 +28,6 @@ export function configureApp(app: NestExpressApplication) {
   });
 
   expressApp.use(cookieParser());
-  expressApp.use(new ClsMiddleware(createClsMiddlewareOptions()).use);
-  expressApp.use(app.get(ContextMiddleware).use.bind(app.get(ContextMiddleware)));
 
   app.enableVersioning({
     type: VersioningType.URI,

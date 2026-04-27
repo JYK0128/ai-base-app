@@ -2,7 +2,7 @@ import { MikroOrmModule } from '@mikro-orm/nestjs';
 import { Module } from '@nestjs/common';
 import { CqrsModule } from '@nestjs/cqrs';
 import { JwtModule } from '@nestjs/jwt';
-import { ManagerAccount } from '@pkg/database';
+import { ManagerAccount, ManagerRole, Permission, Role, RolePermission } from '@pkg/database';
 
 import { ENV } from '@/common/env';
 
@@ -15,6 +15,10 @@ import { Handlers } from './handlers';
     CqrsModule,
     MikroOrmModule.forFeature([
       ManagerAccount,
+      ManagerRole,
+      Role,
+      Permission,
+      RolePermission,
     ]),
     JwtModule.register({
       secret: ENV.JWT_ACCESS_SECRET,
@@ -25,4 +29,4 @@ import { Handlers } from './handlers';
   controllers: [AuthController],
   providers: [...Handlers],
 })
-export class AuthModule { }
+export class AuthModule {}

@@ -5,7 +5,7 @@ import { RedisService } from '@/modules/redis/redis.service';
 
 export class ValidateSessionQuery {
   constructor(
-    public readonly userId: string,
+    public readonly id: string,
     public readonly sid: string,
   ) {}
 }
@@ -17,12 +17,12 @@ export class ValidateSessionHandler implements IQueryHandler<ValidateSessionQuer
   constructor(private readonly redisService: RedisService) {}
 
   async execute(query: ValidateSessionQuery): Promise<boolean> {
-    const { userId, sid } = query;
+    const { id, sid } = query;
 
-    const activeSid = await this.redisService.get(`active_session:${userId}`);
+    const activeSid = await this.redisService.get(`active_session:${id}`);
 
     if (!activeSid || activeSid !== sid) {
-      this.logger.warn(`Invalid session detected for user ${userId}. Expected: ${activeSid}, Received: ${sid}`);
+      this.logger.warn(`Invalid session detected for user ${id}. Expected: ${activeSid}, Received: ${sid}`);
       return false;
     }
 

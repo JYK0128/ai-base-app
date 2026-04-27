@@ -22,6 +22,9 @@ export class RpcLoggingInterceptor implements NestInterceptor {
 
     const traceId = this.cls.get('traceId') || 'internal';
     const requestId = this.cls.get('requestId') || 'internal';
+    const sid = this.cls.get('sid');
+    const id = this.cls.get('id');
+    const tenantId = this.cls.get('tenantId');
 
     // 1. 요청 시작 로그
     this.logger.log({
@@ -29,6 +32,9 @@ export class RpcLoggingInterceptor implements NestInterceptor {
       pattern,
       traceId,
       requestId,
+      sid,
+      id,
+      tenantId,
       payload: this.sanitize(data),
     });
 
@@ -41,6 +47,9 @@ export class RpcLoggingInterceptor implements NestInterceptor {
           pattern,
           traceId,
           requestId,
+          sid,
+          id,
+          tenantId,
           duration: `${duration}ms`,
           response: this.sanitize(result),
         });
@@ -56,6 +65,9 @@ export class RpcLoggingInterceptor implements NestInterceptor {
           pattern,
           traceId,
           requestId,
+          sid,
+          id,
+          tenantId,
           duration: `${duration}ms`,
           error: errorMessage,
           stack: errorStack,
