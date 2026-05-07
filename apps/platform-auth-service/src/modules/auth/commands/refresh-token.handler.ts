@@ -57,7 +57,7 @@ export class RefreshTokenHandler implements ICommandHandler<RefreshTokenCommand>
         throw new UnauthorizedException('소속 조직이 활성화 상태가 아닙니다. 관리자에게 문의하세요.');
       }
 
-      const passwordChangeRequired = account.forcePasswordChange || this.isPasswordExpired(account.nextPasswordChangeAt);
+      const passwordChangeRequired = this.isPasswordExpired(account.passwordExpiresAt);
       if (passwordChangeRequired) {
         throw new UnauthorizedException('비밀번호 변경이 필요합니다.');
       }
@@ -94,7 +94,7 @@ export class RefreshTokenHandler implements ICommandHandler<RefreshTokenCommand>
     }
   }
 
-  private isPasswordExpired(nextPasswordChangeAt: Date) {
-    return Date.now() > nextPasswordChangeAt.getTime();
+  private isPasswordExpired(passwordExpiresAt?: Date | null) {
+    return !passwordExpiresAt || Date.now() > passwordExpiresAt.getTime();
   }
 }

@@ -1,15 +1,14 @@
 import { Transactional } from '@mikro-orm/decorators/legacy';
-import { ForbiddenException, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { AccountStatus, ManagerAccountRepository } from '@pkg/database';
 
-export class DeferPasswordChangeCommand {
-  constructor(public readonly id: string) {}
-}
+export { DeferPasswordChangeCommand } from './defer-password-change.handler.helpers';
+import { DeferPasswordChangeAsserter, DeferPasswordChangeCommand } from './defer-password-change.handler.helpers';
 
 @CommandHandler(DeferPasswordChangeCommand)
 export class DeferPasswordChangeHandler implements ICommandHandler<DeferPasswordChangeCommand> {
   private readonly passwordExpiryDays = 90;
+  private readonly DeferPasswordGuard = DeferPasswordChangeAsserter;
 
   constructor(private readonly managerAccountRepository: ManagerAccountRepository) {}
 
@@ -17,20 +16,15 @@ export class DeferPasswordChangeHandler implements ICommandHandler<DeferPassword
   async execute(command: DeferPasswordChangeCommand): Promise<void> {
     const { id } = command;
 
-    const account = await this.managerAccountRepository.findOne(id);
-    if (!account) {
-      throw new NotFoundException('계정을 찾을 수 없습니다.');
-    }
+    // 1. 계정 존재 여부 및 상태 확인
+    const account = await this.DeferPasswordGuard.assert(
+      await this.managerAccountRepository.findOne(id),
+      'ACCOUNT_NOT_FOUND',
+    );
 
-    if (account.status === AccountStatus.INACTIVE) {
-      throw new UnauthorizedException('비활성화된 계정입니다. 관리자에게 문의하세요.');
-    }
+    await this.DeferPasswordGuard.throwIf(account.status === AccountStatus.INACTIVE, 'INACTIVE_ACCOUNT');
 
-    if (account.forcePasswordChange) {
-      throw new ForbiddenException('관리자에 의해 강제된 비밀번호 변경은 연기할 수 없습니다.');
-    }
-
-    // 다음 변경 예정일을 현재 시점으로부터 passwordExpiryDays일 후로 연장
-    account.nextPasswordChangeAt = new Date(Date.now() + this.passwordExpiryDays * 24 * 60 * 60 * 1000);
+    // 2. 정책 관련 날짜 갱신
+    account.passwordExpiresAt = new Date(Date.now() + this.passwordExpiryDays * 24 * 60 * 60 * 1000);
   }
 }

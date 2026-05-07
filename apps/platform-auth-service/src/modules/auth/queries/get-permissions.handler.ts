@@ -32,7 +32,7 @@ export class GetPermissionsHandler implements IQueryHandler<GetPermissionsQuery>
     this.validateAccountStatus(account);
     this.validateTenantMembership(account, tenantId);
 
-    return this.fetchEffectivePermissions(account.id, tenantId);
+    return this.fetchEffectivePermissions(account.manager.id, tenantId);
   }
 
   /**
@@ -79,10 +79,10 @@ export class GetPermissionsHandler implements IQueryHandler<GetPermissionsQuery>
   /**
    * DB 기반의 역할 및 권한 세트 조회
    */
-  private async fetchEffectivePermissions(managerAccountId: string, tenantId?: string): Promise<GetPermissionsResult> {
+  private async fetchEffectivePermissions(managerPk: string, tenantId?: string): Promise<GetPermissionsResult> {
     const managerRoles = await this.managerRoleRepository.find(
       {
-        managerId: managerAccountId,
+        manager: managerPk,
         ...(tenantId ? { organization: tenantId } : {}),
       },
       { populate: ['role.permissions.permission'] },

@@ -46,7 +46,7 @@ export class ExceptionAsserter<
   /**
    * 비즈니스 예외 객체를 생성합니다.
    */
-  create(code: keyof T, metadata?: M): unknown {
+  private create(code: keyof T, metadata?: M): unknown {
     const { message, exception = InternalServerErrorException } = this.messages[code];
     const Constructor = exception as new (args: Record<string, unknown>) => unknown;
 
@@ -63,7 +63,7 @@ export class ExceptionAsserter<
   async throwIf(condition: boolean, code: keyof T, options?: AsserterOptions<M, C>): Promise<void> {
     if (condition) {
       const { metadata, context } = options || {};
-      if (this.onFailHook) await this.onFailHook({ code, metadata, context });
+      await this.onFailHook?.({ code, metadata, context });
       throw this.create(code, metadata);
     }
   }
@@ -74,7 +74,7 @@ export class ExceptionAsserter<
   async assert<V>(condition: V | null | undefined, code: keyof T, options?: AsserterOptions<M, C>): Promise<V> {
     if (!condition) {
       const { metadata, context } = options || {};
-      if (this.onFailHook) await this.onFailHook({ code, metadata, context });
+      await this.onFailHook?.({ code, metadata, context });
       throw this.create(code, metadata);
     }
     return condition as V;

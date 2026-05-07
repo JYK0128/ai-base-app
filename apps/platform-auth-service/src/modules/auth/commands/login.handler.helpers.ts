@@ -54,6 +54,7 @@ export type LOGIN_METADATA = {
   remainingAttempts?: number
   retryAfterSeconds?: number
   lockedUntil?: string
+  accessToken?: string
 };
 
 /**

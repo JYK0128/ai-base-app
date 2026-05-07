@@ -8,7 +8,8 @@ import { CryptoUtil } from '@/common/utils/crypto.util';
 import { TokenUtil } from '@/common/utils/token.util';
 import { RedisService } from '@/modules/redis/redis.service';
 
-import { LoginAsserter, LoginCommand } from './login.handler.types';
+export { LoginCommand } from './login.handler.helpers';
+import { LoginAsserter, LoginCommand } from './login.handler.helpers';
 
 /**
  * 로그인 처리 핸들러
@@ -18,7 +19,7 @@ export class LoginHandler implements ICommandHandler<LoginCommand> {
   private readonly loginKeys = RedisService.for('login');
   private readonly LoginGuard = LoginAsserter.onFail(({ code, context }) => {
     if (code === 'INVALID_CREDENTIALS' && context) {
-      return this.trackRateLimit(context.email);
+      return this.handleLoginFailure(context.email);
     }
   });
 
@@ -29,7 +30,11 @@ export class LoginHandler implements ICommandHandler<LoginCommand> {
   ) {}
 
   @Transactional()
-  async execute({ email, password, clientIp }: LoginCommand) {
+  async execute({
+    email,
+    password,
+    clientIp,
+  }: LoginCommand): Promise<{ accessToken: string, refreshToken: string }> {
     const account = await this.identifyAccount(email);
     await this.validatePolicies(account);
     await this.verifyCredentials(account, password);
@@ -49,7 +54,7 @@ export class LoginHandler implements ICommandHandler<LoginCommand> {
       },
     });
 
-    return this.LoginGuard.assert(
+    return await this.LoginGuard.assert(
       await this.managerAccountRepository.findOne(
         { email },
         { populate: ['manager.organization'] },
@@ -103,21 +108,24 @@ export class LoginHandler implements ICommandHandler<LoginCommand> {
     account.lastLoginAt = new Date();
     account.lastLoginIp = clientIp;
 
+    // 토큰 생성
+    const tenantId = account.manager?.organization?.id;
+    const tokens = await TokenUtil.generateTokens(this.jwtService, account.id, { tenantId });
+
     // 비밀번호 만료 확인
-    const isPasswordExpired = account.nextPasswordChangeAt.getTime() < Date.now();
+    const isPasswordExpired = !account.passwordExpiresAt || account.passwordExpiresAt.getTime() < Date.now();
     await this.LoginGuard.throwIf(
-      account.forcePasswordChange || isPasswordExpired,
+      isPasswordExpired,
       'PASSWORD_CHANGE_REQUIRED',
+      { metadata: { accessToken: tokens.accessToken } },
     );
 
-    // 토큰 생성 및 응답
-    const tenantId = account.manager?.organization?.id;
-    return TokenUtil.generateTokens(this.jwtService, account.id, { tenantId });
+    return tokens;
   }
 
   // --- 실패 처리 부수 효과 ---
 
-  private async trackRateLimit(email: string) {
+  private async handleLoginFailure(email: string) {
     const attemptKey = this.loginKeys.build('attempt', email);
 
     const attempts = await this.redisService.incr(attemptKey);

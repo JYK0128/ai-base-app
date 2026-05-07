@@ -2,123 +2,165 @@ import 'reflect-metadata';
 
 import { RequestContext } from '@mikro-orm/core';
 import { UnauthorizedException } from '@nestjs/common';
-import { describe, expect, it, vi } from 'vitest';
+import { AccountStatus, ManagerStatus, OrganizationStatus } from '@pkg/database';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { CryptoUtil } from '@/common/utils/crypto.util';
 
 import { LoginCommand, LoginHandler } from './login.handler';
 
 describe('LoginHandler', () => {
-  it('attaches remainingAttempts to invalid credential failures', async () => {
-    vi.spyOn(RequestContext, 'getEntityManager').mockReturnValue({
-      transactional: async <R>(callback: () => Promise<R>) => callback(),
-    } as never);
+  const mockEntityManager = {
+    transactional: async <R>(callback: () => Promise<R>) => callback(),
+  };
 
-    const account = {
-      id: 'user-1',
-      email: 'test@example.com',
-      password: 'hashed-password',
-      status: 'ACTIVE',
-      loginAttempts: 0,
-      lockUntil: null,
-      managers: {
-        getItems: () => [{ status: 'ACTIVE', organization: { id: 'tenant-1' } }],
+  const mockJwtService = {
+    signAsync: vi.fn().mockResolvedValue('Bearer test-token'),
+  };
+
+  const mockRedisService = {
+    ttl: vi.fn(),
+    incr: vi.fn(),
+    expire: vi.fn(),
+    set: vi.fn(),
+    del: vi.fn(),
+  };
+
+  beforeEach(() => {
+    vi.spyOn(RequestContext, 'getEntityManager').mockReturnValue(mockEntityManager as never);
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-04-23T00:00:00.000Z'));
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+    vi.useRealTimers();
+  });
+
+  const createMockAccount = (overrides = {}) => ({
+    id: 'user-1',
+    email: 'test@example.com',
+    password: 'hashed-password',
+    status: AccountStatus.ACTIVE,
+    lastLoginAt: new Date('2026-04-20T00:00:00.000Z'),
+    passwordExpiresAt: new Date('2099-01-01T00:00:00.000Z'),
+    lastLoginIp: null as string | null,
+    manager: {
+      status: ManagerStatus.ACTIVE,
+      organization: {
+        id: 'org-1',
+        status: OrganizationStatus.ACTIVE,
       },
-      nextPasswordChangeAt: new Date('2099-01-01T00:00:00.000Z'),
-      forcePasswordChange: false,
-    };
+    },
+    ...overrides,
+  });
 
-    const managerAccountRepository = {
-      findOne: vi.fn().mockResolvedValue(account),
-    };
-    const jwtService = {
-      signAsync: vi.fn(),
-    };
-    const redisService = {
-      ttl: vi.fn().mockResolvedValue(-2),
-      incr: vi.fn().mockResolvedValue(1),
-      expire: vi.fn().mockResolvedValue(undefined),
-      set: vi.fn().mockResolvedValue(undefined),
-      del: vi.fn().mockResolvedValue(undefined),
-    };
+  it('successfully logs in and returns tokens', async () => {
+    const account = createMockAccount();
+    const repository = { findOne: vi.fn().mockResolvedValue(account) };
+    mockRedisService.ttl.mockResolvedValue(-2); // No lock
+    vi.spyOn(CryptoUtil, 'comparePassword').mockResolvedValue(true);
 
+    const handler = new LoginHandler(repository as never, mockJwtService as never, mockRedisService as never);
+    const result = (await handler.execute(
+      new LoginCommand('test@example.com', 'password123', '127.0.0.1'),
+    )) as { accessToken: string, refreshToken: string };
+
+    expect(result.accessToken).toMatch(/Bearer .+/);
+    expect(result.refreshToken).toMatch(/Bearer .+/);
+    expect(account.lastLoginAt?.toISOString()).toBe('2026-04-23T00:00:00.000Z');
+    expect(account.lastLoginIp).toBe('127.0.0.1');
+  });
+
+  it('throws INVALID_CREDENTIALS when password does not match and tracks attempts', async () => {
+    const account = createMockAccount();
+    const repository = { findOne: vi.fn().mockResolvedValue(account) };
+    mockRedisService.ttl.mockResolvedValue(-2);
+    mockRedisService.incr.mockResolvedValue(1);
     vi.spyOn(CryptoUtil, 'comparePassword').mockResolvedValue(false);
 
-    const handler = new LoginHandler(
-      managerAccountRepository as never,
-      jwtService as never,
-      redisService as never,
-    );
+    const handler = new LoginHandler(repository as never, mockJwtService as never, mockRedisService as never);
 
-    const error = await handler.execute(new LoginCommand('test@example.com', 'wrong-password', '127.0.0.1'))
-      .catch((caught: unknown) => caught as UnauthorizedException);
+    const promise = handler.execute(new LoginCommand('test@example.com', 'wrong-pass', '127.0.0.1'));
 
-    expect(error).toBeInstanceOf(UnauthorizedException);
-    expect(error.getResponse()).toMatchObject({
-      message: '이메일 또는 비밀번호가 일치하지 않습니다.',
-      code: 'INVALID_CREDENTIALS',
-      details: {
-        remainingAttempts: 4,
+    await expect(promise).rejects.toThrow(UnauthorizedException);
+    await expect(promise).rejects.toMatchObject({
+      response: { code: 'INVALID_CREDENTIALS' },
+    });
+    expect(mockRedisService.incr).toHaveBeenCalled();
+  });
+
+  it('throws ACCOUNT_LOCKED when redis has an active lock', async () => {
+    const repository = { findOne: vi.fn() };
+    mockRedisService.ttl.mockResolvedValue(600); // 10 minutes remaining
+
+    const handler = new LoginHandler(repository as never, mockJwtService as never, mockRedisService as never);
+
+    const promise = handler.execute(new LoginCommand('test@example.com', 'any-pass', '127.0.0.1'));
+
+    await expect(promise).rejects.toThrow(UnauthorizedException);
+    await expect(promise).rejects.toMatchObject({
+      response: {
+        code: 'ACCOUNT_LOCKED',
+        details: { retryAfterSeconds: 600 },
       },
     });
   });
 
-  it('attaches lock details when the account is locked', async () => {
-    vi.spyOn(RequestContext, 'getEntityManager').mockReturnValue({
-      transactional: async <R>(callback: () => Promise<R>) => callback(),
-    } as never);
+  it('throws INACTIVE_ACCOUNT when account status is INACTIVE', async () => {
+    const account = createMockAccount({ status: AccountStatus.INACTIVE });
+    const repository = { findOne: vi.fn().mockResolvedValue(account) };
+    mockRedisService.ttl.mockResolvedValue(-2);
 
-    vi.useFakeTimers();
-    vi.setSystemTime(new Date('2026-04-23T00:00:00.000Z'));
+    const handler = new LoginHandler(repository as never, mockJwtService as never, mockRedisService as never);
 
-    const account = {
-      id: 'user-1',
-      email: 'test@example.com',
-      password: 'hashed-password',
-      status: 'ACTIVE',
-      loginAttempts: 5,
-      lockUntil: new Date('2026-04-23T00:10:00.000Z'),
-      managers: {
-        getItems: () => [{ status: 'ACTIVE', organization: { id: 'tenant-1' } }],
-      },
-      nextPasswordChangeAt: new Date('2099-01-01T00:00:00.000Z'),
-      forcePasswordChange: false,
-    };
-
-    const managerAccountRepository = {
-      findOne: vi.fn().mockResolvedValue(account),
-    };
-    const jwtService = {
-      signAsync: vi.fn(),
-    };
-    const redisService = {
-      ttl: vi.fn().mockResolvedValue(-2),
-      incr: vi.fn().mockResolvedValue(1),
-      expire: vi.fn().mockResolvedValue(undefined),
-      set: vi.fn().mockResolvedValue(undefined),
-      del: vi.fn().mockResolvedValue(undefined),
-    };
-
-    const handler = new LoginHandler(
-      managerAccountRepository as never,
-      jwtService as never,
-      redisService as never,
-    );
-
-    const error = await handler.execute(new LoginCommand('test@example.com', 'pass1234', '127.0.0.1'))
-      .catch((caught: unknown) => caught as UnauthorizedException);
-
-    expect(error).toBeInstanceOf(UnauthorizedException);
-    expect(error.getResponse()).toMatchObject({
-      message: '로그인 시도가 너무 많아 계정이 잠겼습니다. 잠시 후 다시 시도하세요.',
-      code: 'ACCOUNT_LOCKED',
-      details: {
-        remainingAttempts: 0,
-        retryAfterSeconds: 600,
-        lockedUntil: '2026-04-23T00:10:00.000Z',
-      },
+    await expect(
+      handler.execute(new LoginCommand('test@example.com', 'pass', '127.0.0.1')),
+    ).rejects.toMatchObject({
+      response: { code: 'INACTIVE_ACCOUNT' },
     });
+  });
 
-    vi.useRealTimers();
+  it('throws INACTIVE_MANAGER when manager status is INACTIVE', async () => {
+    const account = createMockAccount({ manager: { status: ManagerStatus.INACTIVE } });
+    const repository = { findOne: vi.fn().mockResolvedValue(account) };
+    mockRedisService.ttl.mockResolvedValue(-2);
+
+    const handler = new LoginHandler(repository as never, mockJwtService as never, mockRedisService as never);
+
+    await expect(
+      handler.execute(new LoginCommand('test@example.com', 'pass', '127.0.0.1')),
+    ).rejects.toMatchObject({
+      response: { code: 'INACTIVE_MANAGER' },
+    });
+  });
+
+  it('throws DORMANT_ACCOUNT when last login was more than 90 days ago', async () => {
+    const account = createMockAccount({ lastLoginAt: new Date('2025-01-01T00:00:00.000Z') });
+    const repository = { findOne: vi.fn().mockResolvedValue(account) };
+    mockRedisService.ttl.mockResolvedValue(-2);
+
+    const handler = new LoginHandler(repository as never, mockJwtService as never, mockRedisService as never);
+
+    await expect(
+      handler.execute(new LoginCommand('test@example.com', 'pass', '127.0.0.1')),
+    ).rejects.toMatchObject({
+      response: { code: 'DORMANT_ACCOUNT' },
+    });
+  });
+
+  it('throws PASSWORD_CHANGE_REQUIRED when password has expired', async () => {
+    const account = createMockAccount({ passwordExpiresAt: new Date('2026-04-20T00:00:00.000Z') });
+    const repository = { findOne: vi.fn().mockResolvedValue(account) };
+    mockRedisService.ttl.mockResolvedValue(-2);
+    vi.spyOn(CryptoUtil, 'comparePassword').mockResolvedValue(true);
+
+    const handler = new LoginHandler(repository as never, mockJwtService as never, mockRedisService as never);
+
+    await expect(
+      handler.execute(new LoginCommand('test@example.com', 'pass', '127.0.0.1')),
+    ).rejects.toMatchObject({
+      response: { code: 'PASSWORD_CHANGE_REQUIRED' },
+    });
   });
 });
