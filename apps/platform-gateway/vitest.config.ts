@@ -6,6 +6,8 @@ dotenvx.config({ convention: 'nextjs' });
 export default defineConfig({
   test: {
     globals: true,
+    passWithNoTests: true,
+    exclude: ['dist/**', 'node_modules/**'],
   },
   resolve: {
     tsconfigPaths: true,

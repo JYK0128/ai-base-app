@@ -1,7 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { ClsService } from 'nestjs-cls';
-import { firstValueFrom } from 'rxjs';
+import { defaultIfEmpty, firstValueFrom } from 'rxjs';
 
 import { AUTH_SERVICE, AUTH_SERVICE_PATTERNS } from './auth.constants';
 import { LoginResult } from './auth.service';
@@ -27,7 +27,11 @@ export class AuthClient {
       id: this.cls.get('id'),
       tenantId: this.cls.get('tenantId'),
     };
-    return firstValueFrom(this.client.send<TResult>(pattern, payload));
+    return firstValueFrom(
+      this.client.send<TResult>(pattern, payload).pipe(
+        defaultIfEmpty(undefined as TResult),
+      ),
+    );
   }
 
   // --- 비즈니스 메서드 ---

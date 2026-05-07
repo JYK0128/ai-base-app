@@ -27,6 +27,15 @@ export class AuthController {
   ) {
     const { accessToken, refreshToken } = await this.authService.login(loginDto);
 
+    this.setRefreshTokenCookie(res, refreshToken);
+
+    return { accessToken };
+  }
+
+  /**
+   * Refresh Token 쿠키 설정 공통 함수
+   */
+  private setRefreshTokenCookie(res: Response, refreshToken: string) {
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
@@ -34,8 +43,6 @@ export class AuthController {
       path: '/',
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
-
-    return { accessToken };
   }
 
   @Get('permissions')
