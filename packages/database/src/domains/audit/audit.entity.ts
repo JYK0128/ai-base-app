@@ -36,9 +36,6 @@ export class Audit extends CoreEntity<Audit> {
   @Property({ nullable: true })
   actorUserId?: string;
 
-  @Property({ type: 'json', nullable: true })
-  metadata?: Record<string, unknown>;
-
   @Property()
   occurredAt: Date & Opt = new Date();
 }

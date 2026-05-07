@@ -32,6 +32,9 @@ export abstract class CoreEntity<
   @Property({ nullable: true })
   deletedBy?: string | null = null;
 
+  @Property({ type: 'json', nullable: true })
+  metadata?: Record<string, unknown>;
+
   static create<T extends BaseEntity>(
     this: new () => T,
     data: RequiredEntityData<T>,

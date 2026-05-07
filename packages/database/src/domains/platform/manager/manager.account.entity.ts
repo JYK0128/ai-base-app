@@ -11,7 +11,7 @@ export enum AccountStatus {
 
 @Entity({ schema: 'platform', repository: () => ManagerAccountRepository })
 export class ManagerAccount
-  extends CoreEntity<ManagerAccount, 'status' | 'passwordChangedAt' | 'nextPasswordChangeAt' | 'forcePasswordChange'> {
+  extends CoreEntity<ManagerAccount, 'status' | 'lockUntil' | 'passwordExpiresAt'> {
   @Property({ unique: true })
   email!: string;
 
@@ -27,16 +27,11 @@ export class ManagerAccount
   @Enum(() => AccountStatus)
   status: AccountStatus = AccountStatus.ACTIVE;
 
+  @Property({ nullable: true })
+  lockUntil?: Date | null;
 
-
-  @Property()
-  passwordChangedAt: Date = new Date();
-
-  @Property()
-  nextPasswordChangeAt: Date = new Date(Date.now() + 90 * 24 * 60 * 60 * 1000);
-
-  @Property()
-  forcePasswordChange: boolean = false;
+  @Property({ nullable: true })
+  passwordExpiresAt?: Date | null = new Date(Date.now() + 90 * 24 * 60 * 60 * 1000);
 
   @ManyToOne(() => Manager)
   manager!: Manager;

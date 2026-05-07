@@ -83,7 +83,7 @@
     "esbuild-plugin-swc": "1.0.1",
     "eslint": "9.39.4",
     "tsx": "4.21.0",
-    "typescript": "6.0.2",
+    "typescript": "5.9.3",
     "unplugin-isolated-decl": "0.15.7",
     "vitest": "4.1.4"
   }
