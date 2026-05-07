@@ -1,0 +1,17 @@
+{
+  "skill_name": "atomic-layout-guide",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "상단에 고정된 헤더가 있고 아래에 스크롤 가능한 본문 영역이 있는 대시보드 레이아웃을 React와 Tailwind로 만들어줘. 헤더에는 왼쪽 로고와 오른쪽 사용자 메뉴가 가로로 배치되어야 해.",
+      "expected_output": "세로 구조는 grid-rows-[auto_1fr]를 사용하고, 헤더 내부 가로 구조는 flex를 사용하여 구현된 React 컴포넌트",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "카드 뉴스 형태의 컴포넌트를 만들어줘. 카드는 세로로 [이미지 영역(고정높이), 제목(auto), 설명(1fr), 하단 버튼 그룹(auto)] 구조여야 하고, 하단 버튼 그룹에는 '좋아요'와 '공유하기' 버튼이 양 끝에 가로로 배치되어야 해.",
+      "expected_output": "카드 내부 세로 구조는 grid-rows-[auto_auto_1fr_auto]와 같은 Grid 형태를 사용하고, 하단 버튼은 flex justify-between을 사용한 구현",
+      "files": []
+    }
+  ]
+}
