@@ -2,7 +2,7 @@ import { decodeJwt } from 'jose';
 import { atom, useAtom } from 'jotai';
 
 // accessToken을 저장하는 기본 atom
-export const accessTokenAtom = atom<string | null>(null);
+export const accessTokenAtom = atom<string | null>(null as string | null);
 
 // 비밀번호 변경 필요 여부를 계산하는 파생 atom
 export const mustChangePasswordAtom = atom((get) => {

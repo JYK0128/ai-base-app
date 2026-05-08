@@ -38,8 +38,24 @@ import type {
   LoginDto
 } from './model';
 
-import { axiosInstance } from '../lib/axios';
-import type { ErrorType } from '../lib/axios';
+import authControllerLoginV1Mutator from '../lib/axios';
+import type { ErrorType as AuthControllerLoginV1ErrorType } from '../lib/axios';
+import authControllerPermissionsV1Mutator from '../lib/axios';
+import type { ErrorType as AuthControllerPermissionsV1ErrorType } from '../lib/axios';
+import authControllerRefreshV1Mutator from '../lib/axios';
+import type { ErrorType as AuthControllerRefreshV1ErrorType } from '../lib/axios';
+import authControllerGetMeV1Mutator from '../lib/axios';
+import type { ErrorType as AuthControllerGetMeV1ErrorType } from '../lib/axios';
+import authControllerLogoutV1Mutator from '../lib/axios';
+import type { ErrorType as AuthControllerLogoutV1ErrorType } from '../lib/axios';
+import authControllerDeferPasswordChangeV1Mutator from '../lib/axios';
+import type { ErrorType as AuthControllerDeferPasswordChangeV1ErrorType } from '../lib/axios';
+import authControllerChangePasswordV1Mutator from '../lib/axios';
+import type { ErrorType as AuthControllerChangePasswordV1ErrorType } from '../lib/axios';
+import healthControllerLiveMutator from '../lib/axios';
+import type { ErrorType as HealthControllerLiveErrorType } from '../lib/axios';
+import healthControllerReadyMutator from '../lib/axios';
+import type { ErrorType as HealthControllerReadyErrorType } from '../lib/axios';
 
 
 
@@ -54,7 +70,7 @@ export const authControllerLoginV1 = (
 ) => {
 
 
-      return axiosInstance<AuthControllerLoginV1200>(
+      return authControllerLoginV1Mutator<AuthControllerLoginV1200>(
       {url: `/api/v1/auth/login`, method: 'POST',
       headers: {'Content-Type': 'application/json', },
       data: loginDto, signal
@@ -64,7 +80,7 @@ export const authControllerLoginV1 = (
 
 
 
-export const getAuthControllerLoginV1MutationOptions = <TError = ErrorType<ApiResponse>,
+export const getAuthControllerLoginV1MutationOptions = <TError = AuthControllerLoginV1ErrorType<ApiResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof authControllerLoginV1>>, TError,{data: LoginDto}, TContext>, }
 ): UseMutationOptions<Awaited<ReturnType<typeof authControllerLoginV1>>, TError,{data: LoginDto}, TContext> => {
 
@@ -93,12 +109,12 @@ const {mutation: mutationOptions} = options ?
 
     export type AuthControllerLoginV1MutationResult = NonNullable<Awaited<ReturnType<typeof authControllerLoginV1>>>
     export type AuthControllerLoginV1MutationBody = LoginDto
-    export type AuthControllerLoginV1MutationError = ErrorType<ApiResponse>
+    export type AuthControllerLoginV1MutationError = AuthControllerLoginV1ErrorType<ApiResponse>
 
     /**
  * @summary 로그인
  */
-export const useAuthControllerLoginV1 = <TError = ErrorType<ApiResponse>,
+export const useAuthControllerLoginV1 = <TError = AuthControllerLoginV1ErrorType<ApiResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof authControllerLoginV1>>, TError,{data: LoginDto}, TContext>, }
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof authControllerLoginV1>>,
@@ -119,7 +135,7 @@ export const authControllerPermissionsV1 = (
 ) => {
 
 
-      return axiosInstance<AuthControllerPermissionsV1200>(
+      return authControllerPermissionsV1Mutator<AuthControllerPermissionsV1200>(
       {url: `/api/v1/auth/permissions`, method: 'GET', signal
     },
       );
@@ -135,7 +151,7 @@ export const getAuthControllerPermissionsV1QueryKey = () => {
     }
 
 
-export const getAuthControllerPermissionsV1QueryOptions = <TData = Awaited<ReturnType<typeof authControllerPermissionsV1>>, TError = ErrorType<unknown>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof authControllerPermissionsV1>>, TError, TData>>, }
+export const getAuthControllerPermissionsV1QueryOptions = <TData = Awaited<ReturnType<typeof authControllerPermissionsV1>>, TError = AuthControllerPermissionsV1ErrorType<unknown>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof authControllerPermissionsV1>>, TError, TData>>, }
 ) => {
 
 const {query: queryOptions} = options ?? {};
@@ -154,10 +170,10 @@ const {query: queryOptions} = options ?? {};
 }
 
 export type AuthControllerPermissionsV1QueryResult = NonNullable<Awaited<ReturnType<typeof authControllerPermissionsV1>>>
-export type AuthControllerPermissionsV1QueryError = ErrorType<unknown>
+export type AuthControllerPermissionsV1QueryError = AuthControllerPermissionsV1ErrorType<unknown>
 
 
-export function useAuthControllerPermissionsV1<TData = Awaited<ReturnType<typeof authControllerPermissionsV1>>, TError = ErrorType<unknown>>(
+export function useAuthControllerPermissionsV1<TData = Awaited<ReturnType<typeof authControllerPermissionsV1>>, TError = AuthControllerPermissionsV1ErrorType<unknown>>(
   options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof authControllerPermissionsV1>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof authControllerPermissionsV1>>,
@@ -167,7 +183,7 @@ export function useAuthControllerPermissionsV1<TData = Awaited<ReturnType<typeof
       >, }
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useAuthControllerPermissionsV1<TData = Awaited<ReturnType<typeof authControllerPermissionsV1>>, TError = ErrorType<unknown>>(
+export function useAuthControllerPermissionsV1<TData = Awaited<ReturnType<typeof authControllerPermissionsV1>>, TError = AuthControllerPermissionsV1ErrorType<unknown>>(
   options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof authControllerPermissionsV1>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof authControllerPermissionsV1>>,
@@ -177,7 +193,7 @@ export function useAuthControllerPermissionsV1<TData = Awaited<ReturnType<typeof
       >, }
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useAuthControllerPermissionsV1<TData = Awaited<ReturnType<typeof authControllerPermissionsV1>>, TError = ErrorType<unknown>>(
+export function useAuthControllerPermissionsV1<TData = Awaited<ReturnType<typeof authControllerPermissionsV1>>, TError = AuthControllerPermissionsV1ErrorType<unknown>>(
   options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof authControllerPermissionsV1>>, TError, TData>>, }
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
@@ -185,7 +201,7 @@ export function useAuthControllerPermissionsV1<TData = Awaited<ReturnType<typeof
  * @summary 권한 조회
  */
 
-export function useAuthControllerPermissionsV1<TData = Awaited<ReturnType<typeof authControllerPermissionsV1>>, TError = ErrorType<unknown>>(
+export function useAuthControllerPermissionsV1<TData = Awaited<ReturnType<typeof authControllerPermissionsV1>>, TError = AuthControllerPermissionsV1ErrorType<unknown>>(
   options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof authControllerPermissionsV1>>, TError, TData>>, }
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
@@ -213,7 +229,7 @@ export const authControllerRefreshV1 = (
 ) => {
 
 
-      return axiosInstance<AuthControllerRefreshV1200>(
+      return authControllerRefreshV1Mutator<AuthControllerRefreshV1200>(
       {url: `/api/v1/auth/refresh`, method: 'POST', signal
     },
       );
@@ -221,7 +237,7 @@ export const authControllerRefreshV1 = (
 
 
 
-export const getAuthControllerRefreshV1MutationOptions = <TError = ErrorType<unknown>,
+export const getAuthControllerRefreshV1MutationOptions = <TError = AuthControllerRefreshV1ErrorType<unknown>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof authControllerRefreshV1>>, TError,void, TContext>, }
 ): UseMutationOptions<Awaited<ReturnType<typeof authControllerRefreshV1>>, TError,void, TContext> => {
 
@@ -250,12 +266,12 @@ const {mutation: mutationOptions} = options ?
 
     export type AuthControllerRefreshV1MutationResult = NonNullable<Awaited<ReturnType<typeof authControllerRefreshV1>>>
 
-    export type AuthControllerRefreshV1MutationError = ErrorType<unknown>
+    export type AuthControllerRefreshV1MutationError = AuthControllerRefreshV1ErrorType<unknown>
 
     /**
  * @summary 토큰 갱신
  */
-export const useAuthControllerRefreshV1 = <TError = ErrorType<unknown>,
+export const useAuthControllerRefreshV1 = <TError = AuthControllerRefreshV1ErrorType<unknown>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof authControllerRefreshV1>>, TError,void, TContext>, }
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof authControllerRefreshV1>>,
@@ -276,7 +292,7 @@ export const authControllerGetMeV1 = (
 ) => {
 
 
-      return axiosInstance<AuthControllerGetMeV1200>(
+      return authControllerGetMeV1Mutator<AuthControllerGetMeV1200>(
       {url: `/api/v1/auth/me`, method: 'GET', signal
     },
       );
@@ -292,7 +308,7 @@ export const getAuthControllerGetMeV1QueryKey = () => {
     }
 
 
-export const getAuthControllerGetMeV1QueryOptions = <TData = Awaited<ReturnType<typeof authControllerGetMeV1>>, TError = ErrorType<ApiResponse>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof authControllerGetMeV1>>, TError, TData>>, }
+export const getAuthControllerGetMeV1QueryOptions = <TData = Awaited<ReturnType<typeof authControllerGetMeV1>>, TError = AuthControllerGetMeV1ErrorType<ApiResponse>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof authControllerGetMeV1>>, TError, TData>>, }
 ) => {
 
 const {query: queryOptions} = options ?? {};
@@ -311,10 +327,10 @@ const {query: queryOptions} = options ?? {};
 }
 
 export type AuthControllerGetMeV1QueryResult = NonNullable<Awaited<ReturnType<typeof authControllerGetMeV1>>>
-export type AuthControllerGetMeV1QueryError = ErrorType<ApiResponse>
+export type AuthControllerGetMeV1QueryError = AuthControllerGetMeV1ErrorType<ApiResponse>
 
 
-export function useAuthControllerGetMeV1<TData = Awaited<ReturnType<typeof authControllerGetMeV1>>, TError = ErrorType<ApiResponse>>(
+export function useAuthControllerGetMeV1<TData = Awaited<ReturnType<typeof authControllerGetMeV1>>, TError = AuthControllerGetMeV1ErrorType<ApiResponse>>(
   options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof authControllerGetMeV1>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof authControllerGetMeV1>>,
@@ -324,7 +340,7 @@ export function useAuthControllerGetMeV1<TData = Awaited<ReturnType<typeof authC
       >, }
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useAuthControllerGetMeV1<TData = Awaited<ReturnType<typeof authControllerGetMeV1>>, TError = ErrorType<ApiResponse>>(
+export function useAuthControllerGetMeV1<TData = Awaited<ReturnType<typeof authControllerGetMeV1>>, TError = AuthControllerGetMeV1ErrorType<ApiResponse>>(
   options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof authControllerGetMeV1>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof authControllerGetMeV1>>,
@@ -334,7 +350,7 @@ export function useAuthControllerGetMeV1<TData = Awaited<ReturnType<typeof authC
       >, }
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useAuthControllerGetMeV1<TData = Awaited<ReturnType<typeof authControllerGetMeV1>>, TError = ErrorType<ApiResponse>>(
+export function useAuthControllerGetMeV1<TData = Awaited<ReturnType<typeof authControllerGetMeV1>>, TError = AuthControllerGetMeV1ErrorType<ApiResponse>>(
   options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof authControllerGetMeV1>>, TError, TData>>, }
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
@@ -342,7 +358,7 @@ export function useAuthControllerGetMeV1<TData = Awaited<ReturnType<typeof authC
  * @summary 내 정보 조회
  */
 
-export function useAuthControllerGetMeV1<TData = Awaited<ReturnType<typeof authControllerGetMeV1>>, TError = ErrorType<ApiResponse>>(
+export function useAuthControllerGetMeV1<TData = Awaited<ReturnType<typeof authControllerGetMeV1>>, TError = AuthControllerGetMeV1ErrorType<ApiResponse>>(
   options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof authControllerGetMeV1>>, TError, TData>>, }
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
@@ -370,7 +386,7 @@ export const authControllerLogoutV1 = (
 ) => {
 
 
-      return axiosInstance<ApiResponse>(
+      return authControllerLogoutV1Mutator<ApiResponse>(
       {url: `/api/v1/auth/logout`, method: 'POST', signal
     },
       );
@@ -378,7 +394,7 @@ export const authControllerLogoutV1 = (
 
 
 
-export const getAuthControllerLogoutV1MutationOptions = <TError = ErrorType<unknown>,
+export const getAuthControllerLogoutV1MutationOptions = <TError = AuthControllerLogoutV1ErrorType<unknown>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof authControllerLogoutV1>>, TError,void, TContext>, }
 ): UseMutationOptions<Awaited<ReturnType<typeof authControllerLogoutV1>>, TError,void, TContext> => {
 
@@ -407,12 +423,12 @@ const {mutation: mutationOptions} = options ?
 
     export type AuthControllerLogoutV1MutationResult = NonNullable<Awaited<ReturnType<typeof authControllerLogoutV1>>>
 
-    export type AuthControllerLogoutV1MutationError = ErrorType<unknown>
+    export type AuthControllerLogoutV1MutationError = AuthControllerLogoutV1ErrorType<unknown>
 
     /**
  * @summary 로그아웃
  */
-export const useAuthControllerLogoutV1 = <TError = ErrorType<unknown>,
+export const useAuthControllerLogoutV1 = <TError = AuthControllerLogoutV1ErrorType<unknown>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof authControllerLogoutV1>>, TError,void, TContext>, }
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof authControllerLogoutV1>>,
@@ -433,7 +449,7 @@ export const authControllerDeferPasswordChangeV1 = (
 ) => {
 
 
-      return axiosInstance<ApiResponse>(
+      return authControllerDeferPasswordChangeV1Mutator<ApiResponse>(
       {url: `/api/v1/auth/password/defer`, method: 'POST', signal
     },
       );
@@ -441,7 +457,7 @@ export const authControllerDeferPasswordChangeV1 = (
 
 
 
-export const getAuthControllerDeferPasswordChangeV1MutationOptions = <TError = ErrorType<unknown>,
+export const getAuthControllerDeferPasswordChangeV1MutationOptions = <TError = AuthControllerDeferPasswordChangeV1ErrorType<unknown>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof authControllerDeferPasswordChangeV1>>, TError,void, TContext>, }
 ): UseMutationOptions<Awaited<ReturnType<typeof authControllerDeferPasswordChangeV1>>, TError,void, TContext> => {
 
@@ -470,12 +486,12 @@ const {mutation: mutationOptions} = options ?
 
     export type AuthControllerDeferPasswordChangeV1MutationResult = NonNullable<Awaited<ReturnType<typeof authControllerDeferPasswordChangeV1>>>
 
-    export type AuthControllerDeferPasswordChangeV1MutationError = ErrorType<unknown>
+    export type AuthControllerDeferPasswordChangeV1MutationError = AuthControllerDeferPasswordChangeV1ErrorType<unknown>
 
     /**
  * @summary 비밀번호 변경 연장
  */
-export const useAuthControllerDeferPasswordChangeV1 = <TError = ErrorType<unknown>,
+export const useAuthControllerDeferPasswordChangeV1 = <TError = AuthControllerDeferPasswordChangeV1ErrorType<unknown>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof authControllerDeferPasswordChangeV1>>, TError,void, TContext>, }
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof authControllerDeferPasswordChangeV1>>,
@@ -496,7 +512,7 @@ export const authControllerChangePasswordV1 = (
 ) => {
 
 
-      return axiosInstance<ApiResponse>(
+      return authControllerChangePasswordV1Mutator<ApiResponse>(
       {url: `/api/v1/auth/password/change`, method: 'POST',
       headers: {'Content-Type': 'application/json', },
       data: changePasswordDto, signal
@@ -506,7 +522,7 @@ export const authControllerChangePasswordV1 = (
 
 
 
-export const getAuthControllerChangePasswordV1MutationOptions = <TError = ErrorType<ApiResponse>,
+export const getAuthControllerChangePasswordV1MutationOptions = <TError = AuthControllerChangePasswordV1ErrorType<ApiResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof authControllerChangePasswordV1>>, TError,{data: ChangePasswordDto}, TContext>, }
 ): UseMutationOptions<Awaited<ReturnType<typeof authControllerChangePasswordV1>>, TError,{data: ChangePasswordDto}, TContext> => {
 
@@ -535,12 +551,12 @@ const {mutation: mutationOptions} = options ?
 
     export type AuthControllerChangePasswordV1MutationResult = NonNullable<Awaited<ReturnType<typeof authControllerChangePasswordV1>>>
     export type AuthControllerChangePasswordV1MutationBody = ChangePasswordDto
-    export type AuthControllerChangePasswordV1MutationError = ErrorType<ApiResponse>
+    export type AuthControllerChangePasswordV1MutationError = AuthControllerChangePasswordV1ErrorType<ApiResponse>
 
     /**
  * @summary 비밀번호 변경
  */
-export const useAuthControllerChangePasswordV1 = <TError = ErrorType<ApiResponse>,
+export const useAuthControllerChangePasswordV1 = <TError = AuthControllerChangePasswordV1ErrorType<ApiResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof authControllerChangePasswordV1>>, TError,{data: ChangePasswordDto}, TContext>, }
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof authControllerChangePasswordV1>>,
@@ -557,7 +573,7 @@ export const healthControllerLive = (
 ) => {
 
 
-      return axiosInstance<HealthControllerLive200>(
+      return healthControllerLiveMutator<HealthControllerLive200>(
       {url: `/health/live`, method: 'GET', signal
     },
       );
@@ -573,7 +589,7 @@ export const getHealthControllerLiveQueryKey = () => {
     }
 
 
-export const getHealthControllerLiveQueryOptions = <TData = Awaited<ReturnType<typeof healthControllerLive>>, TError = ErrorType<HealthControllerLive503>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof healthControllerLive>>, TError, TData>>, }
+export const getHealthControllerLiveQueryOptions = <TData = Awaited<ReturnType<typeof healthControllerLive>>, TError = HealthControllerLiveErrorType<HealthControllerLive503>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof healthControllerLive>>, TError, TData>>, }
 ) => {
 
 const {query: queryOptions} = options ?? {};
@@ -592,10 +608,10 @@ const {query: queryOptions} = options ?? {};
 }
 
 export type HealthControllerLiveQueryResult = NonNullable<Awaited<ReturnType<typeof healthControllerLive>>>
-export type HealthControllerLiveQueryError = ErrorType<HealthControllerLive503>
+export type HealthControllerLiveQueryError = HealthControllerLiveErrorType<HealthControllerLive503>
 
 
-export function useHealthControllerLive<TData = Awaited<ReturnType<typeof healthControllerLive>>, TError = ErrorType<HealthControllerLive503>>(
+export function useHealthControllerLive<TData = Awaited<ReturnType<typeof healthControllerLive>>, TError = HealthControllerLiveErrorType<HealthControllerLive503>>(
   options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof healthControllerLive>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof healthControllerLive>>,
@@ -605,7 +621,7 @@ export function useHealthControllerLive<TData = Awaited<ReturnType<typeof health
       >, }
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useHealthControllerLive<TData = Awaited<ReturnType<typeof healthControllerLive>>, TError = ErrorType<HealthControllerLive503>>(
+export function useHealthControllerLive<TData = Awaited<ReturnType<typeof healthControllerLive>>, TError = HealthControllerLiveErrorType<HealthControllerLive503>>(
   options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof healthControllerLive>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof healthControllerLive>>,
@@ -615,12 +631,12 @@ export function useHealthControllerLive<TData = Awaited<ReturnType<typeof health
       >, }
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useHealthControllerLive<TData = Awaited<ReturnType<typeof healthControllerLive>>, TError = ErrorType<HealthControllerLive503>>(
+export function useHealthControllerLive<TData = Awaited<ReturnType<typeof healthControllerLive>>, TError = HealthControllerLiveErrorType<HealthControllerLive503>>(
   options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof healthControllerLive>>, TError, TData>>, }
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-export function useHealthControllerLive<TData = Awaited<ReturnType<typeof healthControllerLive>>, TError = ErrorType<HealthControllerLive503>>(
+export function useHealthControllerLive<TData = Awaited<ReturnType<typeof healthControllerLive>>, TError = HealthControllerLiveErrorType<HealthControllerLive503>>(
   options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof healthControllerLive>>, TError, TData>>, }
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
@@ -644,7 +660,7 @@ export const healthControllerReady = (
 ) => {
 
 
-      return axiosInstance<HealthControllerReady200>(
+      return healthControllerReadyMutator<HealthControllerReady200>(
       {url: `/health/ready`, method: 'GET', signal
     },
       );
@@ -660,7 +676,7 @@ export const getHealthControllerReadyQueryKey = () => {
     }
 
 
-export const getHealthControllerReadyQueryOptions = <TData = Awaited<ReturnType<typeof healthControllerReady>>, TError = ErrorType<HealthControllerReady503>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof healthControllerReady>>, TError, TData>>, }
+export const getHealthControllerReadyQueryOptions = <TData = Awaited<ReturnType<typeof healthControllerReady>>, TError = HealthControllerReadyErrorType<HealthControllerReady503>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof healthControllerReady>>, TError, TData>>, }
 ) => {
 
 const {query: queryOptions} = options ?? {};
@@ -679,10 +695,10 @@ const {query: queryOptions} = options ?? {};
 }
 
 export type HealthControllerReadyQueryResult = NonNullable<Awaited<ReturnType<typeof healthControllerReady>>>
-export type HealthControllerReadyQueryError = ErrorType<HealthControllerReady503>
+export type HealthControllerReadyQueryError = HealthControllerReadyErrorType<HealthControllerReady503>
 
 
-export function useHealthControllerReady<TData = Awaited<ReturnType<typeof healthControllerReady>>, TError = ErrorType<HealthControllerReady503>>(
+export function useHealthControllerReady<TData = Awaited<ReturnType<typeof healthControllerReady>>, TError = HealthControllerReadyErrorType<HealthControllerReady503>>(
   options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof healthControllerReady>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof healthControllerReady>>,
@@ -692,7 +708,7 @@ export function useHealthControllerReady<TData = Awaited<ReturnType<typeof healt
       >, }
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useHealthControllerReady<TData = Awaited<ReturnType<typeof healthControllerReady>>, TError = ErrorType<HealthControllerReady503>>(
+export function useHealthControllerReady<TData = Awaited<ReturnType<typeof healthControllerReady>>, TError = HealthControllerReadyErrorType<HealthControllerReady503>>(
   options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof healthControllerReady>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof healthControllerReady>>,
@@ -702,12 +718,12 @@ export function useHealthControllerReady<TData = Awaited<ReturnType<typeof healt
       >, }
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useHealthControllerReady<TData = Awaited<ReturnType<typeof healthControllerReady>>, TError = ErrorType<HealthControllerReady503>>(
+export function useHealthControllerReady<TData = Awaited<ReturnType<typeof healthControllerReady>>, TError = HealthControllerReadyErrorType<HealthControllerReady503>>(
   options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof healthControllerReady>>, TError, TData>>, }
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-export function useHealthControllerReady<TData = Awaited<ReturnType<typeof healthControllerReady>>, TError = ErrorType<HealthControllerReady503>>(
+export function useHealthControllerReady<TData = Awaited<ReturnType<typeof healthControllerReady>>, TError = HealthControllerReadyErrorType<HealthControllerReady503>>(
   options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof healthControllerReady>>, TError, TData>>, }
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {

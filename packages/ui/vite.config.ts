@@ -9,16 +9,15 @@ import { globSync } from 'glob';
 import { defineConfig } from 'vite';
 import dts from 'vite-plugin-dts';
 import { libInjectCss } from 'vite-plugin-lib-inject-css';
+import tsconfigPaths from 'vite-tsconfig-paths';
 
 import pkg from './package.json' with { type: 'json' };
 
 const dirname = typeof __dirname !== 'undefined' ? __dirname : path.dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig({
-  resolve: {
-    tsconfigPaths: true,
-  },
   plugins: [
+    tsconfigPaths(),
     react(),
     tailwindcss(),
     libInjectCss(),

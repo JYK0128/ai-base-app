@@ -1,6 +1,6 @@
+import { useAppForm } from '@pkg/ui';
 import { createFileRoute, Navigate } from '@tanstack/react-router';
 import { ArrowRight, Lock, Mail } from 'lucide-react';
-import React, { useState } from 'react';
 import { z } from 'zod';
 
 import { useAuthControllerLoginV1 } from '../../api/endpoints';
@@ -15,28 +15,34 @@ export const Route = createFileRoute('/_public/login')({
 
 function LoginPage() {
   const { redirect } = Route.useSearch();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
   const { login, isAuthenticated, mustChangePassword } = useAuth();
 
   const { mutate: loginMutate } = useAuthControllerLoginV1({
     mutation: {
       onSuccess: ({ data }) => {
-        // 상태만 업데이트합니다. 이동은 아래의 조건부 렌더링에서 처리합니다.
         login(data.accessToken);
       },
     },
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    loginMutate({ data: { email, password } });
-  };
+  const form = useAppForm({
+    defaultValues: {
+      email: '',
+      password: '',
+    },
+    validators: {
+      onSubmit: z.object({
+        email: z.email('올바른 이메일 형식을 입력해주세요.'),
+        password: z.string().min(1, '비밀번호를 입력해주세요.'),
+      }),
+    },
+    onSubmit: async ({ value }) => {
+      loginMutate({ data: value });
+    },
+  });
 
-  // 로그인 성공 시 상황에 맞는 페이지로 리다이렉트
   if (isAuthenticated) {
     const target = mustChangePassword ? '/change-password' : (redirect || '/dashboard');
-
     return <Navigate to={target} />;
   }
 
@@ -55,45 +61,56 @@ function LoginPage() {
         </header>
 
         <main className="grid gap-6">
-          <form onSubmit={handleSubmit} className="grid gap-5">
-            <div className="grid gap-2">
-              <label className="text-sm font-bold text-slate-700 ml-1">Email Address</label>
-              <div className="relative flex items-center">
-                <Mail className="absolute left-4 w-5 h-5 text-slate-400" />
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full pl-12 pr-4 py-4 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-indigo-500 transition-all outline-none text-slate-900 placeholder:text-slate-400 font-medium"
-                  placeholder="name@company.com"
-                  required
-                />
-              </div>
-            </div>
+          <form.AppForm>
+            <form.Layout onSubmit={(e) => void form.handleSubmit(e)}>
+              <form.AppField
+                name="email"
+              >
+                {(field) => (
+                  <field.Input
+                    label="Email Address"
+                    placeholder="name@company.com"
+                    type="email"
+                    required
+                    orientation="vertical"
+                    className="grid gap-2"
+                    labelWidth="auto"
+                    leftSide={(
+                      <div className="absolute left-4 top-1/2 -translate-y-1/2 z-10">
+                        <Mail className="w-5 h-5 text-slate-400" />
+                      </div>
+                    )}
+                  />
+                )}
+              </form.AppField>
 
-            <div className="grid gap-2">
-              <label className="text-sm font-bold text-slate-700 ml-1">Password</label>
-              <div className="relative flex items-center">
-                <Lock className="absolute left-4 w-5 h-5 text-slate-400" />
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full pl-12 pr-4 py-4 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-indigo-500 transition-all outline-none text-slate-900 placeholder:text-slate-400 font-medium"
-                  placeholder="••••••••"
-                  required
-                />
-              </div>
-            </div>
+              <form.AppField
+                name="password"
+              >
+                {(field) => (
+                  <field.Input
+                    label="Password"
+                    placeholder="••••••••"
+                    type="password"
+                    required
+                    orientation="vertical"
+                    className="grid gap-2"
+                    labelWidth="auto"
+                    leftSide={(
+                      <div className="absolute left-4 top-1/2 -translate-y-1/2 z-10">
+                        <Lock className="w-5 h-5 text-slate-400" />
+                      </div>
+                    )}
+                  />
+                )}
+              </form.AppField>
 
-            <button
-              type="submit"
-              className="group flex items-center justify-center gap-2 w-full py-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-bold shadow-lg shadow-indigo-200 transition-all mt-2"
-            >
-              Sign In
-              <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-            </button>
-          </form>
+              <form.Submit className="group flex items-center justify-center gap-2 w-full py-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-bold shadow-lg shadow-indigo-200 transition-all mt-2 h-auto text-base">
+                Sign In
+                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+              </form.Submit>
+            </form.Layout>
+          </form.AppForm>
         </main>
 
         <footer className="flex flex-row items-center justify-between mt-10 pt-8 border-t border-slate-50">
