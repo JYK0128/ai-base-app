@@ -59,11 +59,13 @@ export class PlatformManagerSeeder extends Seeder {
           email: managerAccountSeed.email,
           password: hashedPassword,
           manager,
+          passwordExpiresAt: new Date(),
         }));
       }
       else {
         found.password = hashedPassword;
         found.manager = manager;
+        found.passwordExpiresAt = new Date();
         manager.organization = organization;
         manager.status = ManagerStatus.ACTIVE;
       }
