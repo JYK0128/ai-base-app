@@ -1,0 +1,42 @@
+{
+  "name": "platform-admin-web",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "lint": "eslint .",
+    "preview": "vite preview",
+    "gen:api": "dotenvx run -- orval"
+  },
+  "dependencies": {
+    "@pkg/config": "workspace:*",
+    "@pkg/ui": "workspace:*",
+    "@pkg/utils": "workspace:*",
+    "@tanstack/react-query": "5.100.9",
+    "@tanstack/react-query-devtools": "5.100.9",
+    "@tanstack/react-router": "1.169.2",
+    "@tanstack/router-devtools": "1.166.13",
+    "axios": "1.16.0",
+    "jose": "6.2.3",
+    "jotai": "2.20.0",
+    "lucide-react": "^0.400.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@dotenvx/dotenvx": "1.61.0",
+    "@tailwindcss/vite": "4.2.2",
+    "@tanstack/router-vite-plugin": "1.166.50",
+    "@types/node": "22.13.9",
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
+    "@vitejs/plugin-react": "6.0.1",
+    "orval": "8.9.1",
+    "tailwindcss": "4.2.2",
+    "typescript": "^5.2.2",
+    "vite": "8.0.11",
+    "zod": "4.4.3"
+  }
+}

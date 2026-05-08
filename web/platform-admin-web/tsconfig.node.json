@@ -1,0 +1,8 @@
+{
+  "extends": "@pkg/config/typescript/node",
+  "files": [
+    "eslint.config.js",
+    "orval.config.ts",
+    "vite.config.ts"
+  ]
+}
