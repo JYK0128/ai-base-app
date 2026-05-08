@@ -32,6 +32,25 @@ export default defineConfig([
           unnamedComponents: 'arrow-function',
         },
       ],
+      '@typescript-eslint/only-throw-error': [
+        'error',
+        {
+          allow: [
+            'Redirect',
+            'NotFound',
+            {
+              from: 'package',
+              package: '@tanstack/react-router',
+              name: 'Redirect',
+            },
+            {
+              from: 'package',
+              package: '@tanstack/react-router',
+              name: 'NotFound',
+            },
+          ],
+        },
+      ],
     },
   },
 ]);

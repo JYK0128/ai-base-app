@@ -27,7 +27,7 @@ export default defineConfig([
     },
     rules: {
       '@typescript-eslint/no-unused-vars': 'off',
-      '@typescript-eslint/only-throw-error': 'warn',
+      '@typescript-eslint/only-throw-error': 'error',
       '@typescript-eslint/no-floating-promises': 'error',
       '@typescript-eslint/no-unsafe-function-type': 'warn',
       '@typescript-eslint/require-await': 'off',
