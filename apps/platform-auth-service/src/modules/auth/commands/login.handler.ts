@@ -108,17 +108,15 @@ export class LoginHandler implements ICommandHandler<LoginCommand> {
     account.lastLoginAt = new Date();
     account.lastLoginIp = clientIp;
 
-    // 토큰 생성
-    const tenantId = account.manager?.organization?.id;
-    const tokens = await TokenUtil.generateTokens(this.jwtService, account.id, { tenantId });
-
     // 비밀번호 만료 확인
     const isPasswordExpired = !account.passwordExpiresAt || account.passwordExpiresAt.getTime() < Date.now();
-    await this.LoginGuard.throwIf(
-      isPasswordExpired,
-      'PASSWORD_CHANGE_REQUIRED',
-      { metadata: { accessToken: tokens.accessToken } },
-    );
+
+    // 토큰 생성 (만료된 경우 제한된 페이로드 포함)
+    const tenantId = account.manager?.organization?.id;
+    const tokens = await TokenUtil.generateTokens(this.jwtService, account.id, {
+      tenantId,
+      mustChangePassword: isPasswordExpired,
+    });
 
     return tokens;
   }

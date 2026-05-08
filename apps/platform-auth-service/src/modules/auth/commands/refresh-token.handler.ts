@@ -5,6 +5,7 @@ import { AccountStatus, ManagerAccountRepository, ManagerStatus, OrganizationSta
 
 import { ENV } from '@/common/env';
 import { JWTPayload } from '@/common/types/request.type';
+import { TokenUtil } from '@/common/utils/token.util';
 import { RedisService } from '@/modules/redis/redis.service';
 
 export class RefreshTokenCommand {
@@ -57,26 +58,21 @@ export class RefreshTokenHandler implements ICommandHandler<RefreshTokenCommand>
         throw new UnauthorizedException('소속 조직이 활성화 상태가 아닙니다. 관리자에게 문의하세요.');
       }
 
-      const passwordChangeRequired = this.isPasswordExpired(account.passwordExpiresAt);
-      if (passwordChangeRequired) {
-        throw new UnauthorizedException('비밀번호 변경이 필요합니다.');
-      }
+      // 비밀번호 만료 여부 확인
+      const mustChangePassword = this.isPasswordExpired(account.passwordExpiresAt);
 
-      // 3. 새로운 토큰 페이로드 준비
-      const newPayload: JWTPayload = {
-        sub: payload.sub,
-        tenantId: payload.tenantId,
-      };
-
-      // 4. 토큰 재발급 및 Redis 갱신 (Token Rotation)
-      const accessToken = await this.jwtService.signAsync(newPayload);
-      const newRefreshToken = await this.jwtService.signAsync(newPayload, {
-        secret: ENV.JWT_REFRESH_SECRET,
-        expiresIn: ENV.JWT_REFRESH_EXPIRES_IN,
-      });
+      // 3. 토큰 재발급 및 Redis 갱신 (Token Rotation)
+      const { accessToken, refreshToken: newRefreshToken } = await TokenUtil.generateTokens(
+        this.jwtService,
+        account.id,
+        {
+          tenantId: payload.tenantId,
+          mustChangePassword,
+        },
+      );
 
       await this.redisService.set(
-        `refresh:${payload.sub}`,
+        `refresh:${account.id}`,
         newRefreshToken,
         ENV.JWT_REFRESH_EXPIRES_IN,
       );

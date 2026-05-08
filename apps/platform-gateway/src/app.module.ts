@@ -10,7 +10,7 @@ import { LoggerModule } from 'nestjs-pino';
 import { ENV } from '@/common/env';
 import { ExceptionFilter } from '@/common/filters/exception.filter';
 import { AuthGuard } from '@/common/guards/auth.guard';
-import { TransformInterceptor } from '@/common/interceptors/transform.interceptor';
+import { TraceInterceptor } from '@/common/interceptors/trace.interceptor';
 import { ContextMiddleware } from '@/common/middlewares/context.middleware';
 import { AuthModule } from '@/modules/auth/auth.module';
 import { HealthModule } from '@/modules/health/health.module';
@@ -62,7 +62,7 @@ import { HealthModule } from '@/modules/health/health.module';
     },
     {
       provide: APP_INTERCEPTOR,
-      useClass: TransformInterceptor,
+      useClass: TraceInterceptor,
     },
     {
       provide: ContextMiddleware,

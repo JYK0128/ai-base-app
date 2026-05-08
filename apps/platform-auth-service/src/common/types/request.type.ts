@@ -3,6 +3,7 @@ import type { Request } from 'express';
 export interface JWTPayload {
   sub: string
   tenantId?: string
+  mustChangePassword?: boolean
   [key: string]: unknown
 }
 

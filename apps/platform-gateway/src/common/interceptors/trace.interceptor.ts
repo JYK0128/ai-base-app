@@ -6,19 +6,18 @@ import { map } from 'rxjs/operators';
 import { ApiResponse } from '@/common/types/response.type';
 
 @Injectable()
-export class TransformInterceptor<T> implements NestInterceptor<T, ApiResponse<T>> {
+export class TraceInterceptor<T> implements NestInterceptor<T, ApiResponse<T>> {
   constructor(private readonly cls: ClsService) {}
 
   intercept(context: ExecutionContext, next: CallHandler): Observable<ApiResponse<T>> {
     return next.handle().pipe(
-      map(
-        (data: T): ApiResponse<T> => ({
-          success: true,
-          data,
-          traceId: this.cls.get('traceId'),
-          requestId: this.cls.get('requestId'),
-        }),
-      ),
+      map((data: T): ApiResponse<T> => {
+        const res = data instanceof ApiResponse ? data : ApiResponse.success(data);
+        res.traceId = this.cls.get('traceId');
+        res.requestId = this.cls.get('requestId');
+
+        return res;
+      }),
     );
   }
 }

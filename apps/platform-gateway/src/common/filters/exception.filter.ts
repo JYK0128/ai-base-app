@@ -21,13 +21,12 @@ export class ExceptionFilter implements NestExceptionFilter {
       isError: exception instanceof Error,
     });
     const ctx = host.switchToHttp();
-    const response = ctx.getResponse<Response>();
+    const originResponse = ctx.getResponse<Response>();
 
-    const errorResponse = ApiResponse.error(exception, {
-      requestId: this.cls.get('requestId'),
-      traceId: this.cls.get('traceId'),
-    });
+    const res = ApiResponse.error(exception);
+    res.traceId = this.cls.get('traceId');
+    res.requestId = this.cls.get('requestId');
 
-    response.status(errorResponse.error?.status || 500).json(errorResponse);
+    originResponse.status(res.error?.status || 500).json(res);
   }
 }

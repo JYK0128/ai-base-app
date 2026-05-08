@@ -25,10 +25,6 @@ const ERROR_MESSAGES = defineErrors({
     message: '로그인 시도가 너무 많아 계정이 잠겼습니다. 잠시 후 다시 시도하세요.',
     exception: UnauthorizedException,
   },
-  PASSWORD_CHANGE_REQUIRED: {
-    message: '비밀번호 변경이 필요합니다.',
-    exception: ForbiddenException,
-  },
   INACTIVE_ACCOUNT: {
     message: '비활성화된 계정입니다. 관리자에게 문의하세요.',
     exception: ForbiddenException,

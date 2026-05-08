@@ -3,6 +3,7 @@ import { Reflector } from '@nestjs/core';
 import { JwtService } from '@nestjs/jwt';
 import { Request } from 'express';
 
+import { BYPASS_KEY, BYPASS_POLICIES } from '@/common/decorators/bypass.decorator';
 import { IS_PERSONAL_KEY } from '@/common/decorators/personal.decorator';
 import { IS_PUBLIC_KEY } from '@/common/decorators/public.decorator';
 import type { JWTPayload } from '@/common/types/request.type';
@@ -49,7 +50,17 @@ export class AuthGuard implements CanActivate {
   }
 
   private handleBypass(context: ExecutionContext, payload: JWTPayload) {
-    // Note: mfaRequired, termsRequired, passwordChangeRequired 등은 로그인/리프레시 시점에 마이크로서비스에서 예외로 처리됩니다.
+    const bypassPolicies = this.reflector.getAllAndOverride<string[]>(BYPASS_KEY, [
+      context.getHandler(),
+      context.getClass(),
+    ]) || [];
+
+    // 비밀번호 변경이 필요한 토큰인데, 해당 정책 우회가 없는 경우
+    if (payload.mustChangePassword && !bypassPolicies.includes(BYPASS_POLICIES.PASSWORD)) {
+      throw new ForbiddenException('Password change is required before accessing this resource');
+    }
+
+    // MFA, 약관 동의 등 추가 정책도 여기서 확장 가능
   }
 
   private handlePersonal(context: ExecutionContext, request: Request, payload: JWTPayload) {
