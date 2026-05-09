@@ -84,7 +84,7 @@ function ChangePassword() {
 
         <main className="grid gap-6">
           <form.AppForm>
-            <form.Layout onSubmit={(e) => void form.handleSubmit(e)}>
+            <form.Layout className="grid gap-4" onSubmit={(e) => void form.handleSubmit(e)}>
               <form.AppField name="currentPassword">
                 {(field) => (
                   <field.Input
@@ -95,11 +95,7 @@ function ChangePassword() {
                     orientation="vertical"
                     className="grid gap-2"
                     labelWidth="auto"
-                    leftSide={(
-                      <div className="absolute left-4 top-1/2 -translate-y-1/2 z-10">
-                        <Lock className="w-5 h-5 text-slate-400" />
-                      </div>
-                    )}
+                    leftSide={<Lock className="w-5 h-5 text-slate-400" />}
                   />
                 )}
               </form.AppField>
@@ -114,11 +110,7 @@ function ChangePassword() {
                     orientation="vertical"
                     className="grid gap-2"
                     labelWidth="auto"
-                    leftSide={(
-                      <div className="absolute left-4 top-1/2 -translate-y-1/2 z-10">
-                        <Lock className="w-5 h-5 text-slate-400" />
-                      </div>
-                    )}
+                    leftSide={<Lock className="w-5 h-5 text-slate-400" />}
                   />
                 )}
               </form.AppField>
@@ -133,11 +125,7 @@ function ChangePassword() {
                     orientation="vertical"
                     className="grid gap-2"
                     labelWidth="auto"
-                    leftSide={(
-                      <div className="absolute left-4 top-1/2 -translate-y-1/2 z-10">
-                        <Lock className="w-5 h-5 text-slate-400" />
-                      </div>
-                    )}
+                    leftSide={<Lock className="w-5 h-5 text-slate-400" />}
                   />
                 )}
               </form.AppField>

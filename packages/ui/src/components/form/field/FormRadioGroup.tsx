@@ -2,6 +2,7 @@ import * as React from 'react';
 
 import { Field,
          FieldContent,
+         FieldDescription,
          FieldError,
          FieldLabel,
          FieldLegend } from '@/components/ui/field';
@@ -98,7 +99,7 @@ function FormRadioGroup({
         </RadioGroup>
 
         {description && (
-          <p className="text-sm text-muted-foreground mt-1.5">{description}</p>
+          <FieldDescription>{description}</FieldDescription>
         )}
 
         {showError && hasError && (

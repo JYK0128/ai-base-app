@@ -3,6 +3,7 @@ import * as React from 'react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Field,
          FieldContent,
+         FieldDescription,
          FieldError,
          FieldGroup,
          FieldLabel,
@@ -101,7 +102,7 @@ function FormCheckGroup({
         </FieldGroup>
 
         {description && (
-          <p className="text-sm text-muted-foreground mt-1.5">{description}</p>
+          <FieldDescription>{description}</FieldDescription>
         )}
 
         {showError && hasError && (

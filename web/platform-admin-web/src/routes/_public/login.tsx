@@ -47,8 +47,8 @@ function LoginPage() {
   }
 
   return (
-    <div className="grid place-items-center h-screen bg-slate-50 font-sans">
-      <div className="grid grid-rows-[auto_1fr_auto] w-full max-w-md bg-white rounded-3xl shadow-2xl shadow-slate-200/50 p-10 border border-slate-100">
+    <div className="grid min-h-screen place-items-center bg-slate-50 px-4 py-6 font-sans">
+      <div className="grid grid-rows-[auto_1fr_auto] w-full max-w-md bg-white rounded-3xl shadow-2xl shadow-slate-200/50 p-6 sm:p-10 border border-slate-100">
         <header className="flex flex-col gap-2 mb-8">
           <div className="flex items-center gap-3 mb-2">
             <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-200">
@@ -62,7 +62,7 @@ function LoginPage() {
 
         <main className="grid gap-6">
           <form.AppForm>
-            <form.Layout onSubmit={(e) => void form.handleSubmit(e)}>
+            <form.Layout className="grid gap-4" onSubmit={(e) => void form.handleSubmit(e)}>
               <form.AppField
                 name="email"
               >
@@ -75,11 +75,7 @@ function LoginPage() {
                     orientation="vertical"
                     className="grid gap-2"
                     labelWidth="auto"
-                    leftSide={(
-                      <div className="absolute left-4 top-1/2 -translate-y-1/2 z-10">
-                        <Mail className="w-5 h-5 text-slate-400" />
-                      </div>
-                    )}
+                    leftSide={<Mail className="w-5 h-5 text-slate-400" />}
                   />
                 )}
               </form.AppField>
@@ -96,11 +92,7 @@ function LoginPage() {
                     orientation="vertical"
                     className="grid gap-2"
                     labelWidth="auto"
-                    leftSide={(
-                      <div className="absolute left-4 top-1/2 -translate-y-1/2 z-10">
-                        <Lock className="w-5 h-5 text-slate-400" />
-                      </div>
-                    )}
+                    leftSide={<Lock className="w-5 h-5 text-slate-400" />}
                   />
                 )}
               </form.AppField>
@@ -113,7 +105,7 @@ function LoginPage() {
           </form.AppForm>
         </main>
 
-        <footer className="flex flex-row items-center justify-between mt-10 pt-8 border-t border-slate-50">
+        <footer className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-10 pt-8 border-t border-slate-50">
           <button className="text-sm font-bold text-slate-400 hover:text-indigo-600 transition-colors">
             Forgot Password?
           </button>
