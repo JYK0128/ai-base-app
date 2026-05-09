@@ -1,4 +1,11 @@
-import { useAppForm } from '@pkg/ui';
+import { Button,
+         Card,
+         CardContent,
+         CardDescription,
+         CardFooter,
+         CardHeader,
+         CardTitle,
+         useAppForm } from '@pkg/ui';
 import { createFileRoute, Navigate } from '@tanstack/react-router';
 import { useAtomValue } from 'jotai';
 import { ArrowLeft, ArrowRight, Lock, ShieldCheck } from 'lucide-react';
@@ -58,31 +65,30 @@ function ChangePassword() {
   }
 
   return (
-    <div className="grid place-items-center h-screen bg-slate-50 font-sans">
-      <div className="grid grid-rows-[auto_1fr_auto] w-full max-w-md bg-white rounded-3xl shadow-2xl shadow-slate-200/50 p-10 border border-slate-100">
-        <header className="flex flex-col gap-2 mb-8">
-          <button
+    <div className="grid min-h-screen place-items-center p-4">
+      <Card className="w-full max-w-md">
+        <CardHeader>
+          <Button
+            type="button"
+            variant="ghost"
             onClick={() => void navigate({ to: '/login' })}
-            className="flex items-center gap-1 text-slate-400 hover:text-indigo-600 transition-colors mb-4 w-fit"
           >
-            <ArrowLeft className="w-4 h-4" />
-            <span className="text-sm font-bold">Back to Login</span>
-          </button>
+            <ArrowLeft />
+            Back to Login
+          </Button>
 
-          <div className="flex items-center gap-3 mb-2">
-            <div className="w-10 h-10 bg-amber-500 rounded-xl flex items-center justify-center shadow-lg shadow-amber-200">
-              <ShieldCheck className="text-white w-5 h-5" />
-            </div>
-            <span className="text-2xl font-black tracking-tighter text-slate-900">SECURITY</span>
+          <div className="flex items-center gap-2">
+            <ShieldCheck />
+            <span>SECURITY</span>
           </div>
 
-          <h1 className="text-3xl font-bold text-slate-900">Change Password</h1>
-          <p className="text-slate-500 font-medium">
+          <CardTitle>Change Password</CardTitle>
+          <CardDescription>
             Please update your password to secure your account.
-          </p>
-        </header>
+          </CardDescription>
+        </CardHeader>
 
-        <main className="grid gap-6">
+        <CardContent>
           <form.AppForm>
             <form.Layout className="grid gap-4" onSubmit={(e) => void form.handleSubmit(e)}>
               <form.AppField name="currentPassword">
@@ -93,9 +99,8 @@ function ChangePassword() {
                     type="password"
                     required
                     orientation="vertical"
-                    className="grid gap-2"
                     labelWidth="auto"
-                    leftSide={<Lock className="w-5 h-5 text-slate-400" />}
+                    leftSide={<Lock />}
                   />
                 )}
               </form.AppField>
@@ -108,9 +113,8 @@ function ChangePassword() {
                     type="password"
                     required
                     orientation="vertical"
-                    className="grid gap-2"
                     labelWidth="auto"
-                    leftSide={<Lock className="w-5 h-5 text-slate-400" />}
+                    leftSide={<Lock />}
                   />
                 )}
               </form.AppField>
@@ -123,28 +127,27 @@ function ChangePassword() {
                     type="password"
                     required
                     orientation="vertical"
-                    className="grid gap-2"
                     labelWidth="auto"
-                    leftSide={<Lock className="w-5 h-5 text-slate-400" />}
+                    leftSide={<Lock />}
                   />
                 )}
               </form.AppField>
 
               <form.Submit
                 disabled={isChanging}
-                className="group flex items-center justify-center gap-2 w-full py-4 bg-amber-500 hover:bg-amber-600 text-white rounded-2xl font-bold shadow-lg shadow-amber-200 transition-all mt-2 h-auto text-base disabled:opacity-50"
+                className="w-full"
               >
                 {isChanging ? 'Updating...' : 'Update Password'}
-                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                <ArrowRight />
               </form.Submit>
             </form.Layout>
           </form.AppForm>
-        </main>
+        </CardContent>
 
-        <footer className="mt-10 pt-8 border-t border-slate-50 text-center">
-          <p className="text-sm text-slate-400 font-medium">Secured by Platform Auth Service</p>
-        </footer>
-      </div>
+        <CardFooter className="justify-center">
+          <CardDescription>Secured by Platform Auth Service</CardDescription>
+        </CardFooter>
+      </Card>
     </div>
   );
 }

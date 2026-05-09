@@ -1,4 +1,11 @@
-import { useAppForm } from '@pkg/ui';
+import { Button,
+         Card,
+         CardContent,
+         CardDescription,
+         CardFooter,
+         CardHeader,
+         CardTitle,
+         useAppForm } from '@pkg/ui';
 import { createFileRoute, Navigate } from '@tanstack/react-router';
 import { ArrowRight, Lock, Mail } from 'lucide-react';
 import { z } from 'zod';
@@ -47,20 +54,20 @@ function LoginPage() {
   }
 
   return (
-    <div className="grid min-h-screen place-items-center bg-slate-50 px-4 py-6 font-sans">
-      <div className="grid grid-rows-[auto_1fr_auto] w-full max-w-md bg-white rounded-3xl shadow-2xl shadow-slate-200/50 p-6 sm:p-10 border border-slate-100">
-        <header className="flex flex-col gap-2 mb-8">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-200">
-              <Lock className="text-white w-5 h-5" />
-            </div>
-            <span className="text-2xl font-black tracking-tighter text-slate-900">PLATFORM</span>
+    <div className="grid min-h-screen place-items-center p-4">
+      <Card className="w-full max-w-md">
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <Lock />
+            <span>PLATFORM</span>
           </div>
-          <h1 className="text-3xl font-bold text-slate-900">Welcome Back</h1>
-          <p className="text-slate-500 font-medium">Please enter your details to sign in.</p>
-        </header>
+          <CardTitle>Welcome Back</CardTitle>
+          <CardDescription>
+            Please enter your details to sign in.
+          </CardDescription>
+        </CardHeader>
 
-        <main className="grid gap-6">
+        <CardContent>
           <form.AppForm>
             <form.Layout className="grid gap-4" onSubmit={(e) => void form.handleSubmit(e)}>
               <form.AppField
@@ -73,9 +80,8 @@ function LoginPage() {
                     type="email"
                     required
                     orientation="vertical"
-                    className="grid gap-2"
                     labelWidth="auto"
-                    leftSide={<Mail className="w-5 h-5 text-slate-400" />}
+                    leftSide={<Mail />}
                   />
                 )}
               </form.AppField>
@@ -90,33 +96,32 @@ function LoginPage() {
                     type="password"
                     required
                     orientation="vertical"
-                    className="grid gap-2"
                     labelWidth="auto"
-                    leftSide={<Lock className="w-5 h-5 text-slate-400" />}
+                    leftSide={<Lock />}
                   />
                 )}
               </form.AppField>
 
-              <form.Submit className="group flex items-center justify-center gap-2 w-full py-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-bold shadow-lg shadow-indigo-200 transition-all mt-2 h-auto text-base">
+              <form.Submit className="w-full">
                 Sign In
-                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                <ArrowRight />
               </form.Submit>
             </form.Layout>
           </form.AppForm>
-        </main>
+        </CardContent>
 
-        <footer className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-10 pt-8 border-t border-slate-50">
-          <button className="text-sm font-bold text-slate-400 hover:text-indigo-600 transition-colors">
+        <CardFooter className="flex-col justify-between gap-2 sm:flex-row">
+          <Button type="button" variant="ghost">
             Forgot Password?
-          </button>
+          </Button>
           <div className="flex items-center gap-2">
-            <span className="text-sm font-medium text-slate-400">New here?</span>
-            <button className="text-sm font-bold text-indigo-600 hover:underline">
+            <CardDescription>New here?</CardDescription>
+            <Button type="button" variant="link">
               Create Account
-            </button>
+            </Button>
           </div>
-        </footer>
-      </div>
+        </CardFooter>
+      </Card>
     </div>
   );
 }
