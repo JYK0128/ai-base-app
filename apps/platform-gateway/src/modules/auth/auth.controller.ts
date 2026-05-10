@@ -12,7 +12,7 @@ import type { JWTPayload } from '@/common/types/request.type';
 import { ApiResponse } from '@/common/types/response.type';
 
 import { AuthService } from './auth.service';
-import { ChangePasswordDto, LoginDto } from './dto/auth-request.dto';
+import { ChangePasswordDto, CreateOnboardingOrganizationDto, LoginDto, RegisterManagerDto, ResendManagerVerificationDto, VerifyManagerRegistrationDto } from './dto/auth-request.dto';
 import { AuthMeResponseDto, AuthPermissionsResponseDto, AuthTokenResponseDto } from './dto/auth-response.dto';
 
 @ApiTags('Auth')
@@ -32,13 +32,50 @@ export class AuthController {
     @Body() loginDto: LoginDto,
     @Res({ passthrough: true }) res: Response,
   ) {
-    const { accessToken, refreshToken } = await this.authService.login(loginDto);
+    const { accessToken, refreshToken, mustCreateOrganization } = await this.authService.login(loginDto);
 
     this.setRefreshTokenCookie(res, refreshToken);
 
     return ApiResponse.success(
-      { accessToken },
+      { accessToken, mustCreateOrganization },
       '로그인에 성공했습니다.',
+    );
+  }
+
+  @Public()
+  @Post('register')
+  @ApiOperation({ summary: '관리자 공개가입', description: '조직 없이 관리자 인증 계정을 생성하고 이메일 인증을 요청합니다.' })
+  @SwaggerResult()
+  @SwaggerResponse({ status: 409, description: '이미 가입된 이메일', type: ApiResponse })
+  async register(@Body() registerDto: RegisterManagerDto) {
+    await this.authService.register(registerDto);
+    return ApiResponse.success(
+      null,
+      '인증 메일이 발송되었습니다.',
+    );
+  }
+
+  @Public()
+  @Post('register/verify')
+  @ApiOperation({ summary: '관리자 가입 이메일 인증', description: '이메일 인증 토큰을 검증하고 계정을 활성화합니다.' })
+  @SwaggerResult()
+  async verifyRegistration(@Body() verifyDto: VerifyManagerRegistrationDto) {
+    await this.authService.verifyRegistration(verifyDto);
+    return ApiResponse.success(
+      null,
+      '이메일 인증이 완료되었습니다.',
+    );
+  }
+
+  @Public()
+  @Post('register/resend')
+  @ApiOperation({ summary: '관리자 가입 인증 메일 재발송', description: '미인증 계정의 인증 메일을 다시 발송합니다.' })
+  @SwaggerResult()
+  async resendRegistrationVerification(@Body() resendDto: ResendManagerVerificationDto) {
+    await this.authService.resendVerification(resendDto);
+    return ApiResponse.success(
+      null,
+      '인증 메일이 발송되었습니다.',
     );
   }
 
@@ -66,6 +103,7 @@ export class AuthController {
     return this.authService.permissions();
   }
 
+  @Public()
   @Post('refresh')
   @ApiOperation({ summary: '토큰 갱신', description: '쿠키의 리프레시 토큰을 사용하여 액세스 토큰을 갱신합니다.' })
   @SwaggerResult(AuthTokenResponseDto)
@@ -77,7 +115,7 @@ export class AuthController {
       throw new UnauthorizedException('리프레시 토큰이 존재하지 않습니다.');
     }
 
-    const { accessToken, refreshToken: newRefreshToken } = await this.authService.refresh(refreshToken);
+    const { accessToken, refreshToken: newRefreshToken, mustCreateOrganization } = await this.authService.refresh(refreshToken);
 
     if (newRefreshToken) {
       res.cookie('refreshToken', newRefreshToken, {
@@ -90,7 +128,7 @@ export class AuthController {
     }
 
     return ApiResponse.success(
-      { accessToken },
+      { accessToken, mustCreateOrganization },
       '토큰이 성공적으로 갱신되었습니다.',
     );
   }
@@ -110,7 +148,7 @@ export class AuthController {
     );
   }
 
-  @Bypass(BYPASS_POLICIES.PASSWORD)
+  @Bypass(BYPASS_POLICIES.PASSWORD, BYPASS_POLICIES.ONBOARDING)
   @Post('logout')
   @ApiOperation({ summary: '로그아웃', description: '세션을 종료하고 리프레시 토큰 쿠키를 제거합니다.' })
   @SwaggerResult()
@@ -128,6 +166,25 @@ export class AuthController {
     return ApiResponse.success(
       null,
       '로그아웃되었습니다.',
+    );
+  }
+
+  @Bypass(BYPASS_POLICIES.ONBOARDING)
+  @Post('onboarding/organization')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: '최초 로그인 조직 생성', description: '조직 생성 온보딩 토큰으로 조직을 생성하고 일반 토큰을 발급합니다.' })
+  @SwaggerResult(AuthTokenResponseDto)
+  async createOnboardingOrganization(
+    @Body() dto: CreateOnboardingOrganizationDto,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const { accessToken, refreshToken, mustCreateOrganization } = await this.authService.createOnboardingOrganization(dto);
+
+    this.setRefreshTokenCookie(res, refreshToken);
+
+    return ApiResponse.success(
+      { accessToken, mustCreateOrganization },
+      '조직 생성이 완료되었습니다.',
     );
   }
 

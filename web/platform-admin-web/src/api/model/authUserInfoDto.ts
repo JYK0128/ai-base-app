@@ -14,5 +14,5 @@ export interface AuthUserInfoDto {
   /** 관리자 상태 (ACTIVE, INACTIVE) */
   status: string;
   /** 소속 테넌트(조직) ID */
-  tenantId?: string;
+  organizationId?: string;
 }

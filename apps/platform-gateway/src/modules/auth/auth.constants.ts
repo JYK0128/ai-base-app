@@ -9,6 +9,14 @@ export const AUTH_SERVICE = Symbol('AUTH_SERVICE');
 export const AUTH_SERVICE_PATTERNS = {
   /** 로그인 요청 */
   LOGIN: 'auth.login',
+  /** 관리자 공개가입 요청 */
+  REGISTER: 'auth.register',
+  /** 관리자 공개가입 이메일 인증 */
+  REGISTER_VERIFY: 'auth.register.verify',
+  /** 관리자 공개가입 이메일 인증 재발송 */
+  REGISTER_RESEND: 'auth.register.resend',
+  /** 최초 로그인 조직 생성 */
+  ONBOARDING_ORGANIZATION: 'auth.onboarding.organization',
   /** 토큰 갱신 요청 */
   REFRESH: 'auth.refresh',
   /** 로그아웃 요청 */

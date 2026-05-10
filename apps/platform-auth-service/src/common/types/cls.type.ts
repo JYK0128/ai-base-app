@@ -10,7 +10,7 @@ declare module 'nestjs-cls' {
     sid: string
     /** 사용자 고유 ID (UUID) */
     id?: string
-    /** 테넌트 ID */
-    tenantId?: string
+    /** 관리자 조직 ID */
+    organizationId?: string
   }
 }

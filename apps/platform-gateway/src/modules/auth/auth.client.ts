@@ -5,7 +5,7 @@ import { defaultIfEmpty, firstValueFrom } from 'rxjs';
 
 import { AUTH_SERVICE, AUTH_SERVICE_PATTERNS } from './auth.constants';
 import { LoginResult } from './auth.service';
-import { type ChangePasswordDto, LoginDto } from './dto/auth-request.dto';
+import { type ChangePasswordDto, type CreateOnboardingOrganizationDto, LoginDto, type RegisterManagerDto, type ResendManagerVerificationDto, type VerifyManagerRegistrationDto } from './dto/auth-request.dto';
 import { AuthPermissionsResponseDto } from './dto/auth-response.dto';
 
 @Injectable()
@@ -25,7 +25,7 @@ export class AuthClient {
       sid: this.cls.get('sid'),
       clientIp: this.cls.get('clientIp'),
       id: this.cls.get('id'),
-      tenantId: this.cls.get('tenantId'),
+      organizationId: this.cls.get('organizationId'),
     };
     return firstValueFrom(
       this.client.send<TResult>(pattern, payload).pipe(
@@ -37,6 +37,22 @@ export class AuthClient {
   // --- 비즈니스 메서드 ---
   async login(loginDto: LoginDto): Promise<LoginResult> {
     return this.send<LoginResult>(AUTH_SERVICE_PATTERNS.LOGIN, loginDto);
+  }
+
+  async register(registerDto: RegisterManagerDto): Promise<void> {
+    await this.send<void>(AUTH_SERVICE_PATTERNS.REGISTER, registerDto);
+  }
+
+  async verifyRegistration(verifyDto: VerifyManagerRegistrationDto): Promise<void> {
+    await this.send<void>(AUTH_SERVICE_PATTERNS.REGISTER_VERIFY, verifyDto);
+  }
+
+  async resendVerification(resendDto: ResendManagerVerificationDto): Promise<void> {
+    await this.send<void>(AUTH_SERVICE_PATTERNS.REGISTER_RESEND, resendDto);
+  }
+
+  async createOnboardingOrganization(dto: CreateOnboardingOrganizationDto): Promise<LoginResult> {
+    return this.send<LoginResult>(AUTH_SERVICE_PATTERNS.ONBOARDING_ORGANIZATION, dto);
   }
 
   async refresh(refreshToken: string): Promise<LoginResult> {

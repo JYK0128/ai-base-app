@@ -4,6 +4,7 @@ export const BYPASS_KEY = 'security_bypass';
 
 export const BYPASS_POLICIES = {
   PASSWORD: 'password',
+  ONBOARDING: 'onboarding',
   MFA: 'mfa',
   TERMS: 'terms',
 } as const;

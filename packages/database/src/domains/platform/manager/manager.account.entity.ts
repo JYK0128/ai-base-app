@@ -5,6 +5,7 @@ import { ManagerAccountRepository } from './manager.account.repository';
 import { Manager } from './manager.entity';
 
 export enum AccountStatus {
+  PENDING_VERIFICATION = 'PENDING_VERIFICATION',
   ACTIVE = 'ACTIVE',
   INACTIVE = 'INACTIVE',
 }

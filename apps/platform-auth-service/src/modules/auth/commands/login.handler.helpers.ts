@@ -29,6 +29,10 @@ const ERROR_MESSAGES = defineErrors({
     message: '비활성화된 계정입니다. 관리자에게 문의하세요.',
     exception: ForbiddenException,
   },
+  ACCOUNT_NOT_VERIFIED: {
+    message: '이메일 인증이 완료되지 않은 계정입니다.',
+    exception: ForbiddenException,
+  },
   DORMANT_ACCOUNT: {
     message: '장기간 미접속으로 인해 휴면 상태로 전환된 계정입니다. 본인 인증 후 이용해주세요.',
     exception: ForbiddenException,

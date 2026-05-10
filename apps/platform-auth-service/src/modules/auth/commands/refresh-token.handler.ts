@@ -1,7 +1,7 @@
 import { Logger, UnauthorizedException } from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { JwtService } from '@nestjs/jwt';
-import { AccountStatus, ManagerAccountRepository, ManagerStatus, OrganizationStatus } from '@pkg/database';
+import { AccountStatus, ManagerAccountRepository, ManagerStatus } from '@pkg/database';
 
 import { ENV } from '@/common/env';
 import { JWTPayload } from '@/common/types/request.type';
@@ -50,24 +50,32 @@ export class RefreshTokenHandler implements ICommandHandler<RefreshTokenCommand>
         throw new UnauthorizedException('비활성화된 계정입니다. 관리자에게 문의하세요.');
       }
 
+      if (account.status === AccountStatus.PENDING_VERIFICATION) {
+        throw new UnauthorizedException('이메일 인증이 완료되지 않은 계정입니다.');
+      }
+
       if (account.manager?.status === ManagerStatus.INACTIVE) {
         throw new UnauthorizedException('조직 권한이 비활성화되었습니다. 관리자에게 문의하세요.');
       }
 
-      if (account.manager?.organization?.status !== OrganizationStatus.ACTIVE) {
+      if (account.manager?.organization && String(account.manager.organization.status) !== 'ACTIVE') {
         throw new UnauthorizedException('소속 조직이 활성화 상태가 아닙니다. 관리자에게 문의하세요.');
       }
 
       // 비밀번호 만료 여부 확인
       const mustChangePassword = this.isPasswordExpired(account.passwordExpiresAt);
 
+      const organizationId = account.manager?.organization?.id;
+      const mustCreateOrganization = !organizationId;
+
       // 3. 토큰 재발급 및 Redis 갱신 (Token Rotation)
       const { accessToken, refreshToken: newRefreshToken } = await TokenUtil.generateTokens(
         this.jwtService,
         account.id,
         {
-          tenantId: payload.tenantId,
+          organizationId,
           mustChangePassword,
+          mustCreateOrganization,
         },
       );
 
@@ -81,7 +89,8 @@ export class RefreshTokenHandler implements ICommandHandler<RefreshTokenCommand>
         id: payload.sub,
         accessToken,
         refreshToken: newRefreshToken,
-        tenantId: payload.tenantId,
+        organizationId,
+        mustCreateOrganization,
       };
     }
     catch (error) {

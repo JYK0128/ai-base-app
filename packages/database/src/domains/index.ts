@@ -21,6 +21,8 @@ export * from './core/core.repository';
 export * from './core/pagination.repository';
 export * from './platform/manager/manager.account.entity';
 export * from './platform/manager/manager.account.repository';
+export * from './platform/manager/manager.account.verification.entity';
+export * from './platform/manager/manager.account.verification.repository';
 export * from './platform/manager/manager.entity';
 export * from './platform/manager/manager.invite.entity';
 export * from './platform/manager/manager.invite.repository';

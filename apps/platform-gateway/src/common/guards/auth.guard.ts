@@ -60,6 +60,10 @@ export class AuthGuard implements CanActivate {
       throw new ForbiddenException('Password change is required before accessing this resource');
     }
 
+    if (payload.mustCreateOrganization && !bypassPolicies.includes(BYPASS_POLICIES.ONBOARDING)) {
+      throw new ForbiddenException('Organization onboarding is required before accessing this resource');
+    }
+
     // MFA, 약관 동의 등 추가 정책도 여기서 확장 가능
   }
 
@@ -76,7 +80,7 @@ export class AuthGuard implements CanActivate {
 
       // 요청에서 id(UUID) 또는 userId(ID로 전송된 경우) 추출
       const requestId = (params?.id || params?.userId || body?.id || body?.userId || query?.id || query?.userId) as string | undefined;
-      const tenantId = (params?.tenantId || body?.tenantId || query?.tenantId) as string | undefined;
+      const organizationId = (params?.organizationId || body?.organizationId || query?.organizationId) as string | undefined;
 
       if (!requestId) {
         throw new ForbiddenException('Resource owner identification (id) is required');
@@ -89,12 +93,14 @@ export class AuthGuard implements CanActivate {
         throw new ForbiddenException('You do not have permission to access this personal resource');
       }
 
-      if (!tenantId) {
-        throw new ForbiddenException('Tenant identification is required');
+      if (organizationId) {
+        if (payload.organizationId !== organizationId) {
+          throw new ForbiddenException('You do not have permission to access this organization resource');
+        }
+        return;
       }
-      if (payload.tenantId !== tenantId) {
-        throw new ForbiddenException('You do not have permission to access this tenant resource');
-      }
+
+      throw new ForbiddenException('Organization identification is required');
     }
   }
 }

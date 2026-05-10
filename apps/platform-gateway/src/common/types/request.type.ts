@@ -3,7 +3,9 @@ import type { IncomingHttpHeaders } from 'node:http';
 import type { Request } from 'express';
 export interface JWTPayload {
   sub: string
-  tenantId?: string
+  organizationId?: string
+  mustChangePassword?: boolean
+  mustCreateOrganization?: boolean
   [key: string]: unknown
 }
 

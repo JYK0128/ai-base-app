@@ -120,7 +120,7 @@ export const AuthControllerGetMeV1Response = zod.object({
   "id": zod.string().describe('관리자 고유 ID'),
   "email": zod.string().describe('이메일 주소'),
   "status": zod.string().describe('관리자 상태 (ACTIVE, INACTIVE)'),
-  "tenantId": zod.string().optional().describe('소속 테넌트(조직) ID')
+  "organizationId": zod.string().optional().describe('관리자 조직 ID')
 }).describe('사용자 정보')
 }).optional()
 }))

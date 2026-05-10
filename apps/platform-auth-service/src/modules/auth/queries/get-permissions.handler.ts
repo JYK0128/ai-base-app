@@ -14,7 +14,7 @@ export interface GetPermissionsResult {
 export class GetPermissionsQuery {
   constructor(
     public readonly id: string,
-    public readonly tenantId?: string,
+    public readonly organizationId?: string,
   ) {}
 }
 
@@ -26,13 +26,13 @@ export class GetPermissionsHandler implements IQueryHandler<GetPermissionsQuery>
   ) {}
 
   async execute(query: GetPermissionsQuery): Promise<GetPermissionsResult> {
-    const { id, tenantId } = query;
+    const { id, organizationId } = query;
 
     const account = await this.findExistingAccount(id);
     this.validateAccountStatus(account);
-    this.validateTenantMembership(account, tenantId);
+    this.validateOrganizationMembership(account, organizationId);
 
-    return this.fetchEffectivePermissions(account.manager.id, tenantId);
+    return this.fetchEffectivePermissions(account.manager.id, organizationId);
   }
 
   /**
@@ -61,13 +61,13 @@ export class GetPermissionsHandler implements IQueryHandler<GetPermissionsQuery>
   }
 
   /**
-   * 특정 테넌트에 대한 소속 여부 및 상태 검증
+   * 특정 조직에 대한 소속 여부 및 상태 검증
    */
-  private validateTenantMembership(account: ManagerAccount, tenantId?: string) {
-    if (!tenantId) return;
+  private validateOrganizationMembership(account: ManagerAccount, organizationId?: string) {
+    if (!organizationId) return;
 
     const manager = account.manager;
-    if (!manager || manager.organization?.id !== tenantId) {
+    if (!manager || manager.organization?.id !== organizationId) {
       throw new UnauthorizedException('해당 조직에 대한 권한이 없습니다.');
     }
 
@@ -79,11 +79,11 @@ export class GetPermissionsHandler implements IQueryHandler<GetPermissionsQuery>
   /**
    * DB 기반의 역할 및 권한 세트 조회
    */
-  private async fetchEffectivePermissions(managerPk: string, tenantId?: string): Promise<GetPermissionsResult> {
+  private async fetchEffectivePermissions(managerPk: string, organizationId?: string): Promise<GetPermissionsResult> {
     const managerRoles = await this.managerRoleRepository.find(
       {
         manager: managerPk,
-        ...(tenantId ? { organization: tenantId } : {}),
+        ...(organizationId ? { organization: organizationId } : {}),
       },
       { populate: ['role.permissions.permission'] },
     );

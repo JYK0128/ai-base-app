@@ -3,6 +3,9 @@ import { ApiProperty } from '@nestjs/swagger';
 export class AuthTokenResponseDto {
   @ApiProperty({ description: '액세스 토큰' })
   accessToken!: string;
+
+  @ApiProperty({ description: '조직 생성 온보딩 필요 여부', required: false })
+  mustCreateOrganization?: boolean;
 }
 
 export class AuthPermissionsResponseDto {
@@ -26,8 +29,8 @@ export class AuthUserInfoDto {
   @ApiProperty({ description: '관리자 상태 (ACTIVE, INACTIVE)' })
   status!: string;
 
-  @ApiProperty({ description: '소속 테넌트(조직) ID', required: false })
-  tenantId?: string;
+  @ApiProperty({ description: '관리자 조직 ID', required: false })
+  organizationId?: string;
 }
 
 /**

@@ -34,7 +34,7 @@ export class LoginHandler implements ICommandHandler<LoginCommand> {
     email,
     password,
     clientIp,
-  }: LoginCommand): Promise<{ accessToken: string, refreshToken: string }> {
+  }: LoginCommand): Promise<{ accessToken: string, refreshToken: string, mustCreateOrganization: boolean }> {
     const account = await this.identifyAccount(email);
     await this.validatePolicies(account);
     await this.verifyCredentials(account, password);
@@ -67,6 +67,10 @@ export class LoginHandler implements ICommandHandler<LoginCommand> {
   // --- 2. 정책 검증 ---
 
   private async validatePolicies(account: ManagerAccount) {
+    await this.LoginGuard.throwIf(
+      account.status === AccountStatus.PENDING_VERIFICATION,
+      'ACCOUNT_NOT_VERIFIED',
+    );
     await this.LoginGuard.throwIf(
       account.status === AccountStatus.INACTIVE,
       'INACTIVE_ACCOUNT',
@@ -112,13 +116,21 @@ export class LoginHandler implements ICommandHandler<LoginCommand> {
     const isPasswordExpired = !account.passwordExpiresAt || account.passwordExpiresAt.getTime() < Date.now();
 
     // 토큰 생성 (만료된 경우 제한된 페이로드 포함)
-    const tenantId = account.manager?.organization?.id;
+    const organizationId = account.manager?.organization?.id;
+    const mustCreateOrganization = !organizationId;
     const tokens = await TokenUtil.generateTokens(this.jwtService, account.id, {
-      tenantId,
+      organizationId,
       mustChangePassword: isPasswordExpired,
+      mustCreateOrganization,
     });
 
-    return tokens;
+    await this.redisService.set(
+      `refresh:${account.id}`,
+      tokens.refreshToken,
+      ENV.JWT_REFRESH_EXPIRES_IN,
+    );
+
+    return { ...tokens, mustCreateOrganization };
   }
 
   // --- 실패 처리 부수 효과 ---

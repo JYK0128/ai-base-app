@@ -27,6 +27,7 @@ describe('LoginHandler', () => {
   };
 
   beforeEach(() => {
+    vi.clearAllMocks();
     vi.spyOn(RequestContext, 'getEntityManager').mockReturnValue(mockEntityManager as never);
     vi.useFakeTimers();
     vi.setSystemTime(new Date('2026-04-23T00:00:00.000Z'));
@@ -62,14 +63,55 @@ describe('LoginHandler', () => {
     vi.spyOn(CryptoUtil, 'comparePassword').mockResolvedValue(true);
 
     const handler = new LoginHandler(repository as never, mockJwtService as never, mockRedisService as never);
-    const result = (await handler.execute(
+    const result = await handler.execute(
       new LoginCommand('test@example.com', 'password123', '127.0.0.1'),
-    )) as { accessToken: string, refreshToken: string };
+    );
 
     expect(result.accessToken).toMatch(/Bearer .+/);
     expect(result.refreshToken).toMatch(/Bearer .+/);
+    expect(result.mustCreateOrganization).toBe(false);
     expect(account.lastLoginAt?.toISOString()).toBe('2026-04-23T00:00:00.000Z');
     expect(account.lastLoginIp).toBe('127.0.0.1');
+    expect(mockRedisService.set).toHaveBeenCalledWith('refresh:user-1', 'Bearer test-token', expect.any(Number));
+  });
+
+  it('throws ACCOUNT_NOT_VERIFIED when account is pending verification', async () => {
+    const account = createMockAccount({ status: AccountStatus.PENDING_VERIFICATION });
+    const repository = { findOne: vi.fn().mockResolvedValue(account) };
+    mockRedisService.ttl.mockResolvedValue(-2);
+
+    const handler = new LoginHandler(repository as never, mockJwtService as never, mockRedisService as never);
+
+    await expect(
+      handler.execute(new LoginCommand('test@example.com', 'pass', '127.0.0.1')),
+    ).rejects.toMatchObject({
+      response: { code: 'ACCOUNT_NOT_VERIFIED' },
+    });
+  });
+
+  it('returns an onboarding token marker when account has no organization', async () => {
+    const account = createMockAccount({
+      manager: {
+        status: ManagerStatus.ACTIVE,
+        organization: null,
+      },
+    });
+    const repository = { findOne: vi.fn().mockResolvedValue(account) };
+    mockRedisService.ttl.mockResolvedValue(-2);
+    vi.spyOn(CryptoUtil, 'comparePassword').mockResolvedValue(true);
+
+    const handler = new LoginHandler(repository as never, mockJwtService as never, mockRedisService as never);
+    const result = await handler.execute(new LoginCommand('test@example.com', 'password123', '127.0.0.1'));
+
+    expect(result.mustCreateOrganization).toBe(true);
+    expect(mockJwtService.signAsync).toHaveBeenCalledWith(
+      expect.objectContaining({
+        sub: 'user-1',
+        organizationId: undefined,
+        mustCreateOrganization: true,
+      }),
+      expect.any(Object),
+    );
   });
 
   it('throws INVALID_CREDENTIALS when password does not match and tracks attempts', async () => {
@@ -149,7 +191,7 @@ describe('LoginHandler', () => {
     });
   });
 
-  it('throws PASSWORD_CHANGE_REQUIRED when password has expired', async () => {
+  it('marks tokens with mustChangePassword when password has expired', async () => {
     const account = createMockAccount({ passwordExpiresAt: new Date('2026-04-20T00:00:00.000Z') });
     const repository = { findOne: vi.fn().mockResolvedValue(account) };
     mockRedisService.ttl.mockResolvedValue(-2);
@@ -157,10 +199,13 @@ describe('LoginHandler', () => {
 
     const handler = new LoginHandler(repository as never, mockJwtService as never, mockRedisService as never);
 
-    await expect(
-      handler.execute(new LoginCommand('test@example.com', 'pass', '127.0.0.1')),
-    ).rejects.toMatchObject({
-      response: { code: 'PASSWORD_CHANGE_REQUIRED' },
-    });
+    await handler.execute(new LoginCommand('test@example.com', 'pass', '127.0.0.1'));
+
+    expect(mockJwtService.signAsync).toHaveBeenCalledWith(
+      expect.objectContaining({
+        mustChangePassword: true,
+      }),
+      expect.any(Object),
+    );
   });
 });
