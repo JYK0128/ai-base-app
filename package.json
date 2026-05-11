@@ -2,14 +2,22 @@
   "name": "ai-base-app",
   "private": true,
   "scripts": {
-    "dev": "turbo run dev",
     "build": "turbo run build",
     "test": "turbo run test",
-    "lint": "turbo run lint"
+    "test:watch": "turbo run test --watch",
+    "lint": "turbo run lint",
+    
+    "img:build": "bash .k8s/scripts/build-apps.sh",
+    "k8s:deploy": "bash .k8s/scripts/deploy-apps.sh",
+    "k8s:init": "bash .k8s/scripts/setup-infra.sh",
+    
+    "web:dev": "pnpm --filter=platform-admin-web dev",
+    "db:seed": "pnpm --filter=@pkg/database seed",
+    "gen:api": "pnpm --filter=platform-admin-web gen:api"
   },
   "devDependencies": {
     "turbo": "2.9.6",
-    "typescript": "6.0.2"
+    "typescript": "5.9.3"
   },
   "packageManager": "pnpm@9.15.9"
 }
