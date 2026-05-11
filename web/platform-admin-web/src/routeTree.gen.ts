@@ -15,6 +15,7 @@ import { Route as PublicIndexRouteImport } from './routes/_public/index'
 import { Route as PublicLoginRouteImport } from './routes/_public/login'
 import { Route as PublicChangePasswordRouteImport } from './routes/_public/change-password'
 import { Route as ProtectedDashboardRouteImport } from './routes/_protected/dashboard'
+import { Route as ProtectedTermsIndexRouteImport } from './routes/_protected/terms/index'
 import { Route as ProtectedSupportIndexRouteImport } from './routes/_protected/support/index'
 import { Route as ProtectedOrganizationsIndexRouteImport } from './routes/_protected/organizations/index'
 import { Route as ProtectedAnnouncementsIndexRouteImport } from './routes/_protected/announcements/index'
@@ -47,6 +48,11 @@ const ProtectedDashboardRoute = ProtectedDashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => ProtectedRoute,
 } as any)
+const ProtectedTermsIndexRoute = ProtectedTermsIndexRouteImport.update({
+  id: '/terms/',
+  path: '/terms/',
+  getParentRoute: () => ProtectedRoute,
+} as any)
 const ProtectedSupportIndexRoute = ProtectedSupportIndexRouteImport.update({
   id: '/support/',
   path: '/support/',
@@ -73,6 +79,7 @@ export interface FileRoutesByFullPath {
   '/announcements/': typeof ProtectedAnnouncementsIndexRoute
   '/organizations/': typeof ProtectedOrganizationsIndexRoute
   '/support/': typeof ProtectedSupportIndexRoute
+  '/terms/': typeof ProtectedTermsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof PublicIndexRoute
@@ -82,6 +89,7 @@ export interface FileRoutesByTo {
   '/announcements': typeof ProtectedAnnouncementsIndexRoute
   '/organizations': typeof ProtectedOrganizationsIndexRoute
   '/support': typeof ProtectedSupportIndexRoute
+  '/terms': typeof ProtectedTermsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -94,6 +102,7 @@ export interface FileRoutesById {
   '/_protected/announcements/': typeof ProtectedAnnouncementsIndexRoute
   '/_protected/organizations/': typeof ProtectedOrganizationsIndexRoute
   '/_protected/support/': typeof ProtectedSupportIndexRoute
+  '/_protected/terms/': typeof ProtectedTermsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -105,6 +114,7 @@ export interface FileRouteTypes {
     | '/announcements/'
     | '/organizations/'
     | '/support/'
+    | '/terms/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -114,6 +124,7 @@ export interface FileRouteTypes {
     | '/announcements'
     | '/organizations'
     | '/support'
+    | '/terms'
   id:
     | '__root__'
     | '/_protected'
@@ -125,6 +136,7 @@ export interface FileRouteTypes {
     | '/_protected/announcements/'
     | '/_protected/organizations/'
     | '/_protected/support/'
+    | '/_protected/terms/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -176,6 +188,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProtectedDashboardRouteImport
       parentRoute: typeof ProtectedRoute
     }
+    '/_protected/terms/': {
+      id: '/_protected/terms/'
+      path: '/terms'
+      fullPath: '/terms/'
+      preLoaderRoute: typeof ProtectedTermsIndexRouteImport
+      parentRoute: typeof ProtectedRoute
+    }
     '/_protected/support/': {
       id: '/_protected/support/'
       path: '/support'
@@ -205,6 +224,7 @@ interface ProtectedRouteChildren {
   ProtectedAnnouncementsIndexRoute: typeof ProtectedAnnouncementsIndexRoute
   ProtectedOrganizationsIndexRoute: typeof ProtectedOrganizationsIndexRoute
   ProtectedSupportIndexRoute: typeof ProtectedSupportIndexRoute
+  ProtectedTermsIndexRoute: typeof ProtectedTermsIndexRoute
 }
 
 const ProtectedRouteChildren: ProtectedRouteChildren = {
@@ -212,6 +232,7 @@ const ProtectedRouteChildren: ProtectedRouteChildren = {
   ProtectedAnnouncementsIndexRoute: ProtectedAnnouncementsIndexRoute,
   ProtectedOrganizationsIndexRoute: ProtectedOrganizationsIndexRoute,
   ProtectedSupportIndexRoute: ProtectedSupportIndexRoute,
+  ProtectedTermsIndexRoute: ProtectedTermsIndexRoute,
 }
 
 const ProtectedRouteWithChildren = ProtectedRoute._addFileChildren(
