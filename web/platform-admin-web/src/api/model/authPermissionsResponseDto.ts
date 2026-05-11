@@ -5,10 +5,13 @@
  * The AI Base App Gateway API documentation
  * OpenAPI spec version: 1.0
  */
+import type { AuthPermissionsResponseDtoMetadata } from './authPermissionsResponseDtoMetadata';
 
 export interface AuthPermissionsResponseDto {
   /** 할당된 역할 코드 목록 */
   roles: string[];
   /** 할당된 권한 코드 목록 */
   permissions: string[];
+  /** 권한별 메타데이터 (UI 설정 등) */
+  metadata: AuthPermissionsResponseDtoMetadata;
 }

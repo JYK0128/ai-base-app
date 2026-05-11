@@ -1,9 +1,9 @@
-import axios, { AxiosResponse, InternalAxiosRequestConfig } from 'axios';
+import axiosClient, { type AxiosError, AxiosRequestConfig, InternalAxiosRequestConfig } from 'axios';
 import { getDefaultStore } from 'jotai';
 
 import { accessTokenAtom } from '../stores/auth.store';
 
-// 공통 응답 구조 정의
+// 🌟 백엔드 공통 응답 구조 (내부 타입용)
 interface ApiResponse<T> {
   success: boolean
   data: T
@@ -19,16 +19,16 @@ const ensureError = (error: unknown): Error => {
 };
 
 /**
- * 🌟 통합 Axios 인스턴스
- * Orval의 mutator이자 앱 전체의 API 클라이언트로 사용됩니다.
+ * 🌟 내부 Axios 인스턴스
+ * 실제 요청과 인터셉터 처리를 담당합니다.
  */
-export const axiosInstance = axios.create({
+export const axios = axiosClient.create({
   baseURL: import.meta.env.VITE_API_BASE_URL,
   withCredentials: true,
 });
 
 // 1. 요청(Request) 인터셉터: accessToken 주입
-axiosInstance.interceptors.request.use(
+axios.interceptors.request.use(
   (config) => {
     const store = getDefaultStore();
     const token = store.get(accessTokenAtom);
@@ -42,15 +42,11 @@ axiosInstance.interceptors.request.use(
   (error: unknown) => Promise.reject(ensureError(error)),
 );
 
-// 2. 응답(Response) 인터셉터: 데이터 추출 및 토큰 갱신
-axiosInstance.interceptors.response.use(
-  (response: AxiosResponse) => {
-    // 🌟 여기서 response.data(ApiResponse)를 바로 반환합니다.
-    // Orval 클라이언트는 이 결과를 받아서 그대로 사용하게 됩니다.
-    return response.data;
-  },
+// 2. 응답(Response) 인터셉터: 에러 처리 및 토큰 갱신
+axios.interceptors.response.use(
+  (response) => response.data,
   async (error: unknown) => {
-    if (!axios.isAxiosError(error)) {
+    if (!axiosClient.isAxiosError(error)) {
       return Promise.reject(ensureError(error));
     }
 
@@ -62,7 +58,7 @@ axiosInstance.interceptors.response.use(
       originalRequest._retry = true;
 
       try {
-        const res = await axios.post<ApiResponse<{ accessToken: string }>>(
+        const res = await axiosClient.post<ApiResponse<{ accessToken: string }>>(
           `${import.meta.env.VITE_API_BASE_URL}/api/v1/auth/refresh`,
           {},
           { withCredentials: true },
@@ -73,7 +69,7 @@ axiosInstance.interceptors.response.use(
         store.set(accessTokenAtom, newAccessToken);
 
         originalRequest.headers.set('Authorization', `Bearer ${newAccessToken}`);
-        return axiosInstance(originalRequest);
+        return axios(originalRequest);
       }
       catch (refreshError) {
         const store = getDefaultStore();
@@ -90,7 +86,10 @@ axiosInstance.interceptors.response.use(
   },
 );
 
-// Orval의 ErrorType으로 사용될 타입 정의
-export type ErrorType<Error> = Error;
+export const axiosInstance = <T>(config: AxiosRequestConfig): Promise<T> => {
+  return axios(config);
+};
+
+export type ErrorType<Error> = AxiosError<Error>;
 
 export default axiosInstance;

@@ -13,6 +13,6 @@ export interface AuthUserInfoDto {
   email: string;
   /** 관리자 상태 (ACTIVE, INACTIVE) */
   status: string;
-  /** 소속 테넌트(조직) ID */
-  tenantId?: string;
+  /** 소속 조직 ID */
+  organizationId?: string;
 }

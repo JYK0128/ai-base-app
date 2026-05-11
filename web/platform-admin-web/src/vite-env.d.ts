@@ -15,6 +15,6 @@ import 'jose';
 declare module 'jose' {
   interface JWTPayload {
     mustChangePassword?: boolean
-    tenantId?: string
+    organizationId?: string
   }
 }

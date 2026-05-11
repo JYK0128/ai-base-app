@@ -15,6 +15,9 @@ import { Route as PublicIndexRouteImport } from './routes/_public/index'
 import { Route as PublicLoginRouteImport } from './routes/_public/login'
 import { Route as PublicChangePasswordRouteImport } from './routes/_public/change-password'
 import { Route as ProtectedDashboardRouteImport } from './routes/_protected/dashboard'
+import { Route as ProtectedSupportIndexRouteImport } from './routes/_protected/support/index'
+import { Route as ProtectedOrganizationsIndexRouteImport } from './routes/_protected/organizations/index'
+import { Route as ProtectedAnnouncementsIndexRouteImport } from './routes/_protected/announcements/index'
 
 const PublicRoute = PublicRouteImport.update({
   id: '/_public',
@@ -44,18 +47,41 @@ const ProtectedDashboardRoute = ProtectedDashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => ProtectedRoute,
 } as any)
+const ProtectedSupportIndexRoute = ProtectedSupportIndexRouteImport.update({
+  id: '/support/',
+  path: '/support/',
+  getParentRoute: () => ProtectedRoute,
+} as any)
+const ProtectedOrganizationsIndexRoute =
+  ProtectedOrganizationsIndexRouteImport.update({
+    id: '/organizations/',
+    path: '/organizations/',
+    getParentRoute: () => ProtectedRoute,
+  } as any)
+const ProtectedAnnouncementsIndexRoute =
+  ProtectedAnnouncementsIndexRouteImport.update({
+    id: '/announcements/',
+    path: '/announcements/',
+    getParentRoute: () => ProtectedRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof PublicIndexRoute
   '/dashboard': typeof ProtectedDashboardRoute
   '/change-password': typeof PublicChangePasswordRoute
   '/login': typeof PublicLoginRoute
+  '/announcements/': typeof ProtectedAnnouncementsIndexRoute
+  '/organizations/': typeof ProtectedOrganizationsIndexRoute
+  '/support/': typeof ProtectedSupportIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof PublicIndexRoute
   '/dashboard': typeof ProtectedDashboardRoute
   '/change-password': typeof PublicChangePasswordRoute
   '/login': typeof PublicLoginRoute
+  '/announcements': typeof ProtectedAnnouncementsIndexRoute
+  '/organizations': typeof ProtectedOrganizationsIndexRoute
+  '/support': typeof ProtectedSupportIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -65,12 +91,29 @@ export interface FileRoutesById {
   '/_public/change-password': typeof PublicChangePasswordRoute
   '/_public/login': typeof PublicLoginRoute
   '/_public/': typeof PublicIndexRoute
+  '/_protected/announcements/': typeof ProtectedAnnouncementsIndexRoute
+  '/_protected/organizations/': typeof ProtectedOrganizationsIndexRoute
+  '/_protected/support/': typeof ProtectedSupportIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/dashboard' | '/change-password' | '/login'
+  fullPaths:
+    | '/'
+    | '/dashboard'
+    | '/change-password'
+    | '/login'
+    | '/announcements/'
+    | '/organizations/'
+    | '/support/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/dashboard' | '/change-password' | '/login'
+  to:
+    | '/'
+    | '/dashboard'
+    | '/change-password'
+    | '/login'
+    | '/announcements'
+    | '/organizations'
+    | '/support'
   id:
     | '__root__'
     | '/_protected'
@@ -79,6 +122,9 @@ export interface FileRouteTypes {
     | '/_public/change-password'
     | '/_public/login'
     | '/_public/'
+    | '/_protected/announcements/'
+    | '/_protected/organizations/'
+    | '/_protected/support/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -130,15 +176,42 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProtectedDashboardRouteImport
       parentRoute: typeof ProtectedRoute
     }
+    '/_protected/support/': {
+      id: '/_protected/support/'
+      path: '/support'
+      fullPath: '/support/'
+      preLoaderRoute: typeof ProtectedSupportIndexRouteImport
+      parentRoute: typeof ProtectedRoute
+    }
+    '/_protected/organizations/': {
+      id: '/_protected/organizations/'
+      path: '/organizations'
+      fullPath: '/organizations/'
+      preLoaderRoute: typeof ProtectedOrganizationsIndexRouteImport
+      parentRoute: typeof ProtectedRoute
+    }
+    '/_protected/announcements/': {
+      id: '/_protected/announcements/'
+      path: '/announcements'
+      fullPath: '/announcements/'
+      preLoaderRoute: typeof ProtectedAnnouncementsIndexRouteImport
+      parentRoute: typeof ProtectedRoute
+    }
   }
 }
 
 interface ProtectedRouteChildren {
   ProtectedDashboardRoute: typeof ProtectedDashboardRoute
+  ProtectedAnnouncementsIndexRoute: typeof ProtectedAnnouncementsIndexRoute
+  ProtectedOrganizationsIndexRoute: typeof ProtectedOrganizationsIndexRoute
+  ProtectedSupportIndexRoute: typeof ProtectedSupportIndexRoute
 }
 
 const ProtectedRouteChildren: ProtectedRouteChildren = {
   ProtectedDashboardRoute: ProtectedDashboardRoute,
+  ProtectedAnnouncementsIndexRoute: ProtectedAnnouncementsIndexRoute,
+  ProtectedOrganizationsIndexRoute: ProtectedOrganizationsIndexRoute,
+  ProtectedSupportIndexRoute: ProtectedSupportIndexRoute,
 }
 
 const ProtectedRouteWithChildren = ProtectedRoute._addFileChildren(

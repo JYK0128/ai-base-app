@@ -31,6 +31,14 @@ import type {
   AuthControllerPermissionsV1200,
   AuthControllerRefreshV1200,
   ChangePasswordDto,
+  CoreControllerCreateAnnouncementV1200,
+  CoreControllerGetAnnouncementsV1200,
+  CoreControllerGetAnnouncementsV1Params,
+  CoreControllerGetOrganizationsV1200,
+  CoreControllerGetOrganizationsV1Params,
+  CoreControllerGetTicketsV1200,
+  CoreControllerGetTicketsV1Params,
+  CreateAnnouncementDto,
   HealthControllerLive200,
   HealthControllerLive503,
   HealthControllerReady200,
@@ -38,8 +46,36 @@ import type {
   LoginDto
 } from './model';
 
-import { axiosInstance } from '../lib/axios';
-import type { ErrorType } from '../lib/axios';
+import authControllerLoginV1Mutator from '../lib/axios';
+import type { ErrorType as AuthControllerLoginV1ErrorType } from '../lib/axios';
+import authControllerPermissionsV1Mutator from '../lib/axios';
+import type { ErrorType as AuthControllerPermissionsV1ErrorType } from '../lib/axios';
+import authControllerRefreshV1Mutator from '../lib/axios';
+import type { ErrorType as AuthControllerRefreshV1ErrorType } from '../lib/axios';
+import authControllerGetMeV1Mutator from '../lib/axios';
+import type { ErrorType as AuthControllerGetMeV1ErrorType } from '../lib/axios';
+import authControllerLogoutV1Mutator from '../lib/axios';
+import type { ErrorType as AuthControllerLogoutV1ErrorType } from '../lib/axios';
+import authControllerDeferPasswordChangeV1Mutator from '../lib/axios';
+import type { ErrorType as AuthControllerDeferPasswordChangeV1ErrorType } from '../lib/axios';
+import authControllerChangePasswordV1Mutator from '../lib/axios';
+import type { ErrorType as AuthControllerChangePasswordV1ErrorType } from '../lib/axios';
+import coreControllerGetOrganizationsV1Mutator from '../lib/axios';
+import type { ErrorType as CoreControllerGetOrganizationsV1ErrorType } from '../lib/axios';
+import coreControllerApproveOrganizationV1Mutator from '../lib/axios';
+import type { ErrorType as CoreControllerApproveOrganizationV1ErrorType } from '../lib/axios';
+import coreControllerRejectOrganizationV1Mutator from '../lib/axios';
+import type { ErrorType as CoreControllerRejectOrganizationV1ErrorType } from '../lib/axios';
+import coreControllerGetAnnouncementsV1Mutator from '../lib/axios';
+import type { ErrorType as CoreControllerGetAnnouncementsV1ErrorType } from '../lib/axios';
+import coreControllerCreateAnnouncementV1Mutator from '../lib/axios';
+import type { ErrorType as CoreControllerCreateAnnouncementV1ErrorType } from '../lib/axios';
+import coreControllerGetTicketsV1Mutator from '../lib/axios';
+import type { ErrorType as CoreControllerGetTicketsV1ErrorType } from '../lib/axios';
+import healthControllerLiveMutator from '../lib/axios';
+import type { ErrorType as HealthControllerLiveErrorType } from '../lib/axios';
+import healthControllerReadyMutator from '../lib/axios';
+import type { ErrorType as HealthControllerReadyErrorType } from '../lib/axios';
 
 
 
@@ -54,7 +90,7 @@ export const authControllerLoginV1 = (
 ) => {
 
 
-      return axiosInstance<AuthControllerLoginV1200>(
+      return authControllerLoginV1Mutator<AuthControllerLoginV1200>(
       {url: `/api/v1/auth/login`, method: 'POST',
       headers: {'Content-Type': 'application/json', },
       data: loginDto, signal
@@ -64,7 +100,7 @@ export const authControllerLoginV1 = (
 
 
 
-export const getAuthControllerLoginV1MutationOptions = <TError = ErrorType<ApiResponse>,
+export const getAuthControllerLoginV1MutationOptions = <TError = AuthControllerLoginV1ErrorType<ApiResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof authControllerLoginV1>>, TError,{data: LoginDto}, TContext>, }
 ): UseMutationOptions<Awaited<ReturnType<typeof authControllerLoginV1>>, TError,{data: LoginDto}, TContext> => {
 
@@ -93,12 +129,12 @@ const {mutation: mutationOptions} = options ?
 
     export type AuthControllerLoginV1MutationResult = NonNullable<Awaited<ReturnType<typeof authControllerLoginV1>>>
     export type AuthControllerLoginV1MutationBody = LoginDto
-    export type AuthControllerLoginV1MutationError = ErrorType<ApiResponse>
+    export type AuthControllerLoginV1MutationError = AuthControllerLoginV1ErrorType<ApiResponse>
 
     /**
  * @summary 로그인
  */
-export const useAuthControllerLoginV1 = <TError = ErrorType<ApiResponse>,
+export const useAuthControllerLoginV1 = <TError = AuthControllerLoginV1ErrorType<ApiResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof authControllerLoginV1>>, TError,{data: LoginDto}, TContext>, }
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof authControllerLoginV1>>,
@@ -119,7 +155,7 @@ export const authControllerPermissionsV1 = (
 ) => {
 
 
-      return axiosInstance<AuthControllerPermissionsV1200>(
+      return authControllerPermissionsV1Mutator<AuthControllerPermissionsV1200>(
       {url: `/api/v1/auth/permissions`, method: 'GET', signal
     },
       );
@@ -135,7 +171,7 @@ export const getAuthControllerPermissionsV1QueryKey = () => {
     }
 
 
-export const getAuthControllerPermissionsV1QueryOptions = <TData = Awaited<ReturnType<typeof authControllerPermissionsV1>>, TError = ErrorType<unknown>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof authControllerPermissionsV1>>, TError, TData>>, }
+export const getAuthControllerPermissionsV1QueryOptions = <TData = Awaited<ReturnType<typeof authControllerPermissionsV1>>, TError = AuthControllerPermissionsV1ErrorType<unknown>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof authControllerPermissionsV1>>, TError, TData>>, }
 ) => {
 
 const {query: queryOptions} = options ?? {};
@@ -154,10 +190,10 @@ const {query: queryOptions} = options ?? {};
 }
 
 export type AuthControllerPermissionsV1QueryResult = NonNullable<Awaited<ReturnType<typeof authControllerPermissionsV1>>>
-export type AuthControllerPermissionsV1QueryError = ErrorType<unknown>
+export type AuthControllerPermissionsV1QueryError = AuthControllerPermissionsV1ErrorType<unknown>
 
 
-export function useAuthControllerPermissionsV1<TData = Awaited<ReturnType<typeof authControllerPermissionsV1>>, TError = ErrorType<unknown>>(
+export function useAuthControllerPermissionsV1<TData = Awaited<ReturnType<typeof authControllerPermissionsV1>>, TError = AuthControllerPermissionsV1ErrorType<unknown>>(
   options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof authControllerPermissionsV1>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof authControllerPermissionsV1>>,
@@ -167,7 +203,7 @@ export function useAuthControllerPermissionsV1<TData = Awaited<ReturnType<typeof
       >, }
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useAuthControllerPermissionsV1<TData = Awaited<ReturnType<typeof authControllerPermissionsV1>>, TError = ErrorType<unknown>>(
+export function useAuthControllerPermissionsV1<TData = Awaited<ReturnType<typeof authControllerPermissionsV1>>, TError = AuthControllerPermissionsV1ErrorType<unknown>>(
   options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof authControllerPermissionsV1>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof authControllerPermissionsV1>>,
@@ -177,7 +213,7 @@ export function useAuthControllerPermissionsV1<TData = Awaited<ReturnType<typeof
       >, }
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useAuthControllerPermissionsV1<TData = Awaited<ReturnType<typeof authControllerPermissionsV1>>, TError = ErrorType<unknown>>(
+export function useAuthControllerPermissionsV1<TData = Awaited<ReturnType<typeof authControllerPermissionsV1>>, TError = AuthControllerPermissionsV1ErrorType<unknown>>(
   options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof authControllerPermissionsV1>>, TError, TData>>, }
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
@@ -185,7 +221,7 @@ export function useAuthControllerPermissionsV1<TData = Awaited<ReturnType<typeof
  * @summary 권한 조회
  */
 
-export function useAuthControllerPermissionsV1<TData = Awaited<ReturnType<typeof authControllerPermissionsV1>>, TError = ErrorType<unknown>>(
+export function useAuthControllerPermissionsV1<TData = Awaited<ReturnType<typeof authControllerPermissionsV1>>, TError = AuthControllerPermissionsV1ErrorType<unknown>>(
   options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof authControllerPermissionsV1>>, TError, TData>>, }
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
@@ -213,7 +249,7 @@ export const authControllerRefreshV1 = (
 ) => {
 
 
-      return axiosInstance<AuthControllerRefreshV1200>(
+      return authControllerRefreshV1Mutator<AuthControllerRefreshV1200>(
       {url: `/api/v1/auth/refresh`, method: 'POST', signal
     },
       );
@@ -221,7 +257,7 @@ export const authControllerRefreshV1 = (
 
 
 
-export const getAuthControllerRefreshV1MutationOptions = <TError = ErrorType<unknown>,
+export const getAuthControllerRefreshV1MutationOptions = <TError = AuthControllerRefreshV1ErrorType<unknown>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof authControllerRefreshV1>>, TError,void, TContext>, }
 ): UseMutationOptions<Awaited<ReturnType<typeof authControllerRefreshV1>>, TError,void, TContext> => {
 
@@ -250,12 +286,12 @@ const {mutation: mutationOptions} = options ?
 
     export type AuthControllerRefreshV1MutationResult = NonNullable<Awaited<ReturnType<typeof authControllerRefreshV1>>>
 
-    export type AuthControllerRefreshV1MutationError = ErrorType<unknown>
+    export type AuthControllerRefreshV1MutationError = AuthControllerRefreshV1ErrorType<unknown>
 
     /**
  * @summary 토큰 갱신
  */
-export const useAuthControllerRefreshV1 = <TError = ErrorType<unknown>,
+export const useAuthControllerRefreshV1 = <TError = AuthControllerRefreshV1ErrorType<unknown>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof authControllerRefreshV1>>, TError,void, TContext>, }
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof authControllerRefreshV1>>,
@@ -276,7 +312,7 @@ export const authControllerGetMeV1 = (
 ) => {
 
 
-      return axiosInstance<AuthControllerGetMeV1200>(
+      return authControllerGetMeV1Mutator<AuthControllerGetMeV1200>(
       {url: `/api/v1/auth/me`, method: 'GET', signal
     },
       );
@@ -292,7 +328,7 @@ export const getAuthControllerGetMeV1QueryKey = () => {
     }
 
 
-export const getAuthControllerGetMeV1QueryOptions = <TData = Awaited<ReturnType<typeof authControllerGetMeV1>>, TError = ErrorType<ApiResponse>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof authControllerGetMeV1>>, TError, TData>>, }
+export const getAuthControllerGetMeV1QueryOptions = <TData = Awaited<ReturnType<typeof authControllerGetMeV1>>, TError = AuthControllerGetMeV1ErrorType<ApiResponse>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof authControllerGetMeV1>>, TError, TData>>, }
 ) => {
 
 const {query: queryOptions} = options ?? {};
@@ -311,10 +347,10 @@ const {query: queryOptions} = options ?? {};
 }
 
 export type AuthControllerGetMeV1QueryResult = NonNullable<Awaited<ReturnType<typeof authControllerGetMeV1>>>
-export type AuthControllerGetMeV1QueryError = ErrorType<ApiResponse>
+export type AuthControllerGetMeV1QueryError = AuthControllerGetMeV1ErrorType<ApiResponse>
 
 
-export function useAuthControllerGetMeV1<TData = Awaited<ReturnType<typeof authControllerGetMeV1>>, TError = ErrorType<ApiResponse>>(
+export function useAuthControllerGetMeV1<TData = Awaited<ReturnType<typeof authControllerGetMeV1>>, TError = AuthControllerGetMeV1ErrorType<ApiResponse>>(
   options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof authControllerGetMeV1>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof authControllerGetMeV1>>,
@@ -324,7 +360,7 @@ export function useAuthControllerGetMeV1<TData = Awaited<ReturnType<typeof authC
       >, }
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useAuthControllerGetMeV1<TData = Awaited<ReturnType<typeof authControllerGetMeV1>>, TError = ErrorType<ApiResponse>>(
+export function useAuthControllerGetMeV1<TData = Awaited<ReturnType<typeof authControllerGetMeV1>>, TError = AuthControllerGetMeV1ErrorType<ApiResponse>>(
   options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof authControllerGetMeV1>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof authControllerGetMeV1>>,
@@ -334,7 +370,7 @@ export function useAuthControllerGetMeV1<TData = Awaited<ReturnType<typeof authC
       >, }
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useAuthControllerGetMeV1<TData = Awaited<ReturnType<typeof authControllerGetMeV1>>, TError = ErrorType<ApiResponse>>(
+export function useAuthControllerGetMeV1<TData = Awaited<ReturnType<typeof authControllerGetMeV1>>, TError = AuthControllerGetMeV1ErrorType<ApiResponse>>(
   options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof authControllerGetMeV1>>, TError, TData>>, }
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
@@ -342,7 +378,7 @@ export function useAuthControllerGetMeV1<TData = Awaited<ReturnType<typeof authC
  * @summary 내 정보 조회
  */
 
-export function useAuthControllerGetMeV1<TData = Awaited<ReturnType<typeof authControllerGetMeV1>>, TError = ErrorType<ApiResponse>>(
+export function useAuthControllerGetMeV1<TData = Awaited<ReturnType<typeof authControllerGetMeV1>>, TError = AuthControllerGetMeV1ErrorType<ApiResponse>>(
   options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof authControllerGetMeV1>>, TError, TData>>, }
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
@@ -370,7 +406,7 @@ export const authControllerLogoutV1 = (
 ) => {
 
 
-      return axiosInstance<ApiResponse>(
+      return authControllerLogoutV1Mutator<ApiResponse>(
       {url: `/api/v1/auth/logout`, method: 'POST', signal
     },
       );
@@ -378,7 +414,7 @@ export const authControllerLogoutV1 = (
 
 
 
-export const getAuthControllerLogoutV1MutationOptions = <TError = ErrorType<unknown>,
+export const getAuthControllerLogoutV1MutationOptions = <TError = AuthControllerLogoutV1ErrorType<unknown>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof authControllerLogoutV1>>, TError,void, TContext>, }
 ): UseMutationOptions<Awaited<ReturnType<typeof authControllerLogoutV1>>, TError,void, TContext> => {
 
@@ -407,12 +443,12 @@ const {mutation: mutationOptions} = options ?
 
     export type AuthControllerLogoutV1MutationResult = NonNullable<Awaited<ReturnType<typeof authControllerLogoutV1>>>
 
-    export type AuthControllerLogoutV1MutationError = ErrorType<unknown>
+    export type AuthControllerLogoutV1MutationError = AuthControllerLogoutV1ErrorType<unknown>
 
     /**
  * @summary 로그아웃
  */
-export const useAuthControllerLogoutV1 = <TError = ErrorType<unknown>,
+export const useAuthControllerLogoutV1 = <TError = AuthControllerLogoutV1ErrorType<unknown>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof authControllerLogoutV1>>, TError,void, TContext>, }
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof authControllerLogoutV1>>,
@@ -433,7 +469,7 @@ export const authControllerDeferPasswordChangeV1 = (
 ) => {
 
 
-      return axiosInstance<ApiResponse>(
+      return authControllerDeferPasswordChangeV1Mutator<ApiResponse>(
       {url: `/api/v1/auth/password/defer`, method: 'POST', signal
     },
       );
@@ -441,7 +477,7 @@ export const authControllerDeferPasswordChangeV1 = (
 
 
 
-export const getAuthControllerDeferPasswordChangeV1MutationOptions = <TError = ErrorType<unknown>,
+export const getAuthControllerDeferPasswordChangeV1MutationOptions = <TError = AuthControllerDeferPasswordChangeV1ErrorType<unknown>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof authControllerDeferPasswordChangeV1>>, TError,void, TContext>, }
 ): UseMutationOptions<Awaited<ReturnType<typeof authControllerDeferPasswordChangeV1>>, TError,void, TContext> => {
 
@@ -470,12 +506,12 @@ const {mutation: mutationOptions} = options ?
 
     export type AuthControllerDeferPasswordChangeV1MutationResult = NonNullable<Awaited<ReturnType<typeof authControllerDeferPasswordChangeV1>>>
 
-    export type AuthControllerDeferPasswordChangeV1MutationError = ErrorType<unknown>
+    export type AuthControllerDeferPasswordChangeV1MutationError = AuthControllerDeferPasswordChangeV1ErrorType<unknown>
 
     /**
  * @summary 비밀번호 변경 연장
  */
-export const useAuthControllerDeferPasswordChangeV1 = <TError = ErrorType<unknown>,
+export const useAuthControllerDeferPasswordChangeV1 = <TError = AuthControllerDeferPasswordChangeV1ErrorType<unknown>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof authControllerDeferPasswordChangeV1>>, TError,void, TContext>, }
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof authControllerDeferPasswordChangeV1>>,
@@ -496,7 +532,7 @@ export const authControllerChangePasswordV1 = (
 ) => {
 
 
-      return axiosInstance<ApiResponse>(
+      return authControllerChangePasswordV1Mutator<ApiResponse>(
       {url: `/api/v1/auth/password/change`, method: 'POST',
       headers: {'Content-Type': 'application/json', },
       data: changePasswordDto, signal
@@ -506,7 +542,7 @@ export const authControllerChangePasswordV1 = (
 
 
 
-export const getAuthControllerChangePasswordV1MutationOptions = <TError = ErrorType<ApiResponse>,
+export const getAuthControllerChangePasswordV1MutationOptions = <TError = AuthControllerChangePasswordV1ErrorType<ApiResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof authControllerChangePasswordV1>>, TError,{data: ChangePasswordDto}, TContext>, }
 ): UseMutationOptions<Awaited<ReturnType<typeof authControllerChangePasswordV1>>, TError,{data: ChangePasswordDto}, TContext> => {
 
@@ -535,12 +571,12 @@ const {mutation: mutationOptions} = options ?
 
     export type AuthControllerChangePasswordV1MutationResult = NonNullable<Awaited<ReturnType<typeof authControllerChangePasswordV1>>>
     export type AuthControllerChangePasswordV1MutationBody = ChangePasswordDto
-    export type AuthControllerChangePasswordV1MutationError = ErrorType<ApiResponse>
+    export type AuthControllerChangePasswordV1MutationError = AuthControllerChangePasswordV1ErrorType<ApiResponse>
 
     /**
  * @summary 비밀번호 변경
  */
-export const useAuthControllerChangePasswordV1 = <TError = ErrorType<ApiResponse>,
+export const useAuthControllerChangePasswordV1 = <TError = AuthControllerChangePasswordV1ErrorType<ApiResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof authControllerChangePasswordV1>>, TError,{data: ChangePasswordDto}, TContext>, }
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof authControllerChangePasswordV1>>,
@@ -551,13 +587,489 @@ export const useAuthControllerChangePasswordV1 = <TError = ErrorType<ApiResponse
       return useMutation(getAuthControllerChangePasswordV1MutationOptions(options), queryClient);
     }
 
+/**
+ * 플랫폼의 모든 조직 목록을 조회합니다.
+ * @summary 조직 목록 조회
+ */
+export const coreControllerGetOrganizationsV1 = (
+    params?: CoreControllerGetOrganizationsV1Params,
+ signal?: AbortSignal
+) => {
+
+
+      return coreControllerGetOrganizationsV1Mutator<CoreControllerGetOrganizationsV1200>(
+      {url: `/api/v1/organizations`, method: 'GET',
+        params, signal
+    },
+      );
+    }
+
+
+
+
+export const getCoreControllerGetOrganizationsV1QueryKey = (params?: CoreControllerGetOrganizationsV1Params,) => {
+    return [
+    `/api/v1/organizations`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getCoreControllerGetOrganizationsV1QueryOptions = <TData = Awaited<ReturnType<typeof coreControllerGetOrganizationsV1>>, TError = CoreControllerGetOrganizationsV1ErrorType<unknown>>(params?: CoreControllerGetOrganizationsV1Params, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof coreControllerGetOrganizationsV1>>, TError, TData>>, }
+) => {
+
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getCoreControllerGetOrganizationsV1QueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof coreControllerGetOrganizationsV1>>> = ({ signal }) => coreControllerGetOrganizationsV1(params, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof coreControllerGetOrganizationsV1>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type CoreControllerGetOrganizationsV1QueryResult = NonNullable<Awaited<ReturnType<typeof coreControllerGetOrganizationsV1>>>
+export type CoreControllerGetOrganizationsV1QueryError = CoreControllerGetOrganizationsV1ErrorType<unknown>
+
+
+export function useCoreControllerGetOrganizationsV1<TData = Awaited<ReturnType<typeof coreControllerGetOrganizationsV1>>, TError = CoreControllerGetOrganizationsV1ErrorType<unknown>>(
+ params: undefined |  CoreControllerGetOrganizationsV1Params, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof coreControllerGetOrganizationsV1>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof coreControllerGetOrganizationsV1>>,
+          TError,
+          Awaited<ReturnType<typeof coreControllerGetOrganizationsV1>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useCoreControllerGetOrganizationsV1<TData = Awaited<ReturnType<typeof coreControllerGetOrganizationsV1>>, TError = CoreControllerGetOrganizationsV1ErrorType<unknown>>(
+ params?: CoreControllerGetOrganizationsV1Params, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof coreControllerGetOrganizationsV1>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof coreControllerGetOrganizationsV1>>,
+          TError,
+          Awaited<ReturnType<typeof coreControllerGetOrganizationsV1>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useCoreControllerGetOrganizationsV1<TData = Awaited<ReturnType<typeof coreControllerGetOrganizationsV1>>, TError = CoreControllerGetOrganizationsV1ErrorType<unknown>>(
+ params?: CoreControllerGetOrganizationsV1Params, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof coreControllerGetOrganizationsV1>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary 조직 목록 조회
+ */
+
+export function useCoreControllerGetOrganizationsV1<TData = Awaited<ReturnType<typeof coreControllerGetOrganizationsV1>>, TError = CoreControllerGetOrganizationsV1ErrorType<unknown>>(
+ params?: CoreControllerGetOrganizationsV1Params, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof coreControllerGetOrganizationsV1>>, TError, TData>>, }
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getCoreControllerGetOrganizationsV1QueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+/**
+ * 가입 대기 중인 조직을 승인합니다.
+ * @summary 조직 승인
+ */
+export const coreControllerApproveOrganizationV1 = (
+    id: string,
+ signal?: AbortSignal
+) => {
+
+
+      return coreControllerApproveOrganizationV1Mutator<ApiResponse>(
+      {url: `/api/v1/organizations/${id}/approve`, method: 'PATCH', signal
+    },
+      );
+    }
+
+
+
+export const getCoreControllerApproveOrganizationV1MutationOptions = <TError = CoreControllerApproveOrganizationV1ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof coreControllerApproveOrganizationV1>>, TError,{id: string}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof coreControllerApproveOrganizationV1>>, TError,{id: string}, TContext> => {
+
+const mutationKey = ['coreControllerApproveOrganizationV1'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof coreControllerApproveOrganizationV1>>, {id: string}> = (props) => {
+          const {id} = props ?? {};
+
+          return  coreControllerApproveOrganizationV1(id,)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CoreControllerApproveOrganizationV1MutationResult = NonNullable<Awaited<ReturnType<typeof coreControllerApproveOrganizationV1>>>
+
+    export type CoreControllerApproveOrganizationV1MutationError = CoreControllerApproveOrganizationV1ErrorType<unknown>
+
+    /**
+ * @summary 조직 승인
+ */
+export const useCoreControllerApproveOrganizationV1 = <TError = CoreControllerApproveOrganizationV1ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof coreControllerApproveOrganizationV1>>, TError,{id: string}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof coreControllerApproveOrganizationV1>>,
+        TError,
+        {id: string},
+        TContext
+      > => {
+      return useMutation(getCoreControllerApproveOrganizationV1MutationOptions(options), queryClient);
+    }
+
+/**
+ * 가입 대기 중인 조직을 거절합니다.
+ * @summary 조직 거절
+ */
+export const coreControllerRejectOrganizationV1 = (
+    id: string,
+ signal?: AbortSignal
+) => {
+
+
+      return coreControllerRejectOrganizationV1Mutator<ApiResponse>(
+      {url: `/api/v1/organizations/${id}/reject`, method: 'PATCH', signal
+    },
+      );
+    }
+
+
+
+export const getCoreControllerRejectOrganizationV1MutationOptions = <TError = CoreControllerRejectOrganizationV1ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof coreControllerRejectOrganizationV1>>, TError,{id: string}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof coreControllerRejectOrganizationV1>>, TError,{id: string}, TContext> => {
+
+const mutationKey = ['coreControllerRejectOrganizationV1'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof coreControllerRejectOrganizationV1>>, {id: string}> = (props) => {
+          const {id} = props ?? {};
+
+          return  coreControllerRejectOrganizationV1(id,)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CoreControllerRejectOrganizationV1MutationResult = NonNullable<Awaited<ReturnType<typeof coreControllerRejectOrganizationV1>>>
+
+    export type CoreControllerRejectOrganizationV1MutationError = CoreControllerRejectOrganizationV1ErrorType<unknown>
+
+    /**
+ * @summary 조직 거절
+ */
+export const useCoreControllerRejectOrganizationV1 = <TError = CoreControllerRejectOrganizationV1ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof coreControllerRejectOrganizationV1>>, TError,{id: string}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof coreControllerRejectOrganizationV1>>,
+        TError,
+        {id: string},
+        TContext
+      > => {
+      return useMutation(getCoreControllerRejectOrganizationV1MutationOptions(options), queryClient);
+    }
+
+/**
+ * 플랫폼 공지사항 목록을 조회합니다.
+ * @summary 공지사항 조회
+ */
+export const coreControllerGetAnnouncementsV1 = (
+    params?: CoreControllerGetAnnouncementsV1Params,
+ signal?: AbortSignal
+) => {
+
+
+      return coreControllerGetAnnouncementsV1Mutator<CoreControllerGetAnnouncementsV1200>(
+      {url: `/api/v1/announcements`, method: 'GET',
+        params, signal
+    },
+      );
+    }
+
+
+
+
+export const getCoreControllerGetAnnouncementsV1QueryKey = (params?: CoreControllerGetAnnouncementsV1Params,) => {
+    return [
+    `/api/v1/announcements`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getCoreControllerGetAnnouncementsV1QueryOptions = <TData = Awaited<ReturnType<typeof coreControllerGetAnnouncementsV1>>, TError = CoreControllerGetAnnouncementsV1ErrorType<unknown>>(params?: CoreControllerGetAnnouncementsV1Params, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof coreControllerGetAnnouncementsV1>>, TError, TData>>, }
+) => {
+
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getCoreControllerGetAnnouncementsV1QueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof coreControllerGetAnnouncementsV1>>> = ({ signal }) => coreControllerGetAnnouncementsV1(params, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof coreControllerGetAnnouncementsV1>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type CoreControllerGetAnnouncementsV1QueryResult = NonNullable<Awaited<ReturnType<typeof coreControllerGetAnnouncementsV1>>>
+export type CoreControllerGetAnnouncementsV1QueryError = CoreControllerGetAnnouncementsV1ErrorType<unknown>
+
+
+export function useCoreControllerGetAnnouncementsV1<TData = Awaited<ReturnType<typeof coreControllerGetAnnouncementsV1>>, TError = CoreControllerGetAnnouncementsV1ErrorType<unknown>>(
+ params: undefined |  CoreControllerGetAnnouncementsV1Params, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof coreControllerGetAnnouncementsV1>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof coreControllerGetAnnouncementsV1>>,
+          TError,
+          Awaited<ReturnType<typeof coreControllerGetAnnouncementsV1>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useCoreControllerGetAnnouncementsV1<TData = Awaited<ReturnType<typeof coreControllerGetAnnouncementsV1>>, TError = CoreControllerGetAnnouncementsV1ErrorType<unknown>>(
+ params?: CoreControllerGetAnnouncementsV1Params, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof coreControllerGetAnnouncementsV1>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof coreControllerGetAnnouncementsV1>>,
+          TError,
+          Awaited<ReturnType<typeof coreControllerGetAnnouncementsV1>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useCoreControllerGetAnnouncementsV1<TData = Awaited<ReturnType<typeof coreControllerGetAnnouncementsV1>>, TError = CoreControllerGetAnnouncementsV1ErrorType<unknown>>(
+ params?: CoreControllerGetAnnouncementsV1Params, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof coreControllerGetAnnouncementsV1>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary 공지사항 조회
+ */
+
+export function useCoreControllerGetAnnouncementsV1<TData = Awaited<ReturnType<typeof coreControllerGetAnnouncementsV1>>, TError = CoreControllerGetAnnouncementsV1ErrorType<unknown>>(
+ params?: CoreControllerGetAnnouncementsV1Params, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof coreControllerGetAnnouncementsV1>>, TError, TData>>, }
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getCoreControllerGetAnnouncementsV1QueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+/**
+ * 새로운 공지사항을 작성합니다.
+ * @summary 공지사항 작성
+ */
+export const coreControllerCreateAnnouncementV1 = (
+    createAnnouncementDto: CreateAnnouncementDto,
+ signal?: AbortSignal
+) => {
+
+
+      return coreControllerCreateAnnouncementV1Mutator<CoreControllerCreateAnnouncementV1200>(
+      {url: `/api/v1/announcements`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: createAnnouncementDto, signal
+    },
+      );
+    }
+
+
+
+export const getCoreControllerCreateAnnouncementV1MutationOptions = <TError = CoreControllerCreateAnnouncementV1ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof coreControllerCreateAnnouncementV1>>, TError,{data: CreateAnnouncementDto}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof coreControllerCreateAnnouncementV1>>, TError,{data: CreateAnnouncementDto}, TContext> => {
+
+const mutationKey = ['coreControllerCreateAnnouncementV1'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof coreControllerCreateAnnouncementV1>>, {data: CreateAnnouncementDto}> = (props) => {
+          const {data} = props ?? {};
+
+          return  coreControllerCreateAnnouncementV1(data,)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CoreControllerCreateAnnouncementV1MutationResult = NonNullable<Awaited<ReturnType<typeof coreControllerCreateAnnouncementV1>>>
+    export type CoreControllerCreateAnnouncementV1MutationBody = CreateAnnouncementDto
+    export type CoreControllerCreateAnnouncementV1MutationError = CoreControllerCreateAnnouncementV1ErrorType<unknown>
+
+    /**
+ * @summary 공지사항 작성
+ */
+export const useCoreControllerCreateAnnouncementV1 = <TError = CoreControllerCreateAnnouncementV1ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof coreControllerCreateAnnouncementV1>>, TError,{data: CreateAnnouncementDto}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof coreControllerCreateAnnouncementV1>>,
+        TError,
+        {data: CreateAnnouncementDto},
+        TContext
+      > => {
+      return useMutation(getCoreControllerCreateAnnouncementV1MutationOptions(options), queryClient);
+    }
+
+/**
+ * 플랫폼 고객지원 티켓 목록을 조회합니다.
+ * @summary 고객지원 티켓 조회
+ */
+export const coreControllerGetTicketsV1 = (
+    params?: CoreControllerGetTicketsV1Params,
+ signal?: AbortSignal
+) => {
+
+
+      return coreControllerGetTicketsV1Mutator<CoreControllerGetTicketsV1200>(
+      {url: `/api/v1/support/tickets`, method: 'GET',
+        params, signal
+    },
+      );
+    }
+
+
+
+
+export const getCoreControllerGetTicketsV1QueryKey = (params?: CoreControllerGetTicketsV1Params,) => {
+    return [
+    `/api/v1/support/tickets`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getCoreControllerGetTicketsV1QueryOptions = <TData = Awaited<ReturnType<typeof coreControllerGetTicketsV1>>, TError = CoreControllerGetTicketsV1ErrorType<unknown>>(params?: CoreControllerGetTicketsV1Params, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof coreControllerGetTicketsV1>>, TError, TData>>, }
+) => {
+
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getCoreControllerGetTicketsV1QueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof coreControllerGetTicketsV1>>> = ({ signal }) => coreControllerGetTicketsV1(params, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof coreControllerGetTicketsV1>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type CoreControllerGetTicketsV1QueryResult = NonNullable<Awaited<ReturnType<typeof coreControllerGetTicketsV1>>>
+export type CoreControllerGetTicketsV1QueryError = CoreControllerGetTicketsV1ErrorType<unknown>
+
+
+export function useCoreControllerGetTicketsV1<TData = Awaited<ReturnType<typeof coreControllerGetTicketsV1>>, TError = CoreControllerGetTicketsV1ErrorType<unknown>>(
+ params: undefined |  CoreControllerGetTicketsV1Params, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof coreControllerGetTicketsV1>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof coreControllerGetTicketsV1>>,
+          TError,
+          Awaited<ReturnType<typeof coreControllerGetTicketsV1>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useCoreControllerGetTicketsV1<TData = Awaited<ReturnType<typeof coreControllerGetTicketsV1>>, TError = CoreControllerGetTicketsV1ErrorType<unknown>>(
+ params?: CoreControllerGetTicketsV1Params, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof coreControllerGetTicketsV1>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof coreControllerGetTicketsV1>>,
+          TError,
+          Awaited<ReturnType<typeof coreControllerGetTicketsV1>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useCoreControllerGetTicketsV1<TData = Awaited<ReturnType<typeof coreControllerGetTicketsV1>>, TError = CoreControllerGetTicketsV1ErrorType<unknown>>(
+ params?: CoreControllerGetTicketsV1Params, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof coreControllerGetTicketsV1>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary 고객지원 티켓 조회
+ */
+
+export function useCoreControllerGetTicketsV1<TData = Awaited<ReturnType<typeof coreControllerGetTicketsV1>>, TError = CoreControllerGetTicketsV1ErrorType<unknown>>(
+ params?: CoreControllerGetTicketsV1Params, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof coreControllerGetTicketsV1>>, TError, TData>>, }
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getCoreControllerGetTicketsV1QueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
 export const healthControllerLive = (
 
  signal?: AbortSignal
 ) => {
 
 
-      return axiosInstance<HealthControllerLive200>(
+      return healthControllerLiveMutator<HealthControllerLive200>(
       {url: `/health/live`, method: 'GET', signal
     },
       );
@@ -573,7 +1085,7 @@ export const getHealthControllerLiveQueryKey = () => {
     }
 
 
-export const getHealthControllerLiveQueryOptions = <TData = Awaited<ReturnType<typeof healthControllerLive>>, TError = ErrorType<HealthControllerLive503>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof healthControllerLive>>, TError, TData>>, }
+export const getHealthControllerLiveQueryOptions = <TData = Awaited<ReturnType<typeof healthControllerLive>>, TError = HealthControllerLiveErrorType<HealthControllerLive503>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof healthControllerLive>>, TError, TData>>, }
 ) => {
 
 const {query: queryOptions} = options ?? {};
@@ -592,10 +1104,10 @@ const {query: queryOptions} = options ?? {};
 }
 
 export type HealthControllerLiveQueryResult = NonNullable<Awaited<ReturnType<typeof healthControllerLive>>>
-export type HealthControllerLiveQueryError = ErrorType<HealthControllerLive503>
+export type HealthControllerLiveQueryError = HealthControllerLiveErrorType<HealthControllerLive503>
 
 
-export function useHealthControllerLive<TData = Awaited<ReturnType<typeof healthControllerLive>>, TError = ErrorType<HealthControllerLive503>>(
+export function useHealthControllerLive<TData = Awaited<ReturnType<typeof healthControllerLive>>, TError = HealthControllerLiveErrorType<HealthControllerLive503>>(
   options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof healthControllerLive>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof healthControllerLive>>,
@@ -605,7 +1117,7 @@ export function useHealthControllerLive<TData = Awaited<ReturnType<typeof health
       >, }
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useHealthControllerLive<TData = Awaited<ReturnType<typeof healthControllerLive>>, TError = ErrorType<HealthControllerLive503>>(
+export function useHealthControllerLive<TData = Awaited<ReturnType<typeof healthControllerLive>>, TError = HealthControllerLiveErrorType<HealthControllerLive503>>(
   options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof healthControllerLive>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof healthControllerLive>>,
@@ -615,12 +1127,12 @@ export function useHealthControllerLive<TData = Awaited<ReturnType<typeof health
       >, }
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useHealthControllerLive<TData = Awaited<ReturnType<typeof healthControllerLive>>, TError = ErrorType<HealthControllerLive503>>(
+export function useHealthControllerLive<TData = Awaited<ReturnType<typeof healthControllerLive>>, TError = HealthControllerLiveErrorType<HealthControllerLive503>>(
   options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof healthControllerLive>>, TError, TData>>, }
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-export function useHealthControllerLive<TData = Awaited<ReturnType<typeof healthControllerLive>>, TError = ErrorType<HealthControllerLive503>>(
+export function useHealthControllerLive<TData = Awaited<ReturnType<typeof healthControllerLive>>, TError = HealthControllerLiveErrorType<HealthControllerLive503>>(
   options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof healthControllerLive>>, TError, TData>>, }
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
@@ -644,7 +1156,7 @@ export const healthControllerReady = (
 ) => {
 
 
-      return axiosInstance<HealthControllerReady200>(
+      return healthControllerReadyMutator<HealthControllerReady200>(
       {url: `/health/ready`, method: 'GET', signal
     },
       );
@@ -660,7 +1172,7 @@ export const getHealthControllerReadyQueryKey = () => {
     }
 
 
-export const getHealthControllerReadyQueryOptions = <TData = Awaited<ReturnType<typeof healthControllerReady>>, TError = ErrorType<HealthControllerReady503>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof healthControllerReady>>, TError, TData>>, }
+export const getHealthControllerReadyQueryOptions = <TData = Awaited<ReturnType<typeof healthControllerReady>>, TError = HealthControllerReadyErrorType<HealthControllerReady503>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof healthControllerReady>>, TError, TData>>, }
 ) => {
 
 const {query: queryOptions} = options ?? {};
@@ -679,10 +1191,10 @@ const {query: queryOptions} = options ?? {};
 }
 
 export type HealthControllerReadyQueryResult = NonNullable<Awaited<ReturnType<typeof healthControllerReady>>>
-export type HealthControllerReadyQueryError = ErrorType<HealthControllerReady503>
+export type HealthControllerReadyQueryError = HealthControllerReadyErrorType<HealthControllerReady503>
 
 
-export function useHealthControllerReady<TData = Awaited<ReturnType<typeof healthControllerReady>>, TError = ErrorType<HealthControllerReady503>>(
+export function useHealthControllerReady<TData = Awaited<ReturnType<typeof healthControllerReady>>, TError = HealthControllerReadyErrorType<HealthControllerReady503>>(
   options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof healthControllerReady>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof healthControllerReady>>,
@@ -692,7 +1204,7 @@ export function useHealthControllerReady<TData = Awaited<ReturnType<typeof healt
       >, }
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useHealthControllerReady<TData = Awaited<ReturnType<typeof healthControllerReady>>, TError = ErrorType<HealthControllerReady503>>(
+export function useHealthControllerReady<TData = Awaited<ReturnType<typeof healthControllerReady>>, TError = HealthControllerReadyErrorType<HealthControllerReady503>>(
   options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof healthControllerReady>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof healthControllerReady>>,
@@ -702,12 +1214,12 @@ export function useHealthControllerReady<TData = Awaited<ReturnType<typeof healt
       >, }
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useHealthControllerReady<TData = Awaited<ReturnType<typeof healthControllerReady>>, TError = ErrorType<HealthControllerReady503>>(
+export function useHealthControllerReady<TData = Awaited<ReturnType<typeof healthControllerReady>>, TError = HealthControllerReadyErrorType<HealthControllerReady503>>(
   options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof healthControllerReady>>, TError, TData>>, }
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-export function useHealthControllerReady<TData = Awaited<ReturnType<typeof healthControllerReady>>, TError = ErrorType<HealthControllerReady503>>(
+export function useHealthControllerReady<TData = Awaited<ReturnType<typeof healthControllerReady>>, TError = HealthControllerReadyErrorType<HealthControllerReady503>>(
   options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof healthControllerReady>>, TError, TData>>, }
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
