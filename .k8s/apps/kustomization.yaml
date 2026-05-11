@@ -3,3 +3,5 @@ kind: Kustomization
 resources:
   - platform-gateway
   - platform-auth-service
+  - platform-core-service
+  - platform-admin-web

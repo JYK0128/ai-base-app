@@ -5,6 +5,14 @@
 
 set -e
 
+# Compatibility for Windows binaries in WSL/Bash
+# This allows 'helm' to call 'helm.exe' if 'helm' is not found in the Linux environment
+for cmd in helm telepresence; do
+  if ! command -v $cmd &> /dev/null && command -v $cmd.exe &> /dev/null; then
+    eval "$cmd() { $cmd.exe \"\$@\"; }"
+  fi
+done
+
 echo "Adding Helm repositories..."
 helm repo add cnpg https://cloudnative-pg.github.io/charts
 helm repo add bitnami https://charts.bitnami.com/bitnami
@@ -41,7 +49,7 @@ helm upgrade --install redis-operator ot-container-kit/redis-operator \
   --wait
 
 echo "Installing Telepresence Traffic Manager..."
-telepresence helm install
+telepresence helm upgrade || telepresence helm install
 
 echo "All extensions installed successfully!"
 

@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: platform-core-service-deploy
+  namespace: dev-api
+  labels:
+    app.kubernetes.io/name: platform-core-service
+    app.kubernetes.io/part-of: ai-base-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: platform-core-service
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: platform-core-service
+    spec:
+      containers:
+      - name: platform-core-service
+        image: platform-core-service:latest
+        imagePullPolicy: IfNotPresent
+        volumeMounts:
+        - name: tmp
+          mountPath: /tmp
+        envFrom:
+        - configMapRef:
+            name: platform-core-service-cm
+        ports:
+        - containerPort: 3004
+        - containerPort: 3005
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 300m
+            memory: 256Mi
+        readinessProbe:
+          tcpSocket:
+            port: 3004
+        livenessProbe:
+          tcpSocket:
+            port: 3004
+      volumes:
+      - name: tmp
+        emptyDir: {}
