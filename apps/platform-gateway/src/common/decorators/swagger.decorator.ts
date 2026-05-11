@@ -3,11 +3,16 @@ import { ApiExtraModels, ApiOkResponse, getSchemaPath } from '@nestjs/swagger';
 
 import { ApiResponse } from '@/common/types/response.type';
 
-export const SwaggerResult = <T extends Type<unknown>>(dataDto?: T) => {
+type SwaggerResultDataDto<T extends Type<unknown>> = T | [T];
+
+export const SwaggerResult = <T extends Type<unknown>>(dataDto?: SwaggerResultDataDto<T>) => {
   const decorators = [ApiExtraModels(ApiResponse)];
 
   if (dataDto) {
-    decorators.push(ApiExtraModels(dataDto));
+    const isArrayResponse = Array.isArray(dataDto);
+    const dto = isArrayResponse ? dataDto[0] : dataDto;
+
+    decorators.push(ApiExtraModels(dto));
     decorators.push(
       ApiOkResponse({
         schema: {
@@ -15,7 +20,12 @@ export const SwaggerResult = <T extends Type<unknown>>(dataDto?: T) => {
             { $ref: getSchemaPath(ApiResponse) },
             {
               properties: {
-                data: { $ref: getSchemaPath(dataDto) },
+                data: isArrayResponse
+                  ? {
+                      type: 'array',
+                      items: { $ref: getSchemaPath(dto) },
+                    }
+                  : { $ref: getSchemaPath(dto) },
               },
             },
           ],

@@ -64,7 +64,7 @@ export class ContextMiddleware implements NestMiddleware {
     try {
       const payload = this.jwtService.verify<JWTPayload>(token);
       this.cls.set('id', payload.sub);
-      this.cls.set('tenantId', payload.tenantId);
+      this.cls.set('organizationId', payload.organizationId);
     }
     catch {
       // 검증 실패 시 무시 (AuthGuard에서 처리)

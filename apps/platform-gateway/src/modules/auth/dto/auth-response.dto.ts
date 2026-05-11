@@ -11,6 +11,9 @@ export class AuthPermissionsResponseDto {
 
   @ApiProperty({ description: '할당된 권한 코드 목록', type: [String] })
   permissions!: string[];
+
+  @ApiProperty({ description: '권한별 메타데이터 (UI 설정 등)', type: 'object', additionalProperties: { type: 'object' } })
+  metadata!: Record<string, unknown>;
 }
 
 /**
@@ -26,8 +29,8 @@ export class AuthUserInfoDto {
   @ApiProperty({ description: '관리자 상태 (ACTIVE, INACTIVE)' })
   status!: string;
 
-  @ApiProperty({ description: '소속 테넌트(조직) ID', required: false })
-  tenantId?: string;
+  @ApiProperty({ description: '소속 조직 ID', required: false })
+  organizationId?: string;
 }
 
 /**

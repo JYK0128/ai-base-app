@@ -66,6 +66,7 @@ export class AuthController {
     return this.authService.permissions();
   }
 
+  @Public()
   @Post('refresh')
   @ApiOperation({ summary: '토큰 갱신', description: '쿠키의 리프레시 토큰을 사용하여 액세스 토큰을 갱신합니다.' })
   @SwaggerResult(AuthTokenResponseDto)

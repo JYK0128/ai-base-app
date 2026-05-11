@@ -6,6 +6,8 @@ export interface EnvConfig {
   JWT_ACCESS_EXPIRES_IN: number
   AUTH_SERVICE_HOST: string
   AUTH_SERVICE_PORT: number
+  CORE_SERVICE_HOST: string
+  CORE_SERVICE_PORT: number
   NODE_ENV: string
 }
 
@@ -15,19 +17,29 @@ const getEnv = (key: string): string => {
   return value;
 };
 
-const getAuthServiceConfig = () => {
-  const url = getEnv('AUTH_SERVICE_URL');
-  const parts = url.split(':');
-  if (parts.length !== 2) {
-    throw new Error('AUTH_SERVICE_URL must be in "host:port" format (e.g., localhost:3001)');
+const parseServiceUrl = (serviceUrl: string | undefined): { host: string, port: number } => {
+  if (!serviceUrl) {
+    throw new Error('Service URL is required');
   }
+
+  const [host, portValue, extra] = String(serviceUrl).split(':');
+  if (!host || !portValue || extra) {
+    throw new Error('Service URL must be in "host:port" format (e.g., localhost:3001)');
+  }
+
+  const port = Number(portValue);
+  if (!Number.isInteger(port)) {
+    throw new Error('Service URL port must be an integer');
+  }
+
   return {
-    host: parts[0],
-    port: Number(parts[1]),
+    host,
+    port,
   };
 };
 
-const authConfig = getAuthServiceConfig();
+const authConfig = parseServiceUrl(getEnv('AUTH_SERVICE_URL'));
+const coreConfig = parseServiceUrl(getEnv('CORE_SERVICE_URL'));
 
 export const ENV: EnvConfig = {
   PORT: Number(getEnv('PORT')),
@@ -35,5 +47,7 @@ export const ENV: EnvConfig = {
   JWT_ACCESS_EXPIRES_IN: Number(getEnv('JWT_ACCESS_EXPIRES_IN')),
   AUTH_SERVICE_HOST: authConfig.host,
   AUTH_SERVICE_PORT: authConfig.port,
+  CORE_SERVICE_HOST: coreConfig.host,
+  CORE_SERVICE_PORT: coreConfig.port,
   NODE_ENV: getEnv('NODE_ENV'),
 } as const;

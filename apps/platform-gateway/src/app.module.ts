@@ -13,6 +13,7 @@ import { AuthGuard } from '@/common/guards/auth.guard';
 import { TraceInterceptor } from '@/common/interceptors/trace.interceptor';
 import { ContextMiddleware } from '@/common/middlewares/context.middleware';
 import { AuthModule } from '@/modules/auth/auth.module';
+import { CoreModule } from '@/modules/core/core.module';
 import { HealthModule } from '@/modules/health/health.module';
 
 @Module({
@@ -44,6 +45,7 @@ import { HealthModule } from '@/modules/health/health.module';
       signOptions: { expiresIn: ENV.JWT_ACCESS_EXPIRES_IN },
     }),
     AuthModule,
+    CoreModule,
     HealthModule,
   ],
   controllers: [],

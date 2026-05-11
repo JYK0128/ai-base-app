@@ -18,7 +18,7 @@ declare module 'nestjs-cls' {
     // 3. 사용자 정보
     /** 사용자 고유 ID (UUID) */
     id?: string
-    /** 테넌트 ID */
-    tenantId?: string
+    /** 조직 ID */
+    organizationId?: string
   }
 }

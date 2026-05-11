@@ -4,6 +4,7 @@ import { JwtService } from '@nestjs/jwt';
 import { Request } from 'express';
 
 import { BYPASS_KEY, BYPASS_POLICIES } from '@/common/decorators/bypass.decorator';
+import { PERMISSIONS_KEY } from '@/common/decorators/permissions.decorator';
 import { IS_PERSONAL_KEY } from '@/common/decorators/personal.decorator';
 import { IS_PUBLIC_KEY } from '@/common/decorators/public.decorator';
 import type { JWTPayload } from '@/common/types/request.type';
@@ -17,11 +18,13 @@ export class AuthGuard implements CanActivate {
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     if (!this.checkPublic(context)) {
-      const request = context.switchToHttp().getRequest<Request>();
+      const request = context.switchToHttp().getRequest<Request & { user?: JWTPayload }>();
       const payload = this.verifyToken(request);
+      request.user = payload;
 
       this.handleBypass(context, payload);
       this.handlePersonal(context, request, payload);
+      this.handlePermissions(context, payload);
     }
 
     return true;
@@ -56,7 +59,7 @@ export class AuthGuard implements CanActivate {
     ]) || [];
 
     // 비밀번호 변경이 필요한 토큰인데, 해당 정책 우회가 없는 경우
-    if (payload.mustChangePassword && !bypassPolicies.includes(BYPASS_POLICIES.PASSWORD)) {
+    if (payload.mustChangePassword && !bypassPolicies.some((p) => p === BYPASS_POLICIES.PASSWORD)) {
       throw new ForbiddenException('Password change is required before accessing this resource');
     }
 
@@ -76,7 +79,7 @@ export class AuthGuard implements CanActivate {
 
       // 요청에서 id(UUID) 또는 userId(ID로 전송된 경우) 추출
       const requestId = (params?.id || params?.userId || body?.id || body?.userId || query?.id || query?.userId) as string | undefined;
-      const tenantId = (params?.tenantId || body?.tenantId || query?.tenantId) as string | undefined;
+      const organizationId = (params?.organizationId || body?.organizationId || query?.organizationId) as string | undefined;
 
       if (!requestId) {
         throw new ForbiddenException('Resource owner identification (id) is required');
@@ -89,12 +92,37 @@ export class AuthGuard implements CanActivate {
         throw new ForbiddenException('You do not have permission to access this personal resource');
       }
 
-      if (!tenantId) {
-        throw new ForbiddenException('Tenant identification is required');
+      if (!organizationId) {
+        throw new ForbiddenException('Organization identification is required');
       }
-      if (payload.tenantId !== tenantId) {
-        throw new ForbiddenException('You do not have permission to access this tenant resource');
+      if (payload.organizationId !== organizationId) {
+        throw new ForbiddenException('You do not have permission to access this organization resource');
       }
+    }
+  }
+
+  private handlePermissions(context: ExecutionContext, payload: JWTPayload) {
+    const requiredPermissions = this.reflector.getAllAndOverride<string[]>(PERMISSIONS_KEY, [
+      context.getHandler(),
+      context.getClass(),
+    ]);
+
+    if (!requiredPermissions || requiredPermissions.length === 0) {
+      return;
+    }
+
+    // 슈퍼어드민 바이패스
+    if (payload.roles?.some((role) => role === 'SUPERADMIN')) {
+      return;
+    }
+
+    const userPermissions = payload.permissions ?? [];
+    const hasPermission = requiredPermissions.every((required) =>
+      userPermissions.some((owned) => owned === required),
+    );
+
+    if (!hasPermission) {
+      throw new ForbiddenException('Insufficient permissions to access this resource');
     }
   }
 }
