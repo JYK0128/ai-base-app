@@ -16,6 +16,7 @@ import { HealthModule } from './modules/health/health.module';
 import { OrganizationModule } from './modules/organization/organization.module';
 import { RedisModule } from './modules/redis/redis.module';
 import { SupportModule } from './modules/support/support.module';
+import { TermsModule } from './modules/terms/terms.module';
 
 @Module({
   imports: [
@@ -46,6 +47,7 @@ import { SupportModule } from './modules/support/support.module';
     OrganizationModule,
     AnnouncementModule,
     SupportModule,
+    TermsModule,
   ],
   providers: [
     {
