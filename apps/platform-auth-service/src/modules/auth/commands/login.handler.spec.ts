@@ -3,19 +3,18 @@ import 'reflect-metadata';
 import { RequestContext } from '@mikro-orm/core';
 import { UnauthorizedException } from '@nestjs/common';
 import { AccountStatus, ManagerStatus, OrganizationStatus } from '@pkg/database';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, type MockInstance, vi } from 'vitest';
 
 import { CryptoUtil } from '@/common/utils/crypto.util';
+import { TokenUtil } from '@/common/utils/token.util';
 
 import { LoginCommand, LoginHandler } from './login.handler';
 
 describe('LoginHandler', () => {
+  let generateTokensSpy: MockInstance<typeof TokenUtil.generateTokens>;
+
   const mockEntityManager = {
     transactional: async <R>(callback: () => Promise<R>) => callback(),
-  };
-
-  const mockJwtService = {
-    signAsync: vi.fn().mockResolvedValue('Bearer test-token'),
   };
 
   const mockRedisService = {
@@ -28,6 +27,11 @@ describe('LoginHandler', () => {
 
   beforeEach(() => {
     vi.spyOn(RequestContext, 'getEntityManager').mockReturnValue(mockEntityManager as never);
+    generateTokensSpy = vi.spyOn(TokenUtil, 'generateTokens').mockResolvedValue({
+      accessToken: 'access-token',
+      refreshToken: 'refresh-token',
+    });
+    mockRedisService.ttl.mockResolvedValue(-2);
     vi.useFakeTimers();
     vi.setSystemTime(new Date('2026-04-23T00:00:00.000Z'));
   });
@@ -37,37 +41,48 @@ describe('LoginHandler', () => {
     vi.useRealTimers();
   });
 
-  const createMockAccount = (overrides = {}) => ({
-    id: 'user-1',
-    email: 'test@example.com',
-    password: 'hashed-password',
-    status: AccountStatus.ACTIVE,
-    lastLoginAt: new Date('2026-04-20T00:00:00.000Z'),
-    passwordExpiresAt: new Date('2099-01-01T00:00:00.000Z'),
-    lastLoginIp: null as string | null,
-    manager: {
-      status: ManagerStatus.ACTIVE,
-      organization: {
-        id: 'org-1',
-        status: OrganizationStatus.ACTIVE,
+  const createMockAccount = (overrides = {}) => {
+    const account = {
+      id: 'user-1',
+      email: 'test@example.com',
+      password: 'hashed-password',
+      status: AccountStatus.ACTIVE,
+      lastLoginAt: new Date('2026-04-20T00:00:00.000Z'),
+      passwordExpiresAt: new Date('2099-01-01T00:00:00.000Z'),
+      lastLoginIp: null as string | null,
+      manager: {
+        status: ManagerStatus.ACTIVE,
+        organization: {
+          id: 'org-1',
+          status: OrganizationStatus.ACTIVE,
+        },
       },
-    },
-    ...overrides,
-  });
+      isActive: () => account.status === AccountStatus.ACTIVE,
+      isDormant: () => !!account.lastLoginAt && Date.now() - account.lastLoginAt.getTime() > 90 * 24 * 60 * 60 * 1000,
+      isPasswordExpired: () => !account.passwordExpiresAt || account.passwordExpiresAt.getTime() < Date.now(),
+    };
+
+    return Object.assign(account, overrides);
+  };
 
   it('successfully logs in and returns tokens', async () => {
     const account = createMockAccount();
     const repository = { findOne: vi.fn().mockResolvedValue(account) };
-    mockRedisService.ttl.mockResolvedValue(-2); // No lock
     vi.spyOn(CryptoUtil, 'comparePassword').mockResolvedValue(true);
 
-    const handler = new LoginHandler(repository as never, mockJwtService as never, mockRedisService as never);
+    const handler = new LoginHandler(repository as never, mockRedisService as never);
     const result = (await handler.execute(
       new LoginCommand('test@example.com', 'password123', '127.0.0.1'),
     )) as { accessToken: string, refreshToken: string };
 
-    expect(result.accessToken).toMatch(/Bearer .+/);
-    expect(result.refreshToken).toMatch(/Bearer .+/);
+    expect(result).toEqual({ accessToken: 'access-token', refreshToken: 'refresh-token' });
+    expect(generateTokensSpy).toHaveBeenCalledWith({
+      sub: account.id,
+      organizationId: account.manager.organization.id,
+      mustChangePassword: false,
+      roles: [],
+      permissions: [],
+    });
     expect(account.lastLoginAt?.toISOString()).toBe('2026-04-23T00:00:00.000Z');
     expect(account.lastLoginIp).toBe('127.0.0.1');
   });
@@ -75,11 +90,10 @@ describe('LoginHandler', () => {
   it('throws INVALID_CREDENTIALS when password does not match and tracks attempts', async () => {
     const account = createMockAccount();
     const repository = { findOne: vi.fn().mockResolvedValue(account) };
-    mockRedisService.ttl.mockResolvedValue(-2);
     mockRedisService.incr.mockResolvedValue(1);
     vi.spyOn(CryptoUtil, 'comparePassword').mockResolvedValue(false);
 
-    const handler = new LoginHandler(repository as never, mockJwtService as never, mockRedisService as never);
+    const handler = new LoginHandler(repository as never, mockRedisService as never);
 
     const promise = handler.execute(new LoginCommand('test@example.com', 'wrong-pass', '127.0.0.1'));
 
@@ -94,7 +108,7 @@ describe('LoginHandler', () => {
     const repository = { findOne: vi.fn() };
     mockRedisService.ttl.mockResolvedValue(600); // 10 minutes remaining
 
-    const handler = new LoginHandler(repository as never, mockJwtService as never, mockRedisService as never);
+    const handler = new LoginHandler(repository as never, mockRedisService as never);
 
     const promise = handler.execute(new LoginCommand('test@example.com', 'any-pass', '127.0.0.1'));
 
@@ -110,9 +124,8 @@ describe('LoginHandler', () => {
   it('throws INACTIVE_ACCOUNT when account status is INACTIVE', async () => {
     const account = createMockAccount({ status: AccountStatus.INACTIVE });
     const repository = { findOne: vi.fn().mockResolvedValue(account) };
-    mockRedisService.ttl.mockResolvedValue(-2);
 
-    const handler = new LoginHandler(repository as never, mockJwtService as never, mockRedisService as never);
+    const handler = new LoginHandler(repository as never, mockRedisService as never);
 
     await expect(
       handler.execute(new LoginCommand('test@example.com', 'pass', '127.0.0.1')),
@@ -124,9 +137,8 @@ describe('LoginHandler', () => {
   it('throws INACTIVE_MANAGER when manager status is INACTIVE', async () => {
     const account = createMockAccount({ manager: { status: ManagerStatus.INACTIVE } });
     const repository = { findOne: vi.fn().mockResolvedValue(account) };
-    mockRedisService.ttl.mockResolvedValue(-2);
 
-    const handler = new LoginHandler(repository as never, mockJwtService as never, mockRedisService as never);
+    const handler = new LoginHandler(repository as never, mockRedisService as never);
 
     await expect(
       handler.execute(new LoginCommand('test@example.com', 'pass', '127.0.0.1')),
@@ -138,9 +150,8 @@ describe('LoginHandler', () => {
   it('throws DORMANT_ACCOUNT when last login was more than 90 days ago', async () => {
     const account = createMockAccount({ lastLoginAt: new Date('2025-01-01T00:00:00.000Z') });
     const repository = { findOne: vi.fn().mockResolvedValue(account) };
-    mockRedisService.ttl.mockResolvedValue(-2);
 
-    const handler = new LoginHandler(repository as never, mockJwtService as never, mockRedisService as never);
+    const handler = new LoginHandler(repository as never, mockRedisService as never);
 
     await expect(
       handler.execute(new LoginCommand('test@example.com', 'pass', '127.0.0.1')),
@@ -149,18 +160,23 @@ describe('LoginHandler', () => {
     });
   });
 
-  it('throws PASSWORD_CHANGE_REQUIRED when password has expired', async () => {
+  it('marks the token as mustChangePassword when password has expired', async () => {
     const account = createMockAccount({ passwordExpiresAt: new Date('2026-04-20T00:00:00.000Z') });
     const repository = { findOne: vi.fn().mockResolvedValue(account) };
-    mockRedisService.ttl.mockResolvedValue(-2);
     vi.spyOn(CryptoUtil, 'comparePassword').mockResolvedValue(true);
 
-    const handler = new LoginHandler(repository as never, mockJwtService as never, mockRedisService as never);
+    const handler = new LoginHandler(repository as never, mockRedisService as never);
 
-    await expect(
-      handler.execute(new LoginCommand('test@example.com', 'pass', '127.0.0.1')),
-    ).rejects.toMatchObject({
-      response: { code: 'PASSWORD_CHANGE_REQUIRED' },
+    await expect(handler.execute(new LoginCommand('test@example.com', 'pass', '127.0.0.1'))).resolves.toEqual({
+      accessToken: 'access-token',
+      refreshToken: 'refresh-token',
+    });
+    expect(generateTokensSpy).toHaveBeenCalledWith({
+      sub: account.id,
+      organizationId: account.manager.organization.id,
+      mustChangePassword: true,
+      roles: [],
+      permissions: [],
     });
   });
 });

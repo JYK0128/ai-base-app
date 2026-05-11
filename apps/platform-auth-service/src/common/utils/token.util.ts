@@ -1,32 +1,43 @@
-import { JwtService } from '@nestjs/jwt';
+import * as jose from 'jose';
 
 import { ENV } from '@/common/env';
 import type { JWTPayload } from '@/common/types/request.type';
 
 export class TokenUtil {
+  private static getExpirationTime(secondsFromNow: number) {
+    return Math.floor(Date.now() / 1000) + secondsFromNow;
+  }
+
   /**
    * Access Token과 Refresh Token 쌍을 생성합니다.
    */
   static async generateTokens(
-    jwtService: JwtService,
-    sub: string,
-    payload: Omit<JWTPayload, 'sub'>,
+    payload: JWTPayload,
   ) {
-    const jwtPayload: JWTPayload = {
-      sub,
+    const encoder = new TextEncoder();
+    const accessPayload: JWTPayload = {
       ...payload,
+      typ: 'access',
+    };
+    const refreshPayload: JWTPayload = {
+      sub: payload.sub,
+      organizationId: payload.organizationId,
+      typ: 'refresh',
     };
 
-    const [accessToken, refreshToken] = await Promise.all([
-      jwtService.signAsync(jwtPayload, {
-        secret: ENV.JWT_ACCESS_SECRET,
-        expiresIn: ENV.JWT_ACCESS_EXPIRES_IN,
-      }),
-      jwtService.signAsync(jwtPayload, {
-        secret: ENV.JWT_REFRESH_SECRET,
-        expiresIn: ENV.JWT_REFRESH_EXPIRES_IN,
-      }),
-    ]);
+    // Access Token 생성
+    const accessToken = await new jose.SignJWT(accessPayload)
+      .setProtectedHeader({ alg: 'HS256' })
+      .setIssuedAt()
+      .setExpirationTime(this.getExpirationTime(ENV.JWT_ACCESS_EXPIRES_IN))
+      .sign(encoder.encode(ENV.JWT_ACCESS_SECRET));
+
+    // Refresh Token 생성
+    const refreshToken = await new jose.SignJWT(refreshPayload)
+      .setProtectedHeader({ alg: 'HS256' })
+      .setIssuedAt()
+      .setExpirationTime(this.getExpirationTime(ENV.JWT_REFRESH_EXPIRES_IN))
+      .sign(encoder.encode(ENV.JWT_REFRESH_SECRET));
 
     return { accessToken, refreshToken };
   }

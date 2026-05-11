@@ -4,8 +4,8 @@ import { AccountStatus, ManagerAccountRepository } from '@pkg/database';
 
 import { CryptoUtil } from '@/common/utils/crypto.util';
 
-export { ChangePasswordCommand } from './change-password.handler.helpers';
-import { ChangePasswordAsserter, ChangePasswordCommand } from './change-password.handler.helpers';
+export { ChangePasswordCommand } from './change-password.helpers';
+import { ChangePasswordAsserter, ChangePasswordCommand } from './change-password.helpers';
 
 @CommandHandler(ChangePasswordCommand)
 export class ChangePasswordHandler implements ICommandHandler<ChangePasswordCommand> {

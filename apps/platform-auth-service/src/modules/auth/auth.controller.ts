@@ -53,11 +53,11 @@ export class AuthController {
   async handlePermissions(
     @Payload() data: {
       id: string
-      tenantId?: string
+      organizationId?: string
     },
   ) {
     return this.queryBus.execute(
-      new GetPermissionsQuery(data.id, data.tenantId),
+      new GetPermissionsQuery(data.id, data.organizationId),
     );
   }
 

@@ -4,9 +4,11 @@ import { JwtService } from '@nestjs/jwt';
 import { AccountStatus, ManagerAccountRepository, ManagerStatus, OrganizationStatus } from '@pkg/database';
 
 import { ENV } from '@/common/env';
-import { JWTPayload } from '@/common/types/request.type';
+import type { JWTPayload } from '@/common/types/request.type';
 import { TokenUtil } from '@/common/utils/token.util';
 import { RedisService } from '@/modules/redis/redis.service';
+
+import { extractPermissions } from '../auth.helpers';
 
 export class RefreshTokenCommand {
   constructor(public readonly refreshToken: string) {}
@@ -32,6 +34,10 @@ export class RefreshTokenHandler implements ICommandHandler<RefreshTokenCommand>
         secret: ENV.JWT_REFRESH_SECRET,
       });
 
+      if (payload.typ !== 'refresh') {
+        throw new UnauthorizedException('유효하지 않은 리프레시 토큰입니다.');
+      }
+
       // 2. Redis에 저장된 토큰과 일치하는지 확인
       const storedToken = await this.redisService.get(`refresh:${payload.sub}`);
       if (!storedToken || storedToken !== refreshToken) {
@@ -40,7 +46,7 @@ export class RefreshTokenHandler implements ICommandHandler<RefreshTokenCommand>
 
       const account = await this.managerAccountRepository.findOne(
         { id: payload.sub },
-        { populate: ['manager.organization'] },
+        { populate: ['manager.organization', 'manager.roles.role.permissions.permission'] },
       );
       if (!account) {
         throw new UnauthorizedException('계정을 찾을 수 없습니다.');
@@ -59,17 +65,19 @@ export class RefreshTokenHandler implements ICommandHandler<RefreshTokenCommand>
       }
 
       // 비밀번호 만료 여부 확인
-      const mustChangePassword = this.isPasswordExpired(account.passwordExpiresAt);
+      const mustChangePassword = account.isPasswordExpired();
+
+      // 권한 정보 조회
+      const { roles, permissions } = extractPermissions(account.manager, payload.organizationId);
 
       // 3. 토큰 재발급 및 Redis 갱신 (Token Rotation)
-      const { accessToken, refreshToken: newRefreshToken } = await TokenUtil.generateTokens(
-        this.jwtService,
-        account.id,
-        {
-          tenantId: payload.tenantId,
-          mustChangePassword,
-        },
-      );
+      const { accessToken, refreshToken: newRefreshToken } = await TokenUtil.generateTokens({
+        sub: account.id,
+        organizationId: payload.organizationId,
+        mustChangePassword,
+        roles,
+        permissions,
+      });
 
       await this.redisService.set(
         `refresh:${account.id}`,
@@ -81,16 +89,12 @@ export class RefreshTokenHandler implements ICommandHandler<RefreshTokenCommand>
         id: payload.sub,
         accessToken,
         refreshToken: newRefreshToken,
-        tenantId: payload.tenantId,
+        organizationId: payload.organizationId,
       };
     }
     catch (error) {
       this.logger.error('Invalid refresh token', error);
       throw new UnauthorizedException('유효하지 않거나 만료된 리프레시 토큰입니다.');
     }
-  }
-
-  private isPasswordExpired(passwordExpiresAt?: Date | null) {
-    return !passwordExpiresAt || Date.now() > passwordExpiresAt.getTime();
   }
 }

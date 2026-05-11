@@ -1,7 +1,6 @@
 import { NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
-import { AccountStatus,
-         ManagerAccount,
+import { ManagerAccount,
          ManagerAccountRepository,
          ManagerRoleRepository,
          ManagerStatus } from '@pkg/database';
@@ -9,12 +8,13 @@ import { AccountStatus,
 export interface GetPermissionsResult {
   roles: string[]
   permissions: string[]
+  metadata: Record<string, unknown>
 }
 
 export class GetPermissionsQuery {
   constructor(
     public readonly id: string,
-    public readonly tenantId?: string,
+    public readonly organizationId?: string,
   ) {}
 }
 
@@ -26,13 +26,13 @@ export class GetPermissionsHandler implements IQueryHandler<GetPermissionsQuery>
   ) {}
 
   async execute(query: GetPermissionsQuery): Promise<GetPermissionsResult> {
-    const { id, tenantId } = query;
+    const { id, organizationId } = query;
 
     const account = await this.findExistingAccount(id);
     this.validateAccountStatus(account);
-    this.validateTenantMembership(account, tenantId);
+    this.validateOrganizationMembership(account, organizationId);
 
-    return this.fetchEffectivePermissions(account.manager.id, tenantId);
+    return this.fetchEffectivePermissions(account.manager.id, organizationId);
   }
 
   /**
@@ -55,19 +55,19 @@ export class GetPermissionsHandler implements IQueryHandler<GetPermissionsQuery>
    * 계정 전역 상태 검증 (ACTIVE/INACTIVE)
    */
   private validateAccountStatus(account: ManagerAccount) {
-    if (account.status === AccountStatus.INACTIVE) {
+    if (!account.isActive()) {
       throw new UnauthorizedException('비활성화된 계정입니다. 관리자에게 문의하세요.');
     }
   }
 
   /**
-   * 특정 테넌트에 대한 소속 여부 및 상태 검증
+   * 특정 조직에 대한 소속 여부 및 상태 검증
    */
-  private validateTenantMembership(account: ManagerAccount, tenantId?: string) {
-    if (!tenantId) return;
+  private validateOrganizationMembership(account: ManagerAccount, organizationId?: string) {
+    if (!organizationId) return;
 
     const manager = account.manager;
-    if (!manager || manager.organization?.id !== tenantId) {
+    if (!manager || manager.organization?.id !== organizationId) {
       throw new UnauthorizedException('해당 조직에 대한 권한이 없습니다.');
     }
 
@@ -79,30 +79,36 @@ export class GetPermissionsHandler implements IQueryHandler<GetPermissionsQuery>
   /**
    * DB 기반의 역할 및 권한 세트 조회
    */
-  private async fetchEffectivePermissions(managerPk: string, tenantId?: string): Promise<GetPermissionsResult> {
+  private async fetchEffectivePermissions(managerPk: string, organizationId?: string): Promise<GetPermissionsResult> {
     const managerRoles = await this.managerRoleRepository.find(
       {
         manager: managerPk,
-        ...(tenantId ? { organization: tenantId } : {}),
+        ...(organizationId ? { organization: organizationId } : {}),
       },
       { populate: ['role.permissions.permission'] },
     );
 
     const roles = new Set<string>();
     const permissions = new Set<string>();
+    const metadata: Record<string, unknown> = {};
 
     for (const mr of managerRoles) {
       const role = mr.role;
       roles.add(role.code);
 
       for (const rp of role.permissions) {
-        permissions.add(rp.permission.code);
+        const p = rp.permission;
+        permissions.add(p.code);
+        if (p.metadata) {
+          metadata[p.code] = p.metadata;
+        }
       }
     }
 
     return {
       roles: Array.from(roles),
       permissions: Array.from(permissions),
+      metadata,
     };
   }
 }

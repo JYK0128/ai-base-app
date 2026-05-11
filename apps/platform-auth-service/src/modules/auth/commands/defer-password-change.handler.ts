@@ -2,8 +2,8 @@ import { Transactional } from '@mikro-orm/decorators/legacy';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { AccountStatus, ManagerAccountRepository } from '@pkg/database';
 
-export { DeferPasswordChangeCommand } from './defer-password-change.handler.helpers';
-import { DeferPasswordChangeAsserter, DeferPasswordChangeCommand } from './defer-password-change.handler.helpers';
+export { DeferPasswordChangeCommand } from './defer-password-change.helpers';
+import { DeferPasswordChangeAsserter, DeferPasswordChangeCommand } from './defer-password-change.helpers';
 
 @CommandHandler(DeferPasswordChangeCommand)
 export class DeferPasswordChangeHandler implements ICommandHandler<DeferPasswordChangeCommand> {

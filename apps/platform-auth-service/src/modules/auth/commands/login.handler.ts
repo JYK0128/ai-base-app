@@ -1,15 +1,15 @@
 import { Transactional } from '@mikro-orm/decorators/legacy';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { JwtService } from '@nestjs/jwt';
-import { AccountStatus, ManagerAccount, ManagerAccountRepository, ManagerStatus, OrganizationStatus } from '@pkg/database';
+import { ManagerAccount, ManagerAccountRepository, ManagerStatus, OrganizationStatus } from '@pkg/database';
 
 import { ENV } from '@/common/env';
 import { CryptoUtil } from '@/common/utils/crypto.util';
 import { TokenUtil } from '@/common/utils/token.util';
 import { RedisService } from '@/modules/redis/redis.service';
 
-export { LoginCommand } from './login.handler.helpers';
-import { LoginAsserter, LoginCommand } from './login.handler.helpers';
+export { LoginCommand } from './login.helpers';
+import { extractPermissions } from '../auth.helpers';
+import { LoginAsserter, LoginCommand } from './login.helpers';
 
 /**
  * 로그인 처리 핸들러
@@ -25,7 +25,6 @@ export class LoginHandler implements ICommandHandler<LoginCommand> {
 
   constructor(
     private readonly managerAccountRepository: ManagerAccountRepository,
-    private readonly jwtService: JwtService,
     private readonly redisService: RedisService,
   ) {}
 
@@ -57,7 +56,7 @@ export class LoginHandler implements ICommandHandler<LoginCommand> {
     return await this.LoginGuard.assert(
       await this.managerAccountRepository.findOne(
         { email },
-        { populate: ['manager.organization'] },
+        { populate: ['manager.organization', 'manager.roles.role.permissions.permission'] },
       ),
       'INVALID_CREDENTIALS',
       { context: { email } },
@@ -68,7 +67,7 @@ export class LoginHandler implements ICommandHandler<LoginCommand> {
 
   private async validatePolicies(account: ManagerAccount) {
     await this.LoginGuard.throwIf(
-      account.status === AccountStatus.INACTIVE,
+      !account.isActive(),
       'INACTIVE_ACCOUNT',
     );
     await this.LoginGuard.throwIf(
@@ -81,11 +80,7 @@ export class LoginHandler implements ICommandHandler<LoginCommand> {
     );
 
     // 휴면 계정 확인
-    if (account.lastLoginAt) {
-      const dormancyPeriodMs = 90 * 24 * 60 * 60 * 1000;
-      const isDormant = Date.now() - account.lastLoginAt.getTime() > dormancyPeriodMs;
-      await this.LoginGuard.throwIf(isDormant, 'DORMANT_ACCOUNT');
-    }
+    await this.LoginGuard.throwIf(account.isDormant(), 'DORMANT_ACCOUNT');
   }
 
   // --- 3. 자격 증명 확인 ---
@@ -109,14 +104,27 @@ export class LoginHandler implements ICommandHandler<LoginCommand> {
     account.lastLoginIp = clientIp;
 
     // 비밀번호 만료 확인
-    const isPasswordExpired = !account.passwordExpiresAt || account.passwordExpiresAt.getTime() < Date.now();
+    const isPasswordExpired = account.isPasswordExpired();
 
-    // 토큰 생성 (만료된 경우 제한된 페이로드 포함)
-    const tenantId = account.manager?.organization?.id;
-    const tokens = await TokenUtil.generateTokens(this.jwtService, account.id, {
-      tenantId,
+    const organizationId = account.manager?.organization?.id;
+
+    // 권한 정보 조회
+    const { roles, permissions } = extractPermissions(account.manager, organizationId);
+
+    // 토큰 생성
+    const tokens = await TokenUtil.generateTokens({
+      sub: account.id,
+      organizationId,
       mustChangePassword: isPasswordExpired,
+      roles,
+      permissions,
     });
+
+    await this.redisService.set(
+      `refresh:${account.id}`,
+      tokens.refreshToken,
+      ENV.JWT_REFRESH_EXPIRES_IN,
+    );
 
     return tokens;
   }

@@ -1,10 +1,13 @@
 import type { Request } from 'express';
+import type { JWTPayload as JoseJWTPayload } from 'jose';
 
-export interface JWTPayload {
+export interface JWTPayload extends JoseJWTPayload {
   sub: string
-  tenantId?: string
+  organizationId?: string
+  typ?: 'access' | 'refresh'
   mustChangePassword?: boolean
-  [key: string]: unknown
+  roles?: string[]
+  permissions?: string[]
 }
 
 export interface AppRequest extends Request {
