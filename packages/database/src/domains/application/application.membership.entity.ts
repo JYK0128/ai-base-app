@@ -30,10 +30,10 @@ export class ApplicationMembership extends CoreEntity<ApplicationMembership> {
   release?: Rel<ApplicationRelease>;
 
   @Enum(() => UserApplicationMembershipStatus)
-  status: UserApplicationMembershipStatus & Opt = UserApplicationMembershipStatus.ACTIVE;
+  status: Opt<UserApplicationMembershipStatus> = UserApplicationMembershipStatus.ACTIVE;
 
   @Property()
-  joinedAt: Date & Opt = new Date();
+  joinedAt: Opt<Date> = new Date();
 
   @Property({ nullable: true })
   leftAt?: Date;

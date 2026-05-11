@@ -6,6 +6,8 @@ import { CoreEntity } from '../../core/core.entity';
 import { Site } from '../../site/site.entity';
 import type { Manager } from '../manager/manager.entity';
 import { ManagerInvite } from '../manager/manager.invite.entity';
+import { ManagerTermsConsent } from '../terms/manager.terms.consent.entity';
+import { TermsDocument } from '../terms/terms.document.entity';
 import { OrganizationRepository } from './organization.repository';
 
 export enum OrganizationStatus {
@@ -27,7 +29,7 @@ export class Organization extends CoreEntity<Organization> {
   email!: string;
 
   @Enum(() => OrganizationStatus)
-  status: OrganizationStatus & Opt = OrganizationStatus.ACTIVE;
+  status: Opt<OrganizationStatus> = OrganizationStatus.ACTIVE;
 
   @OneToMany({ mappedBy: 'organization' })
   managers = new Collection<Manager>(this);
@@ -37,4 +39,10 @@ export class Organization extends CoreEntity<Organization> {
 
   @OneToMany(() => Site, (site) => site.organization)
   sites = new Collection<Site>(this);
+
+  @OneToMany(() => TermsDocument, (doc) => doc.organization)
+  termsDocuments = new Collection<TermsDocument>(this);
+
+  @OneToMany(() => ManagerTermsConsent, (consent) => consent.organization)
+  termsConsents = new Collection<ManagerTermsConsent>(this);
 }

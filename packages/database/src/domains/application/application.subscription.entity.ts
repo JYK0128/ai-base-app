@@ -32,10 +32,10 @@ export class ApplicationSubscription extends CoreEntity<ApplicationSubscription>
   plan!: Rel<ApplicationPlan>;
 
   @Enum(() => ApplicationSubscriptionStatus)
-  status: ApplicationSubscriptionStatus & Opt = ApplicationSubscriptionStatus.ACTIVE;
+  status: Opt<ApplicationSubscriptionStatus> = ApplicationSubscriptionStatus.ACTIVE;
 
   @Property()
-  startedAt: Date & Opt = new Date();
+  startedAt: Opt<Date> = new Date();
 
   @Property({ nullable: true })
   endedAt?: Date;

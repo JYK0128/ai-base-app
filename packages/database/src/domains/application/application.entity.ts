@@ -32,7 +32,7 @@ export class Application extends CoreEntity<Application> {
   description?: string;
 
   @Enum(() => ApplicationStatus)
-  status: ApplicationStatus & Opt = ApplicationStatus.DRAFT;
+  status: Opt<ApplicationStatus> = ApplicationStatus.DRAFT;
 
   @OneToMany(() => ApplicationPlan, (plan) => plan.application)
   plans = new Collection<ApplicationPlan>(this);

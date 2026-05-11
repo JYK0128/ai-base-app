@@ -41,7 +41,7 @@
     "mo": "npm run dx -- mikro-orm",
     "predev": "npm run prebuild",
     "dev": "node esbuild.config.js --watch",
-    "lint": "eslint .",
+    "lint": "eslint . --fix",
     "build": "node esbuild.config.js",
     "play": "vitest run src/test/play.test.ts",
     "migration:create": "npm run mo -- migration:create",

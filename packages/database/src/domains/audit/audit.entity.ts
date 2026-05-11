@@ -37,5 +37,5 @@ export class Audit extends CoreEntity<Audit> {
   actorUserId?: string;
 
   @Property()
-  occurredAt: Date & Opt = new Date();
+  occurredAt: Opt<Date> = new Date();
 }

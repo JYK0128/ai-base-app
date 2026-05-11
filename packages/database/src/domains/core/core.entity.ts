@@ -15,13 +15,13 @@ export abstract class CoreEntity<
   id: string = uuidv7();
 
   @Property()
-  createdAt: Date & Opt = new Date();
+  createdAt: Opt<Date> = new Date();
 
   @Property({ nullable: true })
   createdBy?: string;
 
   @Property({ onUpdate: () => new Date() })
-  updatedAt: Date & Opt = new Date();
+  updatedAt: Opt<Date> = new Date();
 
   @Property({ nullable: true })
   updatedBy?: string;

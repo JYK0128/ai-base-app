@@ -5,6 +5,7 @@ import { Entity, Enum, Index, ManyToOne, OneToMany } from '@mikro-orm/decorators
 import { CoreEntity } from '../../core/core.entity';
 import type { Organization } from '../organization/organization.entity';
 import { ManagerRole } from '../rbac/manager.role.entity';
+import { ManagerTermsConsent } from '../terms/manager.terms.consent.entity';
 import { ManagerAccount } from './manager.account.entity';
 import { ManagerInvite } from './manager.invite.entity';
 import { ManagerRepository } from './manager.repository';
@@ -31,4 +32,7 @@ export class Manager extends CoreEntity<Manager> {
 
   @OneToMany(() => ManagerRole, (managerRole) => managerRole.manager)
   roles = new Collection<ManagerRole>(this);
+
+  @OneToMany(() => ManagerTermsConsent, (consent) => consent.manager)
+  termsConsents = new Collection<ManagerTermsConsent>(this);
 }

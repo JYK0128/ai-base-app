@@ -29,10 +29,10 @@ export class SupportTicket extends CoreEntity<SupportTicket> {
   content!: string;
 
   @Enum(() => TicketStatus)
-  status: TicketStatus & Opt = TicketStatus.OPEN;
+  status: Opt<TicketStatus> = TicketStatus.OPEN;
 
   @Enum(() => TicketPriority)
-  priority: TicketPriority & Opt = TicketPriority.MEDIUM;
+  priority: Opt<TicketPriority> = TicketPriority.MEDIUM;
 
   @Index()
   @ManyToOne(() => Manager)
