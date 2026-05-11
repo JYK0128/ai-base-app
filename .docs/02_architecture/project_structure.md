@@ -10,7 +10,7 @@
 * **apps/**: 실행 가능한 백엔드 애플리케이션(현재 `platform-auth-service`, `service-gateway`)을 관리함.
 * **web/**: 실행 가능한 프론트엔드 애플리케이션(현재 `platform-admin-web`)을 관리함.
 * **packages/**: 공통 라이브러리
-  * `config/`: ESLint·TypeScript·Stylelint 등 공통 빌드/정적분석 설정
+  * `config/`: ESLint·TypeScript·Stylelint 등 공통 빌드/정적분석 설정 (ESM 지원을 위해 .mjs 사용)
   * `database/`: MikroORM 기반 도메인 엔티티/리포지토리/시더
   * `ui/`: 재사용 UI 컴포넌트 및 Storybook
   * `utils/`: 프레임워크 비의존 유틸/도메인 서비스

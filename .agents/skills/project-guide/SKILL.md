@@ -18,7 +18,7 @@ description: 모노레포 내 신규 프로젝트/패키지 생성 시 "base-pro
 - **package.json**
   - 명명 규칙: `@pkg/<project-name>`, `<service-name>`, `<app-name>` 중 택일
   - 버전 정보: `0.1.0`으로 초기화 필수
-- **eslint.config.js**
+- **eslint.config.mjs**
   - 다음 중 프로젝트 성격에 맞는 공유 설정을 반드시 상속(extend):
     - `@pkg/config/eslint/react`
     - `@pkg/config/eslint/nest`
