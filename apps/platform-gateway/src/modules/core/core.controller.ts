@@ -5,8 +5,8 @@ import { CheckPermissions } from '@/common/decorators/permissions.decorator';
 import { SwaggerResult } from '@/common/decorators/swagger.decorator';
 
 import { CoreClient } from './core.client';
-import { CreateAnnouncementDto, GetAnnouncementsQueryDto, GetOrganizationsQueryDto, GetTicketsQueryDto } from './dto/core-request.dto';
-import { AnnouncementResponseDto, OrganizationResponseDto, TicketResponseDto } from './dto/core-response.dto';
+import { AgreeTermsDto, CreateAnnouncementDto, CreateTermsDocumentDto, CreateTermsVersionDto, GetAnnouncementsQueryDto, GetOrganizationsQueryDto, GetTermsQueryDto, GetTicketsQueryDto } from './dto/core-request.dto';
+import { AnnouncementResponseDto, ManagerTermsConsentResponseDto, OrganizationResponseDto, TermsDocumentResponseDto, TermsVersionResponseDto, TicketResponseDto } from './dto/core-response.dto';
 
 @ApiTags('Core')
 @ApiBearerAuth()
@@ -69,5 +69,39 @@ export class CoreController {
       organizationId: query.organizationId,
       status: query.status,
     });
+  }
+
+  // --- Terms ---
+
+  @Get('terms')
+  @CheckPermissions('platform:terms:read')
+  @ApiOperation({ summary: '약관 목록 조회', description: '플랫폼/조직 범위의 현재 활성 약관 목록을 조회합니다.' })
+  @SwaggerResult([TermsDocumentResponseDto])
+  async getActiveTerms(@Query() query: GetTermsQueryDto) {
+    return this.coreClient.send('terms.get.active', { organizationId: query.organizationId });
+  }
+
+  @Post('terms/documents')
+  @CheckPermissions('platform:terms:manage')
+  @ApiOperation({ summary: '약관 문서 생성', description: 'PLATFORM 또는 ORGANIZATION 그룹 약관 문서를 생성합니다.' })
+  @SwaggerResult(TermsDocumentResponseDto)
+  async createTermsDocument(@Body() data: CreateTermsDocumentDto) {
+    return this.coreClient.send('terms.create.document', data);
+  }
+
+  @Post('terms/versions')
+  @CheckPermissions('platform:terms:manage')
+  @ApiOperation({ summary: '약관 버전 생성', description: '약관 버전을 생성하고 선택적으로 즉시 게시합니다.' })
+  @SwaggerResult(TermsVersionResponseDto)
+  async createTermsVersion(@Body() data: CreateTermsVersionDto) {
+    return this.coreClient.send('terms.create.version', data);
+  }
+
+  @Post('terms/agreements')
+  @CheckPermissions('platform:terms:agree')
+  @ApiOperation({ summary: '약관 동의 저장', description: '매니저의 특정 약관 버전 동의 이력을 저장합니다.' })
+  @SwaggerResult(ManagerTermsConsentResponseDto)
+  async agreeTerms(@Body() data: AgreeTermsDto) {
+    return this.coreClient.send('terms.agree', data);
   }
 }
