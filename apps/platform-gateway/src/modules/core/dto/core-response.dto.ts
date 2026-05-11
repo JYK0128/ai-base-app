@@ -56,3 +56,45 @@ export class TicketResponseDto {
   @ApiProperty({ example: '2024-05-10T00:00:00Z' })
   createdAt: string;
 }
+
+export class TermsDocumentResponseDto {
+  @ApiProperty({ example: 'terms_doc_123' })
+  id: string;
+
+  @ApiProperty({ example: 'PLATFORM', enum: ['PLATFORM', 'ORGANIZATION'] })
+  groupType: string;
+
+  @ApiProperty({ example: 'SERVICE_TOS' })
+  code: string;
+
+  @ApiProperty({ example: '서비스 이용약관' })
+  title: string;
+
+  @ApiProperty({ example: true })
+  required: boolean;
+
+  @ApiProperty({ example: 'PUBLISHED', enum: ['DRAFT', 'PUBLISHED', 'DEPRECATED'] })
+  status: string;
+}
+
+export class TermsVersionResponseDto {
+  @ApiProperty({ example: 'terms_ver_123' })
+  id: string;
+
+  @ApiProperty({ example: 'v1.0.0' })
+  versionLabel: string;
+
+  @ApiProperty({ example: 'PUBLISHED', enum: ['DRAFT', 'PUBLISHED', 'ARCHIVED'] })
+  status: string;
+}
+
+export class UserTermsConsentResponseDto {
+  @ApiProperty({ example: 'consent_123' })
+  id: string;
+
+  @ApiProperty({ example: true })
+  agreed: boolean;
+
+  @ApiProperty({ example: '2026-05-11T00:00:00Z' })
+  agreedAt: string;
+}

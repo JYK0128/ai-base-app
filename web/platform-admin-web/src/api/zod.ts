@@ -403,6 +403,156 @@ export const CoreControllerGetTicketsV1Response = zod.object({
 }))
 
 
+/**
+ * 플랫폼/조직 범위의 현재 활성 약관 목록을 조회합니다.
+ * @summary 약관 목록 조회
+ */
+export const CoreControllerGetActiveTermsV1QueryParams = zod.object({
+  "organizationId": zod.string().optional().describe('ORGANIZATION 그룹 약관 조회 시 조직 ID')
+})
+
+export const CoreControllerGetActiveTermsV1Response = zod.object({
+  "success": zod.boolean().describe('성공 여부'),
+  "data": zod.looseObject({
+
+}).describe('응답 데이터'),
+  "error": zod.object({
+  "code": zod.string().describe('에러 코드'),
+  "message": zod.union([zod.string(),zod.array(zod.string())]).describe('에러 메시지'),
+  "details": zod.looseObject({
+
+}).optional().describe('상세 정보'),
+  "status": zod.number().describe('HTTP 상태 코드')
+}).optional().describe('에러 상세 정보'),
+  "message": zod.string().optional().describe('응답 메시지'),
+  "traceId": zod.string().describe('추적 ID'),
+  "requestId": zod.string().describe('요청 ID')
+}).and(zod.object({
+  "data": zod.array(zod.object({
+  "id": zod.string(),
+  "groupType": zod.enum(['PLATFORM', 'ORGANIZATION']),
+  "code": zod.string(),
+  "title": zod.string(),
+  "required": zod.boolean(),
+  "status": zod.enum(['DRAFT', 'PUBLISHED', 'DEPRECATED'])
+})).optional()
+}))
+
+
+/**
+ * PLATFORM 또는 ORGANIZATION 그룹 약관 문서를 생성합니다.
+ * @summary 약관 문서 생성
+ */
+export const CoreControllerCreateTermsDocumentV1Body = zod.object({
+  "groupType": zod.enum(['PLATFORM', 'ORGANIZATION']),
+  "code": zod.string(),
+  "title": zod.string(),
+  "required": zod.boolean().optional(),
+  "organizationId": zod.string().optional()
+})
+
+export const CoreControllerCreateTermsDocumentV1Response = zod.object({
+  "success": zod.boolean().describe('성공 여부'),
+  "data": zod.looseObject({
+
+}).describe('응답 데이터'),
+  "error": zod.object({
+  "code": zod.string().describe('에러 코드'),
+  "message": zod.union([zod.string(),zod.array(zod.string())]).describe('에러 메시지'),
+  "details": zod.looseObject({
+
+}).optional().describe('상세 정보'),
+  "status": zod.number().describe('HTTP 상태 코드')
+}).optional().describe('에러 상세 정보'),
+  "message": zod.string().optional().describe('응답 메시지'),
+  "traceId": zod.string().describe('추적 ID'),
+  "requestId": zod.string().describe('요청 ID')
+}).and(zod.object({
+  "data": zod.object({
+  "id": zod.string(),
+  "groupType": zod.enum(['PLATFORM', 'ORGANIZATION']),
+  "code": zod.string(),
+  "title": zod.string(),
+  "required": zod.boolean(),
+  "status": zod.enum(['DRAFT', 'PUBLISHED', 'DEPRECATED'])
+}).optional()
+}))
+
+
+/**
+ * 약관 버전을 생성하고 선택적으로 즉시 게시합니다.
+ * @summary 약관 버전 생성
+ */
+export const CoreControllerCreateTermsVersionV1Body = zod.object({
+  "termsDocumentId": zod.string(),
+  "versionLabel": zod.string(),
+  "contentMd": zod.string(),
+  "publish": zod.boolean().optional()
+})
+
+export const CoreControllerCreateTermsVersionV1Response = zod.object({
+  "success": zod.boolean().describe('성공 여부'),
+  "data": zod.looseObject({
+
+}).describe('응답 데이터'),
+  "error": zod.object({
+  "code": zod.string().describe('에러 코드'),
+  "message": zod.union([zod.string(),zod.array(zod.string())]).describe('에러 메시지'),
+  "details": zod.looseObject({
+
+}).optional().describe('상세 정보'),
+  "status": zod.number().describe('HTTP 상태 코드')
+}).optional().describe('에러 상세 정보'),
+  "message": zod.string().optional().describe('응답 메시지'),
+  "traceId": zod.string().describe('추적 ID'),
+  "requestId": zod.string().describe('요청 ID')
+}).and(zod.object({
+  "data": zod.object({
+  "id": zod.string(),
+  "versionLabel": zod.string(),
+  "status": zod.enum(['DRAFT', 'PUBLISHED', 'ARCHIVED'])
+}).optional()
+}))
+
+
+/**
+ * 사용자의 특정 약관 버전 동의 이력을 저장합니다.
+ * @summary 약관 동의 저장
+ */
+export const CoreControllerAgreeTermsV1Body = zod.object({
+  "userId": zod.string(),
+  "termsVersionId": zod.string(),
+  "organizationId": zod.string().optional(),
+  "source": zod.string().optional(),
+  "ipAddress": zod.string().optional(),
+  "userAgent": zod.string().optional()
+})
+
+export const CoreControllerAgreeTermsV1Response = zod.object({
+  "success": zod.boolean().describe('성공 여부'),
+  "data": zod.looseObject({
+
+}).describe('응답 데이터'),
+  "error": zod.object({
+  "code": zod.string().describe('에러 코드'),
+  "message": zod.union([zod.string(),zod.array(zod.string())]).describe('에러 메시지'),
+  "details": zod.looseObject({
+
+}).optional().describe('상세 정보'),
+  "status": zod.number().describe('HTTP 상태 코드')
+}).optional().describe('에러 상세 정보'),
+  "message": zod.string().optional().describe('응답 메시지'),
+  "traceId": zod.string().describe('추적 ID'),
+  "requestId": zod.string().describe('요청 ID')
+}).and(zod.object({
+  "data": zod.object({
+  "id": zod.string(),
+  "agreed": zod.boolean(),
+  "agreedAt": zod.string()
+}).optional()
+}))
+
+
 export const HealthControllerLiveResponse = zod.object({
   "status": zod.string().optional(),
   "info": zod.record(zod.string(), zod.object({

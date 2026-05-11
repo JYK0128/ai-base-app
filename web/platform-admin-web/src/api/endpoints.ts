@@ -25,13 +25,19 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
+  AgreeTermsDto,
   ApiResponse,
   AuthControllerGetMeV1200,
   AuthControllerLoginV1200,
   AuthControllerPermissionsV1200,
   AuthControllerRefreshV1200,
   ChangePasswordDto,
+  CoreControllerAgreeTermsV1200,
   CoreControllerCreateAnnouncementV1200,
+  CoreControllerCreateTermsDocumentV1200,
+  CoreControllerCreateTermsVersionV1200,
+  CoreControllerGetActiveTermsV1200,
+  CoreControllerGetActiveTermsV1Params,
   CoreControllerGetAnnouncementsV1200,
   CoreControllerGetAnnouncementsV1Params,
   CoreControllerGetOrganizationsV1200,
@@ -39,6 +45,8 @@ import type {
   CoreControllerGetTicketsV1200,
   CoreControllerGetTicketsV1Params,
   CreateAnnouncementDto,
+  CreateTermsDocumentDto,
+  CreateTermsVersionDto,
   HealthControllerLive200,
   HealthControllerLive503,
   HealthControllerReady200,
@@ -72,6 +80,14 @@ import coreControllerCreateAnnouncementV1Mutator from '../lib/axios';
 import type { ErrorType as CoreControllerCreateAnnouncementV1ErrorType } from '../lib/axios';
 import coreControllerGetTicketsV1Mutator from '../lib/axios';
 import type { ErrorType as CoreControllerGetTicketsV1ErrorType } from '../lib/axios';
+import coreControllerGetActiveTermsV1Mutator from '../lib/axios';
+import type { ErrorType as CoreControllerGetActiveTermsV1ErrorType } from '../lib/axios';
+import coreControllerCreateTermsDocumentV1Mutator from '../lib/axios';
+import type { ErrorType as CoreControllerCreateTermsDocumentV1ErrorType } from '../lib/axios';
+import coreControllerCreateTermsVersionV1Mutator from '../lib/axios';
+import type { ErrorType as CoreControllerCreateTermsVersionV1ErrorType } from '../lib/axios';
+import coreControllerAgreeTermsV1Mutator from '../lib/axios';
+import type { ErrorType as CoreControllerAgreeTermsV1ErrorType } from '../lib/axios';
 import healthControllerLiveMutator from '../lib/axios';
 import type { ErrorType as HealthControllerLiveErrorType } from '../lib/axios';
 import healthControllerReadyMutator from '../lib/axios';
@@ -1062,6 +1078,296 @@ export function useCoreControllerGetTicketsV1<TData = Awaited<ReturnType<typeof 
 
 
 
+
+/**
+ * 플랫폼/조직 범위의 현재 활성 약관 목록을 조회합니다.
+ * @summary 약관 목록 조회
+ */
+export const coreControllerGetActiveTermsV1 = (
+    params?: CoreControllerGetActiveTermsV1Params,
+ signal?: AbortSignal
+) => {
+
+
+      return coreControllerGetActiveTermsV1Mutator<CoreControllerGetActiveTermsV1200>(
+      {url: `/api/v1/terms`, method: 'GET',
+        params, signal
+    },
+      );
+    }
+
+
+
+
+export const getCoreControllerGetActiveTermsV1QueryKey = (params?: CoreControllerGetActiveTermsV1Params,) => {
+    return [
+    `/api/v1/terms`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getCoreControllerGetActiveTermsV1QueryOptions = <TData = Awaited<ReturnType<typeof coreControllerGetActiveTermsV1>>, TError = CoreControllerGetActiveTermsV1ErrorType<unknown>>(params?: CoreControllerGetActiveTermsV1Params, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof coreControllerGetActiveTermsV1>>, TError, TData>>, }
+) => {
+
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getCoreControllerGetActiveTermsV1QueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof coreControllerGetActiveTermsV1>>> = ({ signal }) => coreControllerGetActiveTermsV1(params, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof coreControllerGetActiveTermsV1>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type CoreControllerGetActiveTermsV1QueryResult = NonNullable<Awaited<ReturnType<typeof coreControllerGetActiveTermsV1>>>
+export type CoreControllerGetActiveTermsV1QueryError = CoreControllerGetActiveTermsV1ErrorType<unknown>
+
+
+export function useCoreControllerGetActiveTermsV1<TData = Awaited<ReturnType<typeof coreControllerGetActiveTermsV1>>, TError = CoreControllerGetActiveTermsV1ErrorType<unknown>>(
+ params: undefined |  CoreControllerGetActiveTermsV1Params, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof coreControllerGetActiveTermsV1>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof coreControllerGetActiveTermsV1>>,
+          TError,
+          Awaited<ReturnType<typeof coreControllerGetActiveTermsV1>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useCoreControllerGetActiveTermsV1<TData = Awaited<ReturnType<typeof coreControllerGetActiveTermsV1>>, TError = CoreControllerGetActiveTermsV1ErrorType<unknown>>(
+ params?: CoreControllerGetActiveTermsV1Params, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof coreControllerGetActiveTermsV1>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof coreControllerGetActiveTermsV1>>,
+          TError,
+          Awaited<ReturnType<typeof coreControllerGetActiveTermsV1>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useCoreControllerGetActiveTermsV1<TData = Awaited<ReturnType<typeof coreControllerGetActiveTermsV1>>, TError = CoreControllerGetActiveTermsV1ErrorType<unknown>>(
+ params?: CoreControllerGetActiveTermsV1Params, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof coreControllerGetActiveTermsV1>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary 약관 목록 조회
+ */
+
+export function useCoreControllerGetActiveTermsV1<TData = Awaited<ReturnType<typeof coreControllerGetActiveTermsV1>>, TError = CoreControllerGetActiveTermsV1ErrorType<unknown>>(
+ params?: CoreControllerGetActiveTermsV1Params, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof coreControllerGetActiveTermsV1>>, TError, TData>>, }
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getCoreControllerGetActiveTermsV1QueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+/**
+ * PLATFORM 또는 ORGANIZATION 그룹 약관 문서를 생성합니다.
+ * @summary 약관 문서 생성
+ */
+export const coreControllerCreateTermsDocumentV1 = (
+    createTermsDocumentDto: CreateTermsDocumentDto,
+ signal?: AbortSignal
+) => {
+
+
+      return coreControllerCreateTermsDocumentV1Mutator<CoreControllerCreateTermsDocumentV1200>(
+      {url: `/api/v1/terms/documents`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: createTermsDocumentDto, signal
+    },
+      );
+    }
+
+
+
+export const getCoreControllerCreateTermsDocumentV1MutationOptions = <TError = CoreControllerCreateTermsDocumentV1ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof coreControllerCreateTermsDocumentV1>>, TError,{data: CreateTermsDocumentDto}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof coreControllerCreateTermsDocumentV1>>, TError,{data: CreateTermsDocumentDto}, TContext> => {
+
+const mutationKey = ['coreControllerCreateTermsDocumentV1'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof coreControllerCreateTermsDocumentV1>>, {data: CreateTermsDocumentDto}> = (props) => {
+          const {data} = props ?? {};
+
+          return  coreControllerCreateTermsDocumentV1(data,)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CoreControllerCreateTermsDocumentV1MutationResult = NonNullable<Awaited<ReturnType<typeof coreControllerCreateTermsDocumentV1>>>
+    export type CoreControllerCreateTermsDocumentV1MutationBody = CreateTermsDocumentDto
+    export type CoreControllerCreateTermsDocumentV1MutationError = CoreControllerCreateTermsDocumentV1ErrorType<unknown>
+
+    /**
+ * @summary 약관 문서 생성
+ */
+export const useCoreControllerCreateTermsDocumentV1 = <TError = CoreControllerCreateTermsDocumentV1ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof coreControllerCreateTermsDocumentV1>>, TError,{data: CreateTermsDocumentDto}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof coreControllerCreateTermsDocumentV1>>,
+        TError,
+        {data: CreateTermsDocumentDto},
+        TContext
+      > => {
+      return useMutation(getCoreControllerCreateTermsDocumentV1MutationOptions(options), queryClient);
+    }
+
+/**
+ * 약관 버전을 생성하고 선택적으로 즉시 게시합니다.
+ * @summary 약관 버전 생성
+ */
+export const coreControllerCreateTermsVersionV1 = (
+    createTermsVersionDto: CreateTermsVersionDto,
+ signal?: AbortSignal
+) => {
+
+
+      return coreControllerCreateTermsVersionV1Mutator<CoreControllerCreateTermsVersionV1200>(
+      {url: `/api/v1/terms/versions`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: createTermsVersionDto, signal
+    },
+      );
+    }
+
+
+
+export const getCoreControllerCreateTermsVersionV1MutationOptions = <TError = CoreControllerCreateTermsVersionV1ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof coreControllerCreateTermsVersionV1>>, TError,{data: CreateTermsVersionDto}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof coreControllerCreateTermsVersionV1>>, TError,{data: CreateTermsVersionDto}, TContext> => {
+
+const mutationKey = ['coreControllerCreateTermsVersionV1'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof coreControllerCreateTermsVersionV1>>, {data: CreateTermsVersionDto}> = (props) => {
+          const {data} = props ?? {};
+
+          return  coreControllerCreateTermsVersionV1(data,)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CoreControllerCreateTermsVersionV1MutationResult = NonNullable<Awaited<ReturnType<typeof coreControllerCreateTermsVersionV1>>>
+    export type CoreControllerCreateTermsVersionV1MutationBody = CreateTermsVersionDto
+    export type CoreControllerCreateTermsVersionV1MutationError = CoreControllerCreateTermsVersionV1ErrorType<unknown>
+
+    /**
+ * @summary 약관 버전 생성
+ */
+export const useCoreControllerCreateTermsVersionV1 = <TError = CoreControllerCreateTermsVersionV1ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof coreControllerCreateTermsVersionV1>>, TError,{data: CreateTermsVersionDto}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof coreControllerCreateTermsVersionV1>>,
+        TError,
+        {data: CreateTermsVersionDto},
+        TContext
+      > => {
+      return useMutation(getCoreControllerCreateTermsVersionV1MutationOptions(options), queryClient);
+    }
+
+/**
+ * 사용자의 특정 약관 버전 동의 이력을 저장합니다.
+ * @summary 약관 동의 저장
+ */
+export const coreControllerAgreeTermsV1 = (
+    agreeTermsDto: AgreeTermsDto,
+ signal?: AbortSignal
+) => {
+
+
+      return coreControllerAgreeTermsV1Mutator<CoreControllerAgreeTermsV1200>(
+      {url: `/api/v1/terms/agreements`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: agreeTermsDto, signal
+    },
+      );
+    }
+
+
+
+export const getCoreControllerAgreeTermsV1MutationOptions = <TError = CoreControllerAgreeTermsV1ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof coreControllerAgreeTermsV1>>, TError,{data: AgreeTermsDto}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof coreControllerAgreeTermsV1>>, TError,{data: AgreeTermsDto}, TContext> => {
+
+const mutationKey = ['coreControllerAgreeTermsV1'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof coreControllerAgreeTermsV1>>, {data: AgreeTermsDto}> = (props) => {
+          const {data} = props ?? {};
+
+          return  coreControllerAgreeTermsV1(data,)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CoreControllerAgreeTermsV1MutationResult = NonNullable<Awaited<ReturnType<typeof coreControllerAgreeTermsV1>>>
+    export type CoreControllerAgreeTermsV1MutationBody = AgreeTermsDto
+    export type CoreControllerAgreeTermsV1MutationError = CoreControllerAgreeTermsV1ErrorType<unknown>
+
+    /**
+ * @summary 약관 동의 저장
+ */
+export const useCoreControllerAgreeTermsV1 = <TError = CoreControllerAgreeTermsV1ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof coreControllerAgreeTermsV1>>, TError,{data: AgreeTermsDto}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof coreControllerAgreeTermsV1>>,
+        TError,
+        {data: AgreeTermsDto},
+        TContext
+      > => {
+      return useMutation(getCoreControllerAgreeTermsV1MutationOptions(options), queryClient);
+    }
 
 export const healthControllerLive = (
 

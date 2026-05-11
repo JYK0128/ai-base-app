@@ -3,7 +3,8 @@ import { Building2,
          LayoutDashboard,
          LifeBuoy,
          LogOut,
-         Megaphone } from 'lucide-react';
+         Megaphone,
+         ScrollText } from 'lucide-react';
 
 import { useAuthControllerLogoutV1 } from '../api/endpoints';
 import { useAuth } from '../hooks/useAuth';
@@ -44,6 +45,7 @@ function ProtectedLayout() {
     { label: '조직 승인', icon: Building2, to: '/organizations' },
     { label: '공지사항', icon: Megaphone, to: '/announcements' },
     { label: '고객 지원', icon: LifeBuoy, to: '/support' },
+    { label: '약관 관리', icon: ScrollText, to: '/terms' },
   ];
 
   return (

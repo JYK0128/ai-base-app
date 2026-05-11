@@ -6,6 +6,7 @@
  * OpenAPI spec version: 1.0
  */
 
+export * from './agreeTermsDto';
 export * from './announcementResponseDto';
 export * from './apiResponse';
 export * from './apiResponseData';
@@ -19,7 +20,12 @@ export * from './authPermissionsResponseDtoMetadata';
 export * from './authTokenResponseDto';
 export * from './authUserInfoDto';
 export * from './changePasswordDto';
+export * from './coreControllerAgreeTermsV1200';
 export * from './coreControllerCreateAnnouncementV1200';
+export * from './coreControllerCreateTermsDocumentV1200';
+export * from './coreControllerCreateTermsVersionV1200';
+export * from './coreControllerGetActiveTermsV1200';
+export * from './coreControllerGetActiveTermsV1Params';
 export * from './coreControllerGetAnnouncementsV1200';
 export * from './coreControllerGetAnnouncementsV1Params';
 export * from './coreControllerGetOrganizationsV1200';
@@ -29,6 +35,9 @@ export * from './coreControllerGetTicketsV1200';
 export * from './coreControllerGetTicketsV1Params';
 export * from './coreControllerGetTicketsV1Status';
 export * from './createAnnouncementDto';
+export * from './createTermsDocumentDto';
+export * from './createTermsDocumentDtoGroupType';
+export * from './createTermsVersionDto';
 export * from './errorInfo';
 export * from './errorInfoDetails';
 export * from './healthControllerLive200';
@@ -50,6 +59,12 @@ export * from './healthControllerReady503Info';
 export * from './loginDto';
 export * from './organizationResponseDto';
 export * from './organizationResponseDtoStatus';
+export * from './termsDocumentResponseDto';
+export * from './termsDocumentResponseDtoGroupType';
+export * from './termsDocumentResponseDtoStatus';
+export * from './termsVersionResponseDto';
+export * from './termsVersionResponseDtoStatus';
 export * from './ticketResponseDto';
 export * from './ticketResponseDtoPriority';
 export * from './ticketResponseDtoStatus';
+export * from './userTermsConsentResponseDto';
