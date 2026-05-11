@@ -1,11 +1,8 @@
 import type { EntityManager } from '@mikro-orm/core';
 import { Seeder } from '@mikro-orm/seeder';
 
-import { PlatformManagerSeeder } from './platform.manager.seeder';
-import { PlatformMessageSeeder } from './platform.message.seeder';
-import { PlatformOrganizationSeeder } from './platform.organization.seeder';
-import { PlatformRbacSeeder } from './platform.rbac.seeder';
-import { SiteSeeder } from './site.seeder';
+import { OrganizationSeeder } from './organization.seeder';
+import { PlatformSeeder } from './platform.seeder';
 
 /**
  * DatabaseSeeder
@@ -14,25 +11,7 @@ import { SiteSeeder } from './site.seeder';
  */
 export class DatabaseSeeder extends Seeder {
   async run(em: EntityManager): Promise<void> {
-    // 1. Tenant Layer
-    await this.call(em, [
-      PlatformOrganizationSeeder,
-    ]);
-
-    // 2. Access Layer
-    await this.call(em, [
-      PlatformRbacSeeder,
-      PlatformManagerSeeder,
-    ]);
-
-    // 3. Business Layer (핵심 비즈니스 엔티티)
-    await this.call(em, [
-      SiteSeeder,
-    ]);
-
-    // 4. Content Layer (부가 콘텐츠 및 데이터)
-    await this.call(em, [
-      PlatformMessageSeeder,
-    ]);
+    await this.call(em, [PlatformSeeder]);
+    await this.call(em, [OrganizationSeeder]);
   }
 }

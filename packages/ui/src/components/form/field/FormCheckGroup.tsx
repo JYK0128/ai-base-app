@@ -3,6 +3,7 @@ import * as React from 'react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Field,
          FieldContent,
+         FieldDescription,
          FieldError,
          FieldGroup,
          FieldLabel,
@@ -84,10 +85,7 @@ function FormCheckGroup({
                   checked={isChecked}
                   disabled={item.disabled}
                   onCheckedChange={(checked) => handleToggle(item.value, !!checked)}
-                  onBlur={(e) => {
-                    restProps.onBlur?.(e as unknown as React.FocusEvent<HTMLDivElement>);
-                    field.handleBlur();
-                  }}
+                  onBlur={() => field.handleBlur()}
                 />
                 <FieldLabel
                   htmlFor={`${field.name}-${item.value}`}
@@ -101,7 +99,7 @@ function FormCheckGroup({
         </FieldGroup>
 
         {description && (
-          <p className="text-sm text-muted-foreground mt-1.5">{description}</p>
+          <FieldDescription>{description}</FieldDescription>
         )}
 
         {showError && hasError && (

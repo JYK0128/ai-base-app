@@ -25,7 +25,7 @@ export class Site extends CoreEntity<Site> {
   description?: string;
 
   @Property({ default: true })
-  isActive: boolean & Opt = true;
+  isActive: Opt<boolean> = true;
 
   @OneToMany(() => UserAccount, (account) => account.site)
   accounts = new Collection<UserAccount>(this);

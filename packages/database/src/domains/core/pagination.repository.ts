@@ -20,7 +20,7 @@ export abstract class PaginationRepository<
   /**
    * @deprecated - 차단
    */
-  override findAll<Hint extends string = never, Fields extends string = never, Excludes extends string = never>(options?: FindAllOptions<T, Hint, Fields, Excludes>): Promise<Loaded<T, Hint, Fields, Excludes>[]> {
+  override findAll<Hint extends string = never, Fields extends string = never, Excludes extends string = never>(_options?: FindAllOptions<T, Hint, Fields, Excludes>): Promise<Loaded<T, Hint, Fields, Excludes>[]> {
     throw new Error('findAll is not allowed. Use findByPage or findByCursor instead.');
   }
 

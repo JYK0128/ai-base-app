@@ -1,7 +1,7 @@
 {
   "extends": "@pkg/config/typescript/node",
   "files": [
-    "eslint.config.js",
+    "eslint.config.mjs",
     "stylelint.config.js",
     "token-parser.js",
     "vite.config.ts"

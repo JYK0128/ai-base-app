@@ -21,7 +21,7 @@ export class ApplicationRelease extends CoreEntity<ApplicationRelease> {
   releaseNote?: string;
 
   @Property({ default: false })
-  isStable: boolean & Opt = false;
+  isStable: Opt<boolean> = false;
 
   @OneToMany(() => ApplicationMembership, (membership) => membership.release)
   memberships = new Collection<ApplicationMembership>(this);

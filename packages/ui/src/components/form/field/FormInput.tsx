@@ -2,6 +2,9 @@ import * as React from 'react';
 
 import { Field, FieldContent, FieldDescription, FieldError, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
+import { InputGroup,
+         InputGroupAddon,
+         InputGroupInput } from '@/components/ui/input-group';
 import { cn } from '@/lib/utils';
 
 import { useFormField } from '../use-form-field';
@@ -37,6 +40,27 @@ function FormInput({
     hasError,
   } = useFormField<string | number | readonly string[]>();
 
+  const controlProps = {
+    ...inputProps,
+    ref,
+    'id': field.name,
+    'name': field.name,
+    'value': field.state.value,
+    'onBlur': (e: React.FocusEvent<HTMLInputElement>) => {
+      inputProps.onBlur?.(e);
+      field.handleBlur();
+    },
+    'onChange': (e: React.ChangeEvent<HTMLInputElement>) => {
+      inputProps.onChange?.(e);
+      field.handleChange(
+        (inputProps.type === 'number'
+          ? e.target.valueAsNumber
+          : e.target.value),
+      );
+    },
+    'aria-invalid': hasError,
+  };
+
   return (
     <Field
       orientation={orientation}
@@ -54,30 +78,23 @@ function FormInput({
         </div>
       )}
       <FieldContent className="flex-1">
-        <div className="flex gap-2">
-          {leftSide}
-          <Input
-            {...inputProps}
-            ref={ref}
-            id={field.name}
-            name={field.name}
-            value={field.state.value}
-            onBlur={(e) => {
-              inputProps.onBlur?.(e);
-              field.handleBlur();
-            }}
-            onChange={(e) => {
-              inputProps.onChange?.(e);
-              field.handleChange(
-                (inputProps.type === 'number'
-                  ? e.target.valueAsNumber
-                  : e.target.value),
-              );
-            }}
-            aria-invalid={hasError}
-          />
-          {rightSide}
-        </div>
+        {(leftSide || rightSide)
+          ? (
+            <InputGroup>
+              {leftSide && (
+                <InputGroupAddon align="inline-start">
+                  {leftSide}
+                </InputGroupAddon>
+              )}
+              <InputGroupInput {...controlProps} />
+              {rightSide && (
+                <InputGroupAddon align="inline-end">
+                  {rightSide}
+                </InputGroupAddon>
+              )}
+            </InputGroup>
+          )
+          : <Input {...controlProps} />}
         {description && (
           <FieldDescription>{description}</FieldDescription>
         )}

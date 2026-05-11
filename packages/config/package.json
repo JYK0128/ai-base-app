@@ -3,9 +3,9 @@
   "version": "0.0.0",
   "type": "module",
   "exports": {
-    "./eslint/*": "./eslint/*.js",
+    "./eslint/*": "./eslint/*.mjs",
     "./typescript/*": "./typescript/*.json",
-    "./stylelint": "./stylelint/index.js"
+    "./stylelint": "./stylelint/index.mjs"
   },
   "devDependencies": {
     "@types/node": "22.13.9",

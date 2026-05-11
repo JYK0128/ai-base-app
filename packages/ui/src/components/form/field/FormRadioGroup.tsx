@@ -2,6 +2,7 @@ import * as React from 'react';
 
 import { Field,
          FieldContent,
+         FieldDescription,
          FieldError,
          FieldLabel,
          FieldLegend } from '@/components/ui/field';
@@ -44,6 +45,8 @@ function FormRadioGroup({
   required = false,
   className,
   ref,
+  onBlur,
+  onValueChange,
   ...restProps
 }: Readonly<FormRadioGroupProps>) {
   const { field, hasError, errors } = useFormField<string | number>();
@@ -65,17 +68,23 @@ function FormRadioGroup({
       )}
       <FieldContent className="flex-1">
         <RadioGroup
+          {...restProps}
           name={field.name}
           value={String(field.state.value ?? '')}
-          onValueChange={(value) => field.handleChange(value)}
-          onBlur={() => field.handleBlur()}
+          onValueChange={(value) => {
+            onValueChange?.(value);
+            field.handleChange(value);
+          }}
+          onBlur={(e) => {
+            onBlur?.(e);
+            field.handleBlur();
+          }}
           className={cn(
             'flex gap-3',
             orientation === 'vertical' && 'flex-col',
             orientation === 'horizontal' && 'flex-row flex-wrap',
             orientation === 'responsive' && 'flex-col @md/field-group:flex-row @md/field-group:flex-wrap',
           )}
-          {...restProps}
         >
           {items.map((item) => {
             const itemId = `${field.name}-${item.value}`;
@@ -98,7 +107,7 @@ function FormRadioGroup({
         </RadioGroup>
 
         {description && (
-          <p className="text-sm text-muted-foreground mt-1.5">{description}</p>
+          <FieldDescription>{description}</FieldDescription>
         )}
 
         {showError && hasError && (

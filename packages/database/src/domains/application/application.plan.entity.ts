@@ -21,13 +21,13 @@ export class ApplicationPlan extends CoreEntity<ApplicationPlan> {
   name!: string;
 
   @Property({ default: 'MONTHLY' })
-  billingCycle: string & Opt = 'MONTHLY';
+  billingCycle: Opt<string> = 'MONTHLY';
 
   @Property({ type: 'decimal', precision: 14, scale: 2 })
   unitPrice!: string;
 
   @Property({ length: 3, default: 'USD' })
-  currency: string & Opt = 'USD';
+  currency: Opt<string> = 'USD';
 
   @OneToMany(() => ApplicationSubscription, (subscription) => subscription.plan)
   subscriptions = new Collection<ApplicationSubscription>(this);

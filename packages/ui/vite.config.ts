@@ -9,16 +9,15 @@ import { globSync } from 'glob';
 import { defineConfig } from 'vite';
 import dts from 'vite-plugin-dts';
 import { libInjectCss } from 'vite-plugin-lib-inject-css';
+import tsconfigPaths from 'vite-tsconfig-paths';
 
 import pkg from './package.json' with { type: 'json' };
 
 const dirname = typeof __dirname !== 'undefined' ? __dirname : path.dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig({
-  resolve: {
-    tsconfigPaths: true,
-  },
   plugins: [
+    tsconfigPaths(),
     react(),
     tailwindcss(),
     libInjectCss(),
@@ -36,10 +35,16 @@ export default defineConfig({
     lib: {
       entry: Object.fromEntries(
         globSync('src/**/*.{ts,tsx}', { ignore: ['src/**/*.stories.tsx', 'src/**/*.test.tsx'] })
-          .map((file) => [
-            path.relative('src', file.slice(0, file.lastIndexOf('.'))).replace(/\\/g, '/'),
-            fileURLToPath(new URL(file, import.meta.url)),
-          ]),
+          .filter(Boolean)
+          .map((file) => {
+            const { dir, name } = path.parse(file);
+            const relativeDir = path.relative('src', dir).replace(/\\/g, '/');
+            const entryName = relativeDir ? `${relativeDir}/${name}` : name;
+            return [
+              entryName,
+              path.resolve(dirname, file),
+            ];
+          }),
       ),
       formats: ['es', 'cjs'],
       fileName: (format, entryName) => `${entryName}.${format === 'es' ? 'js' : 'cjs'}`,

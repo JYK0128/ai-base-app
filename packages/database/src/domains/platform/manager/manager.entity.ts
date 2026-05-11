@@ -3,8 +3,8 @@ import { Collection } from '@mikro-orm/core';
 import { Entity, Enum, Index, ManyToOne, OneToMany } from '@mikro-orm/decorators/legacy';
 
 import { CoreEntity } from '../../core/core.entity';
-import { ManagerRole } from '../rbac/manager.role.entity';
 import type { Organization } from '../organization/organization.entity';
+import { ManagerRole } from '../rbac/manager.role.entity';
 import { ManagerAccount } from './manager.account.entity';
 import { ManagerInvite } from './manager.invite.entity';
 import { ManagerRepository } from './manager.repository';

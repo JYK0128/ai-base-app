@@ -24,7 +24,7 @@ export class BillingProfile extends CoreEntity<BillingProfile> {
   billingAddress!: string;
 
   @Property({ length: 3, default: 'USD' })
-  currency: string & Opt = 'USD';
+  currency: Opt<string> = 'USD';
 
   @Property({ nullable: true })
   billingEmail?: string;

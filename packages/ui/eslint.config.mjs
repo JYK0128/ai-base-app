@@ -4,7 +4,7 @@ import storybook from 'eslint-plugin-storybook';
 
 export default defineConfig([
   {
-    ignores: ['src/components/ui/**', 'src/lib/**'],
+    ignores: ['src/components/ui/**', 'src/lib/**', 'vitest.shims.d.ts'],
   },
   reactConfig,
   storybook.configs['flat/recommended'],

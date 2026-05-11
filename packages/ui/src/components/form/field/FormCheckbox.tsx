@@ -45,7 +45,7 @@ function FormCheckbox({
             'flex gap-2',
             orientation === 'vertical' && 'flex-col',
             orientation === 'horizontal' && 'flex-row items-center',
-            orientation === 'responsive' && 'flex-col @md/field:flex-row @md/field:items-center',
+            orientation === 'responsive' && 'flex-col @md/field-group:flex-row @md/field-group:items-center',
           )}
         >
           <div className="shrink-0">

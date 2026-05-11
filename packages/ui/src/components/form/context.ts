@@ -1,37 +1,39 @@
 import { createFormHook, createFormHookContexts } from '@tanstack/react-form';
-import { lazy } from 'react';
 
-export const { fieldContext, useFieldContext, formContext, useFormContext }
-  = createFormHookContexts();
+import FieldDescription from './components/FormFieldDescription';
+import FieldGroup from './components/FormFieldGroup';
+import FieldLegend from './components/FormFieldLegend';
+import FieldSet from './components/FormFieldSet';
+import FormLayout from './components/FormLayout';
+import FormReset from './components/FormReset';
+import FormSubmit from './components/FormSubmit';
+import FormCheckbox from './field/FormCheckbox';
+import FormCheckGroup from './field/FormCheckGroup';
+import FormInput from './field/FormInput';
+import FormRadioGroup from './field/FormRadioGroup';
+import FormSelect from './field/FormSelect';
+import FormTextarea from './field/FormTextarea';
 
-const Layout = lazy(() => import('./components/FormLayout'));
-const Submit = lazy(() => import('./components/FormSubmit'));
-const Reset = lazy(() => import('./components/FormReset'));
-const FieldSet = lazy(() => import('./components/FormFieldSet'));
-const FieldLegend = lazy(() => import('./components/FormFieldLegend'));
-const FieldDescription = lazy(() => import('./components/FormFieldDescription'));
-const FieldGroup = lazy(() => import('./components/FormFieldGroup'));
+const contexts = createFormHookContexts();
 
-const Input = lazy(() => import('./field/FormInput'));
-const Select = lazy(() => import('./field/FormSelect'));
-const Checkbox = lazy(() => import('./field/FormCheckbox'));
-const CheckGroup = lazy(() => import('./field/FormCheckGroup'));
-const RadioGroup = lazy(() => import('./field/FormRadioGroup'));
-const Textarea = lazy(() => import('./field/FormTextarea'));
+export const fieldContext = contexts.fieldContext;
+export const useFieldContext = contexts.useFieldContext;
+export const formContext = contexts.formContext;
+export const useFormContext = contexts.useFormContext;
 
-export const { useAppForm } = createFormHook({
+const hook = createFormHook({
   fieldComponents: {
-    Input,
-    Select,
-    Checkbox,
-    CheckGroup,
-    RadioGroup,
-    Textarea,
+    Input: FormInput,
+    Select: FormSelect,
+    Checkbox: FormCheckbox,
+    CheckGroup: FormCheckGroup,
+    RadioGroup: FormRadioGroup,
+    Textarea: FormTextarea,
   },
   formComponents: {
-    Layout,
-    Submit,
-    Reset,
+    Layout: FormLayout,
+    Submit: FormSubmit,
+    Reset: FormReset,
     FieldSet,
     FieldLegend,
     FieldDescription,
@@ -40,3 +42,5 @@ export const { useAppForm } = createFormHook({
   fieldContext,
   formContext,
 });
+
+export const useAppForm = hook.useAppForm;

@@ -2,8 +2,9 @@ import * as React from 'react';
 
 import { Field,
          FieldContent,
+         FieldDescription,
          FieldError,
-         FieldLegend } from '@/components/ui/field';
+         FieldLabel } from '@/components/ui/field';
 import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
 
@@ -40,16 +41,17 @@ function FormTextarea({
     >
       {label && (
         <div style={{ width: labelWidth }} className="flex items-start cursor-default select-none">
-          <FieldLegend>
+          <FieldLabel htmlFor={field.name}>
             {label}
             {required && <sup className="text-red-600"> *</sup>}
-          </FieldLegend>
+          </FieldLabel>
         </div>
       )}
       <FieldContent className="flex-1">
         <Textarea
           {...textareaProps}
           ref={ref}
+          id={field.name}
           name={field.name}
           value={field.state.value ?? ''}
           onBlur={(e) => {
@@ -63,7 +65,7 @@ function FormTextarea({
           aria-invalid={hasError}
         />
         {description && (
-          <p className="text-sm text-muted-foreground mt-1.5">{description}</p>
+          <FieldDescription>{description}</FieldDescription>
         )}
         {showError && hasError && (
           <FieldError

@@ -7,8 +7,8 @@ export interface RbacRoleRecord {
   id: string
   code: string
   name: string
-  /** 역할의 범위: 플랫폼 전체(PLATFORM) 또는 특정 워크스페이스(WORKSPACE) */
-  scope: 'PLATFORM' | 'WORKSPACE'
+  /** 역할의 범위: 플랫폼 전체(PLATFORM) 또는 특정 조직(ORGANIZATION) */
+  scope: 'PLATFORM' | 'ORGANIZATION'
   description?: string
 }
 
@@ -29,7 +29,7 @@ export interface RbacCache {
   roles: Map<string, RbacRoleRecord>
   /** 권한 ID별 레코드 맵 */
   permissions: Map<string, RbacPermissionRecord>
-  /** 사용자별 권한 코드 Set (복합키: userId::workspaceId) */
+  /** 사용자별 권한 코드 Set (복합키: userId::organizationId) */
   userPermissions: Map<string, Set<string>>
 }
 
@@ -37,7 +37,7 @@ export interface RbacCache {
 export interface CreateRbacRoleInput {
   code: string
   name: string
-  scope?: 'PLATFORM' | 'WORKSPACE'
+  scope?: 'PLATFORM' | 'ORGANIZATION'
   description?: string
   /** 작업을 수행하는 사용자 ID (감사 로그용) */
   actorId?: string
@@ -83,11 +83,11 @@ export interface RbacStore {
   /** 역할에서 권한 제거 */
   revokePermissionFromRole(params: { roleId: string, permissionId: string, actorId?: string }): Promise<void>
 
-  /** 사용자에게 역할 할당 (워크스페이스 범위 지정 가능) */
-  assignRoleToUser(params: { userId: string, roleId: string, workspaceId?: string, actorId?: string }): Promise<void>
+  /** 사용자에게 역할 할당 (조직 범위 지정 가능) */
+  assignRoleToUser(params: { userId: string, roleId: string, organizationId?: string, actorId?: string }): Promise<void>
   /** 사용자로부터 역할 제거 */
-  revokeRoleFromUser(params: { userId: string, roleId: string, workspaceId?: string, actorId?: string }): Promise<void>
+  revokeRoleFromUser(params: { userId: string, roleId: string, organizationId?: string, actorId?: string }): Promise<void>
 
   /** 사용자가 가진 모든 권한 코드 목록 조회 */
-  getPermissionCodesByUser(params: { userId: string, workspaceId?: string }): Promise<string[]>
+  getPermissionCodesByUser(params: { userId: string, organizationId?: string }): Promise<string[]>
 }

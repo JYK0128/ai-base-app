@@ -9,8 +9,10 @@ import { ManagerInvite } from '../manager/manager.invite.entity';
 import { OrganizationRepository } from './organization.repository';
 
 export enum OrganizationStatus {
+  PENDING = 'PENDING',
   ACTIVE = 'ACTIVE',
   INACTIVE = 'INACTIVE',
+  REJECTED = 'REJECTED',
 }
 
 @Entity({ schema: 'platform', repository: () => OrganizationRepository })

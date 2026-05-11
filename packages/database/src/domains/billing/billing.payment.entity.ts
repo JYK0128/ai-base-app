@@ -22,7 +22,7 @@ export class BillingPayment extends CoreEntity<BillingPayment> {
   amount!: string;
 
   @Property({ length: 3, default: 'USD' })
-  currency: string & Opt = 'USD';
+  currency: Opt<string> = 'USD';
 
   @Property({ nullable: true })
   providerTransactionId?: string;
@@ -31,7 +31,7 @@ export class BillingPayment extends CoreEntity<BillingPayment> {
   idempotencyKey!: string;
 
   @Enum(() => PaymentStatus)
-  status: PaymentStatus & Opt = PaymentStatus.PENDING;
+  status: Opt<PaymentStatus> = PaymentStatus.PENDING;
 
   @Property({ nullable: true })
   paidAt?: Date;

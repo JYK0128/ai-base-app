@@ -97,33 +97,31 @@ export abstract class SearchableRepository<
    * 단순 오브젝트를 MikroORM FilterQuery로 변환
    */
   protected buildFilter(filters: Record<string, unknown>): FilterQuery<T> {
-    const andFilters = Object.entries(filters).reduce<FilterQuery<T>[]>((acc, [key, value]) => {
-      if (value === undefined || value === null || value === '') return acc;
+    const andFilters: FilterQuery<T>[] = [];
 
-      const build = (): FilterQuery<T> => {
-        // 1. 배열 처리 (IN)
-        if (Array.isArray(value))
-          return { [key]: { $in: value } } as FilterQuery<T>;
+    for (const [key, value] of Object.entries(filters)) {
+      if (value === undefined || value === null || value === '') continue;
 
-        // 2. LIKE 검색 처리 (문자열에 % 포함 시)
-        if (typeof value === 'string' && value.includes('%'))
-          return { [key]: { $ilike: value } } as FilterQuery<T>;
+      if (Array.isArray(value)) {
+        andFilters.push({ [key]: { $in: value } } as FilterQuery<T>);
+        continue;
+      }
 
-        // 3. 범위 검색(Start, End) 처리
-        const suffix = (['Start', 'End'] as const).find((s) => key.endsWith(s));
-        if (suffix) {
-          const field = key.slice(0, -suffix.length);
-          const operator = suffix === 'Start' ? '$gte' : '$lte';
-          return { [field]: { [operator]: value } } as FilterQuery<T>;
-        }
+      if (typeof value === 'string' && value.includes('%')) {
+        andFilters.push({ [key]: { $ilike: value } } as FilterQuery<T>);
+        continue;
+      }
 
-        // 4. 기본 일치 검색
-        return { [key]: value } as FilterQuery<T>;
-      };
+      const suffix = (['Start', 'End'] as const).find((s) => key.endsWith(s));
+      if (suffix) {
+        const field = key.slice(0, -suffix.length);
+        const operator = suffix === 'Start' ? '$gte' : '$lte';
+        andFilters.push({ [field]: { [operator]: value } } as FilterQuery<T>);
+        continue;
+      }
 
-      acc.push(build());
-      return acc;
-    }, []);
+      andFilters.push({ [key]: value } as FilterQuery<T>);
+    }
 
     return (andFilters.length > 0 ? { $and: andFilters } : {}) as FilterQuery<T>;
   }
@@ -134,13 +132,19 @@ export abstract class SearchableRepository<
   private parseOrderBy(orderBy?: OrderByInput<T>): QueryOrderMap<T>[] {
     if (!orderBy) return [];
 
-    const entries = (Array.isArray(orderBy) ? orderBy : orderBy.split(',')).filter(Boolean);
+    const entries = Array.isArray(orderBy) ? orderBy : orderBy.split(',');
+    const orderMaps: QueryOrderMap<T>[] = [];
 
-    return entries.map((entry) => {
-      const [field, direction] = entry.split(':');
-      return {
+    for (const entry of entries) {
+      if (!entry) continue;
+      const [field = '', direction] = entry.split(':');
+      if (!field) continue;
+
+      orderMaps.push({
         [field]: direction?.toLowerCase() === 'asc' ? QueryOrder.ASC : QueryOrder.DESC,
-      } as QueryOrderMap<T>;
-    });
+      } as QueryOrderMap<T>);
+    }
+
+    return orderMaps;
   }
 }

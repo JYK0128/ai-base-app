@@ -40,13 +40,13 @@ export class BillingOrder extends CoreEntity<BillingOrder> {
   billingAddress!: string;
 
   @Property({ length: 3, default: 'USD' })
-  currency: string & Opt = 'USD';
+  currency: Opt<string> = 'USD';
 
   @Property({ type: 'decimal', precision: 14, scale: 2, default: '0.00' })
-  taxAmount: string & Opt = '0.00';
+  taxAmount: Opt<string> = '0.00';
 
   @Property({ type: 'decimal', precision: 14, scale: 2, default: '0.00' })
-  totalAmount: string & Opt = '0.00';
+  totalAmount: Opt<string> = '0.00';
 
   @Property({ nullable: true })
   providerTransactionId?: string;
@@ -55,7 +55,7 @@ export class BillingOrder extends CoreEntity<BillingOrder> {
   idempotencyKey?: string;
 
   @Enum(() => OrderStatus)
-  status: OrderStatus & Opt = OrderStatus.PENDING;
+  status: Opt<OrderStatus> = OrderStatus.PENDING;
 
   @OneToMany(() => BillingPayment, (payment) => payment.order)
   payments = new Collection<BillingPayment>(this);

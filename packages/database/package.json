@@ -51,7 +51,7 @@
     "migration:pending": "npm run mo -- migration:pending",
     "migration:blank": "npm run mo -- migration:create --blank",
     "seed": "npm run mo -- schema:fresh --run --seed",
-    "prebuild": "npm run mo -- cache:generate --ts -c"
+    "cache:build": "npm run mo -- cache:generate --ts -c"
   },
   "dependencies": {
     "@mikro-orm/core": "7.0.10",
