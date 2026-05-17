@@ -1,0 +1,17 @@
+{
+  "skill_name": "nest-cqrs-pattern",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "platform-core-service에 TermsDocument를 업데이트하는 UpdateTermsDocument 커맨드와 핸들러를 만들어줘. id와 title, content를 받아야 하고, 문서가 없으면 NOT_FOUND, 이미 PUBLISHED 상태면 CANNOT_UPDATE 에러를 던져야 해.",
+      "expected_output": "UpdateTermsDocumentCommand, UpdateTermsDocumentAsserter가 포함된 helpers.ts와 Identify-Validate-Execute 패턴을 따르는 handler.ts 생성",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "platform-core-service에 특정 문서의 버전 목록을 가져오는 GetTermsVersionList 쿼리와 핸들러를 만들어줘. termsDocumentId를 인자로 받고, 해당 문서의 버전들을 생성일 역순으로 정렬해서 반환해야 해. 문서가 없으면 NOT_FOUND 에러를 던져야 해.",
+      "expected_output": "GetTermsVersionListQuery가 포함된 helpers.ts와 에러 처리가 포함된 handler.ts 생성",
+      "files": []
+    }
+  ]
+}

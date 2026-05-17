@@ -1,0 +1,17 @@
+{
+  "skill_name": "mikro-orm-entity-guide",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "platform 스키마의 organization 도메인에 'Project' 엔티티를 추가해줘. 프로젝트는 이름(name), 설명(description, optional), 시작일(startDate), 종료일(endDate, optional)을 가지고 있고, Organization과 ManyToOne 관계야.",
+      "expected_output": "project.entity.ts와 project.repository.ts 파일이 생성되어야 하며, CoreEntity 상속, Rel<Organization> 사용, legacy 데코레이터 사용 등의 규칙을 준수해야 함.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "기존의 TermsVersion 엔티티에 'isPublic' (boolean, default false) 필드를 추가해줘.",
+      "expected_output": "terms.version.entity.ts 파일에 @Property() isPublic: boolean = false; 가 추가되어야 함.",
+      "files": ["packages/database/src/domains/platform/terms/terms.version.entity.ts"]
+    }
+  ]
+}
