@@ -121,22 +121,36 @@
 }
 
 @layer base {
+  /* 1. 공통 뷰 박스 리셋 */
   * {
     @apply border-border outline-ring/50;
-    @apply min-h-0 select-none;
   }
+
+  /* 2. HTML: 시스템 뷰포트 및 브라우저 스크롤 제어 */
+  html {
+    @apply size-full m-0 p-0;
+    @apply overflow-hidden;
+
+    overscroll-behavior: none;
+
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* 3. BODY: 화면 레이아웃 및 글로벌 타이포그래피 상속 제어 */
   body {
     @apply size-full m-0 p-0;
     @apply bg-background text-foreground;
-    @apply overflow-hidden;
-  }
-  html {
-    @apply size-full m-0 p-0;
-    @apply font-sans;
-    @apply overscroll-none;
-    @apply overflow-hidden;
+    @apply font-sans antialiased;
+    @apply break-keep whitespace-pre-line;
+    @apply select-none;
   }
 
+  /* 입력창 및 에디터 영역은 드래그 선택 및 복사/붙여넣기 허용 */
+  input, textarea, [contenteditable='true'] {
+    @apply select-text;
+  }
+
+  /* 4. REACT 루트 컨테이너 */
   #root {
     @apply size-full;
   }

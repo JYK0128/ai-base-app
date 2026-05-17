@@ -5,18 +5,21 @@ import { ClsServiceManager } from 'nestjs-cls';
  * 에러 정의 구조: 메시지는 필수이며, 예외 클래스는 선택 사항입니다.
  * 문자열, 다국어 딕셔너리(각 항목은 문자열 또는 메타데이터 전달받는 함수), 혹은 콜백 함수를 가질 수 있습니다.
  */
-export type ErrorDetail = {
+export type ErrorDetail<M = never> = {
   message:
     | string
-    | Record<string, string | ((metadata?: never) => string)>
-    | ((metadata?: never, lang?: string) => string)
+    | Record<string, string | ((metadata: M) => string)>
+    | ((metadata: M, lang?: string) => string)
   exception?: Type<unknown>
 };
 
 /**
  * 에러 사전을 정의하는 헬퍼 함수입니다.
  */
-export function defineErrors<T extends Record<string, ErrorDetail>>(errors: T): T {
+export function defineErrors<
+  M = never,
+  T extends Record<string, ErrorDetail<M>> = Record<string, ErrorDetail<M>>,
+>(errors: T): T {
   return errors;
 }
 
@@ -32,8 +35,8 @@ export type AsserterOptions<M, C> = {
  * 비즈니스 규칙을 검증하고 상황에 맞는 예외를 발생시키는 실무자 클래스입니다.
  */
 export class ExceptionAsserter<
-  T extends Record<string, ErrorDetail>,
-  M = unknown,
+  T extends Record<string, ErrorDetail<M>>,
+  M = never,
   C = unknown,
 > {
   private onFailHook?: (args: { code: keyof T, metadata?: M, context?: C }) => Promise<void> | void;
@@ -53,7 +56,6 @@ export class ExceptionAsserter<
    */
   private create(code: keyof T, metadata?: M): unknown {
     const { message, exception = InternalServerErrorException } = this.messages[code];
-    const Constructor = exception as new (args: Record<string, unknown>) => unknown;
 
     let lang = 'ko';
     try {
@@ -69,21 +71,23 @@ export class ExceptionAsserter<
       // ClsService가 비활성 상태일 때 폴백
     }
 
+    const safeMetadata = Object.assign({}, metadata);
+
     let resolvedMessage: string;
     if (typeof message === 'function') {
-      resolvedMessage = (message as (metadata?: unknown, lang?: string) => string)(metadata, lang);
+      resolvedMessage = message(safeMetadata, lang);
     }
     else if (typeof message === 'object' && message) {
       const rawLocalized = message[lang] ?? message['ko'] ?? Object.values(message)[0] ?? '';
       resolvedMessage = typeof rawLocalized === 'function'
-        ? (rawLocalized as (metadata?: unknown) => string)(metadata)
+        ? rawLocalized(safeMetadata)
         : rawLocalized;
     }
     else {
       resolvedMessage = message;
     }
 
-    return new Constructor({
+    return new exception({
       message: resolvedMessage,
       code,
       details: metadata,
@@ -155,7 +159,7 @@ class ExceptionGuardBuilder<M = unknown, C = unknown> {
   /**
    * 에러 메시지 사전을 설정하고 최종 비즈니스 단언자(Asserter)를 생성합니다.
    */
-  setMessages<T extends Record<string, ErrorDetail>>(messages: T): ExceptionAsserter<T, M, C> {
+  setMessages<T extends Record<string, ErrorDetail<M>>>(messages: T): ExceptionAsserter<T, M, C> {
     return new ExceptionAsserter<T, M, C>(messages);
   }
 }

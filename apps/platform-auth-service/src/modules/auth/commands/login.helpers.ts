@@ -19,17 +19,17 @@ export class LoginCommand {
 const ERROR_MESSAGES = defineErrors({
   INVALID_CREDENTIALS: {
     message: {
-      ko: (meta?: LOGIN_METADATA) => {
-        const attempts = meta?.attempts;
-        const maxAttempts = meta?.maxAttempts;
+      ko: (meta: LOGIN_METADATA) => {
+        const attempts = meta.attempts;
+        const maxAttempts = meta.maxAttempts;
         const suffix = (attempts !== undefined && maxAttempts !== undefined)
           ? ` (실패 횟수: ${attempts}/${maxAttempts}회)`
           : '';
         return `이메일 또는 비밀번호가 일치하지 않습니다.${suffix}`;
       },
-      en: (meta?: LOGIN_METADATA) => {
-        const attempts = meta?.attempts;
-        const maxAttempts = meta?.maxAttempts;
+      en: (meta: LOGIN_METADATA) => {
+        const attempts = meta.attempts;
+        const maxAttempts = meta.maxAttempts;
         const suffix = (attempts !== undefined && maxAttempts !== undefined)
           ? ` (Attempts: ${attempts}/${maxAttempts})`
           : '';
@@ -40,8 +40,8 @@ const ERROR_MESSAGES = defineErrors({
   },
   ACCOUNT_LOCKED: {
     message: {
-      ko: (meta?: LOGIN_METADATA) => `로그인 시도가 너무 많아 계정이 잠겼습니다. ${meta?.retryAfterSeconds ?? 1800}초 후에 다시 시도하세요.`,
-      en: (meta?: LOGIN_METADATA) => `Too many login attempts. Your account is locked. Please try again after ${meta?.retryAfterSeconds ?? 1800} seconds.`,
+      ko: (meta: LOGIN_METADATA) => `로그인 시도가 너무 많아 계정이 잠겼습니다. ${Math.ceil((meta.retryAfterSeconds ?? 1800) / 60)}분 후에 다시 시도하세요.`,
+      en: (meta: LOGIN_METADATA) => `Too many login attempts. Your account is locked. Please try again after ${Math.ceil((meta.retryAfterSeconds ?? 1800) / 60)} minutes.`,
     },
     exception: UnauthorizedException,
   },
@@ -82,7 +82,6 @@ export type LOGIN_METADATA = {
   attempts?: number
   maxAttempts?: number
   retryAfterSeconds?: number
-  lockedUntil?: string
   accessToken?: string
 };
 

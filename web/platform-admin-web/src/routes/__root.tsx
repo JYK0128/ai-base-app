@@ -4,6 +4,7 @@ import axios from 'axios';
 import { AlertCircle, RefreshCcw } from 'lucide-react';
 
 import type { ApiResponse } from '../api/model';
+import { formatMessage } from '../lib/utils';
 
 interface RouterContext {
   auth: {
@@ -44,10 +45,10 @@ export const Route = createRootRouteWithContext<RouterContext>()({
               ?? error.response?.data.error?.message
               ?? error.message;
           const displayMessage = Array.isArray(message) ? message[0] : message;
-          toast.error(displayMessage);
+          toast.error(formatMessage(displayMessage));
         }
         else {
-          toast.error(error.message);
+          toast.error(formatMessage(error.message));
         }
       }}
     >

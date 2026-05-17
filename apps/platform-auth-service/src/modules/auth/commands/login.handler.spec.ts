@@ -111,6 +111,21 @@ describe('LoginHandler', () => {
     expect(mockRedisService.incr).toHaveBeenCalled();
   });
 
+  it('throws INVALID_CREDENTIALS when account does not exist and tracks attempts', async () => {
+    const repository = { findOne: vi.fn().mockResolvedValue(null) };
+    mockRedisService.incr.mockResolvedValue(1);
+
+    const handler = new LoginHandler(repository as never, mockRedisService as never);
+
+    const promise = handler.execute(new LoginCommand('nonexistent@example.com', 'pass', '127.0.0.1'));
+
+    await expect(promise).rejects.toThrow(UnauthorizedException);
+    await expect(promise).rejects.toMatchObject({
+      response: { code: 'INVALID_CREDENTIALS' },
+    });
+    expect(mockRedisService.incr).toHaveBeenCalled();
+  });
+
   it('throws ACCOUNT_LOCKED when redis has an active lock', async () => {
     const repository = { findOne: vi.fn() };
     mockRedisService.ttl.mockResolvedValue(600); // 10 minutes remaining
