@@ -42,7 +42,8 @@ describe('LoginHandler', () => {
     vi.useRealTimers();
   });
 
-  const createMockAccount = (overrides = {}) => {
+  const createMockAccount = (overrides: Record<string, unknown> = {}) => {
+    const managerOverrides = (overrides.manager as Record<string, unknown>) || {};
     const account = {
       id: 'user-1',
       email: 'test@example.com',
@@ -53,17 +54,22 @@ describe('LoginHandler', () => {
       lastLoginIp: null as string | null,
       manager: {
         status: ManagerStatus.ACTIVE,
+        isActive: () => account.manager.status === ManagerStatus.ACTIVE,
         organization: {
           id: 'org-1',
           status: OrganizationStatus.ACTIVE,
+          isActive: () => account.manager.organization.status === OrganizationStatus.ACTIVE,
         },
+        ...managerOverrides,
       },
       isActive: () => account.status === AccountStatus.ACTIVE,
       isDormant: () => !!account.lastLoginAt && Date.now() - account.lastLoginAt.getTime() > 90 * 24 * 60 * 60 * 1000,
       isPasswordExpired: () => !account.passwordExpiresAt || account.passwordExpiresAt.getTime() < Date.now(),
+      verifyPassword: (password: string) => password !== 'wrong-pass',
     };
 
-    return Object.assign(account, overrides);
+    const { manager, ...restOverrides } = overrides;
+    return Object.assign(account, restOverrides);
   };
 
   it('successfully logs in and returns tokens', async () => {

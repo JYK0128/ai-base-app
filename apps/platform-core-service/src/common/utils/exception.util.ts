@@ -1,10 +1,12 @@
 import { InternalServerErrorException, Type } from '@nestjs/common';
+import { ClsServiceManager } from 'nestjs-cls';
 
 /**
  * 에러 정의 구조: 메시지는 필수이며, 예외 클래스는 선택 사항입니다.
+ * 문자열, 다국어 딕셔너리, 혹은 메타데이터와 언어를 전달받는 콜백 함수를 가질 수 있습니다.
  */
 export type ErrorDetail = {
-  message: string
+  message: string | Record<string, string> | ((metadata?: never, lang?: string) => string)
   exception?: Type<unknown>
 };
 
@@ -50,8 +52,33 @@ export class ExceptionAsserter<
     const { message, exception = InternalServerErrorException } = this.messages[code];
     const Constructor = exception as new (args: Record<string, unknown>) => unknown;
 
+    let lang = 'ko';
+    try {
+      const cls = ClsServiceManager.getClsService();
+      if (cls && cls.isActive()) {
+        const acceptLanguage = cls.get('acceptLanguage');
+        if (acceptLanguage) {
+          lang = acceptLanguage.toLowerCase().startsWith('en') ? 'en' : 'ko';
+        }
+      }
+    }
+    catch {
+      // ClsService가 비활성 상태일 때 폴백
+    }
+
+    let resolvedMessage: string;
+    if (typeof message === 'function') {
+      resolvedMessage = (message as (metadata?: unknown, lang?: string) => string)(metadata, lang);
+    }
+    else if (typeof message === 'object' && message) {
+      resolvedMessage = message[lang] ?? message['ko'] ?? Object.values(message)[0] ?? '';
+    }
+    else {
+      resolvedMessage = message;
+    }
+
     return new Constructor({
-      message,
+      message: resolvedMessage,
       code,
       details: metadata,
     });

@@ -7,7 +7,7 @@ import { TokenUtil } from '@/common/utils/token.util';
 import { RedisService } from '@/modules/redis/redis.service';
 
 import { extractPermissions } from '../auth.helpers';
-import { LoginAsserter, LoginCommand } from './login.helpers';
+import { LOGIN_METADATA, LoginAsserter, LoginCommand } from './login.helpers';
 
 /**
  * 로그인 처리 핸들러
@@ -15,9 +15,9 @@ import { LoginAsserter, LoginCommand } from './login.helpers';
 @CommandHandler(LoginCommand)
 export class LoginHandler implements ICommandHandler<LoginCommand> {
   private readonly loginKeys = RedisService.for('login');
-  private readonly Asserter = LoginAsserter.onFail(({ code, context }) => {
-    if (code === 'INVALID_CREDENTIALS' && context) {
-      return this.handleLoginFailure(context.email);
+  private readonly Asserter = LoginAsserter.onFail(async ({ code, metadata, context }) => {
+    if (code === 'INVALID_CREDENTIALS' && context && metadata) {
+      await this.handleLoginFailure(context.email, metadata);
     }
   });
 
@@ -42,7 +42,8 @@ export class LoginHandler implements ICommandHandler<LoginCommand> {
     const lockTtl = await this.redisService.ttl(this.loginKeys.build('lock', email));
     await this.Asserter.throwIf(lockTtl > 0, 'ACCOUNT_LOCKED', {
       metadata: {
-        remainingAttempts: 0,
+        attempts: ENV.LOGIN_MAX_ATTEMPTS,
+        maxAttempts: ENV.LOGIN_MAX_ATTEMPTS,
         retryAfterSeconds: lockTtl,
         lockedUntil: new Date(Date.now() + lockTtl * 1000).toISOString(),
       },
@@ -77,6 +78,7 @@ export class LoginHandler implements ICommandHandler<LoginCommand> {
     const isPasswordValid = account.verifyPassword(password);
     await this.Asserter.assert(isPasswordValid, 'INVALID_CREDENTIALS', {
       context: { email: account.email },
+      metadata: {},
     });
   }
 
@@ -123,15 +125,21 @@ export class LoginHandler implements ICommandHandler<LoginCommand> {
   /**
    * STEP 5: 실패 처리 부수 효과
    */
-  private async handleLoginFailure(email: string) {
+  private async handleLoginFailure(email: string, metadata: LOGIN_METADATA) {
     const attemptKey = this.loginKeys.build('attempt', email);
 
     const attempts = await this.redisService.incr(attemptKey);
     if (attempts === 1) await this.redisService.expire(attemptKey, ENV.LOGIN_ATTEMPT_TTL);
 
+    metadata.attempts = attempts;
+    metadata.maxAttempts = ENV.LOGIN_MAX_ATTEMPTS;
+
     if (attempts >= ENV.LOGIN_MAX_ATTEMPTS) {
       await this.redisService.set(this.loginKeys.build('lock', email), 'locked', ENV.LOGIN_LOCK_TTL);
       await this.redisService.del(attemptKey);
+
+      metadata.retryAfterSeconds = ENV.LOGIN_LOCK_TTL;
+      metadata.lockedUntil = new Date(Date.now() + ENV.LOGIN_LOCK_TTL * 1000).toISOString();
     }
   }
 }

@@ -29,6 +29,10 @@ describe('DeferPasswordChangeHandler', () => {
     const account = {
       id: 'user-1',
       passwordExpiresAt: new Date('2026-01-01T00:00:00.000Z'),
+      isActive: () => true,
+      deferPasswordExpiry: (days: number) => {
+        account.passwordExpiresAt = new Date(Date.now() + days * 24 * 60 * 60 * 1000);
+      },
     };
     const repository = {
       findOne: vi.fn().mockResolvedValue(account),

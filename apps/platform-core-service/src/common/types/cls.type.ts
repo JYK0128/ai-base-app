@@ -12,5 +12,7 @@ declare module 'nestjs-cls' {
     id?: string
     /** 조직 ID */
     organizationId?: string
+    /** 다국어 선호 언어 */
+    acceptLanguage?: string
   }
 }

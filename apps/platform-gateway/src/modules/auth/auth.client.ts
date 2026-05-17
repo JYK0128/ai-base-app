@@ -25,6 +25,7 @@ export class AuthClient {
       clientIp: this.cls.get('clientIp'),
       id: this.cls.get('id'),
       organizationId: this.cls.get('organizationId'),
+      acceptLanguage: this.cls.get('acceptLanguage'),
     };
     return firstValueFrom(
       this.client.send<TResult>(pattern, payload).pipe(
