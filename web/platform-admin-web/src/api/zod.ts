@@ -40,37 +40,6 @@ export const AuthControllerLoginV1Response = zod.object({
 
 
 /**
- * 현재 인증된 관리자 계정과 테넌트 기준으로 역할과 권한 목록을 반환합니다.
- * @summary 권한 조회
- */
-export const AuthControllerPermissionsV1Response = zod.object({
-  "success": zod.boolean().describe('성공 여부'),
-  "data": zod.looseObject({
-
-}).describe('응답 데이터'),
-  "error": zod.object({
-  "code": zod.string().describe('에러 코드'),
-  "message": zod.union([zod.string(),zod.array(zod.string())]).describe('에러 메시지'),
-  "details": zod.looseObject({
-
-}).optional().describe('상세 정보'),
-  "status": zod.number().describe('HTTP 상태 코드')
-}).optional().describe('에러 상세 정보'),
-  "message": zod.string().optional().describe('응답 메시지'),
-  "traceId": zod.string().describe('추적 ID'),
-  "requestId": zod.string().describe('요청 ID')
-}).and(zod.object({
-  "data": zod.object({
-  "roles": zod.array(zod.string()).describe('할당된 역할 코드 목록'),
-  "permissions": zod.array(zod.string()).describe('할당된 권한 코드 목록'),
-  "metadata": zod.record(zod.string(), zod.looseObject({
-
-})).describe('권한별 메타데이터 (UI 설정 등)')
-}).optional()
-}))
-
-
-/**
  * 쿠키의 리프레시 토큰을 사용하여 액세스 토큰을 갱신합니다.
  * @summary 토큰 갱신
  */
@@ -408,7 +377,7 @@ export const CoreControllerGetTicketsV1Response = zod.object({
  * @summary 약관 목록 조회
  */
 export const CoreControllerGetActiveTermsV1QueryParams = zod.object({
-  "organizationId": zod.string().optional().describe('ORGANIZATION 그룹 약관 조회 시 조직 ID')
+  "organizationId": zod.string().optional().describe('조직별 약관 조회 시 조직 ID (미입력 시 플랫폼 공통 약관 포함 조회)')
 })
 
 export const CoreControllerGetActiveTermsV1Response = zod.object({
@@ -430,7 +399,9 @@ export const CoreControllerGetActiveTermsV1Response = zod.object({
 }).and(zod.object({
   "data": zod.array(zod.object({
   "id": zod.string(),
-  "groupType": zod.enum(['PLATFORM', 'ORGANIZATION']),
+  "organizationId": zod.looseObject({
+
+}).nullable(),
   "code": zod.string(),
   "title": zod.string(),
   "required": zod.boolean(),
@@ -444,11 +415,10 @@ export const CoreControllerGetActiveTermsV1Response = zod.object({
  * @summary 약관 문서 생성
  */
 export const CoreControllerCreateTermsDocumentV1Body = zod.object({
-  "groupType": zod.enum(['PLATFORM', 'ORGANIZATION']),
   "code": zod.string(),
   "title": zod.string(),
   "required": zod.boolean().optional(),
-  "organizationId": zod.string().optional()
+  "organizationId": zod.string().optional().describe('조직 전용 약관일 경우 조직 ID (미입력 시 플랫폼 공통 약관)')
 })
 
 export const CoreControllerCreateTermsDocumentV1Response = zod.object({
@@ -470,7 +440,9 @@ export const CoreControllerCreateTermsDocumentV1Response = zod.object({
 }).and(zod.object({
   "data": zod.object({
   "id": zod.string(),
-  "groupType": zod.enum(['PLATFORM', 'ORGANIZATION']),
+  "organizationId": zod.looseObject({
+
+}).nullable(),
   "code": zod.string(),
   "title": zod.string(),
   "required": zod.boolean(),
@@ -485,9 +457,11 @@ export const CoreControllerCreateTermsDocumentV1Response = zod.object({
  */
 export const CoreControllerCreateTermsVersionV1Body = zod.object({
   "termsDocumentId": zod.string(),
-  "versionLabel": zod.string(),
-  "contentMd": zod.string(),
-  "publish": zod.boolean().optional()
+  "label": zod.string(),
+  "content": zod.string(),
+  "effectiveFrom": zod.iso.datetime({"offset":true}).optional().describe('효력 발생일 (미입력 시 현재 시간)'),
+  "effectiveTo": zod.iso.datetime({"offset":true}).optional().describe('효력 종료일 (미입력 시 무제한)'),
+  "status": zod.enum(['DRAFT', 'PUBLISHED', 'DEPRECATED']).optional().describe('약관 버전 상태 (미입력 시 DRAFT)')
 })
 
 export const CoreControllerCreateTermsVersionV1Response = zod.object({
@@ -510,17 +484,18 @@ export const CoreControllerCreateTermsVersionV1Response = zod.object({
   "data": zod.object({
   "id": zod.string(),
   "versionLabel": zod.string(),
+  "content": zod.string(),
   "status": zod.enum(['DRAFT', 'PUBLISHED', 'ARCHIVED'])
 }).optional()
 }))
 
 
 /**
- * 사용자의 특정 약관 버전 동의 이력을 저장합니다.
+ * 매니저의 특정 약관 버전 동의 이력을 저장합니다.
  * @summary 약관 동의 저장
  */
 export const CoreControllerAgreeTermsV1Body = zod.object({
-  "userId": zod.string(),
+  "managerId": zod.string(),
   "termsVersionId": zod.string(),
   "organizationId": zod.string().optional(),
   "source": zod.string().optional(),

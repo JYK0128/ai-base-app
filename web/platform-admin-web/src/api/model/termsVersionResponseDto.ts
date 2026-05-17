@@ -10,5 +10,6 @@ import type { TermsVersionResponseDtoStatus } from './termsVersionResponseDtoSta
 export interface TermsVersionResponseDto {
   id: string;
   versionLabel: string;
+  content: string;
   status: TermsVersionResponseDtoStatus;
 }

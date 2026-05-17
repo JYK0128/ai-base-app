@@ -5,17 +5,6 @@ export class AuthTokenResponseDto {
   accessToken!: string;
 }
 
-export class AuthPermissionsResponseDto {
-  @ApiProperty({ description: '할당된 역할 코드 목록', type: [String] })
-  roles!: string[];
-
-  @ApiProperty({ description: '할당된 권한 코드 목록', type: [String] })
-  permissions!: string[];
-
-  @ApiProperty({ description: '권한별 메타데이터 (UI 설정 등)', type: 'object', additionalProperties: { type: 'object' } })
-  metadata!: Record<string, unknown>;
-}
-
 /**
  * 사용자 상세 정보 DTO
  */

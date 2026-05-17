@@ -3,11 +3,15 @@ import { InjectRepository } from '@mikro-orm/nestjs';
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
 import { SupportTicket, SupportTicketRepository } from '@pkg/database';
 
-export { GetTicketsQuery } from './get-tickets.helpers';
-import { GetTicketsQuery } from './get-tickets.helpers';
+import { GetTicketsAsserter, GetTicketsQuery } from './get-tickets.helpers';
 
+/**
+ * 문의 티켓 목록 조회 핸들러
+ */
 @QueryHandler(GetTicketsQuery)
 export class GetTicketsHandler implements IQueryHandler<GetTicketsQuery> {
+  private readonly Asserter = GetTicketsAsserter;
+
   constructor(
     @InjectRepository(SupportTicket)
     private readonly supportTicketRepo: SupportTicketRepository,

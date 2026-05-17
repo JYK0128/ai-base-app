@@ -1,13 +1,11 @@
 import { Transactional } from '@mikro-orm/decorators/legacy';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { ManagerAccount, ManagerAccountRepository, ManagerStatus, OrganizationStatus } from '@pkg/database';
+import { ManagerAccount, ManagerAccountRepository } from '@pkg/database';
 
 import { ENV } from '@/common/env';
-import { CryptoUtil } from '@/common/utils/crypto.util';
 import { TokenUtil } from '@/common/utils/token.util';
 import { RedisService } from '@/modules/redis/redis.service';
 
-export { LoginCommand } from './login.helpers';
 import { extractPermissions } from '../auth.helpers';
 import { LoginAsserter, LoginCommand } from './login.helpers';
 
@@ -17,7 +15,7 @@ import { LoginAsserter, LoginCommand } from './login.helpers';
 @CommandHandler(LoginCommand)
 export class LoginHandler implements ICommandHandler<LoginCommand> {
   private readonly loginKeys = RedisService.for('login');
-  private readonly LoginGuard = LoginAsserter.onFail(({ code, context }) => {
+  private readonly Asserter = LoginAsserter.onFail(({ code, context }) => {
     if (code === 'INVALID_CREDENTIALS' && context) {
       return this.handleLoginFailure(context.email);
     }
@@ -29,11 +27,7 @@ export class LoginHandler implements ICommandHandler<LoginCommand> {
   ) {}
 
   @Transactional()
-  async execute({
-    email,
-    password,
-    clientIp,
-  }: LoginCommand): Promise<{ accessToken: string, refreshToken: string }> {
+  async execute({ email, password, clientIp }: LoginCommand) {
     const account = await this.identifyAccount(email);
     await this.validatePolicies(account);
     await this.verifyCredentials(account, password);
@@ -41,11 +35,12 @@ export class LoginHandler implements ICommandHandler<LoginCommand> {
     return this.processLoginSuccess(account, clientIp);
   }
 
-  // --- 1. 식별 및 계정 확보 ---
-
+  /**
+   * STEP 1: 식별 및 계정 확보
+   */
   private async identifyAccount(email: string) {
     const lockTtl = await this.redisService.ttl(this.loginKeys.build('lock', email));
-    await this.LoginGuard.throwIf(lockTtl > 0, 'ACCOUNT_LOCKED', {
+    await this.Asserter.throwIf(lockTtl > 0, 'ACCOUNT_LOCKED', {
       metadata: {
         remainingAttempts: 0,
         retryAfterSeconds: lockTtl,
@@ -53,8 +48,8 @@ export class LoginHandler implements ICommandHandler<LoginCommand> {
       },
     });
 
-    return await this.LoginGuard.assert(
-      await this.managerAccountRepository.findOne(
+    return await this.Asserter.assert(
+      this.managerAccountRepository.findOne(
         { email },
         { populate: ['manager.organization', 'manager.roles.role.permissions.permission'] },
       ),
@@ -63,35 +58,31 @@ export class LoginHandler implements ICommandHandler<LoginCommand> {
     );
   }
 
-  // --- 2. 정책 검증 ---
-
+  /**
+   * STEP 2: 정책 검증
+   */
   private async validatePolicies(account: ManagerAccount) {
-    await this.LoginGuard.throwIf(
-      !account.isActive(),
-      'INACTIVE_ACCOUNT',
-    );
-    await this.LoginGuard.throwIf(
-      account.manager?.status === ManagerStatus.INACTIVE,
-      'INACTIVE_MANAGER',
-    );
-    await this.LoginGuard.throwIf(
-      account.manager?.organization?.status === OrganizationStatus.INACTIVE,
-      'INACTIVE_ORGANIZATION',
-    );
+    await this.Asserter.throwIf(!account.isActive(), 'INACTIVE_ACCOUNT');
+    await this.Asserter.throwIf(!account.manager.isActive(), 'INACTIVE_MANAGER');
+    await this.Asserter.throwIf(!account.manager.organization?.isActive(), 'INACTIVE_ORGANIZATION');
 
     // 휴면 계정 확인
-    await this.LoginGuard.throwIf(account.isDormant(), 'DORMANT_ACCOUNT');
+    await this.Asserter.throwIf(account.isDormant(), 'DORMANT_ACCOUNT');
   }
 
-  // --- 3. 자격 증명 확인 ---
-
+  /**
+   * STEP 3: 자격 증명 확인
+   */
   private async verifyCredentials(account: ManagerAccount, password: string) {
-    const isPasswordValid = await CryptoUtil.comparePassword(password, account.password);
-    await this.LoginGuard.assert(isPasswordValid, 'INVALID_CREDENTIALS', { context: { email: account.email } });
+    const isPasswordValid = account.verifyPassword(password);
+    await this.Asserter.assert(isPasswordValid, 'INVALID_CREDENTIALS', {
+      context: { email: account.email },
+    });
   }
 
-  // --- 4. 성공 처리 및 응답 ---
-
+  /**
+   * STEP 4: 성공 처리 및 응답
+   */
   private async processLoginSuccess(account: ManagerAccount, clientIp: string) {
     // 실패 이력 초기화
     await Promise.all([
@@ -129,8 +120,9 @@ export class LoginHandler implements ICommandHandler<LoginCommand> {
     return tokens;
   }
 
-  // --- 실패 처리 부수 효과 ---
-
+  /**
+   * STEP 5: 실패 처리 부수 효과
+   */
   private async handleLoginFailure(email: string) {
     const attemptKey = this.loginKeys.build('attempt', email);
 

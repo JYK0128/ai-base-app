@@ -1,14 +1,18 @@
 import { Transactional } from '@mikro-orm/decorators/legacy';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { AccountStatus, ManagerAccountRepository } from '@pkg/database';
+import { ManagerAccount, ManagerAccountRepository } from '@pkg/database';
 
-export { DeferPasswordChangeCommand } from './defer-password-change.helpers';
-import { DeferPasswordChangeAsserter, DeferPasswordChangeCommand } from './defer-password-change.helpers';
+import { ENV } from '@/common/env';
 
+import { DeferPasswordChangeAsserter,
+         DeferPasswordChangeCommand } from './defer-password-change.helpers';
+
+/**
+ * 관리자 계정 비밀번호 변경 연기 핸들러
+ */
 @CommandHandler(DeferPasswordChangeCommand)
 export class DeferPasswordChangeHandler implements ICommandHandler<DeferPasswordChangeCommand> {
-  private readonly passwordExpiryDays = 90;
-  private readonly DeferPasswordGuard = DeferPasswordChangeAsserter;
+  private readonly Asserter = DeferPasswordChangeAsserter;
 
   constructor(private readonly managerAccountRepository: ManagerAccountRepository) {}
 
@@ -16,15 +20,33 @@ export class DeferPasswordChangeHandler implements ICommandHandler<DeferPassword
   async execute(command: DeferPasswordChangeCommand): Promise<void> {
     const { id } = command;
 
-    // 1. 계정 존재 여부 및 상태 확인
-    const account = await this.DeferPasswordGuard.assert(
-      await this.managerAccountRepository.findOne(id),
+    const account = await this.identifyAccount(id);
+    await this.validatePolicies(account);
+
+    this.processDeferment(account);
+  }
+
+  /**
+   * STEP 1: 계정 식별
+   */
+  private async identifyAccount(id: string): Promise<ManagerAccount> {
+    return await this.Asserter.assert(
+      this.managerAccountRepository.findOne(id),
       'ACCOUNT_NOT_FOUND',
     );
+  }
 
-    await this.DeferPasswordGuard.throwIf(account.status === AccountStatus.INACTIVE, 'INACTIVE_ACCOUNT');
+  /**
+   * STEP 2: 정책 검증
+   */
+  private async validatePolicies(account: ManagerAccount) {
+    await this.Asserter.throwIf(!account.isActive(), 'INACTIVE_ACCOUNT');
+  }
 
-    // 2. 정책 관련 날짜 갱신
-    account.passwordExpiresAt = new Date(Date.now() + this.passwordExpiryDays * 24 * 60 * 60 * 1000);
+  /**
+   * STEP 3: 유예 처리
+   */
+  private processDeferment(account: ManagerAccount) {
+    account.deferPasswordExpiry(ENV.PASSWORD_EXPIRY_DAYS);
   }
 }

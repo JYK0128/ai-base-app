@@ -9,6 +9,7 @@ export interface EnvConfig {
   CORE_SERVICE_HOST: string
   CORE_SERVICE_PORT: number
   NODE_ENV: string
+  CORS_ORIGIN?: string
 }
 
 const getEnv = (key: string): string => {
@@ -50,4 +51,5 @@ export const ENV: EnvConfig = {
   CORE_SERVICE_HOST: coreConfig.host,
   CORE_SERVICE_PORT: coreConfig.port,
   NODE_ENV: getEnv('NODE_ENV'),
+  CORS_ORIGIN: process.env.CORS_ORIGIN,
 } as const;

@@ -13,10 +13,11 @@ export interface EnvConfig {
   LOGIN_MAX_ATTEMPTS: number
   LOGIN_ATTEMPT_TTL: number
   LOGIN_LOCK_TTL: number
+  PASSWORD_EXPIRY_DAYS: number
 }
 
-const getEnv = (key: string): string => {
-  const value = process.env[key];
+const getEnv = (key: string, defaultValue?: string): string => {
+  const value = process.env[key] || defaultValue;
   if (!value) throw new Error(`${key} environment variable is not defined`);
   return value;
 };
@@ -34,4 +35,5 @@ export const ENV: EnvConfig = {
   LOGIN_MAX_ATTEMPTS: Number(getEnv('LOGIN_MAX_ATTEMPTS')),
   LOGIN_ATTEMPT_TTL: Number(getEnv('LOGIN_ATTEMPT_TTL')),
   LOGIN_LOCK_TTL: Number(getEnv('LOGIN_LOCK_TTL')),
+  PASSWORD_EXPIRY_DAYS: Number(getEnv('PASSWORD_EXPIRY_DAYS', '90')),
 } as const;

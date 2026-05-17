@@ -6,7 +6,6 @@ import { ENV } from '@/common/env';
 import { AuthClient } from './auth.client';
 import { AUTH_SERVICE } from './auth.constants';
 import { AuthController } from './auth.controller';
-import { AuthService } from './auth.service';
 
 @Module({
   imports: [
@@ -22,7 +21,7 @@ import { AuthService } from './auth.service';
     ]),
   ],
   controllers: [AuthController],
-  providers: [AuthService, AuthClient],
-  exports: [AuthService, AuthClient],
+  providers: [AuthClient],
+  exports: [AuthClient],
 })
 export class AuthModule {}

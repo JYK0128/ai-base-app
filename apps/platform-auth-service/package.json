@@ -11,8 +11,7 @@
     "start": "nest start",
     "lint": "eslint .",
     "test": "vitest run",
-    "test:watch": "vitest",
-    "play": "vitest run src/test/play.test.ts"
+    "test:watch": "vitest"
   },
   "dependencies": {
     "@mikro-orm/core": "7.0.10",
@@ -29,8 +28,6 @@
     "@pkg/config": "workspace:*",
     "@pkg/database": "workspace:*",
     "@types/passport-jwt": "4.0.1",
-    "amqp-connection-manager": "4.1.14",
-    "amqplib": "0.10.5",
     "bcrypt": "6.0.0",
     "ioredis": "5.10.1",
     "jose": "6.2.3",

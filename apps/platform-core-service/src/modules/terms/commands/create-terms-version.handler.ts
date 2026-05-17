@@ -1,53 +1,72 @@
-import { InjectRepository } from '@mikro-orm/nestjs';
+import { createHash } from 'node:crypto';
+
+import { Transactional } from '@mikro-orm/decorators/legacy';
 import { EntityManager } from '@mikro-orm/postgresql';
-import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { TermsDocument, TermsDocumentRepository, TermsDocumentStatus, TermsVersion, TermsVersionRepository, TermsVersionStatus } from '@pkg/database';
 
-export class CreateTermsVersionCommand {
-  constructor(
-    readonly termsDocumentId: string,
-    readonly versionLabel: string,
-    readonly content: string,
-    readonly publish: boolean,
-  ) {}
-}
+import { CreateTermsVersionAsserter, CreateTermsVersionCommand } from './create-terms-version.helpers';
 
+/**
+ * 약관 버전 생성 핸들러
+ */
 @CommandHandler(CreateTermsVersionCommand)
 export class CreateTermsVersionHandler implements ICommandHandler<CreateTermsVersionCommand> {
+  private readonly Asserter = CreateTermsVersionAsserter;
+
   constructor(
-    @InjectRepository(TermsDocument)
     private readonly termsDocumentRepo: TermsDocumentRepository,
-    @InjectRepository(TermsVersion)
     private readonly termsVersionRepo: TermsVersionRepository,
     private readonly em: EntityManager,
   ) {}
 
+  @Transactional()
   async execute(command: CreateTermsVersionCommand): Promise<TermsVersion> {
-    const termsDocument = await this.termsDocumentRepo.findOne({ id: command.termsDocumentId });
-    if (!termsDocument) throw new NotFoundException('Terms document not found');
+    const termsDocument = await this.identifyDocument(command.termsDocumentId);
+    await this.validatePolicies(termsDocument, command.label);
+    return this.processCreation(termsDocument, command);
+  }
 
+  /**
+   * STEP 1: 약관 문서 식별
+   */
+  private async identifyDocument(termsDocumentId: string) {
+    return await this.Asserter.assert(
+      this.termsDocumentRepo.findOne({ id: termsDocumentId }),
+      'DOCUMENT_NOT_FOUND',
+    );
+  }
+
+  /**
+   * STEP 2: 정책 검증
+   */
+  private async validatePolicies(termsDocument: TermsDocument, label: string) {
     const alreadyExists = await this.termsVersionRepo.findOne({
       termsDocument: termsDocument.id,
-      versionLabel: command.versionLabel,
+      label,
     });
-    if (alreadyExists) throw new BadRequestException('Version label already exists');
+    await this.Asserter.throwIf(!!alreadyExists, 'VERSION_ALREADY_EXISTS');
+  }
 
-    const status = command.publish ? TermsVersionStatus.PUBLISHED : TermsVersionStatus.DRAFT;
+  /**
+   * STEP 3: 약관 버전 생성 및 상태 업데이트
+   */
+  private processCreation(termsDocument: TermsDocument, info: Omit<CreateTermsVersionCommand, 'termsDocumentId'>) {
+    // 체크섬 생성 (SHA-256)
+    const checksum = createHash('sha256').update(info.content).digest('hex');
+
     const termsVersion = this.termsVersionRepo.create({
       termsDocument,
-      versionLabel: command.versionLabel,
-      content: command.content,
-      status,
-      publishedAt: command.publish ? new Date() : null,
+      checksum,
+      ...info,
     });
 
-    if (command.publish) {
+    if (info.status === TermsVersionStatus.PUBLISHED) {
       termsDocument.status = TermsDocumentStatus.PUBLISHED;
-      termsDocument.latestVersionId = termsVersion.id;
+      termsDocument.latestVersion = termsVersion;
     }
 
-    await this.em.persistAndFlush([termsVersion, termsDocument]);
+    this.em.persist(termsVersion);
     return termsVersion;
   }
 }

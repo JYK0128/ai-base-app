@@ -6,8 +6,7 @@
  * OpenAPI spec version: 1.0
  */
 
-export interface UserTermsConsentResponseDto {
-  id: string;
-  agreed: boolean;
-  agreedAt: string;
-}
+/**
+ * @nullable
+ */
+export type TermsDocumentResponseDtoOrganizationId = { [key: string]: unknown } | null;

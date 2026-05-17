@@ -1,11 +1,10 @@
 import { Controller } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { MessagePattern, Payload } from '@nestjs/microservices';
+import { TermsVersionStatus } from '@pkg/database';
 
-import { AgreeTermsCommand } from './commands/agree-terms.handler';
-import { CreateTermsDocumentCommand } from './commands/create-terms-document.handler';
-import { CreateTermsVersionCommand } from './commands/create-terms-version.handler';
-import { GetActiveTermsQuery } from './queries/get-active-terms.handler';
+import { AgreeTermsCommand, CreateTermsDocumentCommand, CreateTermsVersionCommand } from './commands';
+import { GetActiveTermsQuery } from './queries';
 
 @Controller()
 export class TermsController {
@@ -30,12 +29,21 @@ export class TermsController {
   }
 
   @MessagePattern('terms.create.version')
-  async createVersion(@Payload() data: { termsDocumentId: string, versionLabel: string, content: string, publish?: boolean }) {
+  async createVersion(@Payload() data: {
+    termsDocumentId: string
+    label: string
+    content: string
+    effectiveFrom?: Date
+    effectiveTo?: Date
+    status?: TermsVersionStatus
+  }) {
     return this.commandBus.execute(new CreateTermsVersionCommand(
       data.termsDocumentId,
-      data.versionLabel,
+      data.label,
       data.content,
-      data.publish ?? false,
+      data.effectiveFrom ? new Date(data.effectiveFrom) : new Date(),
+      data.effectiveTo ? new Date(data.effectiveTo) : new Date('9999-12-31'),
+      data.status ?? TermsVersionStatus.DRAFT,
     ));
   }
 

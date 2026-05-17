@@ -8,7 +8,7 @@
 
 export type CoreControllerGetActiveTermsV1Params = {
 /**
- * ORGANIZATION 그룹 약관 조회 시 조직 ID
+ * 조직별 약관 조회 시 조직 ID (미입력 시 플랫폼 공통 약관 포함 조회)
  */
 organizationId?: string;
 };

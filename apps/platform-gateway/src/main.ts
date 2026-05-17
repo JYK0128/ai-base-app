@@ -50,7 +50,16 @@ export function configureApp(app: NestExpressApplication) {
       contentSecurityPolicy: isProduction ? undefined : false,
     }),
   );
-  app.enableCors();
+
+  if (isProduction) {
+    app.enableCors({
+      origin: ENV.CORS_ORIGIN ? ENV.CORS_ORIGIN.split(',') : false,
+      credentials: true,
+    });
+  } else {
+    app.enableCors();
+  }
+
   app.enableShutdownHooks();
 }
 
@@ -61,14 +70,16 @@ async function bootstrap() {
 
   configureApp(app);
 
-  const config = new DocumentBuilder()
-    .setTitle('AI Base App API')
-    .setDescription('The AI Base App Gateway API documentation')
-    .setVersion('1.0')
-    .addBearerAuth()
-    .build();
-  const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('docs', app, document);
+  if (ENV.NODE_ENV !== 'production') {
+    const config = new DocumentBuilder()
+      .setTitle('AI Base App API')
+      .setDescription('The AI Base App Gateway API documentation')
+      .setVersion('1.0')
+      .addBearerAuth()
+      .build();
+    const document = SwaggerModule.createDocument(app, config);
+    SwaggerModule.setup('docs', app, document);
+  }
 
   const port = ENV.PORT;
   await app.listen(port, '0.0.0.0');

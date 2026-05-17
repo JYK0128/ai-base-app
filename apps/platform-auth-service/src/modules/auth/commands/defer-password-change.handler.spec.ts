@@ -4,7 +4,8 @@ import { RequestContext } from '@mikro-orm/core';
 import { NotFoundException } from '@nestjs/common';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { DeferPasswordChangeCommand, DeferPasswordChangeHandler } from './defer-password-change.handler';
+import { DeferPasswordChangeHandler } from './defer-password-change.handler';
+import { DeferPasswordChangeCommand } from './defer-password-change.helpers';
 
 describe('DeferPasswordChangeHandler', () => {
   function mockTransactionalContext() {

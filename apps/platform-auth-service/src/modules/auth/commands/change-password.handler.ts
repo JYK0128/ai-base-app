@@ -1,44 +1,69 @@
 import { Transactional } from '@mikro-orm/decorators/legacy';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { AccountStatus, ManagerAccountRepository } from '@pkg/database';
+import { ManagerAccount, ManagerAccountRepository } from '@pkg/database';
 
-import { CryptoUtil } from '@/common/utils/crypto.util';
+import { ENV } from '@/common/env';
 
-export { ChangePasswordCommand } from './change-password.helpers';
 import { ChangePasswordAsserter, ChangePasswordCommand } from './change-password.helpers';
 
+/**
+ * 관리자 계정 비밀번호 변경 핸들러
+ */
 @CommandHandler(ChangePasswordCommand)
 export class ChangePasswordHandler implements ICommandHandler<ChangePasswordCommand> {
-  private readonly passwordExpiryDays = 90;
-  private readonly ChangePasswordGuard = ChangePasswordAsserter;
+  private readonly Asserter = ChangePasswordAsserter;
 
-  constructor(private readonly managerAccountRepository: ManagerAccountRepository) {}
+  constructor(
+    private readonly managerAccountRepository: ManagerAccountRepository,
+  ) {}
 
   @Transactional()
   async execute(command: ChangePasswordCommand): Promise<void> {
     const { id, currentPassword, newPassword } = command;
 
-    // 1. 계정 존재 여부 및 상태 확인
-    const account = await this.ChangePasswordGuard.assert(
-      await this.managerAccountRepository.findOne(id),
+    const account = await this.identifyAccount(id);
+    await this.validatePolicies(account, currentPassword);
+
+    this.processPasswordUpdate(account, newPassword);
+  }
+
+  /**
+   * STEP 1: 계정 식별
+   */
+  private async identifyAccount(id: string): Promise<ManagerAccount> {
+    return await this.Asserter.assert(
+      this.managerAccountRepository.findOne(id),
       'ACCOUNT_NOT_FOUND',
     );
+  }
 
-    await this.ChangePasswordGuard.throwIf(account.status === AccountStatus.INACTIVE, 'INACTIVE_ACCOUNT');
-    await this.ChangePasswordGuard.throwIf(
-      !!(account.lockUntil && account.lockUntil > new Date()),
+  /**
+   * STEP 2: 정책 및 비밀번호 검증
+   */
+  private async validatePolicies(account: ManagerAccount, currentPassword: string) {
+    // 2-1. 계정 활성화 여부 확인
+    await this.Asserter.throwIf(
+      !account.isActive(),
+      'INACTIVE_ACCOUNT',
+    );
+
+    // 2-2. 계정 잠금 여부 확인
+    await this.Asserter.throwIf(
+      account.isLocked(),
       'ACCOUNT_LOCKED',
     );
 
-    // 2. 현재 비밀번호 확인
-    const isMatch = await CryptoUtil.comparePassword(currentPassword, account.password);
-    await this.ChangePasswordGuard.assert(isMatch, 'INVALID_CURRENT_PASSWORD');
+    // 2-3. 현재 비밀번호 검증
+    await this.Asserter.throwIf(
+      !account.verifyPassword(currentPassword),
+      'INVALID_CURRENT_PASSWORD',
+    );
+  }
 
-    // 3. 새 비밀번호 해싱 및 저장
-    account.password = await CryptoUtil.hashPassword(newPassword);
-
-    // 4. 정책 관련 날짜 갱신
-    const now = new Date();
-    account.passwordExpiresAt = new Date(now.getTime() + this.passwordExpiryDays * 24 * 60 * 60 * 1000);
+  /**
+   * STEP 3: 비밀번호 업데이트
+   */
+  private processPasswordUpdate(account: ManagerAccount, newPassword: string) {
+    account.updatePassword(newPassword, ENV.PASSWORD_EXPIRY_DAYS);
   }
 }

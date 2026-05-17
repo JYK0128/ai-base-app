@@ -2,8 +2,8 @@ import { Controller } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 
-import { CreateAnnouncementCommand } from './commands/create-announcement.handler';
-import { GetAnnouncementsQuery } from './queries/get-announcements.handler';
+import { CreateAnnouncementCommand } from './commands';
+import { GetAnnouncementsQuery } from './queries';
 
 @Controller()
 export class AnnouncementController {

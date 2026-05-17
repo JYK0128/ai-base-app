@@ -23,7 +23,7 @@ const ensureError = (error: unknown): Error => {
  * 실제 요청과 인터셉터 처리를 담당합니다.
  */
 export const axios = axiosClient.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL,
+  baseURL: import.meta.env.VITE_URL,
   withCredentials: true,
 });
 
@@ -59,7 +59,7 @@ axios.interceptors.response.use(
 
       try {
         const res = await axiosClient.post<ApiResponse<{ accessToken: string }>>(
-          `${import.meta.env.VITE_API_BASE_URL}/api/v1/auth/refresh`,
+          `${import.meta.env.VITE_URL}/api/v1/auth/refresh`,
           {},
           { withCredentials: true },
         );

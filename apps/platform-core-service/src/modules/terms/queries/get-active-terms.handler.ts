@@ -2,12 +2,15 @@ import { InjectRepository } from '@mikro-orm/nestjs';
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
 import { TermsDocument, TermsDocumentRepository, TermsDocumentStatus } from '@pkg/database';
 
-export class GetActiveTermsQuery {
-  constructor(readonly organizationId?: string) {}
-}
+import { GetActiveTermsAsserter, GetActiveTermsQuery } from './get-active-terms.helpers';
 
+/**
+ * 활성 약관 목록 조회 핸들러
+ */
 @QueryHandler(GetActiveTermsQuery)
 export class GetActiveTermsHandler implements IQueryHandler<GetActiveTermsQuery> {
+  private readonly Asserter = GetActiveTermsAsserter;
+
   constructor(
     @InjectRepository(TermsDocument)
     private readonly termsDocumentRepo: TermsDocumentRepository,

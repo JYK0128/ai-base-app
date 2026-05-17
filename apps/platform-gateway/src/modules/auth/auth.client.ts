@@ -6,7 +6,6 @@ import { defaultIfEmpty, firstValueFrom } from 'rxjs';
 import { AUTH_SERVICE, AUTH_SERVICE_PATTERNS } from './auth.constants';
 import { LoginResult } from './auth.service';
 import { type ChangePasswordDto, LoginDto } from './dto/auth-request.dto';
-import { AuthPermissionsResponseDto } from './dto/auth-response.dto';
 
 @Injectable()
 export class AuthClient {
@@ -45,10 +44,6 @@ export class AuthClient {
 
   async logout(): Promise<void> {
     await this.send<void>(AUTH_SERVICE_PATTERNS.LOGOUT, {});
-  }
-
-  async permissions(): Promise<AuthPermissionsResponseDto> {
-    return this.send<AuthPermissionsResponseDto>(AUTH_SERVICE_PATTERNS.PERMISSIONS, {});
   }
 
   async deferPasswordChange(): Promise<void> {

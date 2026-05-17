@@ -5,10 +5,16 @@
  * The AI Base App Gateway API documentation
  * OpenAPI spec version: 1.0
  */
+import type { CreateTermsVersionDtoStatus } from './createTermsVersionDtoStatus';
 
 export interface CreateTermsVersionDto {
   termsDocumentId: string;
-  versionLabel: string;
-  contentMd: string;
-  publish?: boolean;
+  label: string;
+  content: string;
+  /** 효력 발생일 (미입력 시 현재 시간) */
+  effectiveFrom?: string;
+  /** 효력 종료일 (미입력 시 무제한) */
+  effectiveTo?: string;
+  /** 약관 버전 상태 (미입력 시 DRAFT) */
+  status?: CreateTermsVersionDtoStatus;
 }

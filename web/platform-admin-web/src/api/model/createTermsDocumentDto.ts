@@ -5,12 +5,11 @@
  * The AI Base App Gateway API documentation
  * OpenAPI spec version: 1.0
  */
-import type { CreateTermsDocumentDtoGroupType } from './createTermsDocumentDtoGroupType';
 
 export interface CreateTermsDocumentDto {
-  groupType: CreateTermsDocumentDtoGroupType;
   code: string;
   title: string;
   required?: boolean;
+  /** 조직 전용 약관일 경우 조직 ID (미입력 시 플랫폼 공통 약관) */
   organizationId?: string;
 }

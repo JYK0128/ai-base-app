@@ -6,8 +6,8 @@
  * OpenAPI spec version: 1.0
  */
 import type { ApiResponse } from './apiResponse';
-import type { UserTermsConsentResponseDto } from './userTermsConsentResponseDto';
+import type { ManagerTermsConsentResponseDto } from './managerTermsConsentResponseDto';
 
 export type CoreControllerAgreeTermsV1200 = ApiResponse & {
-  data?: UserTermsConsentResponseDto;
+  data?: ManagerTermsConsentResponseDto;
 };

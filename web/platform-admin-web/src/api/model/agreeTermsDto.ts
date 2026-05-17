@@ -7,7 +7,7 @@
  */
 
 export interface AgreeTermsDto {
-  userId: string;
+  managerId: string;
   termsVersionId: string;
   organizationId?: string;
   source?: string;

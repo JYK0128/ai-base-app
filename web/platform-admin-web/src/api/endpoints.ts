@@ -29,7 +29,6 @@ import type {
   ApiResponse,
   AuthControllerGetMeV1200,
   AuthControllerLoginV1200,
-  AuthControllerPermissionsV1200,
   AuthControllerRefreshV1200,
   ChangePasswordDto,
   CoreControllerAgreeTermsV1200,
@@ -56,8 +55,6 @@ import type {
 
 import authControllerLoginV1Mutator from '../lib/axios';
 import type { ErrorType as AuthControllerLoginV1ErrorType } from '../lib/axios';
-import authControllerPermissionsV1Mutator from '../lib/axios';
-import type { ErrorType as AuthControllerPermissionsV1ErrorType } from '../lib/axios';
 import authControllerRefreshV1Mutator from '../lib/axios';
 import type { ErrorType as AuthControllerRefreshV1ErrorType } from '../lib/axios';
 import authControllerGetMeV1Mutator from '../lib/axios';
@@ -160,100 +157,6 @@ export const useAuthControllerLoginV1 = <TError = AuthControllerLoginV1ErrorType
       > => {
       return useMutation(getAuthControllerLoginV1MutationOptions(options), queryClient);
     }
-
-/**
- * 현재 인증된 관리자 계정과 테넌트 기준으로 역할과 권한 목록을 반환합니다.
- * @summary 권한 조회
- */
-export const authControllerPermissionsV1 = (
-
- signal?: AbortSignal
-) => {
-
-
-      return authControllerPermissionsV1Mutator<AuthControllerPermissionsV1200>(
-      {url: `/api/v1/auth/permissions`, method: 'GET', signal
-    },
-      );
-    }
-
-
-
-
-export const getAuthControllerPermissionsV1QueryKey = () => {
-    return [
-    `/api/v1/auth/permissions`
-    ] as const;
-    }
-
-
-export const getAuthControllerPermissionsV1QueryOptions = <TData = Awaited<ReturnType<typeof authControllerPermissionsV1>>, TError = AuthControllerPermissionsV1ErrorType<unknown>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof authControllerPermissionsV1>>, TError, TData>>, }
-) => {
-
-const {query: queryOptions} = options ?? {};
-
-  const queryKey =  queryOptions?.queryKey ?? getAuthControllerPermissionsV1QueryKey();
-
-
-
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof authControllerPermissionsV1>>> = ({ signal }) => authControllerPermissionsV1(signal);
-
-
-
-
-
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof authControllerPermissionsV1>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
-}
-
-export type AuthControllerPermissionsV1QueryResult = NonNullable<Awaited<ReturnType<typeof authControllerPermissionsV1>>>
-export type AuthControllerPermissionsV1QueryError = AuthControllerPermissionsV1ErrorType<unknown>
-
-
-export function useAuthControllerPermissionsV1<TData = Awaited<ReturnType<typeof authControllerPermissionsV1>>, TError = AuthControllerPermissionsV1ErrorType<unknown>>(
-  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof authControllerPermissionsV1>>, TError, TData>> & Pick<
-        DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof authControllerPermissionsV1>>,
-          TError,
-          Awaited<ReturnType<typeof authControllerPermissionsV1>>
-        > , 'initialData'
-      >, }
- , queryClient?: QueryClient
-  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useAuthControllerPermissionsV1<TData = Awaited<ReturnType<typeof authControllerPermissionsV1>>, TError = AuthControllerPermissionsV1ErrorType<unknown>>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof authControllerPermissionsV1>>, TError, TData>> & Pick<
-        UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof authControllerPermissionsV1>>,
-          TError,
-          Awaited<ReturnType<typeof authControllerPermissionsV1>>
-        > , 'initialData'
-      >, }
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useAuthControllerPermissionsV1<TData = Awaited<ReturnType<typeof authControllerPermissionsV1>>, TError = AuthControllerPermissionsV1ErrorType<unknown>>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof authControllerPermissionsV1>>, TError, TData>>, }
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-/**
- * @summary 권한 조회
- */
-
-export function useAuthControllerPermissionsV1<TData = Awaited<ReturnType<typeof authControllerPermissionsV1>>, TError = AuthControllerPermissionsV1ErrorType<unknown>>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof authControllerPermissionsV1>>, TError, TData>>, }
- , queryClient?: QueryClient
- ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
-
-  const queryOptions = getAuthControllerPermissionsV1QueryOptions(options)
-
-  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
-
-  return { ...query, queryKey: queryOptions.queryKey };
-}
-
-
-
-
-
-
 
 /**
  * 쿠키의 리프레시 토큰을 사용하여 액세스 토큰을 갱신합니다.
@@ -1305,7 +1208,7 @@ export const useCoreControllerCreateTermsVersionV1 = <TError = CoreControllerCre
     }
 
 /**
- * 사용자의 특정 약관 버전 동의 이력을 저장합니다.
+ * 매니저의 특정 약관 버전 동의 이력을 저장합니다.
  * @summary 약관 동의 저장
  */
 export const coreControllerAgreeTermsV1 = (

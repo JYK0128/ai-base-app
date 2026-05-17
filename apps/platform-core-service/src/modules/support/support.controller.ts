@@ -3,8 +3,8 @@ import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 import { TicketPriority, TicketStatus } from '@pkg/database';
 
-import { CreateTicketCommand } from './commands/create-ticket.handler';
-import { GetTicketsQuery } from './queries/get-tickets.handler';
+import { CreateTicketCommand } from './commands';
+import { GetTicketsQuery } from './queries';
 
 @Controller()
 export class SupportController {

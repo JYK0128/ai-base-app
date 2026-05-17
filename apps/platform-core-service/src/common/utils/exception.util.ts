@@ -69,15 +69,35 @@ export class ExceptionAsserter<
   }
 
   /**
-   * 값이 유효하지 않으면 예외를 발생시키고, 유효하면 값을 반환합니다.
+   * 즉시 예외를 발생시킵니다.
    */
-  async assert<V>(condition: V | null | undefined, code: keyof T, options?: AsserterOptions<M, C>): Promise<V> {
-    if (!condition) {
+  async throw(code: keyof T, options?: AsserterOptions<M, C>): Promise<never> {
+    const { metadata, context } = options || {};
+    await this.onFailHook?.({ code, metadata, context });
+    throw this.create(code, metadata) as Error;
+  }
+
+  /**
+   * 값이 유효하지 않거나 Promise가 거절되면 예외를 발생시키고, 유효하면 값을 반환합니다.
+   */
+  async assert<V>(
+    condition: Promise<V | null | undefined> | V | null | undefined,
+    code: keyof T,
+    options?: AsserterOptions<M, C>,
+  ): Promise<V> {
+    const value = await Promise.resolve(condition)
+      .catch(async () => {
+        const { metadata, context } = options || {};
+        await this.onFailHook?.({ code, metadata, context });
+        throw this.create(code, metadata);
+      });
+
+    if (!value) {
       const { metadata, context } = options || {};
       await this.onFailHook?.({ code, metadata, context });
       throw this.create(code, metadata);
     }
-    return condition as V;
+    return value as V;
   }
 }
 

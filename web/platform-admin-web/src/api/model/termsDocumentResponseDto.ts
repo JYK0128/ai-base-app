@@ -5,12 +5,13 @@
  * The AI Base App Gateway API documentation
  * OpenAPI spec version: 1.0
  */
-import type { TermsDocumentResponseDtoGroupType } from './termsDocumentResponseDtoGroupType';
+import type { TermsDocumentResponseDtoOrganizationId } from './termsDocumentResponseDtoOrganizationId';
 import type { TermsDocumentResponseDtoStatus } from './termsDocumentResponseDtoStatus';
 
 export interface TermsDocumentResponseDto {
   id: string;
-  groupType: TermsDocumentResponseDtoGroupType;
+  /** @nullable */
+  organizationId: TermsDocumentResponseDtoOrganizationId;
   code: string;
   title: string;
   required: boolean;

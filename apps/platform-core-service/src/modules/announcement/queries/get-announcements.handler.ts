@@ -2,11 +2,15 @@ import { InjectRepository } from '@mikro-orm/nestjs';
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
 import { Announcement, AnnouncementRepository } from '@pkg/database';
 
-export { GetAnnouncementsQuery } from './get-announcements.helpers';
-import { GetAnnouncementsQuery } from './get-announcements.helpers';
+import { GetAnnouncementsAsserter, GetAnnouncementsQuery } from './get-announcements.helpers';
 
+/**
+ * 공지사항 목록 조회 핸들러
+ */
 @QueryHandler(GetAnnouncementsQuery)
 export class GetAnnouncementsHandler implements IQueryHandler<GetAnnouncementsQuery> {
+  private readonly Asserter = GetAnnouncementsAsserter;
+
   constructor(
     @InjectRepository(Announcement)
     private readonly announcementRepo: AnnouncementRepository,
@@ -14,6 +18,7 @@ export class GetAnnouncementsHandler implements IQueryHandler<GetAnnouncementsQu
 
   async execute(query: GetAnnouncementsQuery): Promise<Announcement[]> {
     const filter = query.isPublishedOnly ? { isPublished: true } : {};
+
     return this.announcementRepo.find(filter, {
       populate: ['author'],
       orderBy: { createdAt: 'DESC' },

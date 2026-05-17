@@ -3,8 +3,8 @@ import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 import { OrganizationStatus } from '@pkg/database';
 
-import { ApproveOrganizationCommand } from './commands/approve-organization.handler';
-import { GetOrganizationsQuery } from './queries/get-organizations.handler';
+import { ApproveOrganizationCommand } from './commands';
+import { GetOrganizationsQuery } from './queries';
 
 @Controller()
 export class OrganizationController {

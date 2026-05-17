@@ -1,14 +1,12 @@
 import { Controller, Logger } from '@nestjs/common';
-import { CommandBus, EventBus, QueryBus } from '@nestjs/cqrs';
-import { EventPattern, MessagePattern, Payload } from '@nestjs/microservices';
+import { CommandBus, QueryBus } from '@nestjs/cqrs';
+import { MessagePattern, Payload } from '@nestjs/microservices';
 
-import { ChangePasswordCommand } from './commands/change-password.handler';
-import { DeferPasswordChangeCommand } from './commands/defer-password-change.handler';
-import { LoginCommand } from './commands/login.handler';
-import { LogoutCommand } from './commands/logout.handler';
-import { RefreshTokenCommand } from './commands/refresh-token.handler';
-import { AuthNotifiedEvent } from './events/auth-notified.handler';
-import { GetPermissionsQuery } from './queries/get-permissions.handler';
+import { ChangePasswordCommand,
+         DeferPasswordChangeCommand,
+         LoginCommand,
+         LogoutCommand,
+         RefreshTokenCommand } from './commands';
 
 @Controller()
 export class AuthController {
@@ -17,14 +15,11 @@ export class AuthController {
   constructor(
     private readonly commandBus: CommandBus,
     private readonly queryBus: QueryBus,
-    private readonly eventBus: EventBus,
   ) {}
 
   @MessagePattern('auth.login')
   async handleLogin(@Payload() data: { email: string, password: string, clientIp: string }) {
-    return this.commandBus.execute(
-      new LoginCommand(data.email, data.password, data.clientIp),
-    );
+    return this.commandBus.execute(new LoginCommand(data.email, data.password, data.clientIp));
   }
 
   @MessagePattern('auth.refresh')
@@ -43,27 +38,11 @@ export class AuthController {
   }
 
   @MessagePattern('auth.change_password')
-  async handleChangePassword(@Payload() data: { id: string, currentPassword: string, newPassword: string }) {
+  async handleChangePassword(
+    @Payload() data: { id: string, currentPassword: string, newPassword: string },
+  ) {
     return this.commandBus.execute(
       new ChangePasswordCommand(data.id, data.currentPassword, data.newPassword),
     );
-  }
-
-  @MessagePattern('auth.permissions')
-  async handlePermissions(
-    @Payload() data: {
-      id: string
-      organizationId?: string
-    },
-  ) {
-    return this.queryBus.execute(
-      new GetPermissionsQuery(data.id, data.organizationId),
-    );
-  }
-
-  @EventPattern('auth_event')
-  handleAuthEvent(@Payload() data: Record<string, unknown>) {
-    this.logger.log('Received external auth event via RMQ. Broadcasting internally...');
-    this.eventBus.publish(new AuthNotifiedEvent(data));
   }
 }

@@ -6,7 +6,8 @@
  * OpenAPI spec version: 1.0
  */
 
-/**
- * 권한별 메타데이터 (UI 설정 등)
- */
-export type AuthPermissionsResponseDtoMetadata = {[key: string]: { [key: string]: unknown }};
+export interface ManagerTermsConsentResponseDto {
+  id: string;
+  agreed: boolean;
+  agreedAt: string;
+}

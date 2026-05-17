@@ -2,21 +2,22 @@ import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 
 import { RedisService } from '@/modules/redis/redis.service';
 
-export class LogoutCommand {
-  constructor(public readonly id: string) {}
-}
+import { LogoutAsserter, LogoutCommand } from './logout.helpers';
 
+/**
+ * 로그아웃 처리 핸들러
+ */
 @CommandHandler(LogoutCommand)
 export class LogoutHandler implements ICommandHandler<LogoutCommand> {
-  constructor(
-    private readonly redisService: RedisService,
-  ) {}
+  private readonly Asserter = LogoutAsserter;
+
+  constructor(private readonly redisService: RedisService) {}
 
   async execute(command: LogoutCommand) {
     const { id } = command;
-    await Promise.all([
-      this.redisService.del(`refresh:${id}`),
-    ]);
+
+    // 세션 삭제
+    await this.redisService.del(`refresh:${id}`);
 
     return { success: true };
   }
