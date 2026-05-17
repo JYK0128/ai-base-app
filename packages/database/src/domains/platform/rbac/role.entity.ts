@@ -1,5 +1,5 @@
 import { Collection } from '@mikro-orm/core';
-import { Entity, Enum, Index, OneToMany, Property } from '@mikro-orm/decorators/legacy';
+import { Entity, Enum, OneToMany, Property } from '@mikro-orm/decorators/legacy';
 
 import { CoreEntity } from '../../core/core.entity';
 import { ManagerRole } from './manager.role.entity';
@@ -12,7 +12,8 @@ export enum RbacRoleScope {
 }
 
 @Entity({ schema: 'platform', repository: () => RoleRepository })
-export class Role extends CoreEntity<Role> {
+export class Role
+  extends CoreEntity<Role, 'scope'> {
   @Property({ unique: true })
   code!: string;
 
@@ -22,7 +23,6 @@ export class Role extends CoreEntity<Role> {
   @Property({ nullable: true })
   description?: string;
 
-  @Index()
   @Enum(() => RbacRoleScope)
   scope: RbacRoleScope = RbacRoleScope.PLATFORM;
 

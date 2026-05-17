@@ -14,8 +14,9 @@ export enum TermsDocumentStatus {
 }
 
 @Entity({ schema: 'platform', repository: () => TermsDocumentRepository })
-export class TermsDocument extends CoreEntity<TermsDocument> {
-  @Property()
+export class TermsDocument
+  extends CoreEntity<TermsDocument, 'status'> {
+  @Property({ unique: true })
   code!: string;
 
   @Property()
@@ -25,7 +26,7 @@ export class TermsDocument extends CoreEntity<TermsDocument> {
   required!: boolean;
 
   @Enum(() => TermsDocumentStatus)
-  status!: TermsDocumentStatus;
+  status: TermsDocumentStatus = TermsDocumentStatus.DRAFT;
 
   @ManyToOne(() => Organization, { nullable: true })
   organization?: Rel<Organization>;

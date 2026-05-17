@@ -1,5 +1,5 @@
 import type { Rel } from '@mikro-orm/core';
-import { Entity, Enum, Index, ManyToOne, Property, Unique } from '@mikro-orm/decorators/legacy';
+import { Entity, Enum, ManyToOne, Property } from '@mikro-orm/decorators/legacy';
 
 import { CoreEntity } from '../../core/core.entity';
 import type { Organization } from '../organization/organization.entity';
@@ -14,9 +14,8 @@ export enum ManagerInviteStatus {
 }
 
 @Entity({ schema: 'platform', repository: () => ManagerInviteRepository })
-@Unique({ properties: ['token'] })
-export class ManagerInvite extends CoreEntity<ManagerInvite> {
-  @Index()
+export class ManagerInvite
+  extends CoreEntity<ManagerInvite, 'status'> {
   @ManyToOne()
   organization!: Rel<Organization>;
 
@@ -26,7 +25,6 @@ export class ManagerInvite extends CoreEntity<ManagerInvite> {
   @Property()
   email!: string;
 
-  @Index()
   @ManyToOne()
   invitedBy!: Rel<Manager>;
 
@@ -34,7 +32,7 @@ export class ManagerInvite extends CoreEntity<ManagerInvite> {
   expiresAt!: Date;
 
   @Property({ nullable: true })
-  acceptedAt?: Date | null;
+  acceptedAt?: Date;
 
   @Enum(() => ManagerInviteStatus)
   status: ManagerInviteStatus = ManagerInviteStatus.PENDING;

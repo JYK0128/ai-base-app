@@ -8,7 +8,8 @@ import { ManagerTermsConsentRepository } from './manager.terms.consent.repositor
 import { TermsVersion } from './terms.version.entity';
 
 @Entity({ schema: 'platform', repository: () => ManagerTermsConsentRepository })
-export class ManagerTermsConsent extends CoreEntity<ManagerTermsConsent> {
+export class ManagerTermsConsent
+  extends CoreEntity<ManagerTermsConsent> {
   @ManyToOne(() => Manager)
   manager!: Rel<Manager>;
 
@@ -18,12 +19,12 @@ export class ManagerTermsConsent extends CoreEntity<ManagerTermsConsent> {
   @ManyToOne(() => TermsVersion)
   termsVersion!: Rel<TermsVersion>;
 
-  @Property()
+  @Property({ type: 'boolean' })
   agreed!: boolean;
 
-  @Property({ nullable: true })
-  ipAddress?: string | null = null;
+  @Property({ type: 'string', nullable: true })
+  ipAddress?: string;
 
   @Property({ type: 'text', nullable: true })
-  userAgent?: string | null = null;
+  userAgent?: string;
 }

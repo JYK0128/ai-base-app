@@ -1,9 +1,7 @@
-import type { Opt } from '@mikro-orm/core';
 import { Collection } from '@mikro-orm/core';
 import { Entity, Enum, OneToMany, Property } from '@mikro-orm/decorators/legacy';
 
 import { CoreEntity } from '../../core/core.entity';
-import { Site } from '../../site/site.entity';
 import type { Manager } from '../manager/manager.entity';
 import { ManagerInvite } from '../manager/manager.invite.entity';
 import { ManagerTermsConsent } from '../terms/manager.terms.consent.entity';
@@ -18,7 +16,8 @@ export enum OrganizationStatus {
 }
 
 @Entity({ schema: 'platform', repository: () => OrganizationRepository })
-export class Organization extends CoreEntity<Organization> {
+export class Organization
+  extends CoreEntity<Organization, 'status'> {
   @Property({ unique: true })
   code!: string;
 
@@ -29,7 +28,7 @@ export class Organization extends CoreEntity<Organization> {
   email!: string;
 
   @Enum(() => OrganizationStatus)
-  status: Opt<OrganizationStatus> = OrganizationStatus.ACTIVE;
+  status: OrganizationStatus = OrganizationStatus.ACTIVE;
 
   @OneToMany({ mappedBy: 'organization' })
   managers = new Collection<Manager>(this);
@@ -37,12 +36,13 @@ export class Organization extends CoreEntity<Organization> {
   @OneToMany(() => ManagerInvite, (invite) => invite.organization)
   managerInvites = new Collection<ManagerInvite>(this);
 
-  @OneToMany(() => Site, (site) => site.organization)
-  sites = new Collection<Site>(this);
-
   @OneToMany(() => TermsDocument, (doc) => doc.organization)
   termsDocuments = new Collection<TermsDocument>(this);
 
   @OneToMany(() => ManagerTermsConsent, (consent) => consent.organization)
   termsConsents = new Collection<ManagerTermsConsent>(this);
+
+  isActive(): boolean {
+    return this.status === OrganizationStatus.ACTIVE;
+  }
 }

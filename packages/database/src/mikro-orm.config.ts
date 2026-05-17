@@ -1,9 +1,9 @@
 import 'reflect-metadata';
 
-import { GeneratedCacheAdapter, MetadataProvider } from '@mikro-orm/core';
+import { MetadataProvider } from '@mikro-orm/core';
 import { EntityGenerator } from '@mikro-orm/entity-generator';
 import { Migrator } from '@mikro-orm/migrations';
-import { defineConfig, EntityCaseNamingStrategy, type Options, PostgreSqlDriver } from '@mikro-orm/postgresql';
+import { defineConfig, EntityCaseNamingStrategy, GeneratedCacheAdapter, type Options, PostgreSqlDriver } from '@mikro-orm/postgresql';
 import { TsMorphMetadataProvider } from '@mikro-orm/reflection';
 import { SeedManager } from '@mikro-orm/seeder';
 import { SqlHighlighter } from '@mikro-orm/sql-highlighter';
@@ -21,7 +21,10 @@ export default defineConfig({
   metadataCache: {
     enabled: true,
     adapter: GeneratedCacheAdapter,
-    options: { data: metadata, cacheDir: './src' },
+    options: {
+      data: metadata,
+      cacheDir: './src',
+    },
   },
   namingStrategy: EntityCaseNamingStrategy,
   filters: {

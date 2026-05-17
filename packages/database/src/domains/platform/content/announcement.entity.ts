@@ -1,12 +1,13 @@
 import type { Rel } from '@mikro-orm/core';
-import { Entity, Index, ManyToOne, Property } from '@mikro-orm/decorators/legacy';
+import { Entity, ManyToOne, Property } from '@mikro-orm/decorators/legacy';
 
 import { CoreEntity } from '../../core/core.entity';
 import { Manager } from '../manager/manager.entity';
 import { AnnouncementRepository } from './announcement.repository';
 
 @Entity({ schema: 'platform', repository: () => AnnouncementRepository })
-export class Announcement extends CoreEntity<Announcement> {
+export class Announcement
+  extends CoreEntity<Announcement, 'isPublished'> {
   @Property()
   title!: string;
 
@@ -16,7 +17,6 @@ export class Announcement extends CoreEntity<Announcement> {
   @Property()
   isPublished: boolean = false;
 
-  @Index()
   @ManyToOne(() => Manager)
   author!: Rel<Manager>;
 }

@@ -22,6 +22,7 @@ const sharedOptions = {
     '@pkg/*',
     'reflect-metadata',
     'uuidv7',
+    'bcrypt',
   ],
   plugins: [
     swcPlugin({

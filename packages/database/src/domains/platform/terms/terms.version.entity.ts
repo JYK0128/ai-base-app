@@ -13,7 +13,8 @@ export enum TermsVersionStatus {
 }
 
 @Entity({ schema: 'platform', repository: () => TermsVersionRepository })
-export class TermsVersion extends CoreEntity<TermsVersion> {
+export class TermsVersion
+  extends CoreEntity<TermsVersion, 'status'> {
   @ManyToOne(() => TermsDocument)
   termsDocument!: Rel<TermsDocument>;
 
@@ -27,7 +28,7 @@ export class TermsVersion extends CoreEntity<TermsVersion> {
   checksum!: string;
 
   @Enum(() => TermsVersionStatus)
-  status!: TermsVersionStatus;
+  status: TermsVersionStatus = TermsVersionStatus.DRAFT;
 
   @Property()
   effectiveFrom!: Date;

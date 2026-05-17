@@ -1,4 +1,4 @@
-import { BaseEntity, type EntityData, EntityRepositoryType, type FilterQuery, type FindOptions, type FromEntityType, type Loaded, type Opt, OptionalProps, type Primary, RequestContext, type RequiredEntityData } from '@mikro-orm/core';
+import { BaseEntity, type EntityData, EntityRepositoryType, type FilterQuery, type FindOptions, type FromEntityType, type Loaded, OptionalProps, type Primary, RequestContext, type RequiredEntityData } from '@mikro-orm/core';
 import { PrimaryKey, Property } from '@mikro-orm/decorators/legacy';
 import { uuidv7 } from 'uuidv7';
 
@@ -15,22 +15,22 @@ export abstract class CoreEntity<
   id: string = uuidv7();
 
   @Property()
-  createdAt: Opt<Date> = new Date();
+  createdAt: Date = new Date();
 
   @Property({ nullable: true })
   createdBy?: string;
 
   @Property({ onUpdate: () => new Date() })
-  updatedAt: Opt<Date> = new Date();
+  updatedAt: Date = new Date();
 
   @Property({ nullable: true })
   updatedBy?: string;
 
   @Property({ nullable: true })
-  deletedAt?: Date | null = null;
+  deletedAt?: Date;
 
   @Property({ nullable: true })
-  deletedBy?: string | null = null;
+  deletedBy?: string;
 
   @Property({ type: 'json', nullable: true })
   metadata?: Record<string, unknown>;
@@ -86,5 +86,12 @@ export abstract class CoreEntity<
       this.deletedAt = new Date();
     }
     return this;
+  }
+
+  /**
+   * 엔티티의 ID가 일치하는지 확인합니다.
+   */
+  is(id: string): boolean {
+    return this.id === id;
   }
 }
