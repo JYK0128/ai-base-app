@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "vite --host 0.0.0.0",
     "build": "tsc && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
@@ -27,6 +27,7 @@
   },
   "devDependencies": {
     "@dotenvx/dotenvx": "1.61.0",
+    "@esbuild/linux-x64": "0.28.0",
     "@tailwindcss/vite": "4.2.2",
     "@tanstack/router-vite-plugin": "1.166.50",
     "@types/node": "22.13.9",

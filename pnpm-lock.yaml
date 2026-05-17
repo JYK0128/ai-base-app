@@ -59,12 +59,6 @@ importers:
       '@types/passport-jwt':
         specifier: 4.0.1
         version: 4.0.1
-      amqp-connection-manager:
-        specifier: 4.1.14
-        version: 4.1.14(amqplib@0.10.5)
-      amqplib:
-        specifier: 0.10.5
-        version: 0.10.5
       bcrypt:
         specifier: 6.0.0
         version: 6.0.0
@@ -485,6 +479,9 @@ importers:
       '@swc/helpers':
         specifier: 0.5.21
         version: 0.5.21
+      bcrypt:
+        specifier: 6.0.0
+        version: 6.0.0
       reflect-metadata:
         specifier: 0.2.2
         version: 0.2.2
@@ -510,9 +507,6 @@ importers:
       '@types/node':
         specifier: 25.6.0
         version: 25.6.0
-      bcrypt:
-        specifier: 6.0.0
-        version: 6.0.0
       dts-bundle-generator:
         specifier: 9.5.1
         version: 9.5.1
@@ -576,9 +570,6 @@ importers:
       input-otp:
         specifier: 1.4.2
         version: 1.4.2(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
-      lodash-es:
-        specifier: 4.17.23
-        version: 4.17.23
       lucide-react:
         specifier: 1.14.0
         version: 1.14.0(react@19.2.6)
@@ -785,6 +776,9 @@ importers:
       '@dotenvx/dotenvx':
         specifier: 1.61.0
         version: 1.61.0
+      '@esbuild/linux-x64':
+        specifier: 0.28.0
+        version: 0.28.0
       '@tailwindcss/vite':
         specifier: 4.2.2
         version: 4.2.2(vite@8.0.11(@types/node@22.13.9)(esbuild@0.27.7)(jiti@2.7.0)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3))
@@ -1424,6 +1418,11 @@ packages:
     resolution: {integrity: sha512-hzznmADPt+OmsYzw1EE33ccA+HPdIqiCRq7cQeL1Jlq2gb1+OyWBkMCrYGBJ+sxVzve2ZJEVeePbLM2iEIZSxA==}
     engines: {node: '>=18'}
     cpu: [x64]
+    os: [linux]
+
+  '@esbuild/linux-x64@0.28.0':
+    resolution: {integrity: sha512-us0dSb9iFxIi8srnpl931Nvs65it/Jd2a2K3qs7fz2WfGPHqzfzZTfec7oxZJRNPXPnNYZtanmRc4AL/JwVzHQ==}
+    engines: {node: '>=18'}
     os: [linux]
 
   '@esbuild/netbsd-arm64@0.25.5':
@@ -7055,9 +7054,6 @@ packages:
     resolution: {integrity: sha512-XT9ewWAC43tiAV7xDAPflMkG0qOPn2QjHqlgX8FOqmWa/rxnyYDulF9T0F7tRy1u+TVTmK/M//6VIOye+2zDXg==}
     engines: {node: '>=20'}
 
-  lodash-es@4.17.23:
-    resolution: {integrity: sha512-kVI48u3PZr38HdYz98UmfPnXl2DXrpdctLrFLCd3kOx1xUkOmpFPx7gCWWM5MPkL/fD8zb+Ph0QzjGFs4+hHWg==}
-
   lodash.camelcase@4.3.0:
     resolution: {integrity: sha512-TwuEnCnxbc3rAvhf/LbG7tJUDzhqXyFnv3dtzLOPgCG/hODL7WFnsbwktkD7yUV0RrreP/l1PALq/YSg6VvjlA==}
 
@@ -9875,6 +9871,8 @@ snapshots:
 
   '@esbuild/linux-x64@0.27.7':
     optional: true
+
+  '@esbuild/linux-x64@0.28.0': {}
 
   '@esbuild/netbsd-arm64@0.25.5':
     optional: true
@@ -13215,9 +13213,9 @@ snapshots:
       obug: 2.1.1
       std-env: 4.0.0
       tinyrainbow: 3.1.0
-      vitest: 4.1.4(@types/node@25.6.0)(@vitest/browser-playwright@4.1.4)(@vitest/coverage-v8@4.1.4)(msw@2.13.3(@types/node@25.6.0)(typescript@5.9.3))(vite@8.0.11(@types/node@25.6.0)(esbuild@0.25.5)(jiti@2.7.0)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3))
+      vitest: 4.1.4(@types/node@22.13.9)(@vitest/browser-playwright@4.1.4)(@vitest/coverage-v8@4.1.4)(msw@2.13.3(@types/node@22.13.9)(typescript@5.9.3))(vite@8.0.11(@types/node@22.13.9)(esbuild@0.27.7)(jiti@2.7.0)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3))
     optionalDependencies:
-      '@vitest/browser': 4.1.4(msw@2.13.3(@types/node@25.6.0)(typescript@5.9.3))(vite@8.0.11(@types/node@25.6.0)(esbuild@0.25.5)(jiti@2.7.0)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3))(vitest@4.1.4)
+      '@vitest/browser': 4.1.4(msw@2.13.3(@types/node@22.13.9)(typescript@5.9.3))(vite@8.0.11(@types/node@22.13.9)(esbuild@0.27.7)(jiti@2.7.0)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3))(vitest@4.1.4)
 
   '@vitest/expect@3.2.4':
     dependencies:
@@ -15817,8 +15815,6 @@ snapshots:
   locate-path@8.0.0:
     dependencies:
       p-locate: 6.0.0
-
-  lodash-es@4.17.23: {}
 
   lodash.camelcase@4.3.0:
     optional: true

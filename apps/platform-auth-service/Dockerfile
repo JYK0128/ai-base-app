@@ -1,37 +1,40 @@
-# Stage 1: Prune (빌드에 필요한 파일만 골라내기)
-FROM node:24-alpine AS pruner
+# 1. Base
+FROM node:24-alpine AS base
+RUN apk add --no-cache libc6-compat python3 make g++
 RUN corepack enable && corepack prepare pnpm@9.15.9 --activate
 WORKDIR /app
+
+# 2. Pruner
+FROM base AS pruner
 COPY . .
 RUN npx -y turbo@latest prune platform-auth-service --docker
 
-# Stage 2: Builder (실제 빌드 수행)
-FROM node:24-alpine AS builder
-RUN corepack enable && corepack prepare pnpm@9.15.9 --activate
-WORKDIR /app
-
-# Prune 단계에서 걸러진 package.json 및 lockfile들만 먼저 복사
+# 3. Deps: 의존성 설치 레이어 (독립 캐시)
+FROM base AS deps
 COPY --from=pruner /app/out/json/ .
 COPY --from=pruner /app/out/pnpm-lock.yaml ./pnpm-lock.yaml
-RUN pnpm install --frozen-lockfile
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
+    pnpm install --frozen-lockfile
 
-# 실제 소스 코드 복사 및 빌드
+# 4. Development: 개발 환경 (Skaffold Sync 및 NestJS Watch 모드용)
+FROM deps AS development
 COPY --from=pruner /app/out/full/ .
-RUN npx turbo build --filter=platform-auth-service
+RUN pnpm --filter="@pkg/*" build
+ENV NODE_ENV=development
+CMD ["pnpm", "--filter", "platform-auth-service", "run", "dev"]
 
-# 실행에 필요한 핵심 파일만 추출 (격리 배포)
-RUN pnpm --filter platform-auth-service --prod deploy /app/deploy --ignore-scripts --loglevel error
+# 5. Builder: Deps를 상속받아 node_modules 복사 시간 제거 (최적화 핵심)
+FROM deps AS builder
+COPY --from=pruner /app/out/full/ .
+RUN --mount=type=cache,id=turbo,target=/app/.turbo/cache \
+    npx turbo build --filter=platform-auth-service
+RUN pnpm --filter platform-auth-service --prod deploy /app/deploy --ignore-scripts
 
-# Stage 3: Runner (최종 실행 이미지)
-FROM node:24-alpine
-WORKDIR /app
-
+# 5. Runner
+FROM base AS runner
 ENV NODE_ENV=production
-
-# 빌드 결과물 복사 및 소유권 변경
 COPY --from=builder --chown=node:node /app/deploy ./
-
+COPY --from=builder --chown=node:node /app/apps/platform-auth-service/tsconfig.json ./tsconfig.json
 USER node
 EXPOSE 3000
-
 CMD ["node", "dist/main.js"]
