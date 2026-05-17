@@ -29,6 +29,13 @@ spec:
           readOnly: true
         - name: config
           mountPath: /etc/alloy
+        resources:
+          requests:
+            cpu: 50m
+            memory: 64Mi
+          limits:
+            cpu: 200m
+            memory: 256Mi
         ports:
         - containerPort: 12345
           name: http-metrics

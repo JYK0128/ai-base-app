@@ -1,0 +1,19 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: ingress-redis-from-services
+  namespace: dev-infra
+spec:
+  podSelector:
+    matchLabels:
+      cluster: redis
+  policyTypes:
+  - Ingress
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: dev-service
+    ports:
+    - protocol: TCP
+      port: 6379

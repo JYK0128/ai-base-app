@@ -6,9 +6,67 @@ resources:
   - ../../database
   - ../../messaging
   - ../../monitoring
-  - ../../network-policies
   - ../../networking
+
 labels:
   - pairs:
       env: dev
-patches: []
+
+patches:
+  - target:
+      kind: NetworkPolicy
+      name: ingress-admin-web-from-istio-ingress
+      namespace: dev-web
+    patch: |-
+      - op: remove
+        path: /spec/ingress/0/from
+  - target:
+      kind: NetworkPolicy
+      name: ingress-postgres-from-services
+      namespace: dev-infra
+    patch: |
+      - op: add
+        path: /spec/ingress/0/from/-
+        value:
+          ipBlock:
+            cidr: 10.0.0.0/8
+      - op: add
+        path: /spec/ingress/0/from/-
+        value:
+          ipBlock:
+            cidr: 172.16.0.0/12
+      - op: add
+        path: /spec/ingress/0/from/-
+        value:
+          ipBlock:
+            cidr: 192.168.0.0/16
+      - op: add
+        path: /spec/ingress/0/from/-
+        value:
+          ipBlock:
+            cidr: 127.0.0.1/32
+  - target:
+      kind: NetworkPolicy
+      name: ingress-redis-from-services
+      namespace: dev-infra
+    patch: |
+      - op: add
+        path: /spec/ingress/0/from/-
+        value:
+          ipBlock:
+            cidr: 10.0.0.0/8
+      - op: add
+        path: /spec/ingress/0/from/-
+        value:
+          ipBlock:
+            cidr: 172.16.0.0/12
+      - op: add
+        path: /spec/ingress/0/from/-
+        value:
+          ipBlock:
+            cidr: 192.168.0.0/16
+      - op: add
+        path: /spec/ingress/0/from/-
+        value:
+          ipBlock:
+            cidr: 127.0.0.1/32

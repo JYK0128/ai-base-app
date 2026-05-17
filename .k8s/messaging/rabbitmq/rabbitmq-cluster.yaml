@@ -11,3 +11,10 @@ spec:
   image: public.ecr.aws/docker/library/rabbitmq:4-management
   persistence:
     storage: "0"
+  resources:
+    requests:
+      cpu: 200m
+      memory: 512Mi
+    limits:
+      cpu: 500m
+      memory: 1Gi

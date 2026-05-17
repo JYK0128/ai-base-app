@@ -1,0 +1,24 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: ingress-services-from-gateway
+  namespace: dev-service
+spec:
+  podSelector: {}
+  policyTypes:
+  - Ingress
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: dev-web
+      podSelector:
+        matchLabels:
+          app.kubernetes.io/name: platform-gateway
+    ports:
+    - protocol: TCP
+      port: 3001 # auth-service
+    - protocol: TCP
+      port: 3004 # core-service
+    - protocol: TCP
+      port: 3005 # core-service

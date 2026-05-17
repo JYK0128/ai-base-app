@@ -4,3 +4,6 @@ resources:
   - platform-gateway-deploy.yaml
   - platform-gateway-svc.yaml
   - platform-gateway-cm.yaml
+  - platform-gateway-secret.yaml
+  - platform-gateway-gw.yaml
+  - platform-gateway-vs.yaml

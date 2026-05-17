@@ -1,0 +1,49 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: postgres-backup
+  namespace: prod-infra
+spec:
+  schedule: "0 3 * * *"
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: postgres-backup
+            image: postgres:17
+            imagePullPolicy: IfNotPresent
+            command: ["/bin/sh", "-c"]
+            args:
+            - |
+              set -e
+              DATE=$(date +%Y%m%d_%H%M%S)
+              FILENAME="/backups/postgres_backup_${DATE}.sql.gz"
+              echo "Starting backup to ${FILENAME}..."
+              pg_dump -h postgres-rw -U "$PGUSER" "$PGDATABASE" | gzip > ${FILENAME}
+              echo "Backup completed successfully."
+              echo "Cleaning up old backups..."
+              find /backups -name "postgres_backup_*.sql.gz" -mtime +7 -delete
+              echo "Cleanup done."
+            env:
+            - name: PGUSER
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: username
+            - name: PGPASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: password
+            - name: PGDATABASE
+              value: platform_db
+            volumeMounts:
+            - name: backup-volume
+              mountPath: /backups
+          restartPolicy: OnFailure
+          volumes:
+          - name: backup-volume
+            persistentVolumeClaim:
+              claimName: postgres-backup-pvc

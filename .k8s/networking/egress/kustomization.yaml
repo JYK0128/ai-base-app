@@ -1,0 +1,11 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - egress-service-to-dns.yaml
+  - egress-web-to-dns.yaml
+  - egress-infra-to-dns.yaml
+  - egress-monitoring-to-dns.yaml
+  - egress-monitoring-to-system-metrics.yaml
+  - egress-monitoring-to-self.yaml
+  - egress-services-to-infra.yaml
+  - egress-gateway-to-services.yaml

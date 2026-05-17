@@ -26,11 +26,13 @@ spec:
         envFrom:
         - configMapRef:
             name: platform-gateway-cm
+        - secretRef:
+            name: platform-gateway-secret
         ports:
         - containerPort: 3000
         resources:
           requests:
-            cpu: 100m
+            cpu: 50m
             memory: 128Mi
           limits:
             cpu: 300m
@@ -38,9 +40,13 @@ spec:
         readinessProbe:
           tcpSocket:
             port: 3000
+          initialDelaySeconds: 30
+          periodSeconds: 10
         livenessProbe:
           tcpSocket:
             port: 3000
+          initialDelaySeconds: 60
+          periodSeconds: 15
       volumes:
       - name: tmp
         emptyDir: {}

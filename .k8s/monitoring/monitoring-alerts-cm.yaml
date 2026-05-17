@@ -9,21 +9,13 @@ data:
       - name: monitoring-stack-health
         rules:
           - alert: MonitoringComponentDown
-            expr: up{namespace="monitoring",job=~"loki|mimir|tempo|kafka-exporter"} == 0
+            expr: up{namespace="monitoring",job=~"loki|mimir|tempo"} == 0
             for: 3m
             labels:
               severity: warning
             annotations:
               summary: "Monitoring component is down"
               description: "{{ $labels.job }} in namespace {{ $labels.namespace }} has been down for more than 3 minutes."
-          - alert: KafkaExporterNoMetrics
-            expr: absent(kafka_brokers)
-            for: 5m
-            labels:
-              severity: critical
-            annotations:
-              summary: "Kafka exporter metrics missing"
-              description: "kafka-exporter has not exposed kafka_brokers metric for over 5 minutes."
           - alert: MimirHighErrorRate
             expr: |
               (

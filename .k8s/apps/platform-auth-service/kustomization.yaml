@@ -4,3 +4,4 @@ resources:
   - platform-auth-service-deploy.yaml
   - platform-auth-service-svc.yaml
   - platform-auth-service-cm.yaml
+  - platform-auth-service-secret.yaml

@@ -5,3 +5,4 @@ resources:
   - platform-core-service-cm.yaml
   - platform-core-service-deploy.yaml
   - platform-core-service-svc.yaml
+  - platform-core-service-secret.yaml

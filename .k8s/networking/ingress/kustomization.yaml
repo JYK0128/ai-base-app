@@ -1,0 +1,9 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ingress-monitoring-from-self.yaml
+  - ingress-admin-web-from-istio-ingress.yaml
+  - ingress-services-from-gateway.yaml
+  - ingress-gateway-from-istio-ingress.yaml
+  - ingress-postgres-from-services.yaml
+  - ingress-redis-from-services.yaml

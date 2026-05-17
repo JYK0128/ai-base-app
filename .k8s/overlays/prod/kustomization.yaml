@@ -5,39 +5,104 @@ resources:
   - ../../database
   - ../../messaging
   - ../../monitoring
-  - ../../network-policies
   - ../../networking
   - monitoring-namespace.yaml
-  - prod-api-namespace.yaml
+  - prod-service-namespace.yaml
   - prod-infra-namespace.yaml
   - prod-web-namespace.yaml
   - platform-gateway-hpa.yaml
   - platform-gateway-pdb.yaml
   - platform-auth-service-hpa.yaml
   - platform-auth-service-pdb.yaml
-commonLabels:
-  env: prod
+  - platform-core-service-hpa.yaml
+  - platform-core-service-pdb.yaml
+  - platform-admin-web-hpa.yaml
+  - platform-admin-web-pdb.yaml
+  - postgres-backup-cronjob.yaml
+  - postgres-backup-pvc.yaml
+
+labels:
+  - pairs:
+      env: prod
+
 generatorOptions:
   disableNameSuffixHash: true
+
 secretGenerator:
   - name: postgres-secret
+    namespace: dev-infra
+    behavior: replace
     envs:
       - secrets/postgres-secret.env
   - name: rabbitmq-secret
+    namespace: dev-infra
+    behavior: replace
     envs:
       - secrets/rabbitmq-secret.env
     files:
-      - default_user.conf=secrets/rabbitmq-default_user.conf
+      - default_user.conf=secrets/rabbitmq-default-user.conf
+  - name: redis-secret
+    namespace: dev-infra
+    behavior: replace
+    envs:
+      - secrets/redis-secret.env
+  - name: platform-auth-service-secret
+    namespace: dev-service
+    behavior: replace
+    envs:
+      - secrets/platform-auth-service-secret.env
+  - name: platform-gateway-secret
+    namespace: dev-web
+    behavior: replace
+    envs:
+      - secrets/platform-gateway-secret.env
+  - name: platform-core-service-secret
+    namespace: dev-service
+    behavior: replace
+    envs:
+      - secrets/platform-core-service-secret.env
+
+replacements:
+  - source:
+      kind: Namespace
+      name: prod-web
+      fieldPath: metadata.name
+    targets:
+      - select:
+          namespace: dev-web
+        fieldPaths:
+          - metadata.namespace
+        options:
+          create: true
+  - source:
+      kind: Namespace
+      name: prod-service
+      fieldPath: metadata.name
+    targets:
+      - select:
+          namespace: dev-service
+        fieldPaths:
+          - metadata.namespace
+        options:
+          create: true
+  - source:
+      kind: Namespace
+      name: prod-infra
+      fieldPath: metadata.name
+    targets:
+      - select:
+          namespace: dev-infra
+        fieldPaths:
+          - metadata.namespace
+        options:
+          create: true
+
 patches:
-  - path: delete-postgres-secret.yaml
-  - path: delete-rabbitmq-secret.yaml
+  # ===== platform-gateway =====
   - target:
       kind: Deployment
       name: platform-gateway-deploy
     patch: |-
-      - op: replace
-        path: /metadata/namespace
-        value: prod-web
       - op: replace
         path: /spec/replicas
         value: 3
@@ -73,12 +138,38 @@ patches:
                       app.kubernetes.io/name: platform-gateway
                       env: prod
   - target:
+      kind: ConfigMap
+      name: platform-gateway-cm
+    patch: |-
+      - op: replace
+        path: /data/AUTH_SERVICE_URL
+        value: platform-auth-service.prod-service.svc.cluster.local:3001
+      - op: replace
+        path: /data/CORE_SERVICE_URL
+        value: platform-core-service.prod-service.svc.cluster.local:3005
+      - op: replace
+        path: /data/NODE_ENV
+        value: production
+  - target:
+      kind: Gateway
+      name: platform-gateway-gw
+    patch: |-
+      - op: replace
+        path: /spec/servers/0/hosts
+        value: ["your-domain.com", "*.your-domain.com"]
+  - target:
+      kind: VirtualService
+      name: platform-gateway-vs
+    patch: |-
+      - op: replace
+        path: /spec/hosts
+        value: ["your-domain.com"]
+
+  # ===== platform-auth-service =====
+  - target:
       kind: Deployment
       name: platform-auth-service-deploy
     patch: |-
-      - op: replace
-        path: /metadata/namespace
-        value: prod-api
       - op: replace
         path: /spec/replicas
         value: 3
@@ -114,86 +205,105 @@ patches:
                       app.kubernetes.io/name: platform-auth-service
                       env: prod
   - target:
-      kind: Service
-      name: platform-gateway
-    patch: |-
-      - op: replace
-        path: /metadata/namespace
-        value: prod-web
-  - target:
-      kind: Service
-      name: platform-auth-service
-    patch: |-
-      - op: replace
-        path: /metadata/namespace
-        value: prod-api
-  - target:
-      kind: ConfigMap
-      name: platform-gateway-cm
-    patch: |-
-      - op: replace
-        path: /metadata/namespace
-        value: prod-web
-      - op: replace
-        path: /data/AUTH_SERVICE_HOST
-        value: platform-auth-service.prod-api.svc.cluster.local
-      - op: replace
-        path: /data/AUTH_SERVICE_PORT
-        value: "3001"
-      - op: replace
-        path: /data/NODE_ENV
-        value: production
-      - op: replace
-        path: /data/RABBITMQ_URL
-        value: amqp://rabbitmq.prod-infra.svc.cluster.local:5672
-  - target:
       kind: ConfigMap
       name: platform-auth-service-cm
     patch: |-
       - op: replace
-        path: /metadata/namespace
-        value: prod-api
+        path: /data/NODE_ENV
+        value: production
+
+  # ===== platform-core-service =====
+  - target:
+      kind: Deployment
+      name: platform-core-service-deploy
+    patch: |-
+      - op: replace
+        path: /spec/replicas
+        value: 3
+      - op: add
+        path: /spec/template/spec/containers/0/resources
+        value:
+          requests:
+            cpu: "250m"
+            memory: "256Mi"
+          limits:
+            cpu: "500m"
+            memory: "512Mi"
+      - op: add
+        path: /spec/template/spec/topologySpreadConstraints
+        value:
+          - maxSkew: 1
+            topologyKey: kubernetes.io/hostname
+            whenUnsatisfiable: ScheduleAnyway
+            labelSelector:
+              matchLabels:
+                app.kubernetes.io/name: platform-core-service
+                env: prod
+      - op: add
+        path: /spec/template/spec/affinity
+        value:
+          podAntiAffinity:
+            preferredDuringSchedulingIgnoredDuringExecution:
+              - weight: 100
+                podAffinityTerm:
+                  topologyKey: kubernetes.io/hostname
+                  labelSelector:
+                    matchLabels:
+                      app.kubernetes.io/name: platform-core-service
+                      env: prod
+  - target:
+      kind: ConfigMap
+      name: platform-core-service-cm
+    patch: |-
       - op: replace
         path: /data/NODE_ENV
         value: production
-      - op: replace
-        path: /data/DATABASE_URL
-        value: postgres://prod_platform_user:CHANGE_ME_PROD_POSTGRES_PASSWORD@postgres-rw.prod-infra.svc.cluster.local:5432/platform_db
+
+  # ===== platform-admin-web =====
   - target:
-      kind: Secret
-      name: postgres-secret
+      kind: Deployment
+      name: platform-admin-web-deploy
     patch: |-
       - op: replace
-        path: /metadata/namespace
-        value: prod-infra
-  - target:
-      kind: Secret
-      name: rabbitmq-secret
-    patch: |-
-      - op: replace
-        path: /metadata/namespace
-        value: prod-infra
-  - target:
-      kind: Gateway
-      name: platform-gateway-gw
-    patch: |-
-      - op: replace
-        path: /metadata/namespace
-        value: prod-web
-  - target:
-      kind: VirtualService
-      name: platform-gateway-vs
-    patch: |-
-      - op: replace
-        path: /metadata/namespace
-        value: prod-web
+        path: /spec/replicas
+        value: 2
+      - op: add
+        path: /spec/template/spec/containers/0/resources
+        value:
+          requests:
+            cpu: "50m"
+            memory: "64Mi"
+          limits:
+            cpu: "200m"
+            memory: "256Mi"
+      - op: add
+        path: /spec/template/spec/topologySpreadConstraints
+        value:
+          - maxSkew: 1
+            topologyKey: kubernetes.io/hostname
+            whenUnsatisfiable: ScheduleAnyway
+            labelSelector:
+              matchLabels:
+                app.kubernetes.io/name: platform-admin-web
+                env: prod
+      - op: add
+        path: /spec/template/spec/affinity
+        value:
+          podAntiAffinity:
+            preferredDuringSchedulingIgnoredDuringExecution:
+              - weight: 100
+                podAffinityTerm:
+                  topologyKey: kubernetes.io/hostname
+                  labelSelector:
+                    matchLabels:
+                      app.kubernetes.io/name: platform-admin-web
+                      env: prod
+
+  # ===== Infrastructure =====
   - target:
       kind: Cluster
       name: postgres
     patch: |-
-      - op: replace
-        path: /metadata/namespace
-        value: prod-infra
       - op: replace
         path: /spec/instances
         value: 3
@@ -205,278 +315,69 @@ patches:
       name: redis
     patch: |-
       - op: replace
-        path: /metadata/namespace
-        value: prod-infra
-      - op: replace
         path: /spec/clusterSize
         value: 3
-  - target:
-      kind: Kafka
-      name: kafka-cluster
-    patch: |-
-      - op: replace
-        path: /metadata/namespace
-        value: prod-infra
-      - op: replace
-        path: /spec/kafka/replicas
-        value: 3
-      - op: replace
-        path: /spec/kafka/config/offsets.topic.replication.factor
-        value: 3
-      - op: replace
-        path: /spec/kafka/config/transaction.state.log.replication.factor
-        value: 3
-      - op: replace
-        path: /spec/kafka/config/transaction.state.log.min.isr
-        value: 2
-      - op: replace
-        path: /spec/kafka/config/default.replication.factor
-        value: 3
-      - op: replace
-        path: /spec/kafka/config/min.insync.replicas
-        value: 2
   - target:
       kind: RabbitmqCluster
       name: rabbitmq
     patch: |-
-      - op: replace
-        path: /metadata/namespace
-        value: prod-infra
       - op: replace
         path: /spec/replicas
         value: 3
       - op: replace
         path: /spec/persistence/storage
         value: 20Gi
-      - op: add
-        path: /spec/rabbitmq
-        value:
-          additionalConfig: |
-            cluster_partition_handling = pause_minority
-            vm_memory_high_watermark_paging_ratio = 0.99
-      - op: add
-        path: /spec/resources
-        value:
-          requests:
-            cpu: "500m"
-            memory: "1Gi"
-          limits:
-            cpu: "1000m"
-            memory: "2Gi"
+      - op: replace
+        path: /spec/resources/requests/cpu
+        value: 500m
+      - op: replace
+        path: /spec/resources/requests/memory
+        value: 1Gi
+      - op: replace
+        path: /spec/resources/limits/cpu
+        value: "1"
+      - op: replace
+        path: /spec/resources/limits/memory
+        value: 2Gi
+
+  # ===== NetworkPolicies Cross-Namespace Updates =====
   - target:
       kind: NetworkPolicy
-      name: egress-platform-gateway-to-platform-auth
+      name: egress-gateway-to-services
     patch: |-
-      - op: replace
-        path: /metadata/namespace
-        value: prod-web
       - op: replace
         path: /spec/egress/0/to/0/namespaceSelector/matchLabels/kubernetes.io~1metadata.name
-        value: prod-api
+        value: prod-service
   - target:
       kind: NetworkPolicy
-      name: ingress-platform-auth-from-platform-gateway
+      name: ingress-services-from-gateway
     patch: |-
-      - op: replace
-        path: /metadata/namespace
-        value: prod-api
       - op: replace
         path: /spec/ingress/0/from/0/namespaceSelector/matchLabels/kubernetes.io~1metadata.name
         value: prod-web
   - target:
       kind: NetworkPolicy
-      name: egress-platform-auth-to-kafka
+      name: egress-services-to-infra
     patch: |-
-      - op: replace
-        path: /metadata/namespace
-        value: prod-api
       - op: replace
         path: /spec/egress/0/to/0/namespaceSelector/matchLabels/kubernetes.io~1metadata.name
         value: prod-infra
   - target:
       kind: NetworkPolicy
-      name: egress-platform-auth-to-postgres
+      name: ingress-postgres-from-services
     patch: |-
-      - op: replace
-        path: /metadata/namespace
-        value: prod-api
-      - op: replace
-        path: /spec/egress/0/to/0/namespaceSelector/matchLabels/kubernetes.io~1metadata.name
-        value: prod-infra
-  - target:
-      kind: NetworkPolicy
-      name: egress-platform-auth-to-rabbitmq
-    patch: |-
-      - op: replace
-        path: /metadata/namespace
-        value: prod-api
-      - op: replace
-        path: /spec/egress/0/to/0/namespaceSelector/matchLabels/kubernetes.io~1metadata.name
-        value: prod-infra
-  - target:
-      kind: NetworkPolicy
-      name: egress-platform-auth-to-redis
-    patch: |-
-      - op: replace
-        path: /metadata/namespace
-        value: prod-api
-      - op: replace
-        path: /spec/egress/0/to/0/namespaceSelector/matchLabels/kubernetes.io~1metadata.name
-        value: prod-infra
-  - target:
-      kind: NetworkPolicy
-      name: egress-platform-gateway-to-kafka
-    patch: |-
-      - op: replace
-        path: /metadata/namespace
-        value: prod-web
-      - op: replace
-        path: /spec/egress/0/to/0/namespaceSelector/matchLabels/kubernetes.io~1metadata.name
-        value: prod-infra
-  - target:
-      kind: NetworkPolicy
-      name: egress-platform-gateway-to-postgres
-    patch: |-
-      - op: replace
-        path: /metadata/namespace
-        value: prod-web
-      - op: replace
-        path: /spec/egress/0/to/0/namespaceSelector/matchLabels/kubernetes.io~1metadata.name
-        value: prod-infra
-  - target:
-      kind: NetworkPolicy
-      name: egress-platform-gateway-to-rabbitmq
-    patch: |-
-      - op: replace
-        path: /metadata/namespace
-        value: prod-web
-      - op: replace
-        path: /spec/egress/0/to/0/namespaceSelector/matchLabels/kubernetes.io~1metadata.name
-        value: prod-infra
-  - target:
-      kind: NetworkPolicy
-      name: egress-platform-gateway-to-redis
-    patch: |-
-      - op: replace
-        path: /metadata/namespace
-        value: prod-web
-      - op: replace
-        path: /spec/egress/0/to/0/namespaceSelector/matchLabels/kubernetes.io~1metadata.name
-        value: prod-infra
-  - target:
-      kind: NetworkPolicy
-      name: ingress-kafka-from-apps
-    patch: |-
-      - op: replace
-        path: /metadata/namespace
-        value: prod-infra
       - op: replace
         path: /spec/ingress/0/from/0/namespaceSelector/matchLabels/kubernetes.io~1metadata.name
-        value: prod-api
-      - op: replace
-        path: /spec/ingress/0/from/1/namespaceSelector/matchLabels/kubernetes.io~1metadata.name
-        value: prod-web
+        value: prod-service
   - target:
       kind: NetworkPolicy
-      name: ingress-postgres-from-apps
+      name: ingress-redis-from-services
     patch: |-
-      - op: replace
-        path: /metadata/namespace
-        value: prod-infra
       - op: replace
         path: /spec/ingress/0/from/0/namespaceSelector/matchLabels/kubernetes.io~1metadata.name
-        value: prod-api
-      - op: replace
-        path: /spec/ingress/0/from/1/namespaceSelector/matchLabels/kubernetes.io~1metadata.name
-        value: prod-web
-  - target:
-      kind: NetworkPolicy
-      name: ingress-rabbitmq-from-apps
-    patch: |-
-      - op: replace
-        path: /metadata/namespace
-        value: prod-infra
-      - op: replace
-        path: /spec/ingress/0/from/0/namespaceSelector/matchLabels/kubernetes.io~1metadata.name
-        value: prod-api
-      - op: replace
-        path: /spec/ingress/0/from/1/namespaceSelector/matchLabels/kubernetes.io~1metadata.name
-        value: prod-web
-  - target:
-      kind: NetworkPolicy
-      name: ingress-redis-from-apps
-    patch: |-
-      - op: replace
-        path: /metadata/namespace
-        value: prod-infra
-      - op: replace
-        path: /spec/ingress/0/from/0/namespaceSelector/matchLabels/kubernetes.io~1metadata.name
-        value: prod-api
-      - op: replace
-        path: /spec/ingress/0/from/1/namespaceSelector/matchLabels/kubernetes.io~1metadata.name
-        value: prod-web
-  - target:
-      kind: NetworkPolicy
-      name: ingress-platform-gateway-from-istio-ingress
-    patch: |-
-      - op: replace
-        path: /metadata/namespace
-        value: prod-web
-  - target:
-      kind: NetworkPolicy
-      name: default-deny-all
-      namespace: dev-api
-    patch: |-
-      - op: replace
-        path: /metadata/namespace
-        value: prod-api
-  - target:
-      kind: NetworkPolicy
-      name: default-deny-all
-      namespace: dev-infra
-    patch: |-
-      - op: replace
-        path: /metadata/namespace
-        value: prod-infra
-  - target:
-      kind: NetworkPolicy
-      name: default-deny-all
-      namespace: dev-web
-    patch: |-
-      - op: replace
-        path: /metadata/namespace
-        value: prod-web
-  - target:
-      kind: NetworkPolicy
-      name: egress-api-to-dns
-    patch: |-
-      - op: replace
-        path: /metadata/namespace
-        value: prod-api
-  - target:
-      kind: NetworkPolicy
-      name: egress-infra-to-dns
-    patch: |-
-      - op: replace
-        path: /metadata/namespace
-        value: prod-infra
-  - target:
-      kind: NetworkPolicy
-      name: egress-web-to-dns
-    patch: |-
-      - op: replace
-        path: /metadata/namespace
-        value: prod-web
-  - target:
-      kind: KafkaNodePool
-      name: dual-role
-    patch: |-
-      - op: replace
-        path: /metadata/namespace
-        value: prod-infra
-      - op: replace
-        path: /spec/storage/volumes/0/size
-        value: 20Gi
+        value: prod-service
+
+  # ===== Monitoring: switch emptyDir to PVC for persistence =====
   - target:
       kind: StatefulSet
       name: loki-sts

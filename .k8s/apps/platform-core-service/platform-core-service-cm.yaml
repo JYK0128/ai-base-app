@@ -2,7 +2,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: platform-core-service-cm
-  namespace: dev-api
+  namespace: dev-service
   labels:
     app.kubernetes.io/name: platform-core-service
     app.kubernetes.io/part-of: ai-base-app
@@ -10,9 +10,6 @@ data:
   NODE_ENV: "development"
   PORT: "3004"
   TCP_PORT: "3005"
-  DATABASE_URL: "postgresql://platform_user:postgrespassword@postgres-rw.dev-infra.svc.cluster.local:5432/platform_db"
-  REDIS_URL: "redis://default:dev_redis_password@redis-leader.dev-infra.svc.cluster.local:6379"
-  JWT_ACCESS_SECRET: "dev_access_secret_key_1234567890"
-  JWT_REFRESH_SECRET: "dev_refresh_secret_key_1234567890"
   JWT_ACCESS_EXPIRES_IN: "3600"
   JWT_REFRESH_EXPIRES_IN: "604800"
+  LOGIN_MAX_ATTEMPTS: "5"

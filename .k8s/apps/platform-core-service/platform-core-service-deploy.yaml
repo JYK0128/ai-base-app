@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: platform-core-service-deploy
-  namespace: dev-api
+  namespace: dev-service
   labels:
     app.kubernetes.io/name: platform-core-service
     app.kubernetes.io/part-of: ai-base-app
@@ -26,12 +26,14 @@ spec:
         envFrom:
         - configMapRef:
             name: platform-core-service-cm
+        - secretRef:
+            name: platform-core-service-secret
         ports:
         - containerPort: 3004
         - containerPort: 3005
         resources:
           requests:
-            cpu: 100m
+            cpu: 50m
             memory: 128Mi
           limits:
             cpu: 300m
@@ -39,9 +41,13 @@ spec:
         readinessProbe:
           tcpSocket:
             port: 3004
+          initialDelaySeconds: 30
+          periodSeconds: 10
         livenessProbe:
           tcpSocket:
             port: 3004
+          initialDelaySeconds: 60
+          periodSeconds: 15
       volumes:
       - name: tmp
         emptyDir: {}

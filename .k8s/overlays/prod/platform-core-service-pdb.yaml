@@ -1,0 +1,13 @@
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: platform-core-service-pdb
+  namespace: prod-service
+  labels:
+    app.kubernetes.io/name: platform-core-service
+    app.kubernetes.io/part-of: ai-base-app
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: platform-core-service

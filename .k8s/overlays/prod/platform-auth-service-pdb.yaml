@@ -2,7 +2,7 @@ apiVersion: policy/v1
 kind: PodDisruptionBudget
 metadata:
   name: platform-auth-service-pdb
-  namespace: prod-api
+  namespace: prod-service
 spec:
   minAvailable: 2
   selector:

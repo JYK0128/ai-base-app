@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: platform-auth-service-deploy
-  namespace: dev-api
+  namespace: dev-service
   labels:
     app.kubernetes.io/name: platform-auth-service
     app.kubernetes.io/part-of: ai-base-app
@@ -26,12 +26,14 @@ spec:
         envFrom:
         - configMapRef:
             name: platform-auth-service-cm
+        - secretRef:
+            name: platform-auth-service-secret
         ports:
         - containerPort: 3000
         - containerPort: 3001
         resources:
           requests:
-            cpu: 100m
+            cpu: 50m
             memory: 128Mi
           limits:
             cpu: 300m
@@ -40,10 +42,14 @@ spec:
           httpGet:
             path: /health/live
             port: 3000
+          initialDelaySeconds: 30
+          periodSeconds: 10
         livenessProbe:
           httpGet:
             path: /health/live
             port: 3000
+          initialDelaySeconds: 60
+          periodSeconds: 15
       volumes:
       - name: tmp
         emptyDir: {}
