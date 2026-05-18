@@ -23,7 +23,7 @@ import { Badge,
          TableRow,
          Textarea,
          toast } from '@pkg/ui';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQueryClient } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
 import { Check,
          ChevronDown,
@@ -39,8 +39,13 @@ import { Check,
          Trash2 } from 'lucide-react';
 import { useState } from 'react';
 
-import { ApiResponse, ResourceTreeNode, RoleDto, useGetRbacResources, useGetRbacRoles, useUpdateRolePermissions } from '@/lib/api/rbac';
-import axiosInstance from '@/lib/axios';
+import { getRbacControllerGetRolePermissionsMatrixV1QueryKey,
+         useRbacControllerGetResourcesV1,
+         useRbacControllerGetRolePermissionsMatrixV1,
+         useRbacControllerGetRolesV1,
+         useRbacControllerUpdateRolePermissionsV1 } from '@/api/endpoints';
+import type { ResourceResponseDto } from '@/api/model/resourceResponseDto';
+import type { RoleResponseDto } from '@/api/model/roleResponseDto';
 
 // ==========================================
 // TanStack Route Definition
@@ -78,18 +83,23 @@ function RbacPage() {
   const [activeTab, setActiveTab] = useState<'roles' | 'resources' | 'matrix'>('matrix');
 
   // 🌟 DB Live Queries
-  const { data: dbResources = [], isLoading: isResourcesLoading } = useGetRbacResources();
-  const { data: dbRoles = [], isLoading: isRolesLoading } = useGetRbacRoles();
+  const { data: dbResources = [], isLoading: isResourcesLoading } = useRbacControllerGetResourcesV1<ResourceResponseDto[]>({
+    query: {
+      select: (res) => (res.data ?? []) as ResourceResponseDto[],
+      staleTime: 1000 * 60 * 5, // 5분 동안 fresh 상태 유지
+      gcTime: 1000 * 60 * 10,   // 0인 전역 gcTime 우회
+    },
+  });
+  const { data: dbRoles = [], isLoading: isRolesLoading } = useRbacControllerGetRolesV1<RoleResponseDto[]>({
+    query: {
+      select: (res) => (res.data ?? []) as RoleResponseDto[],
+    },
+  });
 
   // 🌟 Single query to fetch the entire role-permissions matrix
-  const { data: matrixData = {}, isLoading: isMatrixLoading } = useQuery<Record<string, string[]>>({
-    queryKey: ['rbac.matrix'],
-    queryFn: async () => {
-      const res = await axiosInstance<ApiResponse<Record<string, string[]>>>({
-        url: '/api/v1/rbac/matrix',
-        method: 'GET',
-      });
-      return res.data;
+  const { data: matrixData = {}, isLoading: isMatrixLoading } = useRbacControllerGetRolePermissionsMatrixV1<Record<string, string[]>>({
+    query: {
+      select: (res) => (res.data ?? {}) as Record<string, string[]>,
     },
   });
 
@@ -102,12 +112,12 @@ function RbacPage() {
     });
   });
 
-  const updatePermissionsMutation = useUpdateRolePermissions();
+  const updatePermissionsMutation = useRbacControllerUpdateRolePermissionsV1();
 
   // States for Dialogs & Forms (Keep local state for UI simulations)
   const [isRoleDialogOpen, setIsRoleDialogOpen] = useState(false);
-  const [selectedRole, setSelectedRole] = useState<RoleDto | null>(null);
-  const [roleForm, setRoleForm] = useState<Omit<RoleDto, 'id'>>({
+  const [selectedRole, setSelectedRole] = useState<RoleResponseDto | null>(null);
+  const [roleForm, setRoleForm] = useState<Omit<RoleResponseDto, 'id'>>({
     code: '',
     name: '',
     description: '',
@@ -115,7 +125,7 @@ function RbacPage() {
   });
 
   const [isResourceDialogOpen, setIsResourceDialogOpen] = useState(false);
-  const [selectedParentResource, setSelectedParentResource] = useState<ResourceTreeNode | null>(null);
+  const [selectedParentResource, setSelectedParentResource] = useState<ResourceResponseDto | null>(null);
   const [resourceForm, setResourceForm] = useState({
     code: '',
     name: '',
@@ -148,7 +158,7 @@ function RbacPage() {
     setIsRoleDialogOpen(true);
   };
 
-  const handleOpenRoleEdit = (role: RoleDto) => {
+  const handleOpenRoleEdit = (role: RoleResponseDto) => {
     setSelectedRole(role);
     setRoleForm({
       code: role.code,
@@ -174,7 +184,7 @@ function RbacPage() {
   // ==========================================
   // Resource CRUD Actions (Local simulations for now)
   // ==========================================
-  const handleOpenResourceAdd = (parent: ResourceTreeNode | null = null) => {
+  const handleOpenResourceAdd = (parent: ResourceResponseDto | null = null) => {
     setSelectedParentResource(parent);
     setResourceForm({
       code: '',
@@ -221,11 +231,11 @@ function RbacPage() {
     try {
       await updatePermissionsMutation.mutateAsync({
         roleCode,
-        permissionCodes: newPermissions,
+        data: { permissionCodes: newPermissions },
       });
 
       // 🌟 Invalidate the entire matrix query so that UI instantly updates!
-      await queryClient.invalidateQueries({ queryKey: ['rbac.matrix'] });
+      await queryClient.invalidateQueries({ queryKey: getRbacControllerGetRolePermissionsMatrixV1QueryKey() });
 
       if (!isCurrentlyChecked) {
         toast.success(`'${roleCode}' 역할에 '${permissionCode}' 권한이 부여되었습니다.`, {
@@ -245,7 +255,7 @@ function RbacPage() {
   };
 
   // Recursively render resource tree in Resources Tab
-  const renderResourceTree = (node: ResourceTreeNode, depth: number = 0) => {
+  const renderResourceTree = (node: ResourceResponseDto, depth: number = 0) => {
     const hasChildren = node.children && node.children.length > 0;
     const isExpanded = expandedNodes[node.id];
 
@@ -341,7 +351,7 @@ function RbacPage() {
   };
 
   // Recursively render matrix rows (Tree row header + checkbox cells)
-  const renderMatrixRows = (node: ResourceTreeNode, depth: number = 0): React.ReactNode[] => {
+  const renderMatrixRows = (node: ResourceResponseDto, depth: number = 0): React.ReactNode[] => {
     const list: React.ReactNode[] = [];
     const hasChildren = node.children && node.children.length > 0;
     const isExpanded = expandedNodes[node.id];
