@@ -12,15 +12,16 @@ import { Building2,
          Shield,
          Users } from 'lucide-react';
 
-import { useAuthControllerLogoutV1 } from '../api/endpoints';
+import { getRbacControllerGetResourcesV1QueryOptions,
+         useAuthControllerLogoutV1,
+         useRbacControllerGetResourcesV1 } from '../api/endpoints';
+import type { ResourceResponseDto } from '../api/model/resourceResponseDto';
 import { useAuth } from '../hooks/useAuth';
-import { ApiResponse, ResourceTreeNode, useGetRbacResources } from '../lib/api/rbac';
-import { axiosInstance } from '../lib/axios';
 
 // 🌟 트리 자원 평탄화 헬퍼 함수
-function flattenResources(nodes: ResourceTreeNode[]): ResourceTreeNode[] {
-  const result: ResourceTreeNode[] = [];
-  const traverse = (list: ResourceTreeNode[]) => {
+function flattenResources(nodes: ResourceResponseDto[]): ResourceResponseDto[] {
+  const result: ResourceResponseDto[] = [];
+  const traverse = (list: ResourceResponseDto[]) => {
     for (const node of list) {
       result.push(node);
       if (node.children && node.children.length > 0) {
@@ -33,7 +34,7 @@ function flattenResources(nodes: ResourceTreeNode[]): ResourceTreeNode[] {
 }
 
 // 🌟 현재 경로와 대응하는 MENU 타입 자원을 식별하는 헬퍼 함수
-function findMatchingResource(flattened: ResourceTreeNode[], path: string): ResourceTreeNode | undefined {
+function findMatchingResource(flattened: ResourceResponseDto[], path: string): ResourceResponseDto | undefined {
   return flattened.find((res) => {
     if (res.type !== 'MENU' || !res.path) return false;
     const mappedPath = res.path === '/roles' ? '/rbac' : res.path;
@@ -42,7 +43,7 @@ function findMatchingResource(flattened: ResourceTreeNode[], path: string): Reso
 }
 
 // 🌟 권한이 없을 경우 사용자가 권한을 가진 첫 번째 메뉴의 경로를 반환하는 헬퍼 함수
-function findFallbackRedirectPath(flattened: ResourceTreeNode[], permissions: string[]): string {
+function findFallbackRedirectPath(flattened: ResourceResponseDto[], permissions: string[]): string {
   const allowedMenu = flattened
     .filter((res) => res.type === 'MENU' && res.path)
     .find((res) => {
@@ -75,18 +76,16 @@ export const Route = createFileRoute('/_protected')({
     const queryClient = context.queryClient;
 
     // 🌟 TanStack Query의 Cache Layer를 활용해 rbac.resources 데이터를 Prefetch 및 로드
-    let resources: ResourceTreeNode[] = [];
+    let resources: ResourceResponseDto[] = [];
     try {
-      resources = await queryClient.ensureQueryData<ResourceTreeNode[]>({
-        queryKey: ['rbac.resources'],
-        queryFn: async () => {
-          const res = await axiosInstance<ApiResponse<ResourceTreeNode[]>>({
-            url: '/api/v1/rbac/resources',
-            method: 'GET',
-          });
-          return res.data;
-        },
+      const { queryKey, queryFn } = getRbacControllerGetResourcesV1QueryOptions();
+      const response = await queryClient.ensureQueryData({
+        queryKey,
+        queryFn,
+        staleTime: 1000 * 60 * 5, // 5분 동안 fresh 상태 유지
+        gcTime: 1000 * 60 * 10,   // 0인 전역 gcTime 우회
       });
+      resources = response.data ?? [];
     }
     catch (error) {
       console.error('Failed to prefetch dynamic resources in route guard:', error);
@@ -127,7 +126,13 @@ function ProtectedLayout() {
   });
 
   // 🌟 API와 실시간 동기화되는 동적 리소스 조회
-  const { data: dbResources = [] } = useGetRbacResources();
+  const { data: dbResources = [] } = useRbacControllerGetResourcesV1({
+    query: {
+      select: (res) => res.data ?? [],
+      staleTime: 1000 * 60 * 5, // 5분 동안 fresh 상태 유지
+      gcTime: 1000 * 60 * 10,   // 0인 전역 gcTime 우회
+    },
+  });
 
   // 🌟 Lucide Icon 매핑 테이블
   const IconMap: Record<string, LucideIcon> = {

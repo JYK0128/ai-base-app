@@ -23,7 +23,7 @@ export class GetRolePermissionsMatrixHandler implements ICommandHandler<GetRoleP
       this.em.find(
         RolePermission,
         {},
-        { populate: ['role', 'permission'] },
+        { populate: ['role', 'permission', 'permission.resource'] },
       ),
       'LOAD_FAILED',
     );
