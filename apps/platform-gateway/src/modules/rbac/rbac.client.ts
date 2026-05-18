@@ -4,7 +4,6 @@ import { ClsService } from 'nestjs-cls';
 import { defaultIfEmpty, firstValueFrom } from 'rxjs';
 
 import { CORE_SERVICE } from '../core/core.constants';
-import { UpdateRolePermissionsDto } from './dto/rbac.dto';
 
 @Injectable()
 export class RbacClient {
@@ -33,24 +32,5 @@ export class RbacClient {
 
   async getResources() {
     return this.send('rbac.resources.get', {});
-  }
-
-  async getRoles() {
-    return this.send('rbac.roles.get', {});
-  }
-
-  async getRolePermissionsMatrix() {
-    return this.send<Record<string, string[]>>('rbac.role_permissions.matrix.get', {});
-  }
-
-  async getRoleResourcePermissionsMatrix() {
-    return this.send<Record<string, Record<string, string[]>>>('rbac.role_permissions.resource_matrix.get', {});
-  }
-
-  async updateRolePermissions(roleCode: string, data: UpdateRolePermissionsDto) {
-    return this.send('rbac.role_permissions.update', {
-      roleCode,
-      permissionCodes: data.permissionCodes,
-    });
   }
 }

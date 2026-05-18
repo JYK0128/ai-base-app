@@ -36,7 +36,7 @@ export class ResourceResponseDto {
   @ApiProperty({ example: '조직 관리' })
   name!: string;
 
-  @ApiProperty({ example: 'MENU', enum: ['MENU', 'API'] })
+  @ApiProperty({ example: 'MENU', enum: ['MENU', 'API', 'COMPONENT'] })
   type!: string;
 
   @ApiPropertyOptional({ example: '/organizations' })
@@ -46,16 +46,13 @@ export class ResourceResponseDto {
   icon?: string;
 
   @ApiPropertyOptional({ example: 1 })
-  displayOrder?: number;
+  sortOrder?: number;
 
-  @ApiPropertyOptional({ example: 'GET' })
-  httpMethod?: string;
+  @ApiProperty({ type: [String], example: ['CREATE', 'READ'] })
+  actions!: string[];
 
-  @ApiPropertyOptional({ example: '/api/v1/organizations' })
-  pathPattern?: string;
-
-  @ApiProperty({ type: [PermissionResponseDto] })
-  permissions!: PermissionResponseDto[];
+  @ApiPropertyOptional({ example: 'READ' })
+  mappedAction?: string;
 
   @ApiProperty({ type: () => [ResourceResponseDto] })
   children!: ResourceResponseDto[];

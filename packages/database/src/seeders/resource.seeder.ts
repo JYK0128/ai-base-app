@@ -1,7 +1,6 @@
 import { EntityManager } from '@mikro-orm/core';
 import { Seeder } from '@mikro-orm/seeder';
 
-import { Permission } from '@/domains/platform/rbac/permission.entity';
 import { Resource, ResourceType } from '@/domains/platform/rbac/resource.entity';
 
 interface ResourceSeedDto {
@@ -10,9 +9,7 @@ interface ResourceSeedDto {
   type: ResourceType
   path?: string
   icon?: string
-  displayOrder?: number
-  httpMethod?: string
-  pathPattern?: string
+  sortOrder?: number
   parentCode?: string
   actions: ('CREATE' | 'READ' | 'UPDATE' | 'DELETE')[]
 }
@@ -25,7 +22,7 @@ const RESOURCES_SEEDS: ResourceSeedDto[] = [
     type: ResourceType.MENU,
     path: '/dashboard',
     icon: 'LayoutDashboard',
-    displayOrder: 1,
+    sortOrder: 1,
     actions: ['READ'],
   },
   // 2. 조직 관리
@@ -35,7 +32,7 @@ const RESOURCES_SEEDS: ResourceSeedDto[] = [
     type: ResourceType.MENU,
     path: '/organizations',
     icon: 'Building2',
-    displayOrder: 2,
+    sortOrder: 2,
     actions: ['CREATE', 'READ', 'UPDATE', 'DELETE'],
   },
   // 3. 공지사항 관리
@@ -45,7 +42,7 @@ const RESOURCES_SEEDS: ResourceSeedDto[] = [
     type: ResourceType.MENU,
     path: '/announcements',
     icon: 'Megaphone',
-    displayOrder: 3,
+    sortOrder: 3,
     actions: ['CREATE', 'READ', 'UPDATE', 'DELETE'],
   },
   // 4. 고객 지원
@@ -55,7 +52,7 @@ const RESOURCES_SEEDS: ResourceSeedDto[] = [
     type: ResourceType.MENU,
     path: '/support',
     icon: 'LifeBuoy',
-    displayOrder: 4,
+    sortOrder: 4,
     actions: ['CREATE', 'READ', 'UPDATE', 'DELETE'],
   },
   // 5. 감사 로그
@@ -65,7 +62,7 @@ const RESOURCES_SEEDS: ResourceSeedDto[] = [
     type: ResourceType.MENU,
     path: '/audit',
     icon: 'ScrollText',
-    displayOrder: 5,
+    sortOrder: 5,
     actions: ['READ'],
   },
   // 6. 조직 멤버 관리
@@ -75,7 +72,7 @@ const RESOURCES_SEEDS: ResourceSeedDto[] = [
     type: ResourceType.MENU,
     path: '/members',
     icon: 'Users',
-    displayOrder: 6,
+    sortOrder: 6,
     actions: ['CREATE', 'READ', 'UPDATE', 'DELETE'],
   },
   // 7. 조직 역할 관리
@@ -85,7 +82,7 @@ const RESOURCES_SEEDS: ResourceSeedDto[] = [
     type: ResourceType.MENU,
     path: '/roles',
     icon: 'Key',
-    displayOrder: 7,
+    sortOrder: 7,
     actions: ['CREATE', 'READ', 'UPDATE', 'DELETE'],
   },
   // 8. 조직 기본 정보
@@ -95,7 +92,7 @@ const RESOURCES_SEEDS: ResourceSeedDto[] = [
     type: ResourceType.MENU,
     path: '/info',
     icon: 'Info',
-    displayOrder: 8,
+    sortOrder: 8,
     actions: ['READ', 'UPDATE'],
   },
   // 9. 조직 서비스 데이터
@@ -105,7 +102,7 @@ const RESOURCES_SEEDS: ResourceSeedDto[] = [
     type: ResourceType.MENU,
     path: '/service',
     icon: 'Settings',
-    displayOrder: 9,
+    sortOrder: 9,
     actions: ['CREATE', 'READ', 'UPDATE', 'DELETE'],
   },
   // 10. 약관 관리
@@ -115,7 +112,7 @@ const RESOURCES_SEEDS: ResourceSeedDto[] = [
     type: ResourceType.MENU,
     path: '/terms',
     icon: 'FileText',
-    displayOrder: 10,
+    sortOrder: 10,
     actions: ['CREATE', 'READ', 'UPDATE', 'DELETE'],
   },
 ];
@@ -134,9 +131,14 @@ export class ResourceSeeder extends Seeder {
           type: seed.type,
           path: seed.path,
           icon: seed.icon,
-          displayOrder: seed.displayOrder,
+          sortOrder: seed.sortOrder,
+          actions: seed.actions,
         });
         em.persist(resource);
+      }
+      else {
+        resource.sortOrder = seed.sortOrder;
+        resource.actions = seed.actions;
       }
       createdResources[seed.code] = resource;
     }
@@ -157,32 +159,18 @@ export class ResourceSeeder extends Seeder {
           name: seed.name,
           type: seed.type,
           parent,
-          httpMethod: seed.httpMethod,
-          pathPattern: seed.pathPattern,
+          path: seed.path,
+          sortOrder: seed.sortOrder,
+          actions: seed.actions,
         });
         em.persist(resource);
       }
-      createdResources[seed.code] = resource;
-    }
-
-    await em.flush();
-
-    // 3. 자원별 Permission 생성
-    for (const seed of RESOURCES_SEEDS) {
-      const resource = createdResources[seed.code];
-      for (const action of seed.actions) {
-        const code = `${seed.code}:${action}`;
-        const exists = await em.findOne(Permission, { code });
-        if (!exists) {
-          const permission = em.create(Permission, {
-            code,
-            name: `${seed.name} (${action})`,
-            resource,
-            action,
-          });
-          em.persist(permission);
-        }
+      else {
+        resource.parent = parent;
+        resource.sortOrder = seed.sortOrder;
+        resource.actions = seed.actions;
       }
+      createdResources[seed.code] = resource;
     }
 
     await em.flush();

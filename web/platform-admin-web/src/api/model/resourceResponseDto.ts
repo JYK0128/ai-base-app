@@ -5,7 +5,6 @@
  * The AI Base App Gateway API documentation
  * OpenAPI spec version: 1.0
  */
-import type { PermissionResponseDto } from './permissionResponseDto';
 import type { ResourceResponseDtoType } from './resourceResponseDtoType';
 
 export interface ResourceResponseDto {
@@ -15,9 +14,8 @@ export interface ResourceResponseDto {
   type: ResourceResponseDtoType;
   path?: string;
   icon?: string;
-  displayOrder?: number;
-  httpMethod?: string;
-  pathPattern?: string;
-  permissions: PermissionResponseDto[];
+  sortOrder?: number;
+  actions: string[];
+  mappedAction?: string;
   children: ResourceResponseDto[];
 }

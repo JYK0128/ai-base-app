@@ -2,7 +2,7 @@ import { MikroOrmModule } from '@mikro-orm/nestjs';
 import { Module } from '@nestjs/common';
 import { CqrsModule } from '@nestjs/cqrs';
 import { JwtModule } from '@nestjs/jwt';
-import { ManagerAccount, ManagerRole, Permission, Role, RolePermission } from '@pkg/database';
+import { ManagerAccount, ManagerRole, Role, RolePermission } from '@pkg/database';
 
 import { ENV } from '@/common/env';
 
@@ -17,7 +17,6 @@ import { Handlers } from './handlers';
       ManagerAccount,
       ManagerRole,
       Role,
-      Permission,
       RolePermission,
     ]),
     JwtModule.register({

@@ -11,10 +11,9 @@ export interface ResourceTreeNode {
   type: string
   path?: string
   icon?: string
-  displayOrder?: number
-  httpMethod?: string
-  pathPattern?: string
-  permissions: { id: string, code: string, name: string, action: string }[]
+  sortOrder?: number
+  actions: string[]
+  mappedAction?: string
   children: ResourceTreeNode[]
 }
 
@@ -38,8 +37,7 @@ export class GetResourcesHandler implements ICommandHandler<GetResourcesCommand>
         Resource,
         {},
         {
-          populate: ['permissions'],
-          orderBy: { displayOrder: 'ASC' },
+          orderBy: { sortOrder: 'ASC' },
         },
       ),
       'LOAD_FAILED',
@@ -58,15 +56,9 @@ export class GetResourcesHandler implements ICommandHandler<GetResourcesCommand>
         type: res.type,
         path: res.path,
         icon: res.icon,
-        displayOrder: res.displayOrder,
-        httpMethod: res.httpMethod,
-        pathPattern: res.pathPattern,
-        permissions: (res.permissions || []).map((p) => ({
-          id: p.id,
-          code: p.code,
-          name: p.name,
-          action: p.action,
-        })),
+        sortOrder: res.sortOrder,
+        actions: res.actions || [],
+        mappedAction: res.mappedAction,
         children: [],
       });
     }
@@ -93,9 +85,9 @@ export class GetResourcesHandler implements ICommandHandler<GetResourcesCommand>
       }
     }
 
-    // 3. 자식 요소들을 displayOrder 기준으로 정렬
+    // 3. 자식 요소들을 sortOrder 기준으로 정렬
     const sortChildren = (nodes: ResourceTreeNode[]) => {
-      nodes.sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0));
+      nodes.sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0));
       for (const node of nodes) {
         if (node.children.length > 0) {
           sortChildren(node.children);

@@ -51,7 +51,7 @@ export class LoginHandler implements ICommandHandler<LoginCommand> {
     return await this.Asserter.assert(
       this.managerAccountRepository.findOne(
         { email },
-        { populate: ['manager.organization', 'manager.roles.role.permissions.permission'] },
+        { populate: ['manager.organization', 'manager.roles.role.permissions.resource'] },
       ),
       'INVALID_CREDENTIALS',
       { context: { email } },

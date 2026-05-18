@@ -13,7 +13,7 @@ import { ManagerAccount } from '@/domains/platform/manager/manager.account.entit
 import { Manager, ManagerStatus } from '@/domains/platform/manager/manager.entity';
 import { Organization, OrganizationStatus } from '@/domains/platform/organization/organization.entity';
 import { ManagerRole } from '@/domains/platform/rbac/manager.role.entity';
-import { Permission } from '@/domains/platform/rbac/permission.entity';
+import { Resource } from '@/domains/platform/rbac/resource.entity';
 import { RbacRoleScope, Role } from '@/domains/platform/rbac/role.entity';
 import { RolePermission } from '@/domains/platform/rbac/role.permission.entity';
 
@@ -139,7 +139,7 @@ const SUPER_ADMINS = [
 export class PlatformSeeder extends Seeder {
   private orgs: Record<string, Organization> = {};
   private roles: Record<string, Role> = {};
-  private perms: Record<string, Permission> = {};
+  private resources: Record<string, Resource> = {};
 
   /**
    * 시더 실행 메인 루틴
@@ -149,22 +149,24 @@ export class PlatformSeeder extends Seeder {
     this.orgs = await this.ensureEntities(em, Organization, ORGANIZATIONS, (seed) => em.create(Organization, seed));
     this.roles = await this.ensureEntities(em, Role, ROLES, (seed) => em.create(Role, seed));
 
-    // Fetch pre-seeded permissions from ResourceSeeder
-    const permissions = await em.find(Permission, {});
-    for (const perm of permissions) {
-      this.perms[perm.code] = perm;
+    // Fetch pre-seeded resources from ResourceSeeder
+    const resources = await em.find(Resource, {});
+    for (const res of resources) {
+      this.resources[res.code] = res;
     }
 
     // 2. 역할-권한 관계 설정
     for (const seed of ROLE_PERMISSIONS) {
-      const permission = this.perms[seed.permissionCode];
-      if (!permission) {
-        throw new Error(`Permission not found in PlatformSeeder: ${seed.permissionCode}`);
+      const [resourceCode, action] = seed.permissionCode.split(':');
+      const resource = this.resources[resourceCode];
+      if (!resource) {
+        throw new Error(`Resource not found in PlatformSeeder: ${resourceCode}`);
       }
       await this.ensureRolePermission(
         em,
         this.roles[seed.roleCode],
-        permission,
+        resource,
+        action,
       );
     }
 
@@ -215,11 +217,12 @@ export class PlatformSeeder extends Seeder {
   private async ensureRolePermission(
     em: EntityManager,
     role: Role,
-    permission: Permission,
+    resource: Resource,
+    action: string,
   ): Promise<void> {
-    const exists = await em.findOne(RolePermission, { role, permission });
+    const exists = await em.findOne(RolePermission, { role, resource, action });
     if (!exists) {
-      em.persist(em.create(RolePermission, { role, permission }));
+      em.persist(em.create(RolePermission, { role, resource, action }));
     }
   }
 

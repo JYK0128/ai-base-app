@@ -1,7 +1,6 @@
 import { Migration } from '@mikro-orm/migrations';
 
 export class Migration20260517235240 extends Migration {
-
   override up(): void | Promise<void> {
     this.addSql(`create table "platform"."Resource" ("id" varchar(255) not null, "createdAt" timestamptz not null, "createdBy" varchar(255) null, "updatedAt" timestamptz not null, "updatedBy" varchar(255) null, "deletedAt" timestamptz null, "deletedBy" varchar(255) null, "metadata" jsonb null, "code" varchar(255) not null, "name" varchar(255) not null, "type" text not null, "parent" varchar(255) null, "path" varchar(255) null, "icon" varchar(255) null, "displayOrder" int null, "httpMethod" varchar(255) null, "pathPattern" varchar(255) null, primary key ("id"));`);
     this.addSql(`alter table "platform"."Resource" add constraint "Resource_code_unique" unique ("code");`);
@@ -216,5 +215,4 @@ export class Migration20260517235240 extends Migration {
     this.addSql(`create index "TermsVersion_terms_document_id_index" on "platform"."TermsVersion" ("terms_document_id");`);
     this.addSql(`alter table "platform"."TermsVersion" add constraint "TermsVersion_terms_document_id_version_label_unique" unique ("terms_document_id", "version_label");`);
   }
-
 }

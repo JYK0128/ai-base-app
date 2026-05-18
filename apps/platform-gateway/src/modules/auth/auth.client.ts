@@ -4,8 +4,12 @@ import { ClsService } from 'nestjs-cls';
 import { defaultIfEmpty, firstValueFrom } from 'rxjs';
 
 import { AUTH_SERVICE, AUTH_SERVICE_PATTERNS } from './auth.constants';
-import { LoginResult } from './auth.service';
 import { type ChangePasswordDto, LoginDto } from './dto/auth-request.dto';
+
+export interface LoginResult {
+  accessToken: string
+  refreshToken: string
+}
 
 @Injectable()
 export class AuthClient {

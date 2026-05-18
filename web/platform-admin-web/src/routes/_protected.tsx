@@ -47,9 +47,8 @@ function findFallbackRedirectPath(flattened: ResourceResponseDto[], permissions:
   const allowedMenu = flattened
     .filter((res) => res.type === 'MENU' && res.path)
     .find((res) => {
-      const rp = res.permissions.find((p) => p.action === 'READ');
-      const req = rp ? rp.code : `${res.code}:READ`;
-      return permissions.includes(req);
+      const required = `${res.code}:READ`;
+      return res.actions.includes('READ') && permissions.includes(required);
     });
 
   if (!allowedMenu) return '/login';
@@ -100,11 +99,10 @@ export const Route = createFileRoute('/_protected')({
 
       if (matchingResource) {
         // READ 권한 코드 동적 추출
-        const readPerm = matchingResource.permissions.find((p) => p.action === 'READ');
-        const requiredPermission = readPerm ? readPerm.code : `${matchingResource.code}:READ`;
+        const requiredPermission = `${matchingResource.code}:READ`;
 
         // 사용자가 해당 자원의 필수 권한을 안 가지고 있다면 차단 및 허용 경로로 튕김 제어
-        if (!permissions.includes(requiredPermission)) {
+        if (!matchingResource.actions.includes('READ') || !permissions.includes(requiredPermission)) {
           const fallbackPath = findFallbackRedirectPath(flattened, permissions);
           throw redirect({ to: fallbackPath });
         }
@@ -155,8 +153,7 @@ function ProtectedLayout() {
       .filter((res) => res.type === 'MENU')
       .map((res) => {
         // READ 액션 권한 찾기
-        const readPerm = res.permissions.find((p) => p.action === 'READ');
-        const requiredPermission = readPerm ? readPerm.code : `${res.code}:READ`;
+        const requiredPermission = `${res.code}:READ`;
 
         // /roles 주소를 우리 플랫폼 어드민 웹의 /rbac 경로와 일치시킴 (DB 자원과 하이퍼링크 매핑 통일)
         let toPath = `/${res.code.toLowerCase()}`;
@@ -176,7 +173,7 @@ function ProtectedLayout() {
           icon: IconComponent,
           to: toPath,
           requiredPermission,
-          displayOrder: res.displayOrder ?? 99,
+          displayOrder: res.sortOrder ?? 99,
         };
       })
       .sort((a, b) => a.displayOrder - b.displayOrder)

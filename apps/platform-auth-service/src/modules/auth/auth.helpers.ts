@@ -41,8 +41,8 @@ function collectRolePermissions(role: Role, permissions: Set<string>): void {
   if (!role.permissions) return;
 
   for (const rp of role.permissions) {
-    if (rp.permission?.code) {
-      permissions.add(rp.permission.code);
+    if (rp.resource?.code && rp.action) {
+      permissions.add(`${rp.resource.code}:${rp.action}`);
     }
   }
 }

@@ -66,7 +66,7 @@ export class RefreshTokenHandler implements ICommandHandler<RefreshTokenCommand>
     return await this.Asserter.assert(
       this.managerAccountRepository.findOne(
         { id },
-        { populate: ['manager.organization', 'manager.roles.role.permissions.permission'] },
+        { populate: ['manager.organization', 'manager.roles.role.permissions.resource'] },
       ),
       'ACCOUNT_NOT_FOUND',
     );
