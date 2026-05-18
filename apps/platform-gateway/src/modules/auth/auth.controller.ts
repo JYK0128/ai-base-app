@@ -8,6 +8,7 @@ import { Cookies } from '@/common/decorators/cookies.decorator';
 import { CurrentUser } from '@/common/decorators/current-user.decorator';
 import { Public } from '@/common/decorators/public.decorator';
 import { SwaggerResult } from '@/common/decorators/swagger.decorator';
+import { ENV } from '@/common/env';
 import type { JWTPayload } from '@/common/types/request.type';
 import { ApiResponse } from '@/common/types/response.type';
 
@@ -51,7 +52,7 @@ export class AuthController {
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
       path: '/',
-      maxAge: 7 * 24 * 60 * 60 * 1000,
+      maxAge: ENV.JWT_REFRESH_EXPIRES_IN * 1000,
     });
   }
 

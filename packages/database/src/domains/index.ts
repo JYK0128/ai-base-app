@@ -15,6 +15,8 @@ export * from './platform/rbac/manager.role.entity';
 export * from './platform/rbac/manager.role.repository';
 export * from './platform/rbac/permission.entity';
 export * from './platform/rbac/permission.repository';
+export * from './platform/rbac/resource.entity';
+export * from './platform/rbac/resource.repository';
 export * from './platform/rbac/role.entity';
 export * from './platform/rbac/role.permission.entity';
 export * from './platform/rbac/role.permission.repository';

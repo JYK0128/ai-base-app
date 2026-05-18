@@ -1,16 +1,62 @@
 import { createFileRoute, Link, Outlet, redirect } from '@tanstack/react-router';
 import { Building2,
+         FileText,
+         Info,
+         Key,
          LayoutDashboard,
          LifeBuoy,
          LogOut,
-         Megaphone,
-         ScrollText } from 'lucide-react';
+         type LucideIcon, Megaphone,
+         ScrollText,
+         Settings,
+         Shield,
+         Users } from 'lucide-react';
 
 import { useAuthControllerLogoutV1 } from '../api/endpoints';
 import { useAuth } from '../hooks/useAuth';
+import { ApiResponse, ResourceTreeNode, useGetRbacResources } from '../lib/api/rbac';
+import { axiosInstance } from '../lib/axios';
+
+// 🌟 트리 자원 평탄화 헬퍼 함수
+function flattenResources(nodes: ResourceTreeNode[]): ResourceTreeNode[] {
+  const result: ResourceTreeNode[] = [];
+  const traverse = (list: ResourceTreeNode[]) => {
+    for (const node of list) {
+      result.push(node);
+      if (node.children && node.children.length > 0) {
+        traverse(node.children);
+      }
+    }
+  };
+  traverse(nodes);
+  return result;
+}
+
+// 🌟 현재 경로와 대응하는 MENU 타입 자원을 식별하는 헬퍼 함수
+function findMatchingResource(flattened: ResourceTreeNode[], path: string): ResourceTreeNode | undefined {
+  return flattened.find((res) => {
+    if (res.type !== 'MENU' || !res.path) return false;
+    const mappedPath = res.path === '/roles' ? '/rbac' : res.path;
+    return path === mappedPath || path.startsWith(mappedPath + '/');
+  });
+}
+
+// 🌟 권한이 없을 경우 사용자가 권한을 가진 첫 번째 메뉴의 경로를 반환하는 헬퍼 함수
+function findFallbackRedirectPath(flattened: ResourceTreeNode[], permissions: string[]): string {
+  const allowedMenu = flattened
+    .filter((res) => res.type === 'MENU' && res.path)
+    .find((res) => {
+      const rp = res.permissions.find((p) => p.action === 'READ');
+      const req = rp ? rp.code : `${res.code}:READ`;
+      return permissions.includes(req);
+    });
+
+  if (!allowedMenu) return '/login';
+  return allowedMenu.path === '/roles' ? '/rbac' : allowedMenu.path!;
+}
 
 export const Route = createFileRoute('/_protected')({
-  beforeLoad: ({ context, location }) => {
+  beforeLoad: async ({ context, location }) => {
     if (!context.auth.isAuthenticated) {
       throw redirect({
         to: '/login',
@@ -25,12 +71,52 @@ export const Route = createFileRoute('/_protected')({
         to: '/change-password',
       });
     }
+
+    const queryClient = context.queryClient;
+
+    // 🌟 TanStack Query의 Cache Layer를 활용해 rbac.resources 데이터를 Prefetch 및 로드
+    let resources: ResourceTreeNode[] = [];
+    try {
+      resources = await queryClient.ensureQueryData<ResourceTreeNode[]>({
+        queryKey: ['rbac.resources'],
+        queryFn: async () => {
+          const res = await axiosInstance<ApiResponse<ResourceTreeNode[]>>({
+            url: '/api/v1/rbac/resources',
+            method: 'GET',
+          });
+          return res.data;
+        },
+      });
+    }
+    catch (error) {
+      console.error('Failed to prefetch dynamic resources in route guard:', error);
+    }
+
+    const permissions = context.auth.permissions;
+    const path = location.pathname;
+
+    if (resources.length > 0) {
+      const flattened = flattenResources(resources);
+      const matchingResource = findMatchingResource(flattened, path);
+
+      if (matchingResource) {
+        // READ 권한 코드 동적 추출
+        const readPerm = matchingResource.permissions.find((p) => p.action === 'READ');
+        const requiredPermission = readPerm ? readPerm.code : `${matchingResource.code}:READ`;
+
+        // 사용자가 해당 자원의 필수 권한을 안 가지고 있다면 차단 및 허용 경로로 튕김 제어
+        if (!permissions.includes(requiredPermission)) {
+          const fallbackPath = findFallbackRedirectPath(flattened, permissions);
+          throw redirect({ to: fallbackPath });
+        }
+      }
+    }
   },
   component: ProtectedLayout,
 });
 
 function ProtectedLayout() {
-  const { logout: authLogout } = useAuth();
+  const { logout: authLogout, permissions } = useAuth();
   const { mutate: logoutMutate } = useAuthControllerLogoutV1({
     mutation: {
       onSettled: () => {
@@ -40,13 +126,60 @@ function ProtectedLayout() {
     },
   });
 
-  const menuItems = [
-    { label: '대시보드', icon: LayoutDashboard, to: '/dashboard' },
-    { label: '조직 승인', icon: Building2, to: '/organizations' },
-    { label: '공지사항', icon: Megaphone, to: '/announcements' },
-    { label: '고객 지원', icon: LifeBuoy, to: '/support' },
-    { label: '약관 관리', icon: ScrollText, to: '/terms' },
-  ];
+  // 🌟 API와 실시간 동기화되는 동적 리소스 조회
+  const { data: dbResources = [] } = useGetRbacResources();
+
+  // 🌟 Lucide Icon 매핑 테이블
+  const IconMap: Record<string, LucideIcon> = {
+    LayoutDashboard,
+    Building2,
+    Megaphone,
+    LifeBuoy,
+    ScrollText,
+    Shield,
+    FileText,
+    Key,
+    Users,
+    Settings,
+    Info,
+  };
+
+  // 🌟 API로 조회한 MENU 타입 리소스를 기반으로 메뉴 동적 렌더링
+  const menuItemsFromApi = dbResources
+    ? flattenResources(dbResources)
+      .filter((res) => res.type === 'MENU')
+      .map((res) => {
+        // READ 액션 권한 찾기
+        const readPerm = res.permissions.find((p) => p.action === 'READ');
+        const requiredPermission = readPerm ? readPerm.code : `${res.code}:READ`;
+
+        // /roles 주소를 우리 플랫폼 어드민 웹의 /rbac 경로와 일치시킴 (DB 자원과 하이퍼링크 매핑 통일)
+        let toPath = `/${res.code.toLowerCase()}`;
+        if (res.path === '/roles') {
+          toPath = '/rbac';
+        }
+        else if (res.path) {
+          toPath = res.path;
+        }
+
+        // Lucide 아이콘 매핑
+        const iconKey = res.icon || 'Shield';
+        const IconComponent = IconMap[iconKey] || Shield;
+
+        return {
+          label: res.name,
+          icon: IconComponent,
+          to: toPath,
+          requiredPermission,
+          displayOrder: res.displayOrder ?? 99,
+        };
+      })
+      .sort((a, b) => a.displayOrder - b.displayOrder)
+    : [];
+
+  const visibleMenuItems = menuItemsFromApi.filter(
+    (item) => permissions.includes(item.requiredPermission),
+  );
 
   return (
     <div className="flex h-screen bg-slate-50 font-sans">
@@ -57,7 +190,7 @@ function ProtectedLayout() {
         </div>
 
         <nav className="flex-1 p-4 space-y-1">
-          {menuItems.map((item) => (
+          {visibleMenuItems.map((item) => (
             <Link
               key={item.to}
               to={item.to}

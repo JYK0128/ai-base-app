@@ -36,3 +36,9 @@ export const organizationIdAtom = atom((get) => {
 
 // 파생 atom (로그인 여부 확인용)
 export const isAuthenticatedAtom = atom((get) => get(accessTokenAtom) !== null);
+
+// 권한 목록을 추출하는 파생 atom
+export const permissionsAtom = atom((get) => {
+  const payload = getPayload(get(accessTokenAtom));
+  return (payload?.permissions as string[]) || [];
+});

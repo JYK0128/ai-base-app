@@ -23,7 +23,6 @@ function TermsPage() {
 
     await createTermsDocument({
       data: {
-        groupType: 'PLATFORM',
         title,
         code,
         required: true,
@@ -73,7 +72,7 @@ function TermsPage() {
           <TableBody>
             {terms.map((item) => (
               <TableRow key={item.id}>
-                <TableCell>{item.groupType === 'PLATFORM' ? '플랫폼' : '조직'}</TableCell>
+                <TableCell>{!item.organizationId ? '플랫폼' : '조직'}</TableCell>
                 <TableCell>{item.code}</TableCell>
                 <TableCell>{item.title}</TableCell>
                 <TableCell>{item.required ? '필수' : '선택'}</TableCell>

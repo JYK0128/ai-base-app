@@ -30,6 +30,7 @@ const router = createRouter({
   routeTree,
   context: {
     auth: undefined!,
+    queryClient: undefined!,
   },
 });
 
@@ -63,7 +64,7 @@ const queryClient = new QueryClient({
 });
 
 function AppInner() {
-  const { isInitializing, isAuthenticated, mustChangePassword } = useAuth();
+  const { isInitializing, isAuthenticated, mustChangePassword, permissions } = useAuth();
 
   if (isInitializing) {
     return (
@@ -75,7 +76,13 @@ function AppInner() {
 
   return (
     <>
-      <RouterProvider router={router} context={{ auth: { isAuthenticated, mustChangePassword } }} />
+      <RouterProvider
+        router={router}
+        context={{
+          auth: { isAuthenticated, mustChangePassword, permissions },
+          queryClient,
+        }}
+      />
       <React.Suspense fallback={null}>
         <TanStackRouterDevtools router={router} />
         <ReactQueryDevtools />

@@ -15,6 +15,7 @@ import { ContextMiddleware } from '@/common/middlewares/context.middleware';
 import { AuthModule } from '@/modules/auth/auth.module';
 import { CoreModule } from '@/modules/core/core.module';
 import { HealthModule } from '@/modules/health/health.module';
+import { RbacModule } from '@/modules/rbac/rbac.module';
 
 @Module({
   imports: [
@@ -47,6 +48,7 @@ import { HealthModule } from '@/modules/health/health.module';
     AuthModule,
     CoreModule,
     HealthModule,
+    RbacModule,
   ],
   controllers: [],
   providers: [

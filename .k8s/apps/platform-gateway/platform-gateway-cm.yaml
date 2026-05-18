@@ -11,4 +11,5 @@ data:
   PORT: "3000"
   AUTH_SERVICE_URL: "platform-auth-service.dev-service.svc.cluster.local:3001"
   CORE_SERVICE_URL: "platform-core-service.dev-service.svc.cluster.local:3005"
-  JWT_ACCESS_EXPIRES_IN: "3600"
+  JWT_ACCESS_EXPIRES_IN: "600"
+  JWT_REFRESH_EXPIRES_IN: "3600"

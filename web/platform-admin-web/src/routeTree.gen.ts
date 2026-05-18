@@ -14,10 +14,12 @@ import { Route as ProtectedRouteImport } from './routes/_protected'
 import { Route as PublicIndexRouteImport } from './routes/_public/index'
 import { Route as PublicLoginRouteImport } from './routes/_public/login'
 import { Route as PublicChangePasswordRouteImport } from './routes/_public/change-password'
-import { Route as ProtectedDashboardRouteImport } from './routes/_protected/dashboard'
 import { Route as ProtectedTermsIndexRouteImport } from './routes/_protected/terms/index'
 import { Route as ProtectedSupportIndexRouteImport } from './routes/_protected/support/index'
+import { Route as ProtectedRbacIndexRouteImport } from './routes/_protected/rbac/index'
 import { Route as ProtectedOrganizationsIndexRouteImport } from './routes/_protected/organizations/index'
+import { Route as ProtectedDashboardIndexRouteImport } from './routes/_protected/dashboard/index'
+import { Route as ProtectedAuditIndexRouteImport } from './routes/_protected/audit/index'
 import { Route as ProtectedAnnouncementsIndexRouteImport } from './routes/_protected/announcements/index'
 
 const PublicRoute = PublicRouteImport.update({
@@ -43,11 +45,6 @@ const PublicChangePasswordRoute = PublicChangePasswordRouteImport.update({
   path: '/change-password',
   getParentRoute: () => PublicRoute,
 } as any)
-const ProtectedDashboardRoute = ProtectedDashboardRouteImport.update({
-  id: '/dashboard',
-  path: '/dashboard',
-  getParentRoute: () => ProtectedRoute,
-} as any)
 const ProtectedTermsIndexRoute = ProtectedTermsIndexRouteImport.update({
   id: '/terms/',
   path: '/terms/',
@@ -58,12 +55,27 @@ const ProtectedSupportIndexRoute = ProtectedSupportIndexRouteImport.update({
   path: '/support/',
   getParentRoute: () => ProtectedRoute,
 } as any)
+const ProtectedRbacIndexRoute = ProtectedRbacIndexRouteImport.update({
+  id: '/rbac/',
+  path: '/rbac/',
+  getParentRoute: () => ProtectedRoute,
+} as any)
 const ProtectedOrganizationsIndexRoute =
   ProtectedOrganizationsIndexRouteImport.update({
     id: '/organizations/',
     path: '/organizations/',
     getParentRoute: () => ProtectedRoute,
   } as any)
+const ProtectedDashboardIndexRoute = ProtectedDashboardIndexRouteImport.update({
+  id: '/dashboard/',
+  path: '/dashboard/',
+  getParentRoute: () => ProtectedRoute,
+} as any)
+const ProtectedAuditIndexRoute = ProtectedAuditIndexRouteImport.update({
+  id: '/audit/',
+  path: '/audit/',
+  getParentRoute: () => ProtectedRoute,
+} as any)
 const ProtectedAnnouncementsIndexRoute =
   ProtectedAnnouncementsIndexRouteImport.update({
     id: '/announcements/',
@@ -73,21 +85,25 @@ const ProtectedAnnouncementsIndexRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof PublicIndexRoute
-  '/dashboard': typeof ProtectedDashboardRoute
   '/change-password': typeof PublicChangePasswordRoute
   '/login': typeof PublicLoginRoute
   '/announcements/': typeof ProtectedAnnouncementsIndexRoute
+  '/audit/': typeof ProtectedAuditIndexRoute
+  '/dashboard/': typeof ProtectedDashboardIndexRoute
   '/organizations/': typeof ProtectedOrganizationsIndexRoute
+  '/rbac/': typeof ProtectedRbacIndexRoute
   '/support/': typeof ProtectedSupportIndexRoute
   '/terms/': typeof ProtectedTermsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof PublicIndexRoute
-  '/dashboard': typeof ProtectedDashboardRoute
   '/change-password': typeof PublicChangePasswordRoute
   '/login': typeof PublicLoginRoute
   '/announcements': typeof ProtectedAnnouncementsIndexRoute
+  '/audit': typeof ProtectedAuditIndexRoute
+  '/dashboard': typeof ProtectedDashboardIndexRoute
   '/organizations': typeof ProtectedOrganizationsIndexRoute
+  '/rbac': typeof ProtectedRbacIndexRoute
   '/support': typeof ProtectedSupportIndexRoute
   '/terms': typeof ProtectedTermsIndexRoute
 }
@@ -95,12 +111,14 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_protected': typeof ProtectedRouteWithChildren
   '/_public': typeof PublicRouteWithChildren
-  '/_protected/dashboard': typeof ProtectedDashboardRoute
   '/_public/change-password': typeof PublicChangePasswordRoute
   '/_public/login': typeof PublicLoginRoute
   '/_public/': typeof PublicIndexRoute
   '/_protected/announcements/': typeof ProtectedAnnouncementsIndexRoute
+  '/_protected/audit/': typeof ProtectedAuditIndexRoute
+  '/_protected/dashboard/': typeof ProtectedDashboardIndexRoute
   '/_protected/organizations/': typeof ProtectedOrganizationsIndexRoute
+  '/_protected/rbac/': typeof ProtectedRbacIndexRoute
   '/_protected/support/': typeof ProtectedSupportIndexRoute
   '/_protected/terms/': typeof ProtectedTermsIndexRoute
 }
@@ -108,33 +126,39 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/dashboard'
     | '/change-password'
     | '/login'
     | '/announcements/'
+    | '/audit/'
+    | '/dashboard/'
     | '/organizations/'
+    | '/rbac/'
     | '/support/'
     | '/terms/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/dashboard'
     | '/change-password'
     | '/login'
     | '/announcements'
+    | '/audit'
+    | '/dashboard'
     | '/organizations'
+    | '/rbac'
     | '/support'
     | '/terms'
   id:
     | '__root__'
     | '/_protected'
     | '/_public'
-    | '/_protected/dashboard'
     | '/_public/change-password'
     | '/_public/login'
     | '/_public/'
     | '/_protected/announcements/'
+    | '/_protected/audit/'
+    | '/_protected/dashboard/'
     | '/_protected/organizations/'
+    | '/_protected/rbac/'
     | '/_protected/support/'
     | '/_protected/terms/'
   fileRoutesById: FileRoutesById
@@ -181,13 +205,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PublicChangePasswordRouteImport
       parentRoute: typeof PublicRoute
     }
-    '/_protected/dashboard': {
-      id: '/_protected/dashboard'
-      path: '/dashboard'
-      fullPath: '/dashboard'
-      preLoaderRoute: typeof ProtectedDashboardRouteImport
-      parentRoute: typeof ProtectedRoute
-    }
     '/_protected/terms/': {
       id: '/_protected/terms/'
       path: '/terms'
@@ -202,11 +219,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProtectedSupportIndexRouteImport
       parentRoute: typeof ProtectedRoute
     }
+    '/_protected/rbac/': {
+      id: '/_protected/rbac/'
+      path: '/rbac'
+      fullPath: '/rbac/'
+      preLoaderRoute: typeof ProtectedRbacIndexRouteImport
+      parentRoute: typeof ProtectedRoute
+    }
     '/_protected/organizations/': {
       id: '/_protected/organizations/'
       path: '/organizations'
       fullPath: '/organizations/'
       preLoaderRoute: typeof ProtectedOrganizationsIndexRouteImport
+      parentRoute: typeof ProtectedRoute
+    }
+    '/_protected/dashboard/': {
+      id: '/_protected/dashboard/'
+      path: '/dashboard'
+      fullPath: '/dashboard/'
+      preLoaderRoute: typeof ProtectedDashboardIndexRouteImport
+      parentRoute: typeof ProtectedRoute
+    }
+    '/_protected/audit/': {
+      id: '/_protected/audit/'
+      path: '/audit'
+      fullPath: '/audit/'
+      preLoaderRoute: typeof ProtectedAuditIndexRouteImport
       parentRoute: typeof ProtectedRoute
     }
     '/_protected/announcements/': {
@@ -220,17 +258,21 @@ declare module '@tanstack/react-router' {
 }
 
 interface ProtectedRouteChildren {
-  ProtectedDashboardRoute: typeof ProtectedDashboardRoute
   ProtectedAnnouncementsIndexRoute: typeof ProtectedAnnouncementsIndexRoute
+  ProtectedAuditIndexRoute: typeof ProtectedAuditIndexRoute
+  ProtectedDashboardIndexRoute: typeof ProtectedDashboardIndexRoute
   ProtectedOrganizationsIndexRoute: typeof ProtectedOrganizationsIndexRoute
+  ProtectedRbacIndexRoute: typeof ProtectedRbacIndexRoute
   ProtectedSupportIndexRoute: typeof ProtectedSupportIndexRoute
   ProtectedTermsIndexRoute: typeof ProtectedTermsIndexRoute
 }
 
 const ProtectedRouteChildren: ProtectedRouteChildren = {
-  ProtectedDashboardRoute: ProtectedDashboardRoute,
   ProtectedAnnouncementsIndexRoute: ProtectedAnnouncementsIndexRoute,
+  ProtectedAuditIndexRoute: ProtectedAuditIndexRoute,
+  ProtectedDashboardIndexRoute: ProtectedDashboardIndexRoute,
   ProtectedOrganizationsIndexRoute: ProtectedOrganizationsIndexRoute,
+  ProtectedRbacIndexRoute: ProtectedRbacIndexRoute,
   ProtectedSupportIndexRoute: ProtectedSupportIndexRoute,
   ProtectedTermsIndexRoute: ProtectedTermsIndexRoute,
 }

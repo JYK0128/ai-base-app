@@ -4,6 +4,7 @@ export interface EnvConfig {
   PORT: number
   JWT_ACCESS_SECRET: string
   JWT_ACCESS_EXPIRES_IN: number
+  JWT_REFRESH_EXPIRES_IN: number
   AUTH_SERVICE_HOST: string
   AUTH_SERVICE_PORT: number
   CORE_SERVICE_HOST: string
@@ -46,6 +47,7 @@ export const ENV: EnvConfig = {
   PORT: Number(getEnv('PORT')),
   JWT_ACCESS_SECRET: getEnv('JWT_ACCESS_SECRET'),
   JWT_ACCESS_EXPIRES_IN: Number(getEnv('JWT_ACCESS_EXPIRES_IN')),
+  JWT_REFRESH_EXPIRES_IN: Number(getEnv('JWT_REFRESH_EXPIRES_IN')),
   AUTH_SERVICE_HOST: authConfig.host,
   AUTH_SERVICE_PORT: authConfig.port,
   CORE_SERVICE_HOST: coreConfig.host,

@@ -21,7 +21,7 @@ export class CoreController {
   // --- Organizations ---
 
   @Get('organizations')
-  @CheckPermissions('platform:organization:read')
+  @CheckPermissions('ORGANIZATION:READ')
   @ApiOperation({ summary: '조직 목록 조회', description: '플랫폼의 모든 조직 목록을 조회합니다.' })
   @SwaggerResult([OrganizationResponseDto])
   async getOrganizations(@Query() query: GetOrganizationsQueryDto) {
@@ -29,7 +29,7 @@ export class CoreController {
   }
 
   @Patch('organizations/:id/approve')
-  @CheckPermissions('platform:organization:approve')
+  @CheckPermissions('ORGANIZATION:UPDATE')
   @ApiOperation({ summary: '조직 승인', description: '가입 대기 중인 조직을 승인합니다.' })
   @SwaggerResult()
   async approveOrganization(@Param('id') id: string) {
@@ -37,7 +37,7 @@ export class CoreController {
   }
 
   @Patch('organizations/:id/reject')
-  @CheckPermissions('platform:organization:approve')
+  @CheckPermissions('ORGANIZATION:UPDATE')
   @ApiOperation({ summary: '조직 거절', description: '가입 대기 중인 조직을 거절합니다.' })
   @SwaggerResult()
   async rejectOrganization(@Param('id') id: string) {
@@ -47,7 +47,7 @@ export class CoreController {
   // --- Announcements ---
 
   @Get('announcements')
-  @CheckPermissions('platform:announcement:read')
+  @CheckPermissions('ANNOUNCEMENT:READ')
   @ApiOperation({ summary: '공지사항 조회', description: '플랫폼 공지사항 목록을 조회합니다.' })
   @SwaggerResult([AnnouncementResponseDto])
   async getAnnouncements(@Query() query: GetAnnouncementsQueryDto) {
@@ -55,7 +55,7 @@ export class CoreController {
   }
 
   @Post('announcements')
-  @CheckPermissions('platform:announcement:manage')
+  @CheckPermissions('ANNOUNCEMENT:CREATE')
   @ApiOperation({ summary: '공지사항 작성', description: '새로운 공지사항을 작성합니다.' })
   @SwaggerResult(AnnouncementResponseDto)
   async createAnnouncement(@Body() data: CreateAnnouncementDto) {
@@ -65,7 +65,7 @@ export class CoreController {
   // --- Support ---
 
   @Get('support/tickets')
-  @CheckPermissions('platform:support:read')
+  @CheckPermissions('SUPPORT:READ')
   @ApiOperation({ summary: '고객지원 티켓 조회', description: '플랫폼 고객지원 티켓 목록을 조회합니다.' })
   @SwaggerResult([TicketResponseDto])
   async getTickets(@Query() query: GetTicketsQueryDto) {
@@ -78,7 +78,7 @@ export class CoreController {
   // --- Terms ---
 
   @Get('terms')
-  @CheckPermissions('platform:terms:read')
+  @CheckPermissions('TERMS:READ')
   @ApiOperation({ summary: '약관 목록 조회', description: '플랫폼/조직 범위의 현재 활성 약관 목록을 조회합니다.' })
   @SwaggerResult([TermsDocumentResponseDto])
   async getActiveTerms(@Query() query: GetTermsQueryDto) {
@@ -86,7 +86,7 @@ export class CoreController {
   }
 
   @Post('terms/documents')
-  @CheckPermissions('platform:terms:manage')
+  @CheckPermissions('TERMS:CREATE')
   @ApiOperation({ summary: '약관 문서 생성', description: 'PLATFORM 또는 ORGANIZATION 그룹 약관 문서를 생성합니다.' })
   @SwaggerResult(TermsDocumentResponseDto)
   async createTermsDocument(@Body() data: CreateTermsDocumentDto) {
@@ -94,7 +94,7 @@ export class CoreController {
   }
 
   @Post('terms/versions')
-  @CheckPermissions('platform:terms:manage')
+  @CheckPermissions('TERMS:CREATE')
   @ApiOperation({ summary: '약관 버전 생성', description: '약관 버전을 생성하고 선택적으로 즉시 게시합니다.' })
   @SwaggerResult(TermsVersionResponseDto)
   async createTermsVersion(@Body() data: CreateTermsVersionDto) {
@@ -102,7 +102,7 @@ export class CoreController {
   }
 
   @Post('terms/agreements')
-  @CheckPermissions('platform:terms:agree')
+  @CheckPermissions('TERMS:UPDATE')
   @ApiOperation({ summary: '약관 동의 저장', description: '매니저의 특정 약관 버전 동의 이력을 저장합니다.' })
   @SwaggerResult(ManagerTermsConsentResponseDto)
   async agreeTerms(@Body() data: AgreeTermsDto) {

@@ -18,7 +18,7 @@ import { RbacRoleScope, Role } from '@/domains/platform/rbac/role.entity';
 import { RolePermission } from '@/domains/platform/rbac/role.permission.entity';
 
 type CodedEntityData<TEntity extends BaseEntity> = RequiredEntityData<TEntity> & { code: string };
-type InitialManagerAccountData = Omit<RequiredEntityData<ManagerAccount>, 'email' | 'manager' | 'password'> & {
+type InitialManagerAccountData = Omit<RequiredEntityData<ManagerAccount>, 'email' | 'manager' | 'password' | 'passwordExpiresAt'> & {
   email: string
   password: string
   passwordExpiresAt?: ManagerAccount['passwordExpiresAt']
@@ -55,43 +55,34 @@ const ORGANIZATION_ROLES = [
 ] satisfies readonly CodedEntityData<Role>[];
 
 // =============================================================================
-// [ Section ] 고객사 조직용 공통 권한(Permission) 정의
-// [ 구조 ] domain:feature:action
-// =============================================================================
-const ORGANIZATION_PERMISSIONS = [
-  // --- Member Management ---
-  { code: 'organization:member:manage', name: '조직 멤버 관리' },
-
-  // --- Role & Permission ---
-  { code: 'organization:role:manage', name: '조직 역할 관리' },
-
-  // --- Organization Info & Settings ---
-  { code: 'organization:info:manage', name: '조직 기본 정보 관리' },
-
-  // --- Service Level Actions ---
-  { code: 'organization:service:read', name: '조직 서비스 데이터 조회' },
-  { code: 'organization:service:write', name: '조직 서비스 데이터 조작' },
-  { code: 'organization:audit:read', name: '조직 감사 로그 조회' },
-] satisfies readonly CodedEntityData<Permission>[];
-
-// =============================================================================
 // [ Section ] 역할별 권한 매핑 (Role-Permission Mapping)
 // =============================================================================
 const ORGANIZATION_ROLE_PERMISSIONS: { roleCode: string, permissionCode: string }[] = [
   // ORGANIZATION.ADMIN: 조직 내 모든 관리 및 실무 권한 보유
-  { roleCode: 'ORGANIZATION.ADMIN', permissionCode: 'organization:member:manage' },
-  { roleCode: 'ORGANIZATION.ADMIN', permissionCode: 'organization:role:manage' },
-  { roleCode: 'ORGANIZATION.ADMIN', permissionCode: 'organization:info:manage' },
-  { roleCode: 'ORGANIZATION.ADMIN', permissionCode: 'organization:service:read' },
-  { roleCode: 'ORGANIZATION.ADMIN', permissionCode: 'organization:service:write' },
-  { roleCode: 'ORGANIZATION.ADMIN', permissionCode: 'organization:audit:read' },
+  { roleCode: 'ORGANIZATION.ADMIN', permissionCode: 'MEMBER:CREATE' },
+  { roleCode: 'ORGANIZATION.ADMIN', permissionCode: 'MEMBER:READ' },
+  { roleCode: 'ORGANIZATION.ADMIN', permissionCode: 'MEMBER:UPDATE' },
+  { roleCode: 'ORGANIZATION.ADMIN', permissionCode: 'MEMBER:DELETE' },
+  { roleCode: 'ORGANIZATION.ADMIN', permissionCode: 'ROLE:CREATE' },
+  { roleCode: 'ORGANIZATION.ADMIN', permissionCode: 'ROLE:READ' },
+  { roleCode: 'ORGANIZATION.ADMIN', permissionCode: 'ROLE:UPDATE' },
+  { roleCode: 'ORGANIZATION.ADMIN', permissionCode: 'ROLE:DELETE' },
+  { roleCode: 'ORGANIZATION.ADMIN', permissionCode: 'ORG_INFO:READ' },
+  { roleCode: 'ORGANIZATION.ADMIN', permissionCode: 'ORG_INFO:UPDATE' },
+  { roleCode: 'ORGANIZATION.ADMIN', permissionCode: 'SERVICE:CREATE' },
+  { roleCode: 'ORGANIZATION.ADMIN', permissionCode: 'SERVICE:READ' },
+  { roleCode: 'ORGANIZATION.ADMIN', permissionCode: 'SERVICE:UPDATE' },
+  { roleCode: 'ORGANIZATION.ADMIN', permissionCode: 'SERVICE:DELETE' },
+  { roleCode: 'ORGANIZATION.ADMIN', permissionCode: 'AUDIT:READ' },
 
-  // ORGANIZATION.MANAGER: 실무 권한만
-  { roleCode: 'ORGANIZATION.MANAGER', permissionCode: 'organization:service:read' },
-  { roleCode: 'ORGANIZATION.MANAGER', permissionCode: 'organization:service:write' },
+  // ORGANIZATION.MANAGER: 실무 권한만 (서비스 데이터 읽기 및 수정)
+  { roleCode: 'ORGANIZATION.MANAGER', permissionCode: 'SERVICE:CREATE' },
+  { roleCode: 'ORGANIZATION.MANAGER', permissionCode: 'SERVICE:READ' },
+  { roleCode: 'ORGANIZATION.MANAGER', permissionCode: 'SERVICE:UPDATE' },
+  { roleCode: 'ORGANIZATION.MANAGER', permissionCode: 'SERVICE:DELETE' },
 
   // ORGANIZATION.VIEWER: 읽기 전용 권한
-  { roleCode: 'ORGANIZATION.VIEWER', permissionCode: 'organization:service:read' },
+  { roleCode: 'ORGANIZATION.VIEWER', permissionCode: 'SERVICE:READ' },
 ];
 
 // =============================================================================
@@ -133,15 +124,24 @@ export class OrganizationSeeder extends Seeder {
   async run(em: EntityManager): Promise<void> {
     // 1. 기초 엔티티 생성 및 객체 보관
     this.roles = await this.ensureEntities(em, Role, ORGANIZATION_ROLES, (seed) => em.create(Role, seed));
-    this.perms = await this.ensureEntities(em, Permission, ORGANIZATION_PERMISSIONS, (seed) => em.create(Permission, seed));
     this.orgs = await this.ensureEntities(em, Organization, CUSTOMER_ORGANIZATIONS, (seed) => em.create(Organization, seed));
+
+    // Fetch pre-seeded permissions
+    const permissions = await em.find(Permission, {});
+    for (const perm of permissions) {
+      this.perms[perm.code] = perm;
+    }
 
     // 2. 역할-권한 관계 설정
     for (const seed of ORGANIZATION_ROLE_PERMISSIONS) {
+      const permission = this.perms[seed.permissionCode];
+      if (!permission) {
+        throw new Error(`Permission not found in OrganizationSeeder: ${seed.permissionCode}`);
+      }
       await this.ensureRolePermission(
         em,
         this.roles[seed.roleCode],
-        this.perms[seed.permissionCode],
+        permission,
       );
     }
 

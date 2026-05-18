@@ -1,4 +1,5 @@
 import { Button, Card, CardContent, CardFooter, CardHeader, CardTitle, ErrorBoundary, toast } from '@pkg/ui';
+import { QueryClient } from '@tanstack/react-query';
 import { createRootRouteWithContext, Outlet } from '@tanstack/react-router';
 import axios from 'axios';
 import { AlertCircle, RefreshCcw } from 'lucide-react';
@@ -10,7 +11,9 @@ interface RouterContext {
   auth: {
     isAuthenticated: boolean
     mustChangePassword: boolean
+    permissions: string[]
   }
+  queryClient: QueryClient
 }
 
 export const Route = createRootRouteWithContext<RouterContext>()({
