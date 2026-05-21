@@ -65,7 +65,7 @@ function FormInput({
     <Field
       orientation={orientation}
       data-invalid={hasError}
-      className={cn(className, 'min-h-fit min-w-fit')}
+      className={cn('min-h-fit min-w-fit', className)}
     >
       {label && (
         <div style={{ width: labelWidth }} className="flex items-start cursor-default select-none">

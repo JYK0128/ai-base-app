@@ -37,7 +37,7 @@ function FormCheckbox({
     <Field
       orientation={orientation}
       data-invalid={hasError}
-      className={cn(className, 'min-h-fit min-w-fit')}
+      className={cn('min-h-fit min-w-fit', className)}
     >
       <FieldContent className="flex-1">
         <div

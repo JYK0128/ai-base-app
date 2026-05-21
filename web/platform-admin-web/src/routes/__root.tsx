@@ -1,15 +1,19 @@
 import { Button, Card, CardContent, CardFooter, CardHeader, CardTitle, ErrorBoundary, toast } from '@pkg/ui';
+import { QueryClient } from '@tanstack/react-query';
 import { createRootRouteWithContext, Outlet } from '@tanstack/react-router';
 import axios from 'axios';
 import { AlertCircle, RefreshCcw } from 'lucide-react';
 
 import type { ApiResponse } from '../api/model';
+import { formatMessage } from '../lib/utils';
 
 interface RouterContext {
   auth: {
     isAuthenticated: boolean
     mustChangePassword: boolean
+    permissions: string[]
   }
+  queryClient: QueryClient
 }
 
 export const Route = createRootRouteWithContext<RouterContext>()({
@@ -44,10 +48,10 @@ export const Route = createRootRouteWithContext<RouterContext>()({
               ?? error.response?.data.error?.message
               ?? error.message;
           const displayMessage = Array.isArray(message) ? message[0] : message;
-          toast.error(displayMessage);
+          toast.error(formatMessage(displayMessage));
         }
         else {
-          toast.error(error.message);
+          toast.error(formatMessage(error.message));
         }
       }}
     >

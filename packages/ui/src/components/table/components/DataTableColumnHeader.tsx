@@ -68,7 +68,10 @@ function DebouncedInput({
       {...props}
       value={value ?? ''}
       onChange={(e) => {
-        const val = e.target.type === 'number' ? (e.target.value === '' ? '' : Number(e.target.value)) : e.target.value;
+        let val: string | number = e.target.value;
+        if (e.target.type === 'number' && e.target.value !== '') {
+          val = Number(e.target.value);
+        }
         setValue(val);
       }}
     />
@@ -85,6 +88,7 @@ export function DataTableColumnHeader<TData, TValue>({
   const meta = column.columnDef.meta as ColumnMeta;
   const facetedConfig = meta?.faceted;
   const filterType = meta?.filterType;
+  const sortDirection = header.column.getIsSorted();
 
   const filterValue = column.getFilterValue();
   const selectedValues = facetedConfig ? new Set(filterValue as string[]) : new Set();
@@ -102,8 +106,15 @@ export function DataTableColumnHeader<TData, TValue>({
     );
   }
 
-  const isFiltered = filterValue !== undefined
-    && (Array.isArray(filterValue) ? filterValue.some((v) => v !== undefined && v !== '') : filterValue !== '');
+  let isFiltered = false;
+  if (filterValue !== undefined) {
+    if (Array.isArray(filterValue)) {
+      isFiltered = filterValue.some((v) => v !== undefined && v !== '');
+    }
+    else {
+      isFiltered = filterValue !== '';
+    }
+  }
 
   return (
     <div className="flex items-center gap-1 h-full w-full px-2.5 overflow-hidden">
@@ -115,9 +126,9 @@ export function DataTableColumnHeader<TData, TValue>({
           {flexRender(header.column.columnDef.header, header.getContext())}
         </div>
 
-        {header.column.getIsSorted() && (
+        {sortDirection && (
           <div className="shrink-0">
-            {header.column.getIsSorted() === 'asc'
+            {sortDirection === 'asc'
               ? (
                 <ChevronUp className="h-3.5 w-3.5 text-primary" />
               )

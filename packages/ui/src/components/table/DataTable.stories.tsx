@@ -144,8 +144,8 @@ const manyData: User[] = Array.from({ length: 200 }, (_, i) => ({
   age: 20 + (i % 30),
   salary: 50000 + (i * 1000) % 50000,
   lastActive: '2024-03-30',
-  createdAt: new Date(Date.now() - Math.floor(Math.random() * 10000000000)).toISOString().split('T')[0],
-  updatedAt: new Date(Date.now() - Math.floor(Math.random() * 1000000000)).toISOString().split('T')[0],
+  createdAt: new Date(Date.now() - i * 10000000).toISOString().split('T')[0],
+  updatedAt: new Date(Date.now() - i * 1000000).toISOString().split('T')[0],
 }));
 
 const meta: Meta<typeof DataTable<User>> = {
@@ -220,7 +220,7 @@ export const ServerSide: Story = {
           filtered = filtered.filter((row) => (value as string[]).includes(row[filter.id as keyof User] as string));
         }
         else if (filter.id === 'age' || filter.id === 'salary') {
-          const [min, max] = value as [number, number];
+          const [min, max] = value as [number | undefined, number | undefined];
           if (min !== undefined) filtered = filtered.filter((row) => (row[filter.id as keyof User] as number) >= min);
           if (max !== undefined) filtered = filtered.filter((row) => (row[filter.id as keyof User] as number) <= max);
         }
@@ -254,7 +254,7 @@ export const ServerSide: Story = {
     }, [pagination, sorting, columnFilters, globalFilter]);
 
     React.useEffect(() => {
-      fetchServerData();
+      void fetchServerData();
     }, [fetchServerData]);
 
     return (

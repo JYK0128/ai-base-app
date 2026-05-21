@@ -1,16 +1,36 @@
-import { createFileRoute, Link, Outlet, redirect } from '@tanstack/react-router';
-import { Building2,
-         LayoutDashboard,
-         LifeBuoy,
-         LogOut,
-         Megaphone,
-         ScrollText } from 'lucide-react';
+import { createFileRoute, Link, notFound, Outlet, redirect } from '@tanstack/react-router';
+import { Building2, FileText, Globe, Info, Key, LayoutDashboard, LifeBuoy, LogOut, type LucideIcon, Megaphone, ScrollText, Settings, Shield, Users } from 'lucide-react';
+import { useState } from 'react';
 
-import { useAuthControllerLogoutV1 } from '../api/endpoints';
+import { getResourceControllerGetMyResourcesV1QueryOptions, useAuthControllerLogoutV1 } from '../api/endpoints';
+import type { ResourceResponseDto } from '../api/model/resourceResponseDto';
 import { useAuth } from '../hooks/useAuth';
 
+// 🌟 트리 자원 평탄화 헬퍼 함수
+function flattenResources(nodes: ResourceResponseDto[]): ResourceResponseDto[] {
+  const result: ResourceResponseDto[] = [];
+  const traverse = (list: ResourceResponseDto[]) => {
+    for (const node of list) {
+      result.push(node);
+      if (node.children && node.children.length > 0) {
+        traverse(node.children);
+      }
+    }
+  };
+  traverse(nodes);
+  return result;
+}
+
+// 🌟 현재 경로와 대응하는 MENU 타입 자원을 식별하는 헬퍼 함수
+function findMatchingMenuResource(flattened: ResourceResponseDto[], path: string): ResourceResponseDto | undefined {
+  return flattened.find((res) => {
+    if (res.type !== 'MENU' || !res.path) return false;
+    return path === res.path || path.startsWith(res.path + '/');
+  });
+}
+
 export const Route = createFileRoute('/_protected')({
-  beforeLoad: ({ context, location }) => {
+  beforeLoad: async ({ context, location }) => {
     if (!context.auth.isAuthenticated) {
       throw redirect({
         to: '/login',
@@ -25,12 +45,64 @@ export const Route = createFileRoute('/_protected')({
         to: '/change-password',
       });
     }
+
+    const queryClient = context.queryClient;
+
+    let resources: ResourceResponseDto[] = [];
+    try {
+      const { queryKey, queryFn } = getResourceControllerGetMyResourcesV1QueryOptions();
+      const response = await queryClient.ensureQueryData({
+        queryKey,
+        queryFn,
+        staleTime: 1000 * 60 * 5, // 5분 동안 fresh 상태 유지
+        gcTime: 1000 * 60 * 10,   // 0인 전역 gcTime 우회
+      });
+      resources = response.data ?? [];
+    }
+    catch (error) {
+      console.error('Failed to prefetch dynamic resources in route guard:', error);
+    }
+
+    const permissions = context.auth.permissions;
+    const path = location.pathname;
+
+    // 보호 구간은 리소스가 없으면 기본 차단(fail-closed)
+    if (resources.length === 0) {
+      throw notFound();
+    }
+
+    const flattened = flattenResources(resources);
+    const matchingMenuResource = findMatchingMenuResource(flattened, path);
+
+    // 보호 구간에서는 MENU 자원에 매칭되지 않는 경로도 접근 불가로 처리
+    if (!matchingMenuResource) {
+      throw notFound();
+    }
+
+    const canReadMenuResource = matchingMenuResource.actions.includes('READ');
+    const requiredPermission = `${matchingMenuResource.code}:READ`;
+    const hasRequiredPermission = permissions.includes(requiredPermission);
+
+    // READ 자체가 허용되지 않았거나, 사용자 READ 권한이 없으면 NotFound 처리
+    if (!canReadMenuResource || !hasRequiredPermission) {
+      throw notFound();
+    }
+
+    // 🌟 하위 레이아웃 컴포넌트가 동기식으로 사용할 수 있도록 리소스 데이터 반환
+    return {
+      resources,
+    };
   },
   component: ProtectedLayout,
 });
 
+function getLocalizedName(res: ResourceResponseDto, currentLang: string): string {
+  if (!res.translations) return res.name;
+  return res.translations[currentLang] || res.translations['ko'] || res.name;
+}
+
 function ProtectedLayout() {
-  const { logout: authLogout } = useAuth();
+  const { logout: authLogout, permissions } = useAuth();
   const { mutate: logoutMutate } = useAuthControllerLogoutV1({
     mutation: {
       onSettled: () => {
@@ -40,24 +112,93 @@ function ProtectedLayout() {
     },
   });
 
-  const menuItems = [
-    { label: '대시보드', icon: LayoutDashboard, to: '/dashboard' },
-    { label: '조직 승인', icon: Building2, to: '/organizations' },
-    { label: '공지사항', icon: Megaphone, to: '/announcements' },
-    { label: '고객 지원', icon: LifeBuoy, to: '/support' },
-    { label: '약관 관리', icon: ScrollText, to: '/terms' },
-  ];
+  const [currentLang, setCurrentLang] = useState<string>(() => {
+    if (typeof localStorage !== 'undefined') {
+      return localStorage.getItem('admin_lang') || 'ko';
+    }
+    return 'ko';
+  });
+
+  const handleLangChange = (lang: string) => {
+    setCurrentLang(lang);
+    if (typeof localStorage !== 'undefined') {
+      localStorage.setItem('admin_lang', lang);
+    }
+  };
+
+  // 🌟 라우터 컨텍스트에서 이미 로드된 리소스 데이터를 직접 꺼내서 바인딩
+  const { resources } = Route.useRouteContext();
+
+  // 🌟 Lucide Icon 매핑 테이블
+  const IconMap: Record<string, LucideIcon> = {
+    LayoutDashboard,
+    Building2,
+    Megaphone,
+    LifeBuoy,
+    ScrollText,
+    Shield,
+    FileText,
+    Key,
+    Users,
+    Settings,
+    Info,
+  };
+
+  // 🌟 API로 조회한 MENU 타입 리소스를 기반으로 메뉴 동적 렌더링
+  const menuItemsFromApi = resources
+    ? flattenResources(resources)
+      .filter((res) => res.type === 'MENU')
+      .map((res) => {
+        // READ 액션 권한 찾기
+        const requiredPermission = `${res.code}:READ`;
+
+        let toPath = `/${res.code.toLowerCase()}`;
+        if (res.path) {
+          toPath = res.path;
+        }
+
+        // Lucide 아이콘 매핑
+        const iconKey = res.icon || 'Shield';
+        const IconComponent = IconMap[iconKey] || Shield;
+
+        return {
+          label: getLocalizedName(res, currentLang),
+          icon: IconComponent,
+          to: toPath,
+          requiredPermission,
+          displayOrder: res.sortOrder ?? 99,
+        };
+      })
+      .sort((a, b) => a.displayOrder - b.displayOrder)
+    : [];
+
+  const visibleMenuItems = menuItemsFromApi.filter(
+    (item) => permissions.includes(item.requiredPermission),
+  );
 
   return (
     <div className="flex h-screen bg-slate-50 font-sans">
       {/* Sidebar */}
       <aside className="w-64 bg-white border-r flex flex-col">
-        <div className="p-6 border-b">
+        <div className="p-6 border-b flex flex-col gap-3">
           <div className="text-xl font-bold text-slate-800 tracking-tight">PLATFORM ADMIN</div>
+          <div className="flex items-center space-x-2 bg-slate-50 px-2.5 py-1.5 rounded-lg border border-slate-100">
+            <Globe className="w-4 h-4 text-slate-400" />
+            <select
+              value={currentLang}
+              onChange={(e) => handleLangChange(e.target.value)}
+              className="text-xs bg-transparent font-medium text-slate-500 focus:outline-none cursor-pointer w-full"
+            >
+              <option value="ko">한국어 (KO)</option>
+              <option value="en">English (EN)</option>
+              <option value="ja">日本語 (JA)</option>
+              <option value="zh">中文 (ZH)</option>
+            </select>
+          </div>
         </div>
 
         <nav className="flex-1 p-4 space-y-1">
-          {menuItems.map((item) => (
+          {visibleMenuItems.map((item) => (
             <Link
               key={item.to}
               to={item.to}

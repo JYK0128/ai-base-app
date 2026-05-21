@@ -5,6 +5,7 @@ import { keepPreviousData, QueryClient, QueryClientProvider } from '@tanstack/re
 import { createRouter, RouterProvider } from '@tanstack/react-router';
 import React from 'react';
 
+import { NotFound } from './components/NotFound';
 import { useAuth } from './hooks/useAuth';
 import { routeTree } from './routeTree.gen';
 
@@ -30,7 +31,9 @@ const router = createRouter({
   routeTree,
   context: {
     auth: undefined!,
+    queryClient: undefined!,
   },
+  defaultNotFoundComponent: NotFound,
 });
 
 declare module '@tanstack/react-router' {
@@ -63,7 +66,7 @@ const queryClient = new QueryClient({
 });
 
 function AppInner() {
-  const { isInitializing, isAuthenticated, mustChangePassword } = useAuth();
+  const { isInitializing, isAuthenticated, mustChangePassword, permissions } = useAuth();
 
   if (isInitializing) {
     return (
@@ -75,7 +78,13 @@ function AppInner() {
 
   return (
     <>
-      <RouterProvider router={router} context={{ auth: { isAuthenticated, mustChangePassword } }} />
+      <RouterProvider
+        router={router}
+        context={{
+          auth: { isAuthenticated, mustChangePassword, permissions },
+          queryClient,
+        }}
+      />
       <React.Suspense fallback={null}>
         <TanStackRouterDevtools router={router} />
         <ReactQueryDevtools />

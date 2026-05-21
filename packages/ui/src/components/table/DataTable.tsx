@@ -175,6 +175,9 @@ export function DataTable<TData>({
     ];
   }, [enableRowSelection, enableRowPinning, enableColumnPinning, columns, filterColumns]);
 
+  // TanStack Table returns stable helper functions, but the hook lint rule flags it as incompatible.
+  // This is an intentional integration with the library's recommended API.
+  // eslint-disable-next-line react-hooks/incompatible-library
   const table = useReactTable({
     data,
     columns: finalColumns,
