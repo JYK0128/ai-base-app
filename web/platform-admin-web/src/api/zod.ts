@@ -554,3 +554,132 @@ export const HealthControllerReadyResponse = zod.object({
   "status": zod.string()
 })).optional()
 })
+
+
+/**
+ * 시스템 내의 메뉴 및 API 자원들의 전체 계층 트리 구조를 조회합니다. 관리자 권한(RESOURCE:READ)이 필요합니다.
+ * @summary 자원 트리 구조 전체 조회
+ */
+export const ResourceControllerGetResourcesV1Response = zod.object({
+  "success": zod.boolean().describe('성공 여부'),
+  "data": zod.looseObject({
+
+}).describe('응답 데이터'),
+  "error": zod.object({
+  "code": zod.string().describe('에러 코드'),
+  "message": zod.union([zod.string(),zod.array(zod.string())]).describe('에러 메시지'),
+  "details": zod.looseObject({
+
+}).optional().describe('상세 정보'),
+  "status": zod.number().describe('HTTP 상태 코드')
+}).optional().describe('에러 상세 정보'),
+  "message": zod.string().optional().describe('응답 메시지'),
+  "traceId": zod.string().describe('추적 ID'),
+  "requestId": zod.string().describe('요청 ID')
+}).and(zod.object({
+  "data": zod.array(zod.object({
+  "id": zod.string(),
+  "code": zod.string(),
+  "name": zod.string(),
+  "type": zod.enum(['MENU', 'API', 'COMPONENT']),
+  "path": zod.string().optional(),
+  "icon": zod.string().optional(),
+  "sortOrder": zod.number().optional(),
+  "actions": zod.array(zod.string()),
+  "mappedAction": zod.string().optional(),
+  "translations": zod.looseObject({
+
+}).optional(),
+  "children": zod.array(zod.unknown())
+})).optional()
+}))
+
+
+/**
+ * 현재 로그인한 유저가 권한을 가진 자원들로만 필터링된 계층 트리 구조를 조회합니다.
+ * @summary 내 허용 자원 트리 구조 조회
+ */
+export const ResourceControllerGetMyResourcesV1Response = zod.object({
+  "success": zod.boolean().describe('성공 여부'),
+  "data": zod.looseObject({
+
+}).describe('응답 데이터'),
+  "error": zod.object({
+  "code": zod.string().describe('에러 코드'),
+  "message": zod.union([zod.string(),zod.array(zod.string())]).describe('에러 메시지'),
+  "details": zod.looseObject({
+
+}).optional().describe('상세 정보'),
+  "status": zod.number().describe('HTTP 상태 코드')
+}).optional().describe('에러 상세 정보'),
+  "message": zod.string().optional().describe('응답 메시지'),
+  "traceId": zod.string().describe('추적 ID'),
+  "requestId": zod.string().describe('요청 ID')
+}).and(zod.object({
+  "data": zod.array(zod.object({
+  "id": zod.string(),
+  "code": zod.string(),
+  "name": zod.string(),
+  "type": zod.enum(['MENU', 'API', 'COMPONENT']),
+  "path": zod.string().optional(),
+  "icon": zod.string().optional(),
+  "sortOrder": zod.number().optional(),
+  "actions": zod.array(zod.string()),
+  "mappedAction": zod.string().optional(),
+  "translations": zod.looseObject({
+
+}).optional(),
+  "children": zod.array(zod.unknown())
+})).optional()
+}))
+
+
+/**
+ * 새로운 메뉴 또는 컴포넌트 리소스를 한 번에 여러 개 생성합니다. 관리자 권한(RESOURCE:CREATE)이 필요합니다.
+ * @summary 리소스 일괄 생성
+ */
+export const ResourceControllerCreateResourcesV1Body = zod.object({
+  "items": zod.array(zod.object({
+  "operation": zod.enum(['CREATE', 'UPDATE', 'DELETE']),
+  "tempId": zod.string().optional(),
+  "id": zod.string().optional(),
+  "code": zod.string().optional(),
+  "name": zod.string().optional(),
+  "type": zod.enum(['MENU', 'COMPONENT']).optional(),
+  "parentTempId": zod.string().optional(),
+  "path": zod.string().optional(),
+  "icon": zod.string().optional(),
+  "parentId": zod.string().optional(),
+  "sortOrder": zod.number().optional(),
+  "translations": zod.looseObject({
+
+}).optional(),
+  "actions": zod.array(zod.string()).optional()
+}))
+})
+
+export const ResourceControllerCreateResourcesV1Response = zod.object({
+  "success": zod.boolean().describe('성공 여부'),
+  "data": zod.looseObject({
+
+}).describe('응답 데이터'),
+  "error": zod.object({
+  "code": zod.string().describe('에러 코드'),
+  "message": zod.union([zod.string(),zod.array(zod.string())]).describe('에러 메시지'),
+  "details": zod.looseObject({
+
+}).optional().describe('상세 정보'),
+  "status": zod.number().describe('HTTP 상태 코드')
+}).optional().describe('에러 상세 정보'),
+  "message": zod.string().optional().describe('응답 메시지'),
+  "traceId": zod.string().describe('추적 ID'),
+  "requestId": zod.string().describe('요청 ID')
+}).and(zod.object({
+  "data": zod.object({
+  "results": zod.array(zod.object({
+  "operation": zod.enum(['CREATE', 'UPDATE', 'DELETE']),
+  "tempId": zod.string().optional(),
+  "id": zod.string()
+}))
+}).optional()
+}))

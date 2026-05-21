@@ -1,0 +1,17 @@
+import { MikroOrmModule } from '@mikro-orm/nestjs';
+import { Module } from '@nestjs/common';
+import { CqrsModule } from '@nestjs/cqrs';
+import { Resource, Role, RolePermission } from '@pkg/database';
+
+import { ResourceHandlers } from './handlers';
+import { ResourceController } from './resource.controller';
+
+@Module({
+  imports: [
+    CqrsModule,
+    MikroOrmModule.forFeature([Resource, Role, RolePermission]),
+  ],
+  controllers: [ResourceController],
+  providers: [...ResourceHandlers],
+})
+export class ResourceModule {}

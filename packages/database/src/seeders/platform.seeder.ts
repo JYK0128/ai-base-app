@@ -12,13 +12,13 @@ import bcrypt from 'bcrypt';
 import { ManagerAccount } from '@/domains/platform/manager/manager.account.entity';
 import { Manager, ManagerStatus } from '@/domains/platform/manager/manager.entity';
 import { Organization, OrganizationStatus } from '@/domains/platform/organization/organization.entity';
-import { ManagerRole } from '@/domains/platform/rbac/manager.role.entity';
-import { Permission } from '@/domains/platform/rbac/permission.entity';
-import { RbacRoleScope, Role } from '@/domains/platform/rbac/role.entity';
-import { RolePermission } from '@/domains/platform/rbac/role.permission.entity';
+import { ManagerRole } from '@/domains/platform/resource/manager.role.entity';
+import { Resource } from '@/domains/platform/resource/resource.entity';
+import { Role, RoleScope } from '@/domains/platform/resource/role.entity';
+import { RolePermission } from '@/domains/platform/resource/role.permission.entity';
 
 type CodedEntityData<TEntity extends BaseEntity> = RequiredEntityData<TEntity> & { code: string };
-type InitialManagerAccountData = Omit<RequiredEntityData<ManagerAccount>, 'email' | 'manager' | 'password'> & {
+type InitialManagerAccountData = Omit<RequiredEntityData<ManagerAccount>, 'email' | 'manager' | 'password' | 'passwordExpiresAt'> & {
   email: string
   password: string
   passwordExpiresAt?: ManagerAccount['passwordExpiresAt']
@@ -48,75 +48,103 @@ const ROLES = [
   {
     code: 'PLATFORM.ADMIN',
     name: 'Platform Admin',
-    scope: RbacRoleScope.PLATFORM,
+    scope: RoleScope.PLATFORM,
     description: '플랫폼 전체 관리자 (모든 권한)',
   },
   {
     code: 'PLATFORM.MANAGER',
     name: 'Platform Manager',
-    scope: RbacRoleScope.PLATFORM,
+    scope: RoleScope.PLATFORM,
     description: '플랫폼 실무 운영자 (조직 승인 및 고객 지원)',
   },
   {
     code: 'PLATFORM.VIEWER',
     name: 'Platform Viewer',
-    scope: RbacRoleScope.PLATFORM,
+    scope: RoleScope.PLATFORM,
     description: '플랫폼 읽기 전용 계정',
   },
+  {
+    code: 'PLATFORM.TESTER',
+    name: 'Platform Tester',
+    scope: RoleScope.PLATFORM,
+    description: '권한 접근성 테스트용 최소 권한 계정',
+  },
 ] satisfies readonly CodedEntityData<Role>[];
-
-// =============================================================================
-// [ Section ] 플랫폼 전용 권한(Permission) 정의
-// [ 구조 ] domain:feature:action
-// =============================================================================
-const PERMISSIONS = [
-  // --- Dashboard ---
-  { code: 'platform:dashboard:read', name: '플랫폼 대시보드 조회' },
-
-  // --- Organization Management ---
-  { code: 'platform:organization:read', name: '플랫폼 내 조직 조회' },
-  { code: 'platform:organization:manage', name: '플랫폼 내 조직 관리(생성/삭제)' },
-  { code: 'platform:organization:approve', name: '플랫폼 내 조직 가입 승인' },
-
-  // --- Platform Content Management ---
-  { code: 'platform:announcement:read', name: '플랫폼 공지사항 조회' },
-  { code: 'platform:announcement:manage', name: '플랫폼 공지사항 관리' },
-  { code: 'platform:support:read', name: '플랫폼 고객 문의 조회' },
-  { code: 'platform:support:manage', name: '플랫폼 고객 문의 관리' },
-
-  // --- Audit & Logs ---
-  { code: 'platform:audit:read', name: '플랫폼 감사 로그 조회' },
-] satisfies readonly CodedEntityData<Permission>[];
 
 // =============================================================================
 // [ Section ] 역할별 권한 매핑 (Role-Permission Mapping)
 // =============================================================================
 const ROLE_PERMISSIONS: { roleCode: string, permissionCode: string }[] = [
   // PLATFORM.ADMIN: 모든 권한 보유
-  { roleCode: 'PLATFORM.ADMIN', permissionCode: 'platform:dashboard:read' },
-  { roleCode: 'PLATFORM.ADMIN', permissionCode: 'platform:organization:read' },
-  { roleCode: 'PLATFORM.ADMIN', permissionCode: 'platform:organization:manage' },
-  { roleCode: 'PLATFORM.ADMIN', permissionCode: 'platform:organization:approve' },
-  { roleCode: 'PLATFORM.ADMIN', permissionCode: 'platform:announcement:read' },
-  { roleCode: 'PLATFORM.ADMIN', permissionCode: 'platform:announcement:manage' },
-  { roleCode: 'PLATFORM.ADMIN', permissionCode: 'platform:support:read' },
-  { roleCode: 'PLATFORM.ADMIN', permissionCode: 'platform:support:manage' },
-  { roleCode: 'PLATFORM.ADMIN', permissionCode: 'platform:audit:read' },
+  { roleCode: 'PLATFORM.ADMIN', permissionCode: 'DASHBOARD:READ' },
+  { roleCode: 'PLATFORM.ADMIN', permissionCode: 'ORGANIZATION:CREATE' },
+  { roleCode: 'PLATFORM.ADMIN', permissionCode: 'ORGANIZATION:READ' },
+  { roleCode: 'PLATFORM.ADMIN', permissionCode: 'ORGANIZATION:UPDATE' },
+  { roleCode: 'PLATFORM.ADMIN', permissionCode: 'ORGANIZATION:DELETE' },
+  { roleCode: 'PLATFORM.ADMIN', permissionCode: 'ANNOUNCEMENT:CREATE' },
+  { roleCode: 'PLATFORM.ADMIN', permissionCode: 'ANNOUNCEMENT:READ' },
+  { roleCode: 'PLATFORM.ADMIN', permissionCode: 'ANNOUNCEMENT:UPDATE' },
+  { roleCode: 'PLATFORM.ADMIN', permissionCode: 'ANNOUNCEMENT:DELETE' },
+  { roleCode: 'PLATFORM.ADMIN', permissionCode: 'SUPPORT:CREATE' },
+  { roleCode: 'PLATFORM.ADMIN', permissionCode: 'SUPPORT:READ' },
+  { roleCode: 'PLATFORM.ADMIN', permissionCode: 'SUPPORT:UPDATE' },
+  { roleCode: 'PLATFORM.ADMIN', permissionCode: 'SUPPORT:DELETE' },
+  { roleCode: 'PLATFORM.ADMIN', permissionCode: 'AUDIT:READ' },
+  { roleCode: 'PLATFORM.ADMIN', permissionCode: 'TERMS:CREATE' },
+  { roleCode: 'PLATFORM.ADMIN', permissionCode: 'TERMS:READ' },
+  { roleCode: 'PLATFORM.ADMIN', permissionCode: 'TERMS:UPDATE' },
+  { roleCode: 'PLATFORM.ADMIN', permissionCode: 'TERMS:DELETE' },
+  { roleCode: 'PLATFORM.ADMIN', permissionCode: 'RESOURCE:CREATE' },
+  { roleCode: 'PLATFORM.ADMIN', permissionCode: 'RESOURCE:READ' },
+  { roleCode: 'PLATFORM.ADMIN', permissionCode: 'RESOURCE:UPDATE' },
+  { roleCode: 'PLATFORM.ADMIN', permissionCode: 'RESOURCE:DELETE' },
+  { roleCode: 'PLATFORM.ADMIN', permissionCode: 'ROLE_RESOURCE_CREATE_BUTTON:READ' },
+  { roleCode: 'PLATFORM.ADMIN', permissionCode: 'ROLE_RESOURCE_SAVE_BUTTON:READ' },
+  { roleCode: 'PLATFORM.ADMIN', permissionCode: 'MEMBER:CREATE' },
+  { roleCode: 'PLATFORM.ADMIN', permissionCode: 'MEMBER:READ' },
+  { roleCode: 'PLATFORM.ADMIN', permissionCode: 'MEMBER:UPDATE' },
+  { roleCode: 'PLATFORM.ADMIN', permissionCode: 'MEMBER:DELETE' },
+  { roleCode: 'PLATFORM.ADMIN', permissionCode: 'ORG_INFO:READ' },
+  { roleCode: 'PLATFORM.ADMIN', permissionCode: 'ORG_INFO:UPDATE' },
+  { roleCode: 'PLATFORM.ADMIN', permissionCode: 'SERVICE:CREATE' },
+  { roleCode: 'PLATFORM.ADMIN', permissionCode: 'SERVICE:READ' },
+  { roleCode: 'PLATFORM.ADMIN', permissionCode: 'SERVICE:UPDATE' },
+  { roleCode: 'PLATFORM.ADMIN', permissionCode: 'SERVICE:DELETE' },
 
-  // PLATFORM.MANAGER: 운영 및 지원 실무
-  { roleCode: 'PLATFORM.MANAGER', permissionCode: 'platform:dashboard:read' },
-  { roleCode: 'PLATFORM.MANAGER', permissionCode: 'platform:organization:read' },
-  { roleCode: 'PLATFORM.MANAGER', permissionCode: 'platform:organization:approve' },
-  { roleCode: 'PLATFORM.MANAGER', permissionCode: 'platform:announcement:read' },
-  { roleCode: 'PLATFORM.MANAGER', permissionCode: 'platform:announcement:manage' },
-  { roleCode: 'PLATFORM.MANAGER', permissionCode: 'platform:support:read' },
-  { roleCode: 'PLATFORM.MANAGER', permissionCode: 'platform:support:manage' },
+  // PLATFORM.MANAGER: 운영 및 지원 실무 (읽기 및 수정 중심)
+  { roleCode: 'PLATFORM.MANAGER', permissionCode: 'DASHBOARD:READ' },
+  { roleCode: 'PLATFORM.MANAGER', permissionCode: 'ORGANIZATION:READ' },
+  { roleCode: 'PLATFORM.MANAGER', permissionCode: 'ORGANIZATION:UPDATE' },
+  { roleCode: 'PLATFORM.MANAGER', permissionCode: 'ANNOUNCEMENT:CREATE' },
+  { roleCode: 'PLATFORM.MANAGER', permissionCode: 'ANNOUNCEMENT:READ' },
+  { roleCode: 'PLATFORM.MANAGER', permissionCode: 'ANNOUNCEMENT:UPDATE' },
+  { roleCode: 'PLATFORM.MANAGER', permissionCode: 'SUPPORT:READ' },
+  { roleCode: 'PLATFORM.MANAGER', permissionCode: 'SUPPORT:UPDATE' },
+  { roleCode: 'PLATFORM.MANAGER', permissionCode: 'TERMS:READ' },
+  { roleCode: 'PLATFORM.MANAGER', permissionCode: 'TERMS:UPDATE' },
+  { roleCode: 'PLATFORM.MANAGER', permissionCode: 'RESOURCE:READ' },
+  { roleCode: 'PLATFORM.MANAGER', permissionCode: 'RESOURCE:UPDATE' },
+  { roleCode: 'PLATFORM.MANAGER', permissionCode: 'MEMBER:READ' },
+  { roleCode: 'PLATFORM.MANAGER', permissionCode: 'MEMBER:UPDATE' },
+  { roleCode: 'PLATFORM.MANAGER', permissionCode: 'ORG_INFO:READ' },
+  { roleCode: 'PLATFORM.MANAGER', permissionCode: 'ORG_INFO:UPDATE' },
+  { roleCode: 'PLATFORM.MANAGER', permissionCode: 'SERVICE:READ' },
+  { roleCode: 'PLATFORM.MANAGER', permissionCode: 'SERVICE:UPDATE' },
 
   // PLATFORM.VIEWER: 읽기 전용
-  { roleCode: 'PLATFORM.VIEWER', permissionCode: 'platform:dashboard:read' },
-  { roleCode: 'PLATFORM.VIEWER', permissionCode: 'platform:organization:read' },
-  { roleCode: 'PLATFORM.VIEWER', permissionCode: 'platform:announcement:read' },
-  { roleCode: 'PLATFORM.VIEWER', permissionCode: 'platform:support:read' },
+  { roleCode: 'PLATFORM.VIEWER', permissionCode: 'DASHBOARD:READ' },
+  { roleCode: 'PLATFORM.VIEWER', permissionCode: 'ORGANIZATION:READ' },
+  { roleCode: 'PLATFORM.VIEWER', permissionCode: 'ANNOUNCEMENT:READ' },
+  { roleCode: 'PLATFORM.VIEWER', permissionCode: 'SUPPORT:READ' },
+  { roleCode: 'PLATFORM.VIEWER', permissionCode: 'TERMS:READ' },
+  { roleCode: 'PLATFORM.VIEWER', permissionCode: 'RESOURCE:READ' },
+  { roleCode: 'PLATFORM.VIEWER', permissionCode: 'MEMBER:READ' },
+  { roleCode: 'PLATFORM.VIEWER', permissionCode: 'ORG_INFO:READ' },
+  { roleCode: 'PLATFORM.VIEWER', permissionCode: 'SERVICE:READ' },
+
+  // PLATFORM.TESTER: 대시보드만 접근 가능한 최소 권한 테스트 계정
+  { roleCode: 'PLATFORM.TESTER', permissionCode: 'DASHBOARD:READ' },
+  { roleCode: 'PLATFORM.TESTER', permissionCode: 'RESOURCE:READ' },
 ];
 
 // =============================================================================
@@ -131,6 +159,14 @@ const SUPER_ADMINS = [
     },
     roleCode: 'PLATFORM.ADMIN',
   },
+  {
+    account: {
+      email: 'tester@platform.com',
+      password: 'pass1234',
+      passwordExpiresAt: new Date(),
+    },
+    roleCode: 'PLATFORM.TESTER',
+  },
 ] satisfies readonly SuperAdminSeed[];
 
 /**
@@ -142,7 +178,7 @@ const SUPER_ADMINS = [
 export class PlatformSeeder extends Seeder {
   private orgs: Record<string, Organization> = {};
   private roles: Record<string, Role> = {};
-  private perms: Record<string, Permission> = {};
+  private resources: Record<string, Resource> = {};
 
   /**
    * 시더 실행 메인 루틴
@@ -151,14 +187,25 @@ export class PlatformSeeder extends Seeder {
     // 1. 기초 엔티티 생성 및 객체 보관
     this.orgs = await this.ensureEntities(em, Organization, ORGANIZATIONS, (seed) => em.create(Organization, seed));
     this.roles = await this.ensureEntities(em, Role, ROLES, (seed) => em.create(Role, seed));
-    this.perms = await this.ensureEntities(em, Permission, PERMISSIONS, (seed) => em.create(Permission, seed));
+
+    // Fetch pre-seeded resources from ResourceSeeder
+    const resources = await em.find(Resource, {});
+    for (const res of resources) {
+      this.resources[res.code] = res;
+    }
 
     // 2. 역할-권한 관계 설정
     for (const seed of ROLE_PERMISSIONS) {
+      const [resourceCode, action] = seed.permissionCode.split(':');
+      const resource = this.resources[resourceCode];
+      if (!resource) {
+        throw new Error(`Resource not found in PlatformSeeder: ${resourceCode}`);
+      }
       await this.ensureRolePermission(
         em,
         this.roles[seed.roleCode],
-        this.perms[seed.permissionCode],
+        resource,
+        action,
       );
     }
 
@@ -209,11 +256,12 @@ export class PlatformSeeder extends Seeder {
   private async ensureRolePermission(
     em: EntityManager,
     role: Role,
-    permission: Permission,
+    resource: Resource,
+    action: string,
   ): Promise<void> {
-    const exists = await em.findOne(RolePermission, { role, permission });
+    const exists = await em.findOne(RolePermission, { role, resource, action });
     if (!exists) {
-      em.persist(em.create(RolePermission, { role, permission }));
+      em.persist(em.create(RolePermission, { role, resource, action }));
     }
   }
 

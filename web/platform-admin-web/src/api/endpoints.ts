@@ -44,13 +44,17 @@ import type {
   CoreControllerGetTicketsV1200,
   CoreControllerGetTicketsV1Params,
   CreateAnnouncementDto,
+  CreateResourcesDto,
   CreateTermsDocumentDto,
   CreateTermsVersionDto,
   HealthControllerLive200,
   HealthControllerLive503,
   HealthControllerReady200,
   HealthControllerReady503,
-  LoginDto
+  LoginDto,
+  ResourceControllerCreateResourcesV1200,
+  ResourceControllerGetMyResourcesV1200,
+  ResourceControllerGetResourcesV1200
 } from './model';
 
 import authControllerLoginV1Mutator from '../lib/axios';
@@ -89,6 +93,12 @@ import healthControllerLiveMutator from '../lib/axios';
 import type { ErrorType as HealthControllerLiveErrorType } from '../lib/axios';
 import healthControllerReadyMutator from '../lib/axios';
 import type { ErrorType as HealthControllerReadyErrorType } from '../lib/axios';
+import resourceControllerGetResourcesV1Mutator from '../lib/axios';
+import type { ErrorType as ResourceControllerGetResourcesV1ErrorType } from '../lib/axios';
+import resourceControllerGetMyResourcesV1Mutator from '../lib/axios';
+import type { ErrorType as ResourceControllerGetMyResourcesV1ErrorType } from '../lib/axios';
+import resourceControllerCreateResourcesV1Mutator from '../lib/axios';
+import type { ErrorType as ResourceControllerCreateResourcesV1ErrorType } from '../lib/axios';
 
 
 
@@ -1445,4 +1455,257 @@ export function useHealthControllerReady<TData = Awaited<ReturnType<typeof healt
 
 
 
+
+/**
+ * 시스템 내의 메뉴 및 API 자원들의 전체 계층 트리 구조를 조회합니다. 관리자 권한(RESOURCE:READ)이 필요합니다.
+ * @summary 자원 트리 구조 전체 조회
+ */
+export const resourceControllerGetResourcesV1 = (
+
+ signal?: AbortSignal
+) => {
+
+
+      return resourceControllerGetResourcesV1Mutator<ResourceControllerGetResourcesV1200>(
+      {url: `/api/v1/resources/resources`, method: 'GET', signal
+    },
+      );
+    }
+
+
+
+
+export const getResourceControllerGetResourcesV1QueryKey = () => {
+    return [
+    `/api/v1/resources/resources`
+    ] as const;
+    }
+
+
+export const getResourceControllerGetResourcesV1QueryOptions = <TData = Awaited<ReturnType<typeof resourceControllerGetResourcesV1>>, TError = ResourceControllerGetResourcesV1ErrorType<unknown>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof resourceControllerGetResourcesV1>>, TError, TData>>, }
+) => {
+
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getResourceControllerGetResourcesV1QueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof resourceControllerGetResourcesV1>>> = ({ signal }) => resourceControllerGetResourcesV1(signal);
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof resourceControllerGetResourcesV1>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type ResourceControllerGetResourcesV1QueryResult = NonNullable<Awaited<ReturnType<typeof resourceControllerGetResourcesV1>>>
+export type ResourceControllerGetResourcesV1QueryError = ResourceControllerGetResourcesV1ErrorType<unknown>
+
+
+export function useResourceControllerGetResourcesV1<TData = Awaited<ReturnType<typeof resourceControllerGetResourcesV1>>, TError = ResourceControllerGetResourcesV1ErrorType<unknown>>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof resourceControllerGetResourcesV1>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof resourceControllerGetResourcesV1>>,
+          TError,
+          Awaited<ReturnType<typeof resourceControllerGetResourcesV1>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useResourceControllerGetResourcesV1<TData = Awaited<ReturnType<typeof resourceControllerGetResourcesV1>>, TError = ResourceControllerGetResourcesV1ErrorType<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof resourceControllerGetResourcesV1>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof resourceControllerGetResourcesV1>>,
+          TError,
+          Awaited<ReturnType<typeof resourceControllerGetResourcesV1>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useResourceControllerGetResourcesV1<TData = Awaited<ReturnType<typeof resourceControllerGetResourcesV1>>, TError = ResourceControllerGetResourcesV1ErrorType<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof resourceControllerGetResourcesV1>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary 자원 트리 구조 전체 조회
+ */
+
+export function useResourceControllerGetResourcesV1<TData = Awaited<ReturnType<typeof resourceControllerGetResourcesV1>>, TError = ResourceControllerGetResourcesV1ErrorType<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof resourceControllerGetResourcesV1>>, TError, TData>>, }
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getResourceControllerGetResourcesV1QueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+/**
+ * 현재 로그인한 유저가 권한을 가진 자원들로만 필터링된 계층 트리 구조를 조회합니다.
+ * @summary 내 허용 자원 트리 구조 조회
+ */
+export const resourceControllerGetMyResourcesV1 = (
+
+ signal?: AbortSignal
+) => {
+
+
+      return resourceControllerGetMyResourcesV1Mutator<ResourceControllerGetMyResourcesV1200>(
+      {url: `/api/v1/resources/my-resources`, method: 'GET', signal
+    },
+      );
+    }
+
+
+
+
+export const getResourceControllerGetMyResourcesV1QueryKey = () => {
+    return [
+    `/api/v1/resources/my-resources`
+    ] as const;
+    }
+
+
+export const getResourceControllerGetMyResourcesV1QueryOptions = <TData = Awaited<ReturnType<typeof resourceControllerGetMyResourcesV1>>, TError = ResourceControllerGetMyResourcesV1ErrorType<unknown>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof resourceControllerGetMyResourcesV1>>, TError, TData>>, }
+) => {
+
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getResourceControllerGetMyResourcesV1QueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof resourceControllerGetMyResourcesV1>>> = ({ signal }) => resourceControllerGetMyResourcesV1(signal);
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof resourceControllerGetMyResourcesV1>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type ResourceControllerGetMyResourcesV1QueryResult = NonNullable<Awaited<ReturnType<typeof resourceControllerGetMyResourcesV1>>>
+export type ResourceControllerGetMyResourcesV1QueryError = ResourceControllerGetMyResourcesV1ErrorType<unknown>
+
+
+export function useResourceControllerGetMyResourcesV1<TData = Awaited<ReturnType<typeof resourceControllerGetMyResourcesV1>>, TError = ResourceControllerGetMyResourcesV1ErrorType<unknown>>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof resourceControllerGetMyResourcesV1>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof resourceControllerGetMyResourcesV1>>,
+          TError,
+          Awaited<ReturnType<typeof resourceControllerGetMyResourcesV1>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useResourceControllerGetMyResourcesV1<TData = Awaited<ReturnType<typeof resourceControllerGetMyResourcesV1>>, TError = ResourceControllerGetMyResourcesV1ErrorType<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof resourceControllerGetMyResourcesV1>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof resourceControllerGetMyResourcesV1>>,
+          TError,
+          Awaited<ReturnType<typeof resourceControllerGetMyResourcesV1>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useResourceControllerGetMyResourcesV1<TData = Awaited<ReturnType<typeof resourceControllerGetMyResourcesV1>>, TError = ResourceControllerGetMyResourcesV1ErrorType<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof resourceControllerGetMyResourcesV1>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary 내 허용 자원 트리 구조 조회
+ */
+
+export function useResourceControllerGetMyResourcesV1<TData = Awaited<ReturnType<typeof resourceControllerGetMyResourcesV1>>, TError = ResourceControllerGetMyResourcesV1ErrorType<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof resourceControllerGetMyResourcesV1>>, TError, TData>>, }
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getResourceControllerGetMyResourcesV1QueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+/**
+ * 새로운 메뉴 또는 컴포넌트 리소스를 한 번에 여러 개 생성합니다. 관리자 권한(RESOURCE:CREATE)이 필요합니다.
+ * @summary 리소스 일괄 생성
+ */
+export const resourceControllerCreateResourcesV1 = (
+    createResourcesDto: CreateResourcesDto,
+ signal?: AbortSignal
+) => {
+
+
+      return resourceControllerCreateResourcesV1Mutator<ResourceControllerCreateResourcesV1200>(
+      {url: `/api/v1/resources/resources/batch`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: createResourcesDto, signal
+    },
+      );
+    }
+
+
+
+export const getResourceControllerCreateResourcesV1MutationOptions = <TError = ResourceControllerCreateResourcesV1ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof resourceControllerCreateResourcesV1>>, TError,{data: CreateResourcesDto}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof resourceControllerCreateResourcesV1>>, TError,{data: CreateResourcesDto}, TContext> => {
+
+const mutationKey = ['resourceControllerCreateResourcesV1'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof resourceControllerCreateResourcesV1>>, {data: CreateResourcesDto}> = (props) => {
+          const {data} = props ?? {};
+
+          return  resourceControllerCreateResourcesV1(data,)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ResourceControllerCreateResourcesV1MutationResult = NonNullable<Awaited<ReturnType<typeof resourceControllerCreateResourcesV1>>>
+    export type ResourceControllerCreateResourcesV1MutationBody = CreateResourcesDto
+    export type ResourceControllerCreateResourcesV1MutationError = ResourceControllerCreateResourcesV1ErrorType<unknown>
+
+    /**
+ * @summary 리소스 일괄 생성
+ */
+export const useResourceControllerCreateResourcesV1 = <TError = ResourceControllerCreateResourcesV1ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof resourceControllerCreateResourcesV1>>, TError,{data: CreateResourcesDto}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof resourceControllerCreateResourcesV1>>,
+        TError,
+        {data: CreateResourcesDto},
+        TContext
+      > => {
+      return useMutation(getResourceControllerCreateResourcesV1MutationOptions(options), queryClient);
+    }
 

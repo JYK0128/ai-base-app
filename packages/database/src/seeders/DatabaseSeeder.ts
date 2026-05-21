@@ -3,6 +3,7 @@ import { Seeder } from '@mikro-orm/seeder';
 
 import { OrganizationSeeder } from './organization.seeder';
 import { PlatformSeeder } from './platform.seeder';
+import { ResourceSeeder } from './resource.seeder';
 
 /**
  * DatabaseSeeder
@@ -11,6 +12,7 @@ import { PlatformSeeder } from './platform.seeder';
  */
 export class DatabaseSeeder extends Seeder {
   async run(em: EntityManager): Promise<void> {
+    await this.call(em, [ResourceSeeder]);
     await this.call(em, [PlatformSeeder]);
     await this.call(em, [OrganizationSeeder]);
   }

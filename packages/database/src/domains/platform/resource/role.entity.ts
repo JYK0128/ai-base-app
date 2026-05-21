@@ -6,7 +6,7 @@ import { ManagerRole } from './manager.role.entity';
 import { RolePermission } from './role.permission.entity';
 import { RoleRepository } from './role.repository';
 
-export enum RbacRoleScope {
+export enum RoleScope {
   PLATFORM = 'PLATFORM',
   ORGANIZATION = 'ORGANIZATION',
 }
@@ -23,8 +23,8 @@ export class Role
   @Property({ nullable: true })
   description?: string;
 
-  @Enum(() => RbacRoleScope)
-  scope: RbacRoleScope = RbacRoleScope.PLATFORM;
+  @Enum(() => RoleScope)
+  scope: RoleScope = RoleScope.PLATFORM;
 
   @OneToMany(() => RolePermission, (rp) => rp.role)
   permissions = new Collection<RolePermission>(this);

@@ -15,6 +15,7 @@ import { AnnouncementModule } from './modules/announcement/announcement.module';
 import { HealthModule } from './modules/health/health.module';
 import { OrganizationModule } from './modules/organization/organization.module';
 import { RedisModule } from './modules/redis/redis.module';
+import { ResourceModule } from './modules/resource/resource.module';
 import { SupportModule } from './modules/support/support.module';
 import { TermsModule } from './modules/terms/terms.module';
 
@@ -48,6 +49,7 @@ import { TermsModule } from './modules/terms/terms.module';
     AnnouncementModule,
     SupportModule,
     TermsModule,
+    ResourceModule,
   ],
   providers: [
     {
