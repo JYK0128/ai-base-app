@@ -19,7 +19,7 @@ spec:
       containers:
       - name: platform-admin-web
         image: platform-admin-web:latest
-        imagePullPolicy: IfNotPresent
+        imagePullPolicy: Always
         ports:
         - containerPort: 80
         resources:

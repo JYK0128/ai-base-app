@@ -38,6 +38,7 @@ export default defineConfig([
           allow: [
             'Redirect',
             'NotFound',
+            'NotFoundError',
             {
               from: 'package',
               package: '@tanstack/react-router',
@@ -47,6 +48,11 @@ export default defineConfig([
               from: 'package',
               package: '@tanstack/react-router',
               name: 'NotFound',
+            },
+            {
+              from: 'package',
+              package: '@tanstack/react-router',
+              name: 'NotFoundError',
             },
           ],
         },

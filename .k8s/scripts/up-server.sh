@@ -1,19 +1,15 @@
 #!/bin/bash
 
-# 통합 서버 병렬 빌드 및 배포 스크립트 (Colima Kubernetes 버전)
+# 통합 서버 병렬 빌드 및 배포 스크립트 (Docker Desktop Kubernetes 버전)
 set -e
 
 echo "=================================================="
-echo "🚀 [PIPELINE] SERVER BUILD & DEPLOYMENT (COLIMA)"
+echo "🚀 [PIPELINE] SERVER BUILD & DEPLOYMENT"
 echo "=================================================="
 
-# 1단계: Docker 환경 설정 (Colima 컨텍스트가 존재하면 사용)
-if docker context inspect colima &> /dev/null; then
-    echo "🐳 Step 1: Using Colima's Docker context..."
-    docker context use colima
-else
-    echo "🐳 Step 1: Using default/native Docker context..."
-fi
+# 1단계: Docker 환경 설정 (Docker Desktop 연동)
+CURRENT_DOCKER_CTX=$(docker context show)
+echo "🐳 Step 1: Using active Docker context: $CURRENT_DOCKER_CTX"
 
 # 2단계: 이미지 병렬 빌드
 echo "📦 Step 2: Building Docker images in parallel..."
@@ -62,7 +58,7 @@ if [ ${#build_pids[@]} -gt 0 ]; then
         echo "❌ Some Docker builds failed. Aborting deployment."
         exit 1
     fi
-    echo "   ✅ All images built successfully inside Colima."
+    echo "   ✅ All images built successfully inside Docker Desktop."
 fi
 
 # 3단계: 매니페스트 적용 및 병렬 재시작
@@ -78,13 +74,15 @@ for app in $APPS; do
         *) continue ;;
     esac
     echo "   [RESTART] $dep..."
-    kubectl rollout restart "deployment/$dep" -n "$ns" &
+    kubectl rollout restart "deployment/$dep" -n "$ns"
+    echo "   [WAIT-READY] Waiting for $dep rollout to complete..."
+    kubectl rollout status "deployment/$dep" -n "$ns" &
     restart_pids+=($!)
 done
 
 if [ ${#restart_pids[@]} -gt 0 ]; then
     wait "${restart_pids[@]}"
-    echo "   ✅ All services restarted."
+    echo "   ✅ All services restarted and fully ready."
 fi
 
 echo "=================================================="

@@ -19,7 +19,7 @@ spec:
       containers:
       - name: platform-auth-service
         image: platform-auth-service:latest
-        imagePullPolicy: IfNotPresent
+        imagePullPolicy: Always
         volumeMounts:
         - name: tmp
           mountPath: /tmp

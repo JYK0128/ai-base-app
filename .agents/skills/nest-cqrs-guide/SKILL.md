@@ -72,20 +72,39 @@ export const CreateExampleAsserter = ExceptionGuard.setMessages(ERROR_MESSAGES);
 - **@CommandHandler / @QueryHandler**: 해당 클래스를 핸들러로 등록.
 - **private readonly Asserter**: 헬퍼에서 가져온 Asserter를 참조.
 - **@Transactional()**: DB 상태를 변경하는 경우 필수 적용 (MikroORM 사용 시).
-- **execute()**: 3단계 흐름을 명시적으로 호출.
+- **execute()**: 구조적 흐름을 명시적으로 호출.
 
-### 3단계 실행 흐름 (Step-based Execution)
+### 3단계 실행 흐름 및 단언자 사용 표준 (Step-based Execution & Asserter Standard)
 
-1. **Identify (식별)**: 필요한 엔티티를 조회하고 존재 여부를 `Asserter.assert`로 확인합니다.
-2. **Validate (검증)**: 비즈니스 정책이나 권한을 `Asserter.throwIf` 또는 `Asserter.assert`로 검증합니다.
-3. **Execute/Process (실행)**: 실제 상태 변경 로직을 수행합니다.
+핸들러 비즈니스 로직은 **식별 (Identify) → 검증 (Validate) → 실행 (Process)** 단계를 거치며, 다음 규칙을 반드시 준수합니다.
+
+#### A. 단언자(Asserter)의 명확한 역할 정의
+
+1. **`assert(promiseOrValue, errorCode)`**:
+   - **역할**: 값을 확인하고 유효할 경우 **값을 그대로 반환(Return)** 합니다.
+   - **사용 위치**: 주로 `identify` 단계에서 DB 조회 Promise를 직접 인수로 전달받아 Non-Nullable 엔티티 값을 확보할 때 활용합니다.
+   - **예시**: `return await this.Asserter.assert(this.repo.findOne(id), 'NOT_FOUND');`
+2. **`throwIf(condition, errorCode)`**:
+   - **역할**: 진리값(참/거짓 조건)을 평가하여 조건이 `true`이면 예외를 던지고, `false`이면 무사 통과합니다.
+   - **사용 위치**: 주로 `validate` 단계에서 도메인 정책, 활성화 여부, 권한 등 논리 검증을 할 때 사용합니다.
+   - **예시**: `this.Asserter.throwIf(!account.isActive(), 'INACTIVE');`
+
+#### B. 프라이빗 메서드 작성 규칙
+
+1. **구체적인 자원명 표기**: `identify`, `validate`, `process`와 같은 추상적 동사만 사용하지 않고, 대상 자원의 명칭을 함께 명시합니다.
+   - *권장*: `identifyAccount()`, `validatePolicies()`, `processPasswordUpdate()`
+   - *지양*: `identify()`, `validate()`, `process()`
+2. **내용 없는 빈 함수 생성 금지 (Omission Rule)**:
+   - 비즈니스 요건 상 `validate` 단에 아무런 논리 검증이나 `throwIf` 구문이 필요 없을 경우에는, **내용이 비어있는 `validate[Resource]` 함수를 선언하거나 호출하지 말고 해당 단계를 완전히 생략**합니다.
+
+---
 
 ### Handler 예시
 
 ```typescript
 import { Transactional } from '@mikro-orm/decorators/legacy';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { ExampleRepository } from '@pkg/database';
+import { Example, ExampleRepository } from '@pkg/database';
 import { CreateExampleAsserter, CreateExampleCommand } from './create-example.helpers';
 
 @CommandHandler(CreateExampleCommand)
@@ -94,30 +113,27 @@ export class CreateExampleHandler implements ICommandHandler<CreateExampleComman
 
   constructor(
     private readonly exampleRepo: ExampleRepository,
-    private readonly em: EntityManager,
   ) {}
 
   @Transactional()
   async execute(command: CreateExampleCommand): Promise<any> {
-    const entity = await this.identify(command.id);
-    await this.validate(entity);
-    return this.process(entity, command.data);
+    // 2단계 (validate)는 별도 비즈니스 정책 검증이 불필요하므로 생략 (Omission Rule 적용)
+    const example = await this.identifyExample(command.id);
+    return this.processExampleCreation(example, command.data);
   }
 
-  private async identify(id: string) {
+  // 1단계: identify (assert로 값을 조회 및 검증하여 Non-Nullable 값 반환)
+  private async identifyExample(id: string): Promise<Example> {
     return await this.Asserter.assert(
       this.exampleRepo.findOne({ id }),
       'NOT_FOUND',
     );
   }
 
-  private async validate(entity: any) {
-    await this.Asserter.throwIf(entity.isLocked, 'ALREADY_LOCKED');
-  }
-
-  private process(entity: any, data: any) {
-    // 로직 수행...
-    return result;
+  // 3단계: process
+  private processExampleCreation(example: Example, data: any) {
+    example.update(data);
+    return example;
   }
 }
 ```
@@ -130,3 +146,4 @@ export class CreateExampleHandler implements ICommandHandler<CreateExampleComman
 - **Repository 사용**: `@pkg/database`에서 필요한 Repository와 Entity를 임포트합니다.
 - **타입 정의**: Command/Query의 생성자 파라미터는 `readonly`를 사용합니다.
 - **문서화**: 클래스와 주요 메서드에 JSDoc 주석을 추가합니다.
+- **단독 이중 래핑 금지**: DB 조회 비동기 메서드를 호출할 때 바깥에서 미리 `await`하여 변수로 담고 이를 다시 `assert`에 전달하는 식의 불필요한 단독 래핑을 피하고, DB Promise를 `assert` 메서드 내부에 직배송시킵니다.

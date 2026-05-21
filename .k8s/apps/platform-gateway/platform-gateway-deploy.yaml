@@ -19,7 +19,7 @@ spec:
       containers:
       - name: platform-gateway
         image: platform-gateway:latest
-        imagePullPolicy: IfNotPresent
+        imagePullPolicy: Always
         volumeMounts:
         - name: tmp
           mountPath: /tmp

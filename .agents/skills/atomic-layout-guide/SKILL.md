@@ -36,7 +36,8 @@ description: React와 Tailwind CSS를 사용하여 반응형 블록 기반 UI를
 페이지의 전체 구조나 고정/가변 영역이 공존하는 세로 배치에 사용합니다.
 
 ```tsx
-/* 상단 헤더(auto) + 본문(1fr) + 하단 푸터(auto) 구조 */
+/* 상단 헤더(auto), 본문(1fr), 하단 푸터(auto)처럼
+   본문이 남는 높이를 차지하게 해서 스크롤 공간을 확보하는 구조 */
 <div className="grid grid-rows-[auto_1fr_auto] h-screen">
   <header className="p-4 bg-gray-50">Header</header>
   <main className="overflow-auto p-6">Main Content</main>

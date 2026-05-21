@@ -19,7 +19,7 @@ spec:
       containers:
       - name: platform-core-service
         image: platform-core-service:latest
-        imagePullPolicy: IfNotPresent
+        imagePullPolicy: Always
         volumeMounts:
         - name: tmp
           mountPath: /tmp
