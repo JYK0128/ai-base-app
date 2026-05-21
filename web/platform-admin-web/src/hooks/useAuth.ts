@@ -7,7 +7,8 @@ import { accessTokenAtom,
          isInitializedAtom,
          isRefreshingAtom,
          mustChangePasswordAtom,
-         organizationIdAtom } from '../stores/auth.store';
+         organizationIdAtom,
+         permissionsAtom } from '../stores/auth.store';
 
 export const useAuth = () => {
   const [accessToken, setAccessToken] = useAtom(accessTokenAtom);
@@ -52,11 +53,14 @@ export const useAuth = () => {
     setAccessToken(null);
   };
 
+  const permissions = useAtomValue(permissionsAtom);
+
   return {
     accessToken,
     isAuthenticated,
     mustChangePassword,
     organizationId,
+    permissions,
     isInitializing: !isInitialized,
     setAccessToken,
     login,

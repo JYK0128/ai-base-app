@@ -4,8 +4,12 @@ import { ClsService } from 'nestjs-cls';
 import { defaultIfEmpty, firstValueFrom } from 'rxjs';
 
 import { AUTH_SERVICE, AUTH_SERVICE_PATTERNS } from './auth.constants';
-import { LoginResult } from './auth.service';
 import { type ChangePasswordDto, LoginDto } from './dto/auth-request.dto';
+
+export interface LoginResult {
+  accessToken: string
+  refreshToken: string
+}
 
 @Injectable()
 export class AuthClient {
@@ -25,6 +29,7 @@ export class AuthClient {
       clientIp: this.cls.get('clientIp'),
       id: this.cls.get('id'),
       organizationId: this.cls.get('organizationId'),
+      acceptLanguage: this.cls.get('acceptLanguage'),
     };
     return firstValueFrom(
       this.client.send<TResult>(pattern, payload).pipe(

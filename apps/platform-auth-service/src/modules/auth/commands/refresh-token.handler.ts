@@ -66,7 +66,7 @@ export class RefreshTokenHandler implements ICommandHandler<RefreshTokenCommand>
     return await this.Asserter.assert(
       this.managerAccountRepository.findOne(
         { id },
-        { populate: ['manager.organization', 'manager.roles.role.permissions.permission'] },
+        { populate: ['manager.organization', 'manager.roles.role.permissions.resource'] },
       ),
       'ACCOUNT_NOT_FOUND',
     );
@@ -89,7 +89,7 @@ export class RefreshTokenHandler implements ICommandHandler<RefreshTokenCommand>
 
     // 4-3. (선택) 요청 조직 소속 여부 재검증
     if (organizationId) {
-      await this.Asserter.throwIf(organization.is(organizationId), 'INVALID_TOKEN');
+      await this.Asserter.throwIf(!organization.is(organizationId), 'INVALID_TOKEN');
     }
   }
 

@@ -24,7 +24,7 @@ function LoginPage() {
   const { redirect } = Route.useSearch();
   const { login, isAuthenticated, mustChangePassword } = useAuth();
 
-  const { mutate: loginMutate } = useAuthControllerLoginV1({
+  const { mutateAsync: loginMutate } = useAuthControllerLoginV1({
     mutation: {
       onSuccess: ({ data }) => {
         login(data.accessToken);
@@ -44,7 +44,7 @@ function LoginPage() {
       }),
     },
     onSubmit: async ({ value }) => {
-      loginMutate({ data: value });
+      await loginMutate({ data: value });
     },
   });
 

@@ -22,9 +22,9 @@ export const SwaggerResult = <T extends Type<unknown>>(dataDto?: SwaggerResultDa
               properties: {
                 data: isArrayResponse
                   ? {
-                      type: 'array',
-                      items: { $ref: getSchemaPath(dto) },
-                    }
+                    type: 'array',
+                    items: { $ref: getSchemaPath(dto) },
+                  }
                   : { $ref: getSchemaPath(dto) },
               },
             },

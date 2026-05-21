@@ -56,7 +56,8 @@ export function configureApp(app: NestExpressApplication) {
       origin: ENV.CORS_ORIGIN ? ENV.CORS_ORIGIN.split(',') : false,
       credentials: true,
     });
-  } else {
+  }
+  else {
     app.enableCors();
   }
 

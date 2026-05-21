@@ -5,7 +5,7 @@ import { BadRequestException, NotFoundException, UnauthorizedException } from '@
 import { AccountStatus } from '@pkg/database';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { CryptoUtil } from '@/common/utils/crypto.util';
+import { ENV } from '@/common/env';
 
 import { ChangePasswordHandler } from './change-password.handler';
 import { ChangePasswordCommand } from './change-password.helpers';
@@ -28,14 +28,23 @@ describe('ChangePasswordHandler', () => {
     vi.useRealTimers();
   });
 
-  const createMockAccount = (overrides = {}) => ({
-    id: 'user-1',
-    password: 'hashed-current',
-    status: AccountStatus.ACTIVE,
-    lockUntil: null,
-    passwordExpiresAt: new Date('2026-01-01T00:00:00.000Z'),
-    ...overrides,
-  });
+  const createMockAccount = (overrides = {}) => {
+    const account = {
+      id: 'user-1',
+      password: 'hashed-current',
+      status: AccountStatus.ACTIVE,
+      lockUntil: null as Date | null,
+      passwordExpiresAt: new Date('2026-01-01T00:00:00.000Z'),
+      isActive: () => account.status === AccountStatus.ACTIVE,
+      isLocked: () => !!account.lockUntil && account.lockUntil.getTime() > Date.now(),
+      verifyPassword: (password: string) => password !== 'wrong-password',
+      updatePassword: (password: string, expiryDays: number) => {
+        account.password = password;
+        account.passwordExpiresAt = new Date(Date.now() + expiryDays * 24 * 60 * 60 * 1000);
+      },
+    };
+    return Object.assign(account, overrides);
+  };
 
   it('updates the password and password policy fields on success', async () => {
     const account = createMockAccount();
@@ -43,17 +52,16 @@ describe('ChangePasswordHandler', () => {
       findOne: vi.fn().mockResolvedValue(account),
     };
 
-    vi.spyOn(CryptoUtil, 'comparePassword').mockResolvedValue(true);
-    vi.spyOn(CryptoUtil, 'hashPassword').mockResolvedValue('hashed-new-password');
+    const verifyPasswordSpy = vi.spyOn(account, 'verifyPassword');
+    const updatePasswordSpy = vi.spyOn(account, 'updatePassword');
 
     const handler = new ChangePasswordHandler(repository as never);
 
     await handler.execute(new ChangePasswordCommand('user-1', 'current-password', 'new-password'));
 
     expect(repository.findOne).toHaveBeenCalledWith('user-1');
-    expect(CryptoUtil.comparePassword).toHaveBeenCalledWith('current-password', 'hashed-current');
-    expect(CryptoUtil.hashPassword).toHaveBeenCalledWith('new-password');
-    expect(account.password).toBe('hashed-new-password');
+    expect(verifyPasswordSpy).toHaveBeenCalledWith('current-password');
+    expect(updatePasswordSpy).toHaveBeenCalledWith('new-password', ENV.PASSWORD_EXPIRY_DAYS);
     expect(account.passwordExpiresAt.toISOString()).toBe('2026-07-22T00:00:00.000Z');
   });
 
@@ -82,8 +90,6 @@ describe('ChangePasswordHandler', () => {
   it('throws BadRequestException when the current password does not match', async () => {
     const account = createMockAccount();
     const repository = { findOne: vi.fn().mockResolvedValue(account) };
-
-    vi.spyOn(CryptoUtil, 'comparePassword').mockResolvedValue(false);
 
     const handler = new ChangePasswordHandler(repository as never);
 

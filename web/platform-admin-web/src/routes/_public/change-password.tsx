@@ -20,7 +20,7 @@ export const Route = createFileRoute('/_public/change-password')({
 function ChangePassword() {
   const { logout: authLogout, isAuthenticated } = useAuth();
 
-  const { mutate: logoutMutate } = useAuthControllerLogoutV1({
+  const { mutateAsync: logout } = useAuthControllerLogoutV1({
     mutation: {
       onSuccess: () => {
         authLogout();
@@ -28,10 +28,10 @@ function ChangePassword() {
     },
   });
 
-  const { mutate: changePasswordMutate, isPending: isChanging } = useAuthControllerChangePasswordV1({
+  const { mutateAsync: changePassword, isPending: isChanging } = useAuthControllerChangePasswordV1({
     mutation: {
-      onSuccess: () => {
-        logoutMutate();
+      onSuccess: async () => {
+        await logout();
       },
     },
   });
@@ -53,7 +53,7 @@ function ChangePassword() {
       }),
     },
     onSubmit: async ({ value }) => {
-      changePasswordMutate({ data: value });
+      await changePassword({ data: value });
     },
   });
 
