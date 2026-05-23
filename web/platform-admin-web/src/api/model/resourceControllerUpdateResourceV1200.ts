@@ -6,8 +6,8 @@
  * OpenAPI spec version: 1.0
  */
 import type { ApiResponse } from './apiResponse';
-import type { CreateResourcesResponseDto } from './createResourcesResponseDto';
+import type { CreateResourceResponseDto } from './createResourceResponseDto';
 
-export type ResourceControllerCreateResourcesV1200 = ApiResponse & {
-  data?: CreateResourcesResponseDto;
+export type ResourceControllerUpdateResourceV1200 = ApiResponse & {
+  data?: CreateResourceResponseDto;
 };

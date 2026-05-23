@@ -6,6 +6,9 @@
  * OpenAPI spec version: 1.0
  */
 
+/**
+ * 우선순위
+ */
 export type TicketResponseDtoPriority = typeof TicketResponseDtoPriority[keyof typeof TicketResponseDtoPriority];
 
 

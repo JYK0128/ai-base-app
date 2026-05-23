@@ -7,7 +7,7 @@
  */
 
 /**
- * 약관 버전 상태 (미입력 시 DRAFT)
+ * 버전 상태
  */
 export type CreateTermsVersionDtoStatus = typeof CreateTermsVersionDtoStatus[keyof typeof CreateTermsVersionDtoStatus];
 

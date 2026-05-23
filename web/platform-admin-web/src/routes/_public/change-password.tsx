@@ -8,6 +8,7 @@ import { Button,
          useAppForm } from '@pkg/ui';
 import { createFileRoute, Navigate } from '@tanstack/react-router';
 import { ArrowLeft, ArrowRight, Lock, ShieldCheck } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { z } from 'zod';
 
 import { useAuthControllerChangePasswordV1, useAuthControllerLogoutV1 } from '../../api/endpoints';
@@ -19,6 +20,7 @@ export const Route = createFileRoute('/_public/change-password')({
 
 function ChangePassword() {
   const { logout: authLogout, isAuthenticated } = useAuth();
+  const { t } = useTranslation('common');
 
   const { mutateAsync: logout } = useAuthControllerLogoutV1({
     mutation: {
@@ -71,18 +73,16 @@ function ChangePassword() {
             onClick={() => authLogout()}
           >
             <ArrowLeft />
-            Back to Login
+            {t('changePasswordBack')}
           </Button>
 
           <div className="flex items-center gap-2">
             <ShieldCheck />
-            <span>SECURITY</span>
+            <span>{t('changePasswordBrand')}</span>
           </div>
 
-          <CardTitle>Change Password</CardTitle>
-          <CardDescription>
-            Please update your password to secure your account.
-          </CardDescription>
+          <CardTitle>{t('changePasswordTitle')}</CardTitle>
+          <CardDescription>{t('changePasswordSubtitle')}</CardDescription>
         </CardHeader>
 
         <CardContent>
@@ -91,8 +91,8 @@ function ChangePassword() {
               <form.AppField name="currentPassword">
                 {(field) => (
                   <field.Input
-                    label="Current Password"
-                    placeholder="Enter current password"
+                    label={t('currentPassword')}
+                    placeholder={t('currentPasswordPlaceholder')}
                     type="password"
                     autoComplete="current-password"
                     required
@@ -106,8 +106,8 @@ function ChangePassword() {
               <form.AppField name="newPassword">
                 {(field) => (
                   <field.Input
-                    label="New Password"
-                    placeholder="Min. 6 characters"
+                    label={t('newPassword')}
+                    placeholder={t('newPasswordPlaceholder')}
                     type="password"
                     autoComplete="new-password"
                     required
@@ -121,8 +121,8 @@ function ChangePassword() {
               <form.AppField name="confirmPassword">
                 {(field) => (
                   <field.Input
-                    label="Confirm New Password"
-                    placeholder="Re-type new password"
+                    label={t('confirmNewPassword')}
+                    placeholder={t('confirmNewPasswordPlaceholder')}
                     type="password"
                     autoComplete="new-password"
                     required
@@ -137,7 +137,7 @@ function ChangePassword() {
                 disabled={isChanging}
                 className="w-full"
               >
-                {isChanging ? 'Updating...' : 'Update Password'}
+                {isChanging ? t('updatingPassword') : t('updatePassword')}
                 <ArrowRight />
               </form.Submit>
             </form.Layout>
@@ -145,7 +145,7 @@ function ChangePassword() {
         </CardContent>
 
         <CardFooter className="justify-center">
-          <CardDescription>Secured by Platform Auth Service</CardDescription>
+          <CardDescription>{t('securedBy')}</CardDescription>
         </CardFooter>
       </Card>
     </div>

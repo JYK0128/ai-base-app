@@ -28,8 +28,6 @@ export function SubResourceRegistrationModal({ open, onOpenChange, parentName, o
       ...form,
       actions: [],
     });
-
-    toast.success('컴포넌트 리소스가 임시 트리에 추가되었습니다.');
     onOpenChange(false);
     setForm({ type: 'COMPONENT', code: '', name: '' });
   };

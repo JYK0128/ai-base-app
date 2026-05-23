@@ -7,5 +7,8 @@
  */
 
 export type CoreControllerGetAnnouncementsV1Params = {
+/**
+ * 게시된 공지사항만 조회 여부
+ */
 isPublishedOnly?: boolean;
 };

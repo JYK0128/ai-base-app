@@ -5,8 +5,10 @@
  * The AI Base App Gateway API documentation
  * OpenAPI spec version: 1.0
  */
-import type { CreateResourceBatchItemDto } from './createResourceBatchItemDto';
 
-export interface CreateResourcesDto {
-  items: CreateResourceBatchItemDto[];
-}
+export type I18nControllerGetTranslationV1Params = {
+/**
+ * 단건 조회할 로케일
+ */
+locale?: string;
+};

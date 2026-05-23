@@ -7,9 +7,14 @@
  */
 
 export interface AnnouncementResponseDto {
+  /** 공지사항 식별자 */
   id: string;
+  /** 공지사항 제목 */
   title: string;
+  /** 공지사항 내용 */
   content: string;
+  /** 게시 여부 */
   isPublished: boolean;
+  /** 생성 일시 */
   createdAt: string;
 }

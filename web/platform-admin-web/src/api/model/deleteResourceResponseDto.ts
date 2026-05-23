@@ -6,4 +6,7 @@
  * OpenAPI spec version: 1.0
  */
 
-export type ResourceResponseDtoTranslations = { [key: string]: unknown };
+export interface DeleteResourceResponseDto {
+  /** 삭제된 리소스 식별자 */
+  id: string;
+}

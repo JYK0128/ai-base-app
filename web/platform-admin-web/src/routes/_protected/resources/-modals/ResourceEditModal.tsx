@@ -2,6 +2,7 @@ import { Button, Dialog, DialogContent, DialogDescription, DialogFooter, DialogH
 import { useState } from 'react';
 
 import { type ResourceResponseDto } from '../../../../api/model';
+import { COMMON_ICONS } from './commonIcons';
 
 interface ResourceEditModalProps {
   readonly open: boolean
@@ -48,8 +49,6 @@ export function ResourceEditModal({ open, onOpenChange, resource, onSave }: Reso
               path: isMenu ? form.path : undefined,
               icon: isMenu ? form.icon : undefined,
             });
-
-            toast.success('리소스 정보가 수정되었습니다.');
             onOpenChange(false);
           }}
           className="space-y-4"
@@ -85,15 +84,31 @@ export function ResourceEditModal({ open, onOpenChange, resource, onSave }: Reso
                   className="font-mono"
                 />
               </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="edit-icon">아이콘 이름</Label>
-                <Input
-                  id="edit-icon"
-                  placeholder="예: LayoutDashboard"
-                  value={form.icon}
-                  onChange={(e) => setForm({ ...form, icon: e.target.value })}
-                  className="font-mono"
-                />
+              <div className="space-y-2">
+                <Label>아이콘 선택 - 선택사항</Label>
+                <div className="grid grid-cols-5 gap-2 border border-slate-200 rounded-md p-2 max-h-40 overflow-y-auto bg-slate-50">
+                  {COMMON_ICONS.map(({ name, icon: IconComponent }) => (
+                    <button
+                      key={name}
+                      type="button"
+                      title={name}
+                      className={`p-2 rounded flex items-center justify-center transition-colors ${
+                        form.icon === name
+                          ? 'bg-blue-100 text-blue-600 border border-blue-300'
+                          : 'text-slate-600 bg-white border border-slate-200 hover:bg-slate-100'
+                      }`}
+                      onClick={() => setForm({ ...form, icon: form.icon === name ? '' : name })}
+                    >
+                      <IconComponent className="w-5 h-5" />
+                    </button>
+                  ))}
+                </div>
+                {form.icon && (
+                  <p className="text-xs text-blue-600 font-medium">
+                    선택된 아이콘:
+                    {form.icon}
+                  </p>
+                )}
               </div>
             </>
           )}

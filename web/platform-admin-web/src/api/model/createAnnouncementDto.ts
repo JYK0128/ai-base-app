@@ -7,7 +7,10 @@
  */
 
 export interface CreateAnnouncementDto {
+  /** 공지사항 제목 */
   title: string;
+  /** 공지사항 내용 */
   content: string;
+  /** 즉시 게시 여부 */
   isPublished?: boolean;
 }

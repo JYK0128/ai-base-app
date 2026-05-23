@@ -7,12 +7,12 @@
  */
 
 export interface AuthUserInfoDto {
-  /** 관리자 고유 ID */
+  /** 관리자 식별자 */
   id: string;
   /** 이메일 주소 */
   email: string;
-  /** 관리자 상태 (ACTIVE, INACTIVE) */
+  /** 관리자 상태 */
   status: string;
-  /** 소속 조직 ID */
+  /** 소속 조직 식별자 */
   organizationId?: string;
 }

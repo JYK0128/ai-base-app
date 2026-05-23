@@ -8,6 +8,7 @@ import { Button,
          useAppForm } from '@pkg/ui';
 import { createFileRoute, Navigate } from '@tanstack/react-router';
 import { ArrowRight, Lock, Mail } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { z } from 'zod';
 
 import { useAuthControllerLoginV1 } from '../../api/endpoints';
@@ -23,6 +24,7 @@ export const Route = createFileRoute('/_public/login')({
 function LoginPage() {
   const { redirect } = Route.useSearch();
   const { login, isAuthenticated, mustChangePassword } = useAuth();
+  const { t } = useTranslation('common');
 
   const { mutateAsync: loginMutate } = useAuthControllerLoginV1({
     mutation: {
@@ -59,12 +61,10 @@ function LoginPage() {
         <CardHeader>
           <div className="flex items-center gap-2">
             <Lock />
-            <span>PLATFORM</span>
+            <span>{t('appName')}</span>
           </div>
-          <CardTitle>Welcome Back</CardTitle>
-          <CardDescription>
-            Please enter your details to sign in.
-          </CardDescription>
+          <CardTitle>{t('loginTitle')}</CardTitle>
+          <CardDescription>{t('loginSubtitle')}</CardDescription>
         </CardHeader>
 
         <CardContent>
@@ -75,7 +75,7 @@ function LoginPage() {
               >
                 {(field) => (
                   <field.Input
-                    label="Email Address"
+                    label={t('loginEmail')}
                     placeholder="name@company.com"
                     type="email"
                     autoComplete="email"
@@ -92,7 +92,7 @@ function LoginPage() {
               >
                 {(field) => (
                   <field.Input
-                    label="Password"
+                    label={t('loginPassword')}
                     placeholder="••••••••"
                     type="password"
                     autoComplete="current-password"
@@ -105,7 +105,7 @@ function LoginPage() {
               </form.AppField>
 
               <form.Submit className="w-full">
-                Sign In
+                {t('loginSubmit')}
                 <ArrowRight />
               </form.Submit>
             </form.Layout>
@@ -114,12 +114,12 @@ function LoginPage() {
 
         <CardFooter className="flex-col justify-between gap-2 sm:flex-row">
           <Button type="button" variant="ghost">
-            Forgot Password?
+            {t('loginForgotPassword')}
           </Button>
           <div className="flex items-center gap-2">
-            <CardDescription>New here?</CardDescription>
+            <CardDescription>{t('loginNewHere')}</CardDescription>
             <Button type="button" variant="link">
-              Create Account
+              {t('loginCreateAccount')}
             </Button>
           </div>
         </CardFooter>

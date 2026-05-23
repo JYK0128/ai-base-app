@@ -44,17 +44,39 @@ import type {
   CoreControllerGetTicketsV1200,
   CoreControllerGetTicketsV1Params,
   CreateAnnouncementDto,
-  CreateResourcesDto,
+  CreateResourceDto,
   CreateTermsDocumentDto,
   CreateTermsVersionDto,
+  DeleteResourceBodyDto,
   HealthControllerLive200,
   HealthControllerLive503,
   HealthControllerReady200,
   HealthControllerReady503,
+  I18nControllerBulkTranslationsV1200,
+  I18nControllerCreateTranslationV1200,
+  I18nControllerDeleteTranslationV1200,
+  I18nControllerGetLocalesV1200,
+  I18nControllerGetTranslationV1200,
+  I18nControllerGetTranslationV1Params,
+  I18nControllerGetTranslationsV1200,
+  I18nControllerGetTranslationsV1Params,
+  I18nControllerUpdateTranslationV1200,
   LoginDto,
-  ResourceControllerCreateResourcesV1200,
+  ResourceControllerCreateResourceV1200,
+  ResourceControllerDeleteResourceV1200,
   ResourceControllerGetMyResourcesV1200,
-  ResourceControllerGetResourcesV1200
+  ResourceControllerGetResourceV1200,
+  ResourceControllerGetResourcesV1200,
+  ResourceControllerUpdateResourcePermissionsV1200,
+  ResourceControllerUpdateResourceSortV1200,
+  ResourceControllerUpdateResourceV1200,
+  TranslationBulkDto,
+  TranslationCreateDto,
+  TranslationDeleteDto,
+  TranslationUpdateDto,
+  UpdateResourceDetailBodyDto,
+  UpdateResourcePermissionsDto,
+  UpdateResourceSortDto
 } from './model';
 
 import authControllerLoginV1Mutator from '../lib/axios';
@@ -89,22 +111,46 @@ import coreControllerCreateTermsVersionV1Mutator from '../lib/axios';
 import type { ErrorType as CoreControllerCreateTermsVersionV1ErrorType } from '../lib/axios';
 import coreControllerAgreeTermsV1Mutator from '../lib/axios';
 import type { ErrorType as CoreControllerAgreeTermsV1ErrorType } from '../lib/axios';
+import i18nControllerGetLocalesV1Mutator from '../lib/axios';
+import type { ErrorType as I18nControllerGetLocalesV1ErrorType } from '../lib/axios';
+import i18nControllerGetTranslationV1Mutator from '../lib/axios';
+import type { ErrorType as I18nControllerGetTranslationV1ErrorType } from '../lib/axios';
+import i18nControllerGetTranslationsV1Mutator from '../lib/axios';
+import type { ErrorType as I18nControllerGetTranslationsV1ErrorType } from '../lib/axios';
+import i18nControllerCreateTranslationV1Mutator from '../lib/axios';
+import type { ErrorType as I18nControllerCreateTranslationV1ErrorType } from '../lib/axios';
+import i18nControllerBulkTranslationsV1Mutator from '../lib/axios';
+import type { ErrorType as I18nControllerBulkTranslationsV1ErrorType } from '../lib/axios';
+import i18nControllerUpdateTranslationV1Mutator from '../lib/axios';
+import type { ErrorType as I18nControllerUpdateTranslationV1ErrorType } from '../lib/axios';
+import i18nControllerDeleteTranslationV1Mutator from '../lib/axios';
+import type { ErrorType as I18nControllerDeleteTranslationV1ErrorType } from '../lib/axios';
 import healthControllerLiveMutator from '../lib/axios';
 import type { ErrorType as HealthControllerLiveErrorType } from '../lib/axios';
 import healthControllerReadyMutator from '../lib/axios';
 import type { ErrorType as HealthControllerReadyErrorType } from '../lib/axios';
 import resourceControllerGetResourcesV1Mutator from '../lib/axios';
 import type { ErrorType as ResourceControllerGetResourcesV1ErrorType } from '../lib/axios';
+import resourceControllerGetResourceV1Mutator from '../lib/axios';
+import type { ErrorType as ResourceControllerGetResourceV1ErrorType } from '../lib/axios';
 import resourceControllerGetMyResourcesV1Mutator from '../lib/axios';
 import type { ErrorType as ResourceControllerGetMyResourcesV1ErrorType } from '../lib/axios';
-import resourceControllerCreateResourcesV1Mutator from '../lib/axios';
-import type { ErrorType as ResourceControllerCreateResourcesV1ErrorType } from '../lib/axios';
+import resourceControllerCreateResourceV1Mutator from '../lib/axios';
+import type { ErrorType as ResourceControllerCreateResourceV1ErrorType } from '../lib/axios';
+import resourceControllerUpdateResourceV1Mutator from '../lib/axios';
+import type { ErrorType as ResourceControllerUpdateResourceV1ErrorType } from '../lib/axios';
+import resourceControllerUpdateResourcePermissionsV1Mutator from '../lib/axios';
+import type { ErrorType as ResourceControllerUpdateResourcePermissionsV1ErrorType } from '../lib/axios';
+import resourceControllerUpdateResourceSortV1Mutator from '../lib/axios';
+import type { ErrorType as ResourceControllerUpdateResourceSortV1ErrorType } from '../lib/axios';
+import resourceControllerDeleteResourceV1Mutator from '../lib/axios';
+import type { ErrorType as ResourceControllerDeleteResourceV1ErrorType } from '../lib/axios';
 
 
 
 
 /**
- * 인증 서비스로 로그인 요청을 전달하고 Refresh Token을 쿠키에 설정합니다.
+ * 로그인합니다.
  * @summary 로그인
  */
 export const authControllerLoginV1 = (
@@ -169,7 +215,7 @@ export const useAuthControllerLoginV1 = <TError = AuthControllerLoginV1ErrorType
     }
 
 /**
- * 쿠키의 리프레시 토큰을 사용하여 액세스 토큰을 갱신합니다.
+ * 액세스 토큰을 갱신합니다.
  * @summary 토큰 갱신
  */
 export const authControllerRefreshV1 = (
@@ -232,7 +278,7 @@ export const useAuthControllerRefreshV1 = <TError = AuthControllerRefreshV1Error
     }
 
 /**
- * JWT 토큰을 통해 인증된 현재 관리자 계정의 정보를 반환합니다.
+ * 현재 관리자 정보를 조회합니다.
  * @summary 내 정보 조회
  */
 export const authControllerGetMeV1 = (
@@ -326,7 +372,7 @@ export function useAuthControllerGetMeV1<TData = Awaited<ReturnType<typeof authC
 
 
 /**
- * 세션을 종료하고 리프레시 토큰 쿠키를 제거합니다.
+ * 로그아웃합니다.
  * @summary 로그아웃
  */
 export const authControllerLogoutV1 = (
@@ -389,7 +435,7 @@ export const useAuthControllerLogoutV1 = <TError = AuthControllerLogoutV1ErrorTy
     }
 
 /**
- * 비밀번호 변경 안내를 확인하고 90일 연장합니다.
+ * 비밀번호 변경을 연장합니다.
  * @summary 비밀번호 변경 연장
  */
 export const authControllerDeferPasswordChangeV1 = (
@@ -452,7 +498,7 @@ export const useAuthControllerDeferPasswordChangeV1 = <TError = AuthControllerDe
     }
 
 /**
- * 현재 비밀번호를 확인하고 새로운 비밀번호로 변경합니다.
+ * 비밀번호를 변경합니다.
  * @summary 비밀번호 변경
  */
 export const authControllerChangePasswordV1 = (
@@ -517,7 +563,7 @@ export const useAuthControllerChangePasswordV1 = <TError = AuthControllerChangeP
     }
 
 /**
- * 플랫폼의 모든 조직 목록을 조회합니다.
+ * 조직 목록을 조회합니다.
  * @summary 조직 목록 조회
  */
 export const coreControllerGetOrganizationsV1 = (
@@ -612,7 +658,7 @@ export function useCoreControllerGetOrganizationsV1<TData = Awaited<ReturnType<t
 
 
 /**
- * 가입 대기 중인 조직을 승인합니다.
+ * 조직을 승인합니다.
  * @summary 조직 승인
  */
 export const coreControllerApproveOrganizationV1 = (
@@ -675,7 +721,7 @@ export const useCoreControllerApproveOrganizationV1 = <TError = CoreControllerAp
     }
 
 /**
- * 가입 대기 중인 조직을 거절합니다.
+ * 조직을 거절합니다.
  * @summary 조직 거절
  */
 export const coreControllerRejectOrganizationV1 = (
@@ -738,7 +784,7 @@ export const useCoreControllerRejectOrganizationV1 = <TError = CoreControllerRej
     }
 
 /**
- * 플랫폼 공지사항 목록을 조회합니다.
+ * 공지사항 목록을 조회합니다.
  * @summary 공지사항 조회
  */
 export const coreControllerGetAnnouncementsV1 = (
@@ -833,7 +879,7 @@ export function useCoreControllerGetAnnouncementsV1<TData = Awaited<ReturnType<t
 
 
 /**
- * 새로운 공지사항을 작성합니다.
+ * 공지사항을 작성합니다.
  * @summary 공지사항 작성
  */
 export const coreControllerCreateAnnouncementV1 = (
@@ -898,8 +944,8 @@ export const useCoreControllerCreateAnnouncementV1 = <TError = CoreControllerCre
     }
 
 /**
- * 플랫폼 고객지원 티켓 목록을 조회합니다.
- * @summary 고객지원 티켓 조회
+ * 티켓 목록을 조회합니다.
+ * @summary 티켓 조회
  */
 export const coreControllerGetTicketsV1 = (
     params?: CoreControllerGetTicketsV1Params,
@@ -971,7 +1017,7 @@ export function useCoreControllerGetTicketsV1<TData = Awaited<ReturnType<typeof 
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
- * @summary 고객지원 티켓 조회
+ * @summary 티켓 조회
  */
 
 export function useCoreControllerGetTicketsV1<TData = Awaited<ReturnType<typeof coreControllerGetTicketsV1>>, TError = CoreControllerGetTicketsV1ErrorType<unknown>>(
@@ -993,7 +1039,7 @@ export function useCoreControllerGetTicketsV1<TData = Awaited<ReturnType<typeof 
 
 
 /**
- * 플랫폼/조직 범위의 현재 활성 약관 목록을 조회합니다.
+ * 약관 목록을 조회합니다.
  * @summary 약관 목록 조회
  */
 export const coreControllerGetActiveTermsV1 = (
@@ -1088,7 +1134,7 @@ export function useCoreControllerGetActiveTermsV1<TData = Awaited<ReturnType<typ
 
 
 /**
- * PLATFORM 또는 ORGANIZATION 그룹 약관 문서를 생성합니다.
+ * 약관 문서를 생성합니다.
  * @summary 약관 문서 생성
  */
 export const coreControllerCreateTermsDocumentV1 = (
@@ -1153,7 +1199,7 @@ export const useCoreControllerCreateTermsDocumentV1 = <TError = CoreControllerCr
     }
 
 /**
- * 약관 버전을 생성하고 선택적으로 즉시 게시합니다.
+ * 약관 버전을 생성합니다.
  * @summary 약관 버전 생성
  */
 export const coreControllerCreateTermsVersionV1 = (
@@ -1218,7 +1264,7 @@ export const useCoreControllerCreateTermsVersionV1 = <TError = CoreControllerCre
     }
 
 /**
- * 매니저의 특정 약관 버전 동의 이력을 저장합니다.
+ * 약관 동의 이력을 저장합니다.
  * @summary 약관 동의 저장
  */
 export const coreControllerAgreeTermsV1 = (
@@ -1280,6 +1326,564 @@ export const useCoreControllerAgreeTermsV1 = <TError = CoreControllerAgreeTermsV
         TContext
       > => {
       return useMutation(getCoreControllerAgreeTermsV1MutationOptions(options), queryClient);
+    }
+
+/**
+ * 로케일 목록을 조회합니다.
+ * @summary 로케일 목록 조회
+ */
+export const i18nControllerGetLocalesV1 = (
+
+ signal?: AbortSignal
+) => {
+
+
+      return i18nControllerGetLocalesV1Mutator<I18nControllerGetLocalesV1200>(
+      {url: `/api/v1/i18n/locales`, method: 'GET', signal
+    },
+      );
+    }
+
+
+
+
+export const getI18nControllerGetLocalesV1QueryKey = () => {
+    return [
+    `/api/v1/i18n/locales`
+    ] as const;
+    }
+
+
+export const getI18nControllerGetLocalesV1QueryOptions = <TData = Awaited<ReturnType<typeof i18nControllerGetLocalesV1>>, TError = I18nControllerGetLocalesV1ErrorType<unknown>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof i18nControllerGetLocalesV1>>, TError, TData>>, }
+) => {
+
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getI18nControllerGetLocalesV1QueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof i18nControllerGetLocalesV1>>> = ({ signal }) => i18nControllerGetLocalesV1(signal);
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof i18nControllerGetLocalesV1>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type I18nControllerGetLocalesV1QueryResult = NonNullable<Awaited<ReturnType<typeof i18nControllerGetLocalesV1>>>
+export type I18nControllerGetLocalesV1QueryError = I18nControllerGetLocalesV1ErrorType<unknown>
+
+
+export function useI18nControllerGetLocalesV1<TData = Awaited<ReturnType<typeof i18nControllerGetLocalesV1>>, TError = I18nControllerGetLocalesV1ErrorType<unknown>>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof i18nControllerGetLocalesV1>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof i18nControllerGetLocalesV1>>,
+          TError,
+          Awaited<ReturnType<typeof i18nControllerGetLocalesV1>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useI18nControllerGetLocalesV1<TData = Awaited<ReturnType<typeof i18nControllerGetLocalesV1>>, TError = I18nControllerGetLocalesV1ErrorType<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof i18nControllerGetLocalesV1>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof i18nControllerGetLocalesV1>>,
+          TError,
+          Awaited<ReturnType<typeof i18nControllerGetLocalesV1>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useI18nControllerGetLocalesV1<TData = Awaited<ReturnType<typeof i18nControllerGetLocalesV1>>, TError = I18nControllerGetLocalesV1ErrorType<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof i18nControllerGetLocalesV1>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary 로케일 목록 조회
+ */
+
+export function useI18nControllerGetLocalesV1<TData = Awaited<ReturnType<typeof i18nControllerGetLocalesV1>>, TError = I18nControllerGetLocalesV1ErrorType<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof i18nControllerGetLocalesV1>>, TError, TData>>, }
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getI18nControllerGetLocalesV1QueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+/**
+ * 단건 번역을 조회합니다.
+ * @summary 번역 단건 조회
+ */
+export const i18nControllerGetTranslationV1 = (
+    namespace: string,
+    key: string,
+    params?: I18nControllerGetTranslationV1Params,
+ signal?: AbortSignal
+) => {
+
+
+      return i18nControllerGetTranslationV1Mutator<I18nControllerGetTranslationV1200>(
+      {url: `/api/v1/i18n/translations/${namespace}/${key}`, method: 'GET',
+        params, signal
+    },
+      );
+    }
+
+
+
+
+export const getI18nControllerGetTranslationV1QueryKey = (namespace: string,
+    key: string,
+    params?: I18nControllerGetTranslationV1Params,) => {
+    return [
+    `/api/v1/i18n/translations/${namespace}/${key}`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getI18nControllerGetTranslationV1QueryOptions = <TData = Awaited<ReturnType<typeof i18nControllerGetTranslationV1>>, TError = I18nControllerGetTranslationV1ErrorType<unknown>>(namespace: string,
+    key: string,
+    params?: I18nControllerGetTranslationV1Params, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof i18nControllerGetTranslationV1>>, TError, TData>>, }
+) => {
+
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getI18nControllerGetTranslationV1QueryKey(namespace,key,params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof i18nControllerGetTranslationV1>>> = ({ signal }) => i18nControllerGetTranslationV1(namespace,key,params, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: !!(namespace && key), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof i18nControllerGetTranslationV1>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type I18nControllerGetTranslationV1QueryResult = NonNullable<Awaited<ReturnType<typeof i18nControllerGetTranslationV1>>>
+export type I18nControllerGetTranslationV1QueryError = I18nControllerGetTranslationV1ErrorType<unknown>
+
+
+export function useI18nControllerGetTranslationV1<TData = Awaited<ReturnType<typeof i18nControllerGetTranslationV1>>, TError = I18nControllerGetTranslationV1ErrorType<unknown>>(
+ namespace: string,
+    key: string,
+    params: undefined |  I18nControllerGetTranslationV1Params, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof i18nControllerGetTranslationV1>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof i18nControllerGetTranslationV1>>,
+          TError,
+          Awaited<ReturnType<typeof i18nControllerGetTranslationV1>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useI18nControllerGetTranslationV1<TData = Awaited<ReturnType<typeof i18nControllerGetTranslationV1>>, TError = I18nControllerGetTranslationV1ErrorType<unknown>>(
+ namespace: string,
+    key: string,
+    params?: I18nControllerGetTranslationV1Params, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof i18nControllerGetTranslationV1>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof i18nControllerGetTranslationV1>>,
+          TError,
+          Awaited<ReturnType<typeof i18nControllerGetTranslationV1>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useI18nControllerGetTranslationV1<TData = Awaited<ReturnType<typeof i18nControllerGetTranslationV1>>, TError = I18nControllerGetTranslationV1ErrorType<unknown>>(
+ namespace: string,
+    key: string,
+    params?: I18nControllerGetTranslationV1Params, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof i18nControllerGetTranslationV1>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary 번역 단건 조회
+ */
+
+export function useI18nControllerGetTranslationV1<TData = Awaited<ReturnType<typeof i18nControllerGetTranslationV1>>, TError = I18nControllerGetTranslationV1ErrorType<unknown>>(
+ namespace: string,
+    key: string,
+    params?: I18nControllerGetTranslationV1Params, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof i18nControllerGetTranslationV1>>, TError, TData>>, }
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getI18nControllerGetTranslationV1QueryOptions(namespace,key,params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+/**
+ * 번역 목록을 조회합니다.
+ * @summary 번역 배치 조회
+ */
+export const i18nControllerGetTranslationsV1 = (
+    params?: I18nControllerGetTranslationsV1Params,
+ signal?: AbortSignal
+) => {
+
+
+      return i18nControllerGetTranslationsV1Mutator<I18nControllerGetTranslationsV1200>(
+      {url: `/api/v1/i18n/translations`, method: 'GET',
+        params, signal
+    },
+      );
+    }
+
+
+
+
+export const getI18nControllerGetTranslationsV1QueryKey = (params?: I18nControllerGetTranslationsV1Params,) => {
+    return [
+    `/api/v1/i18n/translations`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getI18nControllerGetTranslationsV1QueryOptions = <TData = Awaited<ReturnType<typeof i18nControllerGetTranslationsV1>>, TError = I18nControllerGetTranslationsV1ErrorType<unknown>>(params?: I18nControllerGetTranslationsV1Params, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof i18nControllerGetTranslationsV1>>, TError, TData>>, }
+) => {
+
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getI18nControllerGetTranslationsV1QueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof i18nControllerGetTranslationsV1>>> = ({ signal }) => i18nControllerGetTranslationsV1(params, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof i18nControllerGetTranslationsV1>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type I18nControllerGetTranslationsV1QueryResult = NonNullable<Awaited<ReturnType<typeof i18nControllerGetTranslationsV1>>>
+export type I18nControllerGetTranslationsV1QueryError = I18nControllerGetTranslationsV1ErrorType<unknown>
+
+
+export function useI18nControllerGetTranslationsV1<TData = Awaited<ReturnType<typeof i18nControllerGetTranslationsV1>>, TError = I18nControllerGetTranslationsV1ErrorType<unknown>>(
+ params: undefined |  I18nControllerGetTranslationsV1Params, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof i18nControllerGetTranslationsV1>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof i18nControllerGetTranslationsV1>>,
+          TError,
+          Awaited<ReturnType<typeof i18nControllerGetTranslationsV1>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useI18nControllerGetTranslationsV1<TData = Awaited<ReturnType<typeof i18nControllerGetTranslationsV1>>, TError = I18nControllerGetTranslationsV1ErrorType<unknown>>(
+ params?: I18nControllerGetTranslationsV1Params, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof i18nControllerGetTranslationsV1>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof i18nControllerGetTranslationsV1>>,
+          TError,
+          Awaited<ReturnType<typeof i18nControllerGetTranslationsV1>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useI18nControllerGetTranslationsV1<TData = Awaited<ReturnType<typeof i18nControllerGetTranslationsV1>>, TError = I18nControllerGetTranslationsV1ErrorType<unknown>>(
+ params?: I18nControllerGetTranslationsV1Params, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof i18nControllerGetTranslationsV1>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary 번역 배치 조회
+ */
+
+export function useI18nControllerGetTranslationsV1<TData = Awaited<ReturnType<typeof i18nControllerGetTranslationsV1>>, TError = I18nControllerGetTranslationsV1ErrorType<unknown>>(
+ params?: I18nControllerGetTranslationsV1Params, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof i18nControllerGetTranslationsV1>>, TError, TData>>, }
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getI18nControllerGetTranslationsV1QueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+/**
+ * 번역을 생성합니다.
+ * @summary 번역 생성
+ */
+export const i18nControllerCreateTranslationV1 = (
+    translationCreateDto: TranslationCreateDto,
+ signal?: AbortSignal
+) => {
+
+
+      return i18nControllerCreateTranslationV1Mutator<I18nControllerCreateTranslationV1200>(
+      {url: `/api/v1/i18n/translations`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: translationCreateDto, signal
+    },
+      );
+    }
+
+
+
+export const getI18nControllerCreateTranslationV1MutationOptions = <TError = I18nControllerCreateTranslationV1ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof i18nControllerCreateTranslationV1>>, TError,{data: TranslationCreateDto}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof i18nControllerCreateTranslationV1>>, TError,{data: TranslationCreateDto}, TContext> => {
+
+const mutationKey = ['i18nControllerCreateTranslationV1'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof i18nControllerCreateTranslationV1>>, {data: TranslationCreateDto}> = (props) => {
+          const {data} = props ?? {};
+
+          return  i18nControllerCreateTranslationV1(data,)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type I18nControllerCreateTranslationV1MutationResult = NonNullable<Awaited<ReturnType<typeof i18nControllerCreateTranslationV1>>>
+    export type I18nControllerCreateTranslationV1MutationBody = TranslationCreateDto
+    export type I18nControllerCreateTranslationV1MutationError = I18nControllerCreateTranslationV1ErrorType<unknown>
+
+    /**
+ * @summary 번역 생성
+ */
+export const useI18nControllerCreateTranslationV1 = <TError = I18nControllerCreateTranslationV1ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof i18nControllerCreateTranslationV1>>, TError,{data: TranslationCreateDto}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof i18nControllerCreateTranslationV1>>,
+        TError,
+        {data: TranslationCreateDto},
+        TContext
+      > => {
+      return useMutation(getI18nControllerCreateTranslationV1MutationOptions(options), queryClient);
+    }
+
+/**
+ * 번역을 일괄 처리합니다.
+ * @summary 번역 일괄 처리
+ */
+export const i18nControllerBulkTranslationsV1 = (
+    translationBulkDto: TranslationBulkDto,
+ signal?: AbortSignal
+) => {
+
+
+      return i18nControllerBulkTranslationsV1Mutator<I18nControllerBulkTranslationsV1200>(
+      {url: `/api/v1/i18n/translations/bulk`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: translationBulkDto, signal
+    },
+      );
+    }
+
+
+
+export const getI18nControllerBulkTranslationsV1MutationOptions = <TError = I18nControllerBulkTranslationsV1ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof i18nControllerBulkTranslationsV1>>, TError,{data: TranslationBulkDto}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof i18nControllerBulkTranslationsV1>>, TError,{data: TranslationBulkDto}, TContext> => {
+
+const mutationKey = ['i18nControllerBulkTranslationsV1'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof i18nControllerBulkTranslationsV1>>, {data: TranslationBulkDto}> = (props) => {
+          const {data} = props ?? {};
+
+          return  i18nControllerBulkTranslationsV1(data,)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type I18nControllerBulkTranslationsV1MutationResult = NonNullable<Awaited<ReturnType<typeof i18nControllerBulkTranslationsV1>>>
+    export type I18nControllerBulkTranslationsV1MutationBody = TranslationBulkDto
+    export type I18nControllerBulkTranslationsV1MutationError = I18nControllerBulkTranslationsV1ErrorType<unknown>
+
+    /**
+ * @summary 번역 일괄 처리
+ */
+export const useI18nControllerBulkTranslationsV1 = <TError = I18nControllerBulkTranslationsV1ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof i18nControllerBulkTranslationsV1>>, TError,{data: TranslationBulkDto}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof i18nControllerBulkTranslationsV1>>,
+        TError,
+        {data: TranslationBulkDto},
+        TContext
+      > => {
+      return useMutation(getI18nControllerBulkTranslationsV1MutationOptions(options), queryClient);
+    }
+
+/**
+ * 번역을 수정합니다.
+ * @summary 번역 수정
+ */
+export const i18nControllerUpdateTranslationV1 = (
+    translationUpdateDto: TranslationUpdateDto,
+ signal?: AbortSignal
+) => {
+
+
+      return i18nControllerUpdateTranslationV1Mutator<I18nControllerUpdateTranslationV1200>(
+      {url: `/api/v1/i18n/translations/update`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: translationUpdateDto, signal
+    },
+      );
+    }
+
+
+
+export const getI18nControllerUpdateTranslationV1MutationOptions = <TError = I18nControllerUpdateTranslationV1ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof i18nControllerUpdateTranslationV1>>, TError,{data: TranslationUpdateDto}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof i18nControllerUpdateTranslationV1>>, TError,{data: TranslationUpdateDto}, TContext> => {
+
+const mutationKey = ['i18nControllerUpdateTranslationV1'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof i18nControllerUpdateTranslationV1>>, {data: TranslationUpdateDto}> = (props) => {
+          const {data} = props ?? {};
+
+          return  i18nControllerUpdateTranslationV1(data,)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type I18nControllerUpdateTranslationV1MutationResult = NonNullable<Awaited<ReturnType<typeof i18nControllerUpdateTranslationV1>>>
+    export type I18nControllerUpdateTranslationV1MutationBody = TranslationUpdateDto
+    export type I18nControllerUpdateTranslationV1MutationError = I18nControllerUpdateTranslationV1ErrorType<unknown>
+
+    /**
+ * @summary 번역 수정
+ */
+export const useI18nControllerUpdateTranslationV1 = <TError = I18nControllerUpdateTranslationV1ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof i18nControllerUpdateTranslationV1>>, TError,{data: TranslationUpdateDto}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof i18nControllerUpdateTranslationV1>>,
+        TError,
+        {data: TranslationUpdateDto},
+        TContext
+      > => {
+      return useMutation(getI18nControllerUpdateTranslationV1MutationOptions(options), queryClient);
+    }
+
+/**
+ * 번역을 삭제합니다.
+ * @summary 번역 삭제
+ */
+export const i18nControllerDeleteTranslationV1 = (
+    translationDeleteDto: TranslationDeleteDto,
+ signal?: AbortSignal
+) => {
+
+
+      return i18nControllerDeleteTranslationV1Mutator<I18nControllerDeleteTranslationV1200>(
+      {url: `/api/v1/i18n/translations/delete`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: translationDeleteDto, signal
+    },
+      );
+    }
+
+
+
+export const getI18nControllerDeleteTranslationV1MutationOptions = <TError = I18nControllerDeleteTranslationV1ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof i18nControllerDeleteTranslationV1>>, TError,{data: TranslationDeleteDto}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof i18nControllerDeleteTranslationV1>>, TError,{data: TranslationDeleteDto}, TContext> => {
+
+const mutationKey = ['i18nControllerDeleteTranslationV1'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof i18nControllerDeleteTranslationV1>>, {data: TranslationDeleteDto}> = (props) => {
+          const {data} = props ?? {};
+
+          return  i18nControllerDeleteTranslationV1(data,)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type I18nControllerDeleteTranslationV1MutationResult = NonNullable<Awaited<ReturnType<typeof i18nControllerDeleteTranslationV1>>>
+    export type I18nControllerDeleteTranslationV1MutationBody = TranslationDeleteDto
+    export type I18nControllerDeleteTranslationV1MutationError = I18nControllerDeleteTranslationV1ErrorType<unknown>
+
+    /**
+ * @summary 번역 삭제
+ */
+export const useI18nControllerDeleteTranslationV1 = <TError = I18nControllerDeleteTranslationV1ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof i18nControllerDeleteTranslationV1>>, TError,{data: TranslationDeleteDto}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof i18nControllerDeleteTranslationV1>>,
+        TError,
+        {data: TranslationDeleteDto},
+        TContext
+      > => {
+      return useMutation(getI18nControllerDeleteTranslationV1MutationOptions(options), queryClient);
     }
 
 export const healthControllerLive = (
@@ -1457,8 +2061,8 @@ export function useHealthControllerReady<TData = Awaited<ReturnType<typeof healt
 
 
 /**
- * 시스템 내의 메뉴 및 API 자원들의 전체 계층 트리 구조를 조회합니다. 관리자 권한(RESOURCE:READ)이 필요합니다.
- * @summary 자원 트리 구조 전체 조회
+ * 자원 트리를 조회합니다.
+ * @summary 자원 목록 조회
  */
 export const resourceControllerGetResourcesV1 = (
 
@@ -1467,7 +2071,7 @@ export const resourceControllerGetResourcesV1 = (
 
 
       return resourceControllerGetResourcesV1Mutator<ResourceControllerGetResourcesV1200>(
-      {url: `/api/v1/resources/resources`, method: 'GET', signal
+      {url: `/api/v1/resources`, method: 'GET', signal
     },
       );
     }
@@ -1477,7 +2081,7 @@ export const resourceControllerGetResourcesV1 = (
 
 export const getResourceControllerGetResourcesV1QueryKey = () => {
     return [
-    `/api/v1/resources/resources`
+    `/api/v1/resources`
     ] as const;
     }
 
@@ -1529,7 +2133,7 @@ export function useResourceControllerGetResourcesV1<TData = Awaited<ReturnType<t
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
- * @summary 자원 트리 구조 전체 조회
+ * @summary 자원 목록 조회
  */
 
 export function useResourceControllerGetResourcesV1<TData = Awaited<ReturnType<typeof resourceControllerGetResourcesV1>>, TError = ResourceControllerGetResourcesV1ErrorType<unknown>>(
@@ -1551,8 +2155,102 @@ export function useResourceControllerGetResourcesV1<TData = Awaited<ReturnType<t
 
 
 /**
- * 현재 로그인한 유저가 권한을 가진 자원들로만 필터링된 계층 트리 구조를 조회합니다.
- * @summary 내 허용 자원 트리 구조 조회
+ * 자원 상세를 조회합니다.
+ * @summary 자원 조회
+ */
+export const resourceControllerGetResourceV1 = (
+    id: string,
+ signal?: AbortSignal
+) => {
+
+
+      return resourceControllerGetResourceV1Mutator<ResourceControllerGetResourceV1200>(
+      {url: `/api/v1/resources/${id}`, method: 'GET', signal
+    },
+      );
+    }
+
+
+
+
+export const getResourceControllerGetResourceV1QueryKey = (id: string,) => {
+    return [
+    `/api/v1/resources/${id}`
+    ] as const;
+    }
+
+
+export const getResourceControllerGetResourceV1QueryOptions = <TData = Awaited<ReturnType<typeof resourceControllerGetResourceV1>>, TError = ResourceControllerGetResourceV1ErrorType<unknown>>(id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof resourceControllerGetResourceV1>>, TError, TData>>, }
+) => {
+
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getResourceControllerGetResourceV1QueryKey(id);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof resourceControllerGetResourceV1>>> = ({ signal }) => resourceControllerGetResourceV1(id, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: !!(id), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof resourceControllerGetResourceV1>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type ResourceControllerGetResourceV1QueryResult = NonNullable<Awaited<ReturnType<typeof resourceControllerGetResourceV1>>>
+export type ResourceControllerGetResourceV1QueryError = ResourceControllerGetResourceV1ErrorType<unknown>
+
+
+export function useResourceControllerGetResourceV1<TData = Awaited<ReturnType<typeof resourceControllerGetResourceV1>>, TError = ResourceControllerGetResourceV1ErrorType<unknown>>(
+ id: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof resourceControllerGetResourceV1>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof resourceControllerGetResourceV1>>,
+          TError,
+          Awaited<ReturnType<typeof resourceControllerGetResourceV1>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useResourceControllerGetResourceV1<TData = Awaited<ReturnType<typeof resourceControllerGetResourceV1>>, TError = ResourceControllerGetResourceV1ErrorType<unknown>>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof resourceControllerGetResourceV1>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof resourceControllerGetResourceV1>>,
+          TError,
+          Awaited<ReturnType<typeof resourceControllerGetResourceV1>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useResourceControllerGetResourceV1<TData = Awaited<ReturnType<typeof resourceControllerGetResourceV1>>, TError = ResourceControllerGetResourceV1ErrorType<unknown>>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof resourceControllerGetResourceV1>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary 자원 조회
+ */
+
+export function useResourceControllerGetResourceV1<TData = Awaited<ReturnType<typeof resourceControllerGetResourceV1>>, TError = ResourceControllerGetResourceV1ErrorType<unknown>>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof resourceControllerGetResourceV1>>, TError, TData>>, }
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getResourceControllerGetResourceV1QueryOptions(id,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+/**
+ * 내 허용 자원을 조회합니다.
+ * @summary 내 자원 목록 조회
  */
 export const resourceControllerGetMyResourcesV1 = (
 
@@ -1623,7 +2321,7 @@ export function useResourceControllerGetMyResourcesV1<TData = Awaited<ReturnType
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
- * @summary 내 허용 자원 트리 구조 조회
+ * @summary 내 자원 목록 조회
  */
 
 export function useResourceControllerGetMyResourcesV1<TData = Awaited<ReturnType<typeof resourceControllerGetMyResourcesV1>>, TError = ResourceControllerGetMyResourcesV1ErrorType<unknown>>(
@@ -1645,30 +2343,30 @@ export function useResourceControllerGetMyResourcesV1<TData = Awaited<ReturnType
 
 
 /**
- * 새로운 메뉴 또는 컴포넌트 리소스를 한 번에 여러 개 생성합니다. 관리자 권한(RESOURCE:CREATE)이 필요합니다.
- * @summary 리소스 일괄 생성
+ * 리소스를 생성합니다.
+ * @summary 리소스 생성
  */
-export const resourceControllerCreateResourcesV1 = (
-    createResourcesDto: CreateResourcesDto,
+export const resourceControllerCreateResourceV1 = (
+    createResourceDto: CreateResourceDto,
  signal?: AbortSignal
 ) => {
 
 
-      return resourceControllerCreateResourcesV1Mutator<ResourceControllerCreateResourcesV1200>(
-      {url: `/api/v1/resources/resources/batch`, method: 'POST',
+      return resourceControllerCreateResourceV1Mutator<ResourceControllerCreateResourceV1200>(
+      {url: `/api/v1/resources/create`, method: 'POST',
       headers: {'Content-Type': 'application/json', },
-      data: createResourcesDto, signal
+      data: createResourceDto, signal
     },
       );
     }
 
 
 
-export const getResourceControllerCreateResourcesV1MutationOptions = <TError = ResourceControllerCreateResourcesV1ErrorType<unknown>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof resourceControllerCreateResourcesV1>>, TError,{data: CreateResourcesDto}, TContext>, }
-): UseMutationOptions<Awaited<ReturnType<typeof resourceControllerCreateResourcesV1>>, TError,{data: CreateResourcesDto}, TContext> => {
+export const getResourceControllerCreateResourceV1MutationOptions = <TError = ResourceControllerCreateResourceV1ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof resourceControllerCreateResourceV1>>, TError,{data: CreateResourceDto}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof resourceControllerCreateResourceV1>>, TError,{data: CreateResourceDto}, TContext> => {
 
-const mutationKey = ['resourceControllerCreateResourcesV1'];
+const mutationKey = ['resourceControllerCreateResourceV1'];
 const {mutation: mutationOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
@@ -1678,10 +2376,10 @@ const {mutation: mutationOptions} = options ?
 
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof resourceControllerCreateResourcesV1>>, {data: CreateResourcesDto}> = (props) => {
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof resourceControllerCreateResourceV1>>, {data: CreateResourceDto}> = (props) => {
           const {data} = props ?? {};
 
-          return  resourceControllerCreateResourcesV1(data,)
+          return  resourceControllerCreateResourceV1(data,)
         }
 
 
@@ -1691,21 +2389,281 @@ const {mutation: mutationOptions} = options ?
 
   return  { mutationFn, ...mutationOptions }}
 
-    export type ResourceControllerCreateResourcesV1MutationResult = NonNullable<Awaited<ReturnType<typeof resourceControllerCreateResourcesV1>>>
-    export type ResourceControllerCreateResourcesV1MutationBody = CreateResourcesDto
-    export type ResourceControllerCreateResourcesV1MutationError = ResourceControllerCreateResourcesV1ErrorType<unknown>
+    export type ResourceControllerCreateResourceV1MutationResult = NonNullable<Awaited<ReturnType<typeof resourceControllerCreateResourceV1>>>
+    export type ResourceControllerCreateResourceV1MutationBody = CreateResourceDto
+    export type ResourceControllerCreateResourceV1MutationError = ResourceControllerCreateResourceV1ErrorType<unknown>
 
     /**
- * @summary 리소스 일괄 생성
+ * @summary 리소스 생성
  */
-export const useResourceControllerCreateResourcesV1 = <TError = ResourceControllerCreateResourcesV1ErrorType<unknown>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof resourceControllerCreateResourcesV1>>, TError,{data: CreateResourcesDto}, TContext>, }
+export const useResourceControllerCreateResourceV1 = <TError = ResourceControllerCreateResourceV1ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof resourceControllerCreateResourceV1>>, TError,{data: CreateResourceDto}, TContext>, }
  , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof resourceControllerCreateResourcesV1>>,
+        Awaited<ReturnType<typeof resourceControllerCreateResourceV1>>,
         TError,
-        {data: CreateResourcesDto},
+        {data: CreateResourceDto},
         TContext
       > => {
-      return useMutation(getResourceControllerCreateResourcesV1MutationOptions(options), queryClient);
+      return useMutation(getResourceControllerCreateResourceV1MutationOptions(options), queryClient);
+    }
+
+/**
+ * 리소스를 수정합니다.
+ * @summary 리소스 수정
+ */
+export const resourceControllerUpdateResourceV1 = (
+    updateResourceDetailBodyDto: UpdateResourceDetailBodyDto,
+ signal?: AbortSignal
+) => {
+
+
+      return resourceControllerUpdateResourceV1Mutator<ResourceControllerUpdateResourceV1200>(
+      {url: `/api/v1/resources/update`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: updateResourceDetailBodyDto, signal
+    },
+      );
+    }
+
+
+
+export const getResourceControllerUpdateResourceV1MutationOptions = <TError = ResourceControllerUpdateResourceV1ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof resourceControllerUpdateResourceV1>>, TError,{data: UpdateResourceDetailBodyDto}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof resourceControllerUpdateResourceV1>>, TError,{data: UpdateResourceDetailBodyDto}, TContext> => {
+
+const mutationKey = ['resourceControllerUpdateResourceV1'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof resourceControllerUpdateResourceV1>>, {data: UpdateResourceDetailBodyDto}> = (props) => {
+          const {data} = props ?? {};
+
+          return  resourceControllerUpdateResourceV1(data,)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ResourceControllerUpdateResourceV1MutationResult = NonNullable<Awaited<ReturnType<typeof resourceControllerUpdateResourceV1>>>
+    export type ResourceControllerUpdateResourceV1MutationBody = UpdateResourceDetailBodyDto
+    export type ResourceControllerUpdateResourceV1MutationError = ResourceControllerUpdateResourceV1ErrorType<unknown>
+
+    /**
+ * @summary 리소스 수정
+ */
+export const useResourceControllerUpdateResourceV1 = <TError = ResourceControllerUpdateResourceV1ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof resourceControllerUpdateResourceV1>>, TError,{data: UpdateResourceDetailBodyDto}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof resourceControllerUpdateResourceV1>>,
+        TError,
+        {data: UpdateResourceDetailBodyDto},
+        TContext
+      > => {
+      return useMutation(getResourceControllerUpdateResourceV1MutationOptions(options), queryClient);
+    }
+
+/**
+ * 리소스 권한을 수정합니다.
+ * @summary 리소스 권한 수정
+ */
+export const resourceControllerUpdateResourcePermissionsV1 = (
+    updateResourcePermissionsDto: UpdateResourcePermissionsDto,
+ signal?: AbortSignal
+) => {
+
+
+      return resourceControllerUpdateResourcePermissionsV1Mutator<ResourceControllerUpdateResourcePermissionsV1200>(
+      {url: `/api/v1/resources/update-permissions`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: updateResourcePermissionsDto, signal
+    },
+      );
+    }
+
+
+
+export const getResourceControllerUpdateResourcePermissionsV1MutationOptions = <TError = ResourceControllerUpdateResourcePermissionsV1ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof resourceControllerUpdateResourcePermissionsV1>>, TError,{data: UpdateResourcePermissionsDto}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof resourceControllerUpdateResourcePermissionsV1>>, TError,{data: UpdateResourcePermissionsDto}, TContext> => {
+
+const mutationKey = ['resourceControllerUpdateResourcePermissionsV1'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof resourceControllerUpdateResourcePermissionsV1>>, {data: UpdateResourcePermissionsDto}> = (props) => {
+          const {data} = props ?? {};
+
+          return  resourceControllerUpdateResourcePermissionsV1(data,)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ResourceControllerUpdateResourcePermissionsV1MutationResult = NonNullable<Awaited<ReturnType<typeof resourceControllerUpdateResourcePermissionsV1>>>
+    export type ResourceControllerUpdateResourcePermissionsV1MutationBody = UpdateResourcePermissionsDto
+    export type ResourceControllerUpdateResourcePermissionsV1MutationError = ResourceControllerUpdateResourcePermissionsV1ErrorType<unknown>
+
+    /**
+ * @summary 리소스 권한 수정
+ */
+export const useResourceControllerUpdateResourcePermissionsV1 = <TError = ResourceControllerUpdateResourcePermissionsV1ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof resourceControllerUpdateResourcePermissionsV1>>, TError,{data: UpdateResourcePermissionsDto}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof resourceControllerUpdateResourcePermissionsV1>>,
+        TError,
+        {data: UpdateResourcePermissionsDto},
+        TContext
+      > => {
+      return useMutation(getResourceControllerUpdateResourcePermissionsV1MutationOptions(options), queryClient);
+    }
+
+/**
+ * 리소스 순서를 수정합니다.
+ * @summary 리소스 순서 수정
+ */
+export const resourceControllerUpdateResourceSortV1 = (
+    updateResourceSortDto: UpdateResourceSortDto,
+ signal?: AbortSignal
+) => {
+
+
+      return resourceControllerUpdateResourceSortV1Mutator<ResourceControllerUpdateResourceSortV1200>(
+      {url: `/api/v1/resources/update-sort`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: updateResourceSortDto, signal
+    },
+      );
+    }
+
+
+
+export const getResourceControllerUpdateResourceSortV1MutationOptions = <TError = ResourceControllerUpdateResourceSortV1ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof resourceControllerUpdateResourceSortV1>>, TError,{data: UpdateResourceSortDto}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof resourceControllerUpdateResourceSortV1>>, TError,{data: UpdateResourceSortDto}, TContext> => {
+
+const mutationKey = ['resourceControllerUpdateResourceSortV1'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof resourceControllerUpdateResourceSortV1>>, {data: UpdateResourceSortDto}> = (props) => {
+          const {data} = props ?? {};
+
+          return  resourceControllerUpdateResourceSortV1(data,)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ResourceControllerUpdateResourceSortV1MutationResult = NonNullable<Awaited<ReturnType<typeof resourceControllerUpdateResourceSortV1>>>
+    export type ResourceControllerUpdateResourceSortV1MutationBody = UpdateResourceSortDto
+    export type ResourceControllerUpdateResourceSortV1MutationError = ResourceControllerUpdateResourceSortV1ErrorType<unknown>
+
+    /**
+ * @summary 리소스 순서 수정
+ */
+export const useResourceControllerUpdateResourceSortV1 = <TError = ResourceControllerUpdateResourceSortV1ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof resourceControllerUpdateResourceSortV1>>, TError,{data: UpdateResourceSortDto}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof resourceControllerUpdateResourceSortV1>>,
+        TError,
+        {data: UpdateResourceSortDto},
+        TContext
+      > => {
+      return useMutation(getResourceControllerUpdateResourceSortV1MutationOptions(options), queryClient);
+    }
+
+/**
+ * 리소스를 삭제합니다.
+ * @summary 리소스 삭제
+ */
+export const resourceControllerDeleteResourceV1 = (
+    deleteResourceBodyDto: DeleteResourceBodyDto,
+ signal?: AbortSignal
+) => {
+
+
+      return resourceControllerDeleteResourceV1Mutator<ResourceControllerDeleteResourceV1200>(
+      {url: `/api/v1/resources/delete`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: deleteResourceBodyDto, signal
+    },
+      );
+    }
+
+
+
+export const getResourceControllerDeleteResourceV1MutationOptions = <TError = ResourceControllerDeleteResourceV1ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof resourceControllerDeleteResourceV1>>, TError,{data: DeleteResourceBodyDto}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof resourceControllerDeleteResourceV1>>, TError,{data: DeleteResourceBodyDto}, TContext> => {
+
+const mutationKey = ['resourceControllerDeleteResourceV1'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof resourceControllerDeleteResourceV1>>, {data: DeleteResourceBodyDto}> = (props) => {
+          const {data} = props ?? {};
+
+          return  resourceControllerDeleteResourceV1(data,)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ResourceControllerDeleteResourceV1MutationResult = NonNullable<Awaited<ReturnType<typeof resourceControllerDeleteResourceV1>>>
+    export type ResourceControllerDeleteResourceV1MutationBody = DeleteResourceBodyDto
+    export type ResourceControllerDeleteResourceV1MutationError = ResourceControllerDeleteResourceV1ErrorType<unknown>
+
+    /**
+ * @summary 리소스 삭제
+ */
+export const useResourceControllerDeleteResourceV1 = <TError = ResourceControllerDeleteResourceV1ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof resourceControllerDeleteResourceV1>>, TError,{data: DeleteResourceBodyDto}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof resourceControllerDeleteResourceV1>>,
+        TError,
+        {data: DeleteResourceBodyDto},
+        TContext
+      > => {
+      return useMutation(getResourceControllerDeleteResourceV1MutationOptions(options), queryClient);
     }
 

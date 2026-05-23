@@ -6,4 +6,7 @@
  * OpenAPI spec version: 1.0
  */
 
-export type CreateResourceBatchItemDtoTranslations = { [key: string]: unknown };
+export interface TranslationBulkDataDto {
+  /** 처리된 번역 수 */
+  processedCount: number;
+}

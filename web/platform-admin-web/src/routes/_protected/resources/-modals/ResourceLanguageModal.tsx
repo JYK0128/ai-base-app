@@ -1,25 +1,23 @@
-import { Button, cn, Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, toast, useAppForm } from '@pkg/ui';
+import { Button, Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, toast, useAppForm } from '@pkg/ui';
 import { useStore } from '@tanstack/react-form';
-import { Globe, Info, Languages, Plus } from 'lucide-react';
-import { useState } from 'react';
+import { Globe, Languages, Plus } from 'lucide-react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
-import { type ResourceResponseDto } from '../../../../api/model';
+import { i18nControllerBulkTranslationsV1, useI18nControllerGetTranslationsV1 } from '@/api/endpoints';
+import type { LocaleDto, ResourceResponseDto, TranslationBulkOperationDto } from '@/api/model';
 
 interface ResourceLanguageModalProps {
   readonly open: boolean
   readonly onOpenChange: (open: boolean) => void
   readonly resource: ResourceResponseDto | null
-  readonly translations?: Record<string, string>
-  readonly onSave: (payload: {
-    resourceId: string
-    translations: Record<string, string>
-  }) => void
+  readonly locales: LocaleDto[]
 }
 
 interface LanguageEntry {
   code: string
   label: string
   value: string
+  hasTranslation: boolean
 }
 
 interface ResourceLanguageFormValues {
@@ -27,117 +25,231 @@ interface ResourceLanguageFormValues {
   readonly entries: LanguageEntry[]
 }
 
-const PRESET_LANGUAGES = [
-  { code: 'ko', label: '한국어' },
-  { code: 'en', label: 'English' },
-  { code: 'ja', label: '日本語' },
-  { code: 'zh', label: '中文' },
-  { code: 'vi', label: 'Tiếng Việt' },
-  { code: 'es', label: 'Español' },
-  { code: 'fr', label: 'Français' },
-  { code: 'de', label: 'Deutsch' },
-] as const;
+function isTemporaryResource(resource: ResourceResponseDto): boolean {
+  return resource.id.startsWith('new-') || resource.id.startsWith('sub-');
+}
 
-function buildInitialEntries(
-  resource: ResourceResponseDto | null,
-  translations?: Record<string, string>,
+function createEntriesFromResponse(
+  resourceCode: string,
+  locales: LocaleDto[],
+  translationData?: Record<string, Record<string, Record<string, string>>>,
 ): LanguageEntry[] {
-  const hasKo = translations && 'ko' in translations;
-  const koEntry: LanguageEntry = {
-    code: 'ko',
-    label: '한국어',
-    value: hasKo ? (translations.ko ?? '') : (resource?.name ?? ''),
-  };
+  const localeLabelMap = new Map(locales.map((locale) => [
+    locale.code,
+    locale.name,
+  ]));
 
-  const otherEntries = Object.entries(translations ?? {})
-    .filter(([code]) => code !== 'ko')
-    .map(([code, value]) => {
-      const preset = PRESET_LANGUAGES.find((p) => p.code === code);
-      return {
-        code,
-        label: preset?.label || code.toUpperCase(),
-        value,
-      } satisfies LanguageEntry;
+  const localeOrderMap = new Map(locales.map((locale) => [
+    locale.code,
+    locale.sortOrder,
+  ]));
+
+  return Object.entries(translationData ?? {})
+    .flatMap(([locale, namespaces]) => {
+      const rawTranslation = namespaces?.resource?.[resourceCode];
+
+      if (typeof rawTranslation !== 'string' || !rawTranslation.trim()) {
+        return [];
+      }
+
+      return [{
+        code: locale,
+        label: localeLabelMap.get(locale) ?? '',
+        value: rawTranslation,
+        hasTranslation: true,
+      } satisfies LanguageEntry];
+    })
+    .sort((left, right) => {
+      const leftOrder = localeOrderMap.get(left.code) ?? 9999;
+      const rightOrder = localeOrderMap.get(right.code) ?? 9999;
+      return leftOrder - rightOrder;
     });
-
-  return [koEntry, ...otherEntries];
 }
 
 export function ResourceLanguageModal({
   open,
   onOpenChange,
   resource,
-  translations,
-  onSave,
+  locales,
 }: ResourceLanguageModalProps) {
-  const initialEntries = buildInitialEntries(resource, translations);
+  const originalEntryMapRef = useRef<Record<string, { hasTranslation: boolean, value: string }>>({});
+
   const form = useAppForm({
     defaultValues: {
       newLanguageCode: '',
-      entries: initialEntries,
+      entries: [],
     } satisfies ResourceLanguageFormValues,
     onSubmit: async ({ value }) => {
       if (!resource) {
         return;
       }
 
-      const nextTranslations = Object.fromEntries(
-        value.entries
-          .filter((entry) => entry.value.trim() !== '')
-          .map((entry) => [entry.code, entry.value.trim()]),
-      ) as Record<string, string>;
+      const operations: TranslationBulkOperationDto[] = [];
 
-      if (Object.keys(nextTranslations).length === 0) {
+      value.entries.forEach((entry) => {
+        const trimmed = entry.value.trim();
+        const original = originalEntryMapRef.current[entry.code];
+        const originalValue = original?.value ?? '';
+        const originalHasTranslation = original?.hasTranslation ?? false;
+
+        if (trimmed === originalValue) {
+          return;
+        }
+
+        if (trimmed) {
+          if (originalHasTranslation) {
+            operations.push({
+              action: 'UPDATE',
+              locale: entry.code,
+              namespace: 'resource',
+              key: resource.code,
+              value: trimmed,
+            });
+          }
+          else {
+            operations.push({
+              action: 'CREATE',
+              locale: entry.code,
+              namespace: 'resource',
+              key: resource.code,
+              value: trimmed,
+            });
+          }
+        }
+        else if (originalHasTranslation) {
+          operations.push({
+            action: 'DELETE',
+            locale: entry.code,
+            namespace: 'resource',
+            key: resource.code,
+          });
+        }
+      });
+
+      if (operations.length === 0) {
         toast.error('최소 하나의 다국어 값을 입력해주세요.');
         return;
       }
 
-      onSave({
-        resourceId: resource.id,
-        translations: nextTranslations,
-      });
-
-      toast.success('다국어 정보가 저장되었습니다.');
-      onOpenChange(false);
+      try {
+        await i18nControllerBulkTranslationsV1({ operations });
+        toast.success('다국어 정보가 저장되었습니다.');
+        onOpenChange(false);
+      }
+      catch {
+        toast.error('다국어 정보 저장 중 오류가 발생했습니다.');
+      }
     },
   });
 
-  const [activeLanguage, setActiveLanguage] = useState<string>(initialEntries[0]?.code ?? 'ko');
-  const entries = useStore(form.baseStore, (state: { values: ResourceLanguageFormValues }) => state.values.entries) ?? [];
+  const [activeLanguage, setActiveLanguage] = useState<string>('');
+  const storedEntries = useStore(form.baseStore, (state: { values: ResourceLanguageFormValues }) => state.values.entries);
+  const entries = useMemo(() => storedEntries ?? [], [storedEntries]);
   const newLanguageCode = useStore(form.baseStore, (state: { values: ResourceLanguageFormValues }) => state.values.newLanguageCode) ?? '';
+  const translationQueryParams = useMemo(() => {
+    if (!resource || isTemporaryResource(resource)) {
+      return undefined;
+    }
+
+    return {
+      namespace: 'resource',
+      keys: resource.code,
+    };
+  }, [resource]);
+
+  const { data: translationResponse } = useI18nControllerGetTranslationsV1(translationQueryParams, {
+    query: {
+      enabled: open && !!translationQueryParams,
+    },
+  });
+
+  useEffect(() => {
+    if (!open || !resource) {
+      return;
+    }
+
+    const nextEntries = createEntriesFromResponse(resource.code, locales, translationResponse?.data);
+
+    originalEntryMapRef.current = Object.fromEntries(
+      nextEntries.map((entry) => [
+        entry.code,
+        {
+          hasTranslation: entry.hasTranslation,
+          value: entry.value.trim(),
+        },
+      ]),
+    );
+
+    form.setFieldValue('entries', nextEntries);
+    setActiveLanguage(nextEntries[0]?.code ?? '');
+    form.setFieldValue('newLanguageCode', '');
+  }, [open, resource, form, translationResponse, locales]);
+
   const activeIndex = entries.findIndex((entry) => entry.code === activeLanguage);
   const activeEntry = activeIndex >= 0 ? entries[activeIndex] : null;
-
-  const availablePresets = PRESET_LANGUAGES.filter(
-    (preset) => !entries.some((entry) => entry.code === preset.code),
+  const availableLocales = useMemo(
+    () => locales.filter((locale) => locale.isActive && !entries.some((entry) => entry.code === locale.code)),
+    [entries, locales],
   );
 
+  const handleSelectLanguage = (code: string) => {
+    setActiveLanguage(code);
+  };
+
+  const handleUpdateValue = (value: string) => {
+    if (activeIndex < 0) {
+      return;
+    }
+
+    const nextEntries = [...entries];
+    nextEntries[activeIndex] = {
+      ...nextEntries[activeIndex],
+      value,
+    };
+    form.setFieldValue('entries', nextEntries);
+  };
+
   const handleAddLanguage = () => {
-    const code = newLanguageCode.trim().toLowerCase();
+    const code = newLanguageCode.trim();
 
     if (!code) {
       toast.error('추가할 언어를 선택해주세요.');
       return;
     }
 
-    const preset = PRESET_LANGUAGES.find((p) => p.code === code);
-    if (!preset) return;
+    const locale = availableLocales.find((item) => item.code === code);
+    if (!locale) {
+      toast.error('지원하지 않는 언어입니다.');
+      return;
+    }
 
     if (entries.some((entry) => entry.code === code)) {
       toast.error('이미 추가된 언어입니다.');
       return;
     }
 
-    form.setFieldValue('entries', [
+    const localeOrderMap = new Map(locales.map((locale, index) => [
+      locale.code,
+      locale.sortOrder ?? index,
+    ]));
+
+    const nextEntries = [
       ...entries,
       {
-        code: preset.code,
-        label: preset.label,
+        code: locale.code,
+        label: locale.name,
         value: '',
+        hasTranslation: false,
       },
-    ]);
-    setActiveLanguage(code);
+    ].sort((left, right) => {
+      const leftOrder = localeOrderMap.get(left.code) ?? 9999;
+      const rightOrder = localeOrderMap.get(right.code) ?? 9999;
+      return leftOrder - rightOrder;
+    });
+
+    form.setFieldValue('entries', nextEntries);
     form.setFieldValue('newLanguageCode', '');
+    setActiveLanguage(code);
   };
 
   return (
@@ -172,10 +284,10 @@ export function ResourceLanguageModal({
             onSubmit={(e) => void form.handleSubmit(e)}
           >
             <section className="grid grid-rows-[auto_1fr] gap-4">
-              <form.FieldSet className="border border-border/60 rounded-xl p-4 bg-muted/20 flex flex-col gap-3 shadow-xs">
-                <form.FieldLegend className="text-sm font-semibold text-foreground px-1">
+              <div className="border border-border/60 rounded-xl p-4 bg-muted/20 flex flex-col gap-3 shadow-xs">
+                <div className="text-sm font-semibold text-foreground px-1">
                   언어 추가
-                </form.FieldLegend>
+                </div>
                 <div className="flex items-end gap-3 w-full">
                   <div className="flex-1">
                     <form.AppField name="newLanguageCode">
@@ -192,21 +304,21 @@ export function ResourceLanguageModal({
                               <SelectValue placeholder="추가할 언어 선택" />
                             </SelectTrigger>
                             <SelectContent side="bottom" position="popper">
-                              {availablePresets.length > 0
+                              {availableLocales.length > 0
                                 ? (
-                                  availablePresets.map((preset) => (
-                                    <SelectItem key={preset.code} value={preset.code}>
-                                      {preset.label}
+                                  availableLocales.map((locale) => (
+                                    <SelectItem key={locale.code} value={locale.code}>
+                                      {locale.name}
                                       {' '}
                                       (
-                                      {preset.code.toUpperCase()}
+                                      {locale.code.toUpperCase()}
                                       )
                                     </SelectItem>
                                   ))
                                 )
                                 : (
                                   <SelectItem value="none" disabled>
-                                    모든 언어가 이미 추가되었습니다.
+                                    추가할 수 있는 언어가 없습니다.
                                   </SelectItem>
                                 )}
                             </SelectContent>
@@ -218,144 +330,94 @@ export function ResourceLanguageModal({
                   <Button
                     type="button"
                     onClick={handleAddLanguage}
+                    className="gap-1.5"
                     variant="outline"
-                    disabled={availablePresets.length === 0}
-                    className="h-9 px-4 border-dashed border-primary/40 text-primary hover:bg-primary/5 hover:text-primary hover:border-primary/80 transition-all font-medium flex items-center gap-1.5 shrink-0"
                   >
-                    <Plus className="size-3.5 stroke-[2.5]" />
-                    <span>추가</span>
+                    <Plus className="size-4" />
+                    추가
                   </Button>
                 </div>
-              </form.FieldSet>
+              </div>
 
-              <form.FieldSet className="border border-border/60 rounded-xl p-4 bg-card grid grid-rows-[auto_auto_1fr] gap-3 shadow-xs">
-                <form.FieldLegend className="text-sm font-semibold text-foreground px-1">
-                  언어 목록 및 편집
-                </form.FieldLegend>
-
-                <div className="flex items-center justify-between text-xs text-muted-foreground bg-muted/40 px-3 py-1.5 rounded-lg border border-border/30">
-                  <span className="flex items-center gap-1.5 font-medium">
-                    <Globe className="size-3.5 text-muted-foreground/70" />
-                    <span>등록된 언어:</span>
-                    <strong className="text-foreground font-semibold">
-                      {entries.length}
-                      개
-                    </strong>
-                  </span>
-                  {activeEntry && (
-                    <span className="flex items-center gap-1.5 font-medium">
-                      <span>현재 선택:</span>
-                      <span className="px-1.5 py-0.5 bg-primary/10 text-primary font-bold rounded text-[10px] uppercase tracking-wider">
-                        {activeLanguage}
-                      </span>
-                    </span>
-                  )}
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="grid grid-rows-[auto_1fr]">
-                    <div className="text-[11px] font-bold tracking-wider text-muted-foreground uppercase mb-2">
-                      언어 목록
-                    </div>
-                    <div className="overflow-y-auto pr-1 flex flex-col gap-1.5">
-                      {entries.map((entry) => {
-                        const isActive = entry.code === activeLanguage;
-                        const hasValue = entry.value.trim() !== '';
-                        return (
-                          <button
-                            key={entry.code}
-                            type="button"
-                            onClick={() => setActiveLanguage(entry.code)}
-                            className={cn(
-                              'flex items-center justify-between px-3 h-10 shrink-0 rounded-lg text-sm font-medium transition-all duration-150 border text-left',
-                              isActive
-                                ? 'bg-primary/5 border-primary/40 text-primary shadow-xs'
-                                : 'bg-transparent border-transparent hover:bg-muted/40 hover:border-border/50 text-muted-foreground hover:text-foreground',
-                            )}
-                          >
-                            <span className="flex items-center gap-2">
-                              <span className={cn(
-                                'w-1.5 h-1.5 rounded-full transition-transform duration-200',
-                                isActive ? 'bg-primary scale-125' : 'bg-muted-foreground/30',
-                              )}
-                              />
-                              <span className="font-semibold">{entry.label ?? entry.code.toUpperCase()}</span>
-                              <span className="text-[10px] text-muted-foreground/70 font-mono">
-                                (
-                                {entry.code}
-                                )
-                              </span>
-                            </span>
-                            <span className={cn(
-                              'inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium border transition-colors',
-                              hasValue
-                                ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20 dark:bg-emerald-500/20 dark:text-emerald-400'
-                                : 'bg-muted text-muted-foreground/80 border-border/80',
-                            )}
-                            >
-                              {hasValue ? '입력됨' : '비어있음'}
-                            </span>
-                          </button>
-                        );
-                      })}
-                    </div>
+              <div className="grid grid-cols-[150px_1fr] gap-4 min-h-0">
+                <div className="border border-border/60 rounded-xl p-2 bg-background overflow-auto">
+                  <div className="flex items-center gap-2 px-2 py-2 text-xs font-semibold text-muted-foreground">
+                    <Globe className="size-4" />
+                    언어 목록
                   </div>
-
-                  <div className="grid grid-rows-[auto_1fr]">
-                    <div className="text-[11px] font-bold tracking-wider text-muted-foreground uppercase mb-2">
-                      편집 영역
-                    </div>
-                    {activeEntry
-                      ? (
-                        <div className="flex flex-col gap-3 bg-muted/20 border border-border/40 rounded-xl p-4 overflow-y-auto">
-                          <div className="flex flex-col gap-1">
-                            <span className="text-xs font-semibold text-muted-foreground select-none">
-                              언어 구분
-                            </span>
-                            <div className="px-3 py-2 bg-background border border-border/60 rounded-lg text-sm font-semibold text-foreground/90 flex items-center gap-2">
-                              <span>{activeEntry.label}</span>
-                              <span className="text-xs text-muted-foreground/80 font-mono">
-                                (
-                                {activeEntry.code.toUpperCase()}
-                                )
-                              </span>
-                            </div>
+                  <div className="space-y-1">
+                    {entries.length > 0
+                      ? entries.map((entry) => (
+                        <button
+                          key={entry.code}
+                          type="button"
+                          onClick={() => handleSelectLanguage(entry.code)}
+                          className={`w-full text-left rounded-lg px-3 py-2 text-sm transition-colors ${
+                            entry.code === activeLanguage
+                              ? 'bg-primary text-primary-foreground'
+                              : 'hover:bg-muted text-foreground'
+                          }`}
+                        >
+                          <div className="font-medium">{entry.label}</div>
+                          <div className={`text-[11px] ${entry.code === activeLanguage ? 'text-primary-foreground/70' : 'text-muted-foreground'}`}>
+                            {entry.code.toUpperCase()}
                           </div>
-
-                          <form.AppField name={`entries[${activeIndex}].value`}>
-                            {(field) => (
-                              <field.Input
-                                label="번역값"
-                                placeholder="예: User Management"
-                                orientation="vertical"
-                                className="w-full text-sm"
-                              />
-                            )}
-                          </form.AppField>
-                        </div>
-                      )
+                        </button>
+                      ))
                       : (
-                        <div className="flex flex-col items-center justify-center border border-dashed border-border/80 rounded-xl p-6 bg-muted/5 text-muted-foreground text-center h-full">
-                          <Info className="size-6 text-muted-foreground/50 mb-2" />
-                          <p className="text-xs">편집할 언어를 목록에서 선택해주세요.</p>
+                        <div className="px-2 py-6 text-center text-xs text-muted-foreground">
+                          실제 번역 값이 없습니다.
                         </div>
                       )}
                   </div>
                 </div>
-              </form.FieldSet>
+
+                <div className="border border-border/60 rounded-xl p-4 bg-background min-h-0">
+                  {activeEntry
+                    ? (
+                      <div className="grid gap-3">
+                        <div className="flex items-center gap-2">
+                          <span className="px-2 py-1 rounded-md bg-muted text-xs font-semibold">
+                            {activeEntry.label}
+                          </span>
+                          <span className="text-xs text-muted-foreground">
+                            {activeEntry.code.toUpperCase()}
+                          </span>
+                        </div>
+                        <label className="space-y-1">
+                          <div className="text-sm font-medium">표시명</div>
+                          <input
+                            className="w-full rounded-md border border-border/80 bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary/30"
+                            value={activeEntry.value}
+                            onChange={(e) => handleUpdateValue(e.target.value)}
+                            placeholder={`${activeEntry.label} 표시명 입력`}
+                          />
+                        </label>
+                        <p className="text-xs text-muted-foreground">
+                          비워두면 해당 언어 번역은 삭제됩니다.
+                        </p>
+                      </div>
+                    )
+                    : (
+                      <div className="flex flex-col items-center justify-center h-full text-center p-6 border border-dashed border-border/60 rounded-lg bg-muted/5 gap-3">
+                        <Globe className="size-8 text-muted-foreground/40" />
+                        <div>
+                          <div className="text-sm font-semibold text-foreground">표시할 번역 값이 없습니다</div>
+                          <div className="text-xs text-muted-foreground mt-1">API 응답에 실제 번역이 있는 언어만 표시됩니다.</div>
+                        </div>
+                      </div>
+                    )}
+                </div>
+              </div>
             </section>
 
-            <DialogFooter className="mt-2 pt-2 border-t border-border/30">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => onOpenChange(false)}
-              >
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
                 취소
               </Button>
-              <form.Submit>
-                저장
-              </form.Submit>
+              <Button type="submit">
+                적용
+              </Button>
             </DialogFooter>
           </form.Layout>
         </form.AppForm>

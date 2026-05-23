@@ -6,10 +6,13 @@
  * OpenAPI spec version: 1.0
  */
 
-export type CreateResourceBatchItemDtoType = typeof CreateResourceBatchItemDtoType[keyof typeof CreateResourceBatchItemDtoType];
+/**
+ * 리소스 유형
+ */
+export type CreateResourceDtoType = typeof CreateResourceDtoType[keyof typeof CreateResourceDtoType];
 
 
-export const CreateResourceBatchItemDtoType = {
+export const CreateResourceDtoType = {
   MENU: 'MENU',
   COMPONENT: 'COMPONENT',
 } as const;

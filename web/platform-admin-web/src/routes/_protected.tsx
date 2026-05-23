@@ -1,10 +1,14 @@
 import { createFileRoute, Link, notFound, Outlet, redirect } from '@tanstack/react-router';
 import { Building2, FileText, Globe, Info, Key, LayoutDashboard, LifeBuoy, LogOut, type LucideIcon, Megaphone, ScrollText, Settings, Shield, Users } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
-import { getResourceControllerGetMyResourcesV1QueryOptions, useAuthControllerLogoutV1 } from '../api/endpoints';
+import { getI18nControllerGetLocalesV1QueryOptions, getResourceControllerGetMyResourcesV1QueryOptions, useAuthControllerLogoutV1, useI18nControllerGetTranslationsV1 } from '../api/endpoints';
+import type { LocaleDto } from '../api/model';
 import type { ResourceResponseDto } from '../api/model/resourceResponseDto';
 import { useAuth } from '../hooks/useAuth';
+import i18n from '../lib/i18n';
+import { getStoredAdminLocale, normalizeAdminLocale } from '../lib/locale';
 
 // 🌟 트리 자원 평탄화 헬퍼 함수
 function flattenResources(nodes: ResourceResponseDto[]): ResourceResponseDto[] {
@@ -49,6 +53,7 @@ export const Route = createFileRoute('/_protected')({
     const queryClient = context.queryClient;
 
     let resources: ResourceResponseDto[] = [];
+    let locales: LocaleDto[] = [];
     try {
       const { queryKey, queryFn } = getResourceControllerGetMyResourcesV1QueryOptions();
       const response = await queryClient.ensureQueryData({
@@ -61,6 +66,20 @@ export const Route = createFileRoute('/_protected')({
     }
     catch (error) {
       console.error('Failed to prefetch dynamic resources in route guard:', error);
+    }
+
+    try {
+      const { queryKey, queryFn } = getI18nControllerGetLocalesV1QueryOptions();
+      const response = await queryClient.ensureQueryData({
+        queryKey,
+        queryFn,
+        staleTime: 1000 * 60 * 60,
+        gcTime: 1000 * 60 * 60,
+      });
+      locales = response.data?.list ?? [];
+    }
+    catch (error) {
+      console.error('Failed to prefetch locales in route guard:', error);
     }
 
     const permissions = context.auth.permissions;
@@ -91,15 +110,12 @@ export const Route = createFileRoute('/_protected')({
     // 🌟 하위 레이아웃 컴포넌트가 동기식으로 사용할 수 있도록 리소스 데이터 반환
     return {
       resources,
+      flatResources: flattened,
+      locales,
     };
   },
   component: ProtectedLayout,
 });
-
-function getLocalizedName(res: ResourceResponseDto, currentLang: string): string {
-  if (!res.translations) return res.name;
-  return res.translations[currentLang] || res.translations['ko'] || res.name;
-}
 
 function ProtectedLayout() {
   const { logout: authLogout, permissions } = useAuth();
@@ -112,22 +128,32 @@ function ProtectedLayout() {
     },
   });
 
-  const [currentLang, setCurrentLang] = useState<string>(() => {
-    if (typeof localStorage !== 'undefined') {
-      return localStorage.getItem('admin_lang') || 'ko';
-    }
-    return 'ko';
-  });
+  const [currentLang, setCurrentLang] = useState<string>(getStoredAdminLocale);
+  const { t } = useTranslation('common');
 
   const handleLangChange = (lang: string) => {
-    setCurrentLang(lang);
-    if (typeof localStorage !== 'undefined') {
-      localStorage.setItem('admin_lang', lang);
+    const nextLang = normalizeAdminLocale(lang);
+    setCurrentLang(nextLang);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('admin_lang', nextLang);
     }
   };
 
-  // 🌟 라우터 컨텍스트에서 이미 로드된 리소스 데이터를 직접 꺼내서 바인딩
-  const { resources } = Route.useRouteContext();
+  const { flatResources } = Route.useRouteContext();
+
+  // 🌟 현재 로케일의 전체 번역 목록 조회
+  const { data: translationResponse } = useI18nControllerGetTranslationsV1(
+    { locale: currentLang },
+    { query: { enabled: !!currentLang } },
+  );
+
+  useEffect(() => {
+    const bundle = translationResponse?.data?.[currentLang]?.resource;
+    if (!bundle) return;
+
+    i18n.addResourceBundle(currentLang, 'resource', bundle, true, true);
+    void i18n.changeLanguage(currentLang);
+  }, [currentLang, translationResponse]);
 
   // 🌟 Lucide Icon 매핑 테이블
   const IconMap: Record<string, LucideIcon> = {
@@ -145,32 +171,33 @@ function ProtectedLayout() {
   };
 
   // 🌟 API로 조회한 MENU 타입 리소스를 기반으로 메뉴 동적 렌더링
-  const menuItemsFromApi = resources
-    ? flattenResources(resources)
-      .filter((res) => res.type === 'MENU')
-      .map((res) => {
-        // READ 액션 권한 찾기
-        const requiredPermission = `${res.code}:READ`;
+  const menuItemsFromApi = flatResources
+    .filter((res) => res.type === 'MENU')
+    .map((res) => {
+      // READ 액션 권한 찾기
+      const requiredPermission = `${res.code}:READ`;
 
-        let toPath = `/${res.code.toLowerCase()}`;
-        if (res.path) {
-          toPath = res.path;
-        }
+      let toPath = `/${res.code.toLowerCase()}`;
+      if (res.path) {
+        toPath = res.path;
+      }
 
-        // Lucide 아이콘 매핑
-        const iconKey = res.icon || 'Shield';
-        const IconComponent = IconMap[iconKey] || Shield;
+      // Lucide 아이콘 매핑
+      const iconKey = res.icon || 'Shield';
+      const IconComponent = IconMap[iconKey] || Shield;
 
-        return {
-          label: getLocalizedName(res, currentLang),
-          icon: IconComponent,
-          to: toPath,
-          requiredPermission,
-          displayOrder: res.sortOrder ?? 99,
-        };
-      })
-      .sort((a, b) => a.displayOrder - b.displayOrder)
-    : [];
+      // 다국어 번역
+      const label = t(res.code, { ns: 'resource', defaultValue: res.name });
+
+      return {
+        label,
+        icon: IconComponent,
+        to: toPath,
+        requiredPermission,
+        displayOrder: res.sortOrder ?? 99,
+      };
+    })
+    .sort((a, b) => a.displayOrder - b.displayOrder);
 
   const visibleMenuItems = menuItemsFromApi.filter(
     (item) => permissions.includes(item.requiredPermission),
@@ -181,7 +208,7 @@ function ProtectedLayout() {
       {/* Sidebar */}
       <aside className="w-64 bg-white border-r flex flex-col">
         <div className="p-6 border-b flex flex-col gap-3">
-          <div className="text-xl font-bold text-slate-800 tracking-tight">PLATFORM ADMIN</div>
+          <div className="text-xl font-bold text-slate-800 tracking-tight">{t('appName')}</div>
           <div className="flex items-center space-x-2 bg-slate-50 px-2.5 py-1.5 rounded-lg border border-slate-100">
             <Globe className="w-4 h-4 text-slate-400" />
             <select
@@ -192,7 +219,7 @@ function ProtectedLayout() {
               <option value="ko">한국어 (KO)</option>
               <option value="en">English (EN)</option>
               <option value="ja">日本語 (JA)</option>
-              <option value="zh">中文 (ZH)</option>
+              <option value="zh-CN">中文 (ZH-CN)</option>
             </select>
           </div>
         </div>
@@ -219,7 +246,7 @@ function ProtectedLayout() {
             className="flex items-center space-x-3 px-3 py-2 w-full rounded-lg text-red-600 hover:bg-red-50 transition-colors"
           >
             <LogOut className="w-5 h-5" />
-            <span className="font-medium">로그아웃</span>
+            <span className="font-medium">{t('logout')}</span>
           </button>
         </div>
       </aside>

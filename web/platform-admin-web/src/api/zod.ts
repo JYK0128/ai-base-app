@@ -8,7 +8,7 @@
 import * as zod from 'zod';
 
 /**
- * 인증 서비스로 로그인 요청을 전달하고 Refresh Token을 쿠키에 설정합니다.
+ * 로그인합니다.
  * @summary 로그인
  */
 export const AuthControllerLoginV1Body = zod.object({
@@ -40,7 +40,7 @@ export const AuthControllerLoginV1Response = zod.object({
 
 
 /**
- * 쿠키의 리프레시 토큰을 사용하여 액세스 토큰을 갱신합니다.
+ * 액세스 토큰을 갱신합니다.
  * @summary 토큰 갱신
  */
 export const AuthControllerRefreshV1Response = zod.object({
@@ -67,7 +67,7 @@ export const AuthControllerRefreshV1Response = zod.object({
 
 
 /**
- * JWT 토큰을 통해 인증된 현재 관리자 계정의 정보를 반환합니다.
+ * 현재 관리자 정보를 조회합니다.
  * @summary 내 정보 조회
  */
 export const AuthControllerGetMeV1Response = zod.object({
@@ -89,17 +89,17 @@ export const AuthControllerGetMeV1Response = zod.object({
 }).and(zod.object({
   "data": zod.object({
   "user": zod.object({
-  "id": zod.string().describe('관리자 고유 ID'),
+  "id": zod.string().describe('관리자 식별자'),
   "email": zod.string().describe('이메일 주소'),
-  "status": zod.string().describe('관리자 상태 (ACTIVE, INACTIVE)'),
-  "organizationId": zod.string().optional().describe('소속 조직 ID')
+  "status": zod.string().describe('관리자 상태'),
+  "organizationId": zod.string().optional().describe('소속 조직 식별자')
 }).describe('사용자 정보')
 }).optional()
 }))
 
 
 /**
- * 세션을 종료하고 리프레시 토큰 쿠키를 제거합니다.
+ * 로그아웃합니다.
  * @summary 로그아웃
  */
 export const AuthControllerLogoutV1Response = zod.object({
@@ -122,7 +122,7 @@ export const AuthControllerLogoutV1Response = zod.object({
 
 
 /**
- * 비밀번호 변경 안내를 확인하고 90일 연장합니다.
+ * 비밀번호 변경을 연장합니다.
  * @summary 비밀번호 변경 연장
  */
 export const AuthControllerDeferPasswordChangeV1Response = zod.object({
@@ -145,7 +145,7 @@ export const AuthControllerDeferPasswordChangeV1Response = zod.object({
 
 
 /**
- * 현재 비밀번호를 확인하고 새로운 비밀번호로 변경합니다.
+ * 비밀번호를 변경합니다.
  * @summary 비밀번호 변경
  */
 export const AuthControllerChangePasswordV1Body = zod.object({
@@ -174,11 +174,11 @@ export const AuthControllerChangePasswordV1Response = zod.object({
 
 
 /**
- * 플랫폼의 모든 조직 목록을 조회합니다.
+ * 조직 목록을 조회합니다.
  * @summary 조직 목록 조회
  */
 export const CoreControllerGetOrganizationsV1QueryParams = zod.object({
-  "status": zod.enum(['PENDING', 'APPROVED', 'REJECTED', 'DORMANT']).optional()
+  "status": zod.enum(['PENDING', 'APPROVED', 'REJECTED', 'DORMANT']).optional().describe('조직 상태 필터')
 })
 
 export const CoreControllerGetOrganizationsV1Response = zod.object({
@@ -199,21 +199,21 @@ export const CoreControllerGetOrganizationsV1Response = zod.object({
   "requestId": zod.string().describe('요청 ID')
 }).and(zod.object({
   "data": zod.array(zod.object({
-  "id": zod.string(),
-  "name": zod.string(),
-  "subdomain": zod.string(),
-  "status": zod.enum(['PENDING', 'APPROVED', 'REJECTED', 'DORMANT']),
-  "createdAt": zod.string()
+  "id": zod.string().describe('조직 식별자'),
+  "name": zod.string().describe('조직명'),
+  "subdomain": zod.string().describe('서브도메인'),
+  "status": zod.enum(['PENDING', 'APPROVED', 'REJECTED', 'DORMANT']).describe('조직 상태'),
+  "createdAt": zod.string().describe('생성 일시')
 })).optional()
 }))
 
 
 /**
- * 가입 대기 중인 조직을 승인합니다.
+ * 조직을 승인합니다.
  * @summary 조직 승인
  */
 export const CoreControllerApproveOrganizationV1Params = zod.object({
-  "id": zod.string()
+  "id": zod.string().describe('조직 식별자')
 })
 
 export const CoreControllerApproveOrganizationV1Response = zod.object({
@@ -236,11 +236,11 @@ export const CoreControllerApproveOrganizationV1Response = zod.object({
 
 
 /**
- * 가입 대기 중인 조직을 거절합니다.
+ * 조직을 거절합니다.
  * @summary 조직 거절
  */
 export const CoreControllerRejectOrganizationV1Params = zod.object({
-  "id": zod.string()
+  "id": zod.string().describe('조직 식별자')
 })
 
 export const CoreControllerRejectOrganizationV1Response = zod.object({
@@ -263,11 +263,11 @@ export const CoreControllerRejectOrganizationV1Response = zod.object({
 
 
 /**
- * 플랫폼 공지사항 목록을 조회합니다.
+ * 공지사항 목록을 조회합니다.
  * @summary 공지사항 조회
  */
 export const CoreControllerGetAnnouncementsV1QueryParams = zod.object({
-  "isPublishedOnly": zod.boolean().optional()
+  "isPublishedOnly": zod.boolean().optional().describe('게시된 공지사항만 조회 여부')
 })
 
 export const CoreControllerGetAnnouncementsV1Response = zod.object({
@@ -288,23 +288,23 @@ export const CoreControllerGetAnnouncementsV1Response = zod.object({
   "requestId": zod.string().describe('요청 ID')
 }).and(zod.object({
   "data": zod.array(zod.object({
-  "id": zod.string(),
-  "title": zod.string(),
-  "content": zod.string(),
-  "isPublished": zod.boolean(),
-  "createdAt": zod.string()
+  "id": zod.string().describe('공지사항 식별자'),
+  "title": zod.string().describe('공지사항 제목'),
+  "content": zod.string().describe('공지사항 내용'),
+  "isPublished": zod.boolean().describe('게시 여부'),
+  "createdAt": zod.string().describe('생성 일시')
 })).optional()
 }))
 
 
 /**
- * 새로운 공지사항을 작성합니다.
+ * 공지사항을 작성합니다.
  * @summary 공지사항 작성
  */
 export const CoreControllerCreateAnnouncementV1Body = zod.object({
-  "title": zod.string(),
-  "content": zod.string(),
-  "isPublished": zod.boolean().optional()
+  "title": zod.string().describe('공지사항 제목'),
+  "content": zod.string().describe('공지사항 내용'),
+  "isPublished": zod.boolean().optional().describe('즉시 게시 여부')
 })
 
 export const CoreControllerCreateAnnouncementV1Response = zod.object({
@@ -325,22 +325,22 @@ export const CoreControllerCreateAnnouncementV1Response = zod.object({
   "requestId": zod.string().describe('요청 ID')
 }).and(zod.object({
   "data": zod.object({
-  "id": zod.string(),
-  "title": zod.string(),
-  "content": zod.string(),
-  "isPublished": zod.boolean(),
-  "createdAt": zod.string()
+  "id": zod.string().describe('공지사항 식별자'),
+  "title": zod.string().describe('공지사항 제목'),
+  "content": zod.string().describe('공지사항 내용'),
+  "isPublished": zod.boolean().describe('게시 여부'),
+  "createdAt": zod.string().describe('생성 일시')
 }).optional()
 }))
 
 
 /**
- * 플랫폼 고객지원 티켓 목록을 조회합니다.
- * @summary 고객지원 티켓 조회
+ * 티켓 목록을 조회합니다.
+ * @summary 티켓 조회
  */
 export const CoreControllerGetTicketsV1QueryParams = zod.object({
-  "organizationId": zod.string().optional(),
-  "status": zod.enum(['OPEN', 'IN_PROGRESS', 'RESOLVED', 'CLOSED']).optional()
+  "organizationId": zod.string().optional().describe('조직 식별자 필터'),
+  "status": zod.enum(['OPEN', 'IN_PROGRESS', 'RESOLVED', 'CLOSED']).optional().describe('티켓 상태 필터')
 })
 
 export const CoreControllerGetTicketsV1Response = zod.object({
@@ -361,23 +361,23 @@ export const CoreControllerGetTicketsV1Response = zod.object({
   "requestId": zod.string().describe('요청 ID')
 }).and(zod.object({
   "data": zod.array(zod.object({
-  "id": zod.string(),
-  "organizationId": zod.string(),
-  "title": zod.string(),
-  "content": zod.string(),
-  "status": zod.enum(['OPEN', 'IN_PROGRESS', 'RESOLVED', 'CLOSED']),
-  "priority": zod.enum(['LOW', 'MEDIUM', 'HIGH', 'URGENT']),
-  "createdAt": zod.string()
+  "id": zod.string().describe('티켓 식별자'),
+  "organizationId": zod.string().describe('조직 식별자'),
+  "title": zod.string().describe('티켓 제목'),
+  "content": zod.string().describe('티켓 내용'),
+  "status": zod.enum(['OPEN', 'IN_PROGRESS', 'RESOLVED', 'CLOSED']).describe('티켓 상태'),
+  "priority": zod.enum(['LOW', 'MEDIUM', 'HIGH', 'URGENT']).describe('우선순위'),
+  "createdAt": zod.string().describe('생성 일시')
 })).optional()
 }))
 
 
 /**
- * 플랫폼/조직 범위의 현재 활성 약관 목록을 조회합니다.
+ * 약관 목록을 조회합니다.
  * @summary 약관 목록 조회
  */
 export const CoreControllerGetActiveTermsV1QueryParams = zod.object({
-  "organizationId": zod.string().optional().describe('조직별 약관 조회 시 조직 ID (미입력 시 플랫폼 공통 약관 포함 조회)')
+  "organizationId": zod.string().optional().describe('조직 식별자')
 })
 
 export const CoreControllerGetActiveTermsV1Response = zod.object({
@@ -398,27 +398,27 @@ export const CoreControllerGetActiveTermsV1Response = zod.object({
   "requestId": zod.string().describe('요청 ID')
 }).and(zod.object({
   "data": zod.array(zod.object({
-  "id": zod.string(),
+  "id": zod.string().describe('약관 문서 식별자'),
   "organizationId": zod.looseObject({
 
-}).nullable(),
-  "code": zod.string(),
-  "title": zod.string(),
-  "required": zod.boolean(),
-  "status": zod.enum(['DRAFT', 'PUBLISHED', 'DEPRECATED'])
+}).nullable().describe('조직 식별자'),
+  "code": zod.string().describe('약관 문서 코드'),
+  "title": zod.string().describe('약관 제목'),
+  "required": zod.boolean().describe('필수 약관 여부'),
+  "status": zod.enum(['DRAFT', 'PUBLISHED', 'DEPRECATED']).describe('문서 상태')
 })).optional()
 }))
 
 
 /**
- * PLATFORM 또는 ORGANIZATION 그룹 약관 문서를 생성합니다.
+ * 약관 문서를 생성합니다.
  * @summary 약관 문서 생성
  */
 export const CoreControllerCreateTermsDocumentV1Body = zod.object({
-  "code": zod.string(),
-  "title": zod.string(),
-  "required": zod.boolean().optional(),
-  "organizationId": zod.string().optional().describe('조직 전용 약관일 경우 조직 ID (미입력 시 플랫폼 공통 약관)')
+  "code": zod.string().describe('약관 문서 코드'),
+  "title": zod.string().describe('약관 문서 제목'),
+  "required": zod.boolean().optional().describe('필수 약관 여부'),
+  "organizationId": zod.string().optional().describe('조직 식별자')
 })
 
 export const CoreControllerCreateTermsDocumentV1Response = zod.object({
@@ -439,29 +439,29 @@ export const CoreControllerCreateTermsDocumentV1Response = zod.object({
   "requestId": zod.string().describe('요청 ID')
 }).and(zod.object({
   "data": zod.object({
-  "id": zod.string(),
+  "id": zod.string().describe('약관 문서 식별자'),
   "organizationId": zod.looseObject({
 
-}).nullable(),
-  "code": zod.string(),
-  "title": zod.string(),
-  "required": zod.boolean(),
-  "status": zod.enum(['DRAFT', 'PUBLISHED', 'DEPRECATED'])
+}).nullable().describe('조직 식별자'),
+  "code": zod.string().describe('약관 문서 코드'),
+  "title": zod.string().describe('약관 제목'),
+  "required": zod.boolean().describe('필수 약관 여부'),
+  "status": zod.enum(['DRAFT', 'PUBLISHED', 'DEPRECATED']).describe('문서 상태')
 }).optional()
 }))
 
 
 /**
- * 약관 버전을 생성하고 선택적으로 즉시 게시합니다.
+ * 약관 버전을 생성합니다.
  * @summary 약관 버전 생성
  */
 export const CoreControllerCreateTermsVersionV1Body = zod.object({
-  "termsDocumentId": zod.string(),
-  "label": zod.string(),
-  "content": zod.string(),
-  "effectiveFrom": zod.iso.datetime({"offset":true}).optional().describe('효력 발생일 (미입력 시 현재 시간)'),
-  "effectiveTo": zod.iso.datetime({"offset":true}).optional().describe('효력 종료일 (미입력 시 무제한)'),
-  "status": zod.enum(['DRAFT', 'PUBLISHED', 'DEPRECATED']).optional().describe('약관 버전 상태 (미입력 시 DRAFT)')
+  "termsDocumentId": zod.string().describe('약관 문서 식별자'),
+  "label": zod.string().describe('약관 버전 라벨'),
+  "content": zod.string().describe('약관 본문'),
+  "effectiveFrom": zod.iso.datetime({"offset":true}).optional().describe('효력 시작일'),
+  "effectiveTo": zod.iso.datetime({"offset":true}).optional().describe('효력 종료일'),
+  "status": zod.enum(['DRAFT', 'PUBLISHED', 'DEPRECATED']).optional().describe('버전 상태')
 })
 
 export const CoreControllerCreateTermsVersionV1Response = zod.object({
@@ -482,25 +482,25 @@ export const CoreControllerCreateTermsVersionV1Response = zod.object({
   "requestId": zod.string().describe('요청 ID')
 }).and(zod.object({
   "data": zod.object({
-  "id": zod.string(),
-  "versionLabel": zod.string(),
-  "content": zod.string(),
-  "status": zod.enum(['DRAFT', 'PUBLISHED', 'ARCHIVED'])
+  "id": zod.string().describe('약관 버전 식별자'),
+  "versionLabel": zod.string().describe('버전 라벨'),
+  "content": zod.string().describe('약관 본문'),
+  "status": zod.enum(['DRAFT', 'PUBLISHED', 'ARCHIVED']).describe('버전 상태')
 }).optional()
 }))
 
 
 /**
- * 매니저의 특정 약관 버전 동의 이력을 저장합니다.
+ * 약관 동의 이력을 저장합니다.
  * @summary 약관 동의 저장
  */
 export const CoreControllerAgreeTermsV1Body = zod.object({
-  "managerId": zod.string(),
-  "termsVersionId": zod.string(),
-  "organizationId": zod.string().optional(),
-  "source": zod.string().optional(),
-  "ipAddress": zod.string().optional(),
-  "userAgent": zod.string().optional()
+  "managerId": zod.string().describe('매니저 식별자'),
+  "termsVersionId": zod.string().describe('동의할 약관 버전 식별자'),
+  "organizationId": zod.string().optional().describe('조직 식별자'),
+  "source": zod.string().optional().describe('동의 소스'),
+  "ipAddress": zod.string().optional().describe('클라이언트 접속 주소'),
+  "userAgent": zod.string().optional().describe('브라우저 정보')
 })
 
 export const CoreControllerAgreeTermsV1Response = zod.object({
@@ -521,9 +521,246 @@ export const CoreControllerAgreeTermsV1Response = zod.object({
   "requestId": zod.string().describe('요청 ID')
 }).and(zod.object({
   "data": zod.object({
-  "id": zod.string(),
-  "agreed": zod.boolean(),
-  "agreedAt": zod.string()
+  "id": zod.string().describe('동의 이력 식별자'),
+  "agreed": zod.boolean().describe('동의 여부'),
+  "agreedAt": zod.string().describe('동의 일시')
+}).optional()
+}))
+
+
+/**
+ * 로케일 목록을 조회합니다.
+ * @summary 로케일 목록 조회
+ */
+export const I18nControllerGetLocalesV1Response = zod.object({
+  "success": zod.boolean().describe('성공 여부'),
+  "data": zod.looseObject({
+
+}).describe('응답 데이터'),
+  "error": zod.object({
+  "code": zod.string().describe('에러 코드'),
+  "message": zod.union([zod.string(),zod.array(zod.string())]).describe('에러 메시지'),
+  "details": zod.looseObject({
+
+}).optional().describe('상세 정보'),
+  "status": zod.number().describe('HTTP 상태 코드')
+}).optional().describe('에러 상세 정보'),
+  "message": zod.string().optional().describe('응답 메시지'),
+  "traceId": zod.string().describe('추적 ID'),
+  "requestId": zod.string().describe('요청 ID')
+}).and(zod.object({
+  "data": zod.object({
+  "list": zod.array(zod.object({
+  "code": zod.string().describe('로케일 코드'),
+  "name": zod.string().describe('이름'),
+  "regionCode": zod.string().optional().describe('지역 코드'),
+  "direction": zod.enum(['ltr', 'rtl']).describe('문자 방향'),
+  "isActive": zod.boolean().describe('활성화 여부'),
+  "sortOrder": zod.number().optional().describe('정렬 순서')
+})).describe('로케일 목록')
+}).optional()
+}))
+
+
+/**
+ * 단건 번역을 조회합니다.
+ * @summary 번역 단건 조회
+ */
+export const I18nControllerGetTranslationV1Params = zod.object({
+  "namespace": zod.string().describe('번역 네임스페이스'),
+  "key": zod.string().describe('번역 키')
+})
+
+export const I18nControllerGetTranslationV1QueryParams = zod.object({
+  "locale": zod.string().optional().describe('단건 조회할 로케일')
+})
+
+export const I18nControllerGetTranslationV1Response = zod.object({
+  "success": zod.boolean().describe('성공 여부'),
+  "data": zod.looseObject({
+
+}).describe('응답 데이터'),
+  "error": zod.object({
+  "code": zod.string().describe('에러 코드'),
+  "message": zod.union([zod.string(),zod.array(zod.string())]).describe('에러 메시지'),
+  "details": zod.looseObject({
+
+}).optional().describe('상세 정보'),
+  "status": zod.number().describe('HTTP 상태 코드')
+}).optional().describe('에러 상세 정보'),
+  "message": zod.string().optional().describe('응답 메시지'),
+  "traceId": zod.string().describe('추적 ID'),
+  "requestId": zod.string().describe('요청 ID')
+}).and(zod.object({
+  "data": zod.record(zod.string(), zod.record(zod.string(), zod.record(zod.string(), zod.string()))).optional()
+}))
+
+
+/**
+ * 번역 목록을 조회합니다.
+ * @summary 번역 배치 조회
+ */
+export const I18nControllerGetTranslationsV1QueryParams = zod.object({
+  "keys": zod.string().optional().describe('조회할 번역 키 목록'),
+  "namespace": zod.string().optional().describe('선택 조회할 네임스페이스'),
+  "locale": zod.string().optional().describe('배치 조회할 로케일')
+})
+
+export const I18nControllerGetTranslationsV1Response = zod.object({
+  "success": zod.boolean().describe('성공 여부'),
+  "data": zod.looseObject({
+
+}).describe('응답 데이터'),
+  "error": zod.object({
+  "code": zod.string().describe('에러 코드'),
+  "message": zod.union([zod.string(),zod.array(zod.string())]).describe('에러 메시지'),
+  "details": zod.looseObject({
+
+}).optional().describe('상세 정보'),
+  "status": zod.number().describe('HTTP 상태 코드')
+}).optional().describe('에러 상세 정보'),
+  "message": zod.string().optional().describe('응답 메시지'),
+  "traceId": zod.string().describe('추적 ID'),
+  "requestId": zod.string().describe('요청 ID')
+}).and(zod.object({
+  "data": zod.record(zod.string(), zod.record(zod.string(), zod.record(zod.string(), zod.string()))).optional()
+}))
+
+
+/**
+ * 번역을 생성합니다.
+ * @summary 번역 생성
+ */
+export const I18nControllerCreateTranslationV1Body = zod.object({
+  "namespace": zod.string().describe('번역 네임스페이스'),
+  "key": zod.string().describe('번역 키'),
+  "locale": zod.string().describe('번역 로케일'),
+  "value": zod.string().describe('번역 값')
+})
+
+export const I18nControllerCreateTranslationV1Response = zod.object({
+  "success": zod.boolean().describe('성공 여부'),
+  "data": zod.looseObject({
+
+}).describe('응답 데이터'),
+  "error": zod.object({
+  "code": zod.string().describe('에러 코드'),
+  "message": zod.union([zod.string(),zod.array(zod.string())]).describe('에러 메시지'),
+  "details": zod.looseObject({
+
+}).optional().describe('상세 정보'),
+  "status": zod.number().describe('HTTP 상태 코드')
+}).optional().describe('에러 상세 정보'),
+  "message": zod.string().optional().describe('응답 메시지'),
+  "traceId": zod.string().describe('추적 ID'),
+  "requestId": zod.string().describe('요청 ID')
+}).and(zod.object({
+  "data": zod.object({
+  "id": zod.string().describe('생성된 번역 식별자')
+}).optional()
+}))
+
+
+/**
+ * 번역을 일괄 처리합니다.
+ * @summary 번역 일괄 처리
+ */
+export const I18nControllerBulkTranslationsV1Body = zod.object({
+  "operations": zod.array(zod.object({
+  "action": zod.enum(['CREATE', 'UPDATE', 'DELETE']).describe('처리 유형'),
+  "namespace": zod.string().describe('번역 네임스페이스'),
+  "key": zod.string().describe('번역 키'),
+  "locale": zod.string().describe('번역 로케일'),
+  "value": zod.string().optional().describe('번역 값')
+})).describe('번역 처리 목록')
+})
+
+export const I18nControllerBulkTranslationsV1Response = zod.object({
+  "success": zod.boolean().describe('성공 여부'),
+  "data": zod.looseObject({
+
+}).describe('응답 데이터'),
+  "error": zod.object({
+  "code": zod.string().describe('에러 코드'),
+  "message": zod.union([zod.string(),zod.array(zod.string())]).describe('에러 메시지'),
+  "details": zod.looseObject({
+
+}).optional().describe('상세 정보'),
+  "status": zod.number().describe('HTTP 상태 코드')
+}).optional().describe('에러 상세 정보'),
+  "message": zod.string().optional().describe('응답 메시지'),
+  "traceId": zod.string().describe('추적 ID'),
+  "requestId": zod.string().describe('요청 ID')
+}).and(zod.object({
+  "data": zod.object({
+  "processedCount": zod.number().describe('처리된 번역 수')
+}).optional()
+}))
+
+
+/**
+ * 번역을 수정합니다.
+ * @summary 번역 수정
+ */
+export const I18nControllerUpdateTranslationV1Body = zod.object({
+  "namespace": zod.string().describe('번역 네임스페이스'),
+  "key": zod.string().describe('번역 키'),
+  "locale": zod.string().describe('번역 로케일'),
+  "value": zod.string().describe('번역 값')
+})
+
+export const I18nControllerUpdateTranslationV1Response = zod.object({
+  "success": zod.boolean().describe('성공 여부'),
+  "data": zod.looseObject({
+
+}).describe('응답 데이터'),
+  "error": zod.object({
+  "code": zod.string().describe('에러 코드'),
+  "message": zod.union([zod.string(),zod.array(zod.string())]).describe('에러 메시지'),
+  "details": zod.looseObject({
+
+}).optional().describe('상세 정보'),
+  "status": zod.number().describe('HTTP 상태 코드')
+}).optional().describe('에러 상세 정보'),
+  "message": zod.string().optional().describe('응답 메시지'),
+  "traceId": zod.string().describe('추적 ID'),
+  "requestId": zod.string().describe('요청 ID')
+}).and(zod.object({
+  "data": zod.object({
+  "id": zod.string().describe('수정된 번역 식별자')
+}).optional()
+}))
+
+
+/**
+ * 번역을 삭제합니다.
+ * @summary 번역 삭제
+ */
+export const I18nControllerDeleteTranslationV1Body = zod.object({
+  "namespace": zod.string().describe('번역 네임스페이스'),
+  "key": zod.string().describe('번역 키'),
+  "locale": zod.string().describe('번역 로케일')
+})
+
+export const I18nControllerDeleteTranslationV1Response = zod.object({
+  "success": zod.boolean().describe('성공 여부'),
+  "data": zod.looseObject({
+
+}).describe('응답 데이터'),
+  "error": zod.object({
+  "code": zod.string().describe('에러 코드'),
+  "message": zod.union([zod.string(),zod.array(zod.string())]).describe('에러 메시지'),
+  "details": zod.looseObject({
+
+}).optional().describe('상세 정보'),
+  "status": zod.number().describe('HTTP 상태 코드')
+}).optional().describe('에러 상세 정보'),
+  "message": zod.string().optional().describe('응답 메시지'),
+  "traceId": zod.string().describe('추적 ID'),
+  "requestId": zod.string().describe('요청 ID')
+}).and(zod.object({
+  "data": zod.object({
+  "id": zod.string().describe('삭제된 번역 식별자')
 }).optional()
 }))
 
@@ -557,8 +794,8 @@ export const HealthControllerReadyResponse = zod.object({
 
 
 /**
- * 시스템 내의 메뉴 및 API 자원들의 전체 계층 트리 구조를 조회합니다. 관리자 권한(RESOURCE:READ)이 필요합니다.
- * @summary 자원 트리 구조 전체 조회
+ * 자원 트리를 조회합니다.
+ * @summary 자원 목록 조회
  */
 export const ResourceControllerGetResourcesV1Response = zod.object({
   "success": zod.boolean().describe('성공 여부'),
@@ -578,26 +815,63 @@ export const ResourceControllerGetResourcesV1Response = zod.object({
   "requestId": zod.string().describe('요청 ID')
 }).and(zod.object({
   "data": zod.array(zod.object({
-  "id": zod.string(),
-  "code": zod.string(),
-  "name": zod.string(),
-  "type": zod.enum(['MENU', 'API', 'COMPONENT']),
-  "path": zod.string().optional(),
-  "icon": zod.string().optional(),
-  "sortOrder": zod.number().optional(),
-  "actions": zod.array(zod.string()),
-  "mappedAction": zod.string().optional(),
-  "translations": zod.looseObject({
-
-}).optional(),
-  "children": zod.array(zod.unknown())
+  "id": zod.string().describe('리소스 식별자'),
+  "code": zod.string().describe('리소스 코드'),
+  "name": zod.string().describe('리소스 이름'),
+  "type": zod.enum(['MENU', 'API', 'COMPONENT']).describe('리소스 유형'),
+  "path": zod.string().optional().describe('경로'),
+  "icon": zod.string().optional().describe('아이콘 이름'),
+  "sortOrder": zod.number().optional().describe('정렬 순서'),
+  "actions": zod.array(zod.string()).describe('허용 액션 목록'),
+  "constraint": zod.string().optional().describe('제약 조건'),
+  "children": zod.array(zod.unknown()).describe('하위 리소스 목록')
 })).optional()
 }))
 
 
 /**
- * 현재 로그인한 유저가 권한을 가진 자원들로만 필터링된 계층 트리 구조를 조회합니다.
- * @summary 내 허용 자원 트리 구조 조회
+ * 자원 상세를 조회합니다.
+ * @summary 자원 조회
+ */
+export const ResourceControllerGetResourceV1Params = zod.object({
+  "id": zod.string()
+})
+
+export const ResourceControllerGetResourceV1Response = zod.object({
+  "success": zod.boolean().describe('성공 여부'),
+  "data": zod.looseObject({
+
+}).describe('응답 데이터'),
+  "error": zod.object({
+  "code": zod.string().describe('에러 코드'),
+  "message": zod.union([zod.string(),zod.array(zod.string())]).describe('에러 메시지'),
+  "details": zod.looseObject({
+
+}).optional().describe('상세 정보'),
+  "status": zod.number().describe('HTTP 상태 코드')
+}).optional().describe('에러 상세 정보'),
+  "message": zod.string().optional().describe('응답 메시지'),
+  "traceId": zod.string().describe('추적 ID'),
+  "requestId": zod.string().describe('요청 ID')
+}).and(zod.object({
+  "data": zod.object({
+  "id": zod.string().describe('리소스 식별자'),
+  "code": zod.string().describe('리소스 코드'),
+  "name": zod.string().describe('리소스 이름'),
+  "type": zod.enum(['MENU', 'API', 'COMPONENT']).describe('리소스 유형'),
+  "path": zod.string().optional().describe('경로'),
+  "icon": zod.string().optional().describe('아이콘 이름'),
+  "sortOrder": zod.number().optional().describe('정렬 순서'),
+  "actions": zod.array(zod.string()).describe('허용 액션 목록'),
+  "constraint": zod.string().optional().describe('제약 조건'),
+  "parentId": zod.string().optional().describe('부모 리소스 식별자')
+}).optional()
+}))
+
+
+/**
+ * 내 허용 자원을 조회합니다.
+ * @summary 내 자원 목록 조회
  */
 export const ResourceControllerGetMyResourcesV1Response = zod.object({
   "success": zod.boolean().describe('성공 여부'),
@@ -617,48 +891,34 @@ export const ResourceControllerGetMyResourcesV1Response = zod.object({
   "requestId": zod.string().describe('요청 ID')
 }).and(zod.object({
   "data": zod.array(zod.object({
-  "id": zod.string(),
-  "code": zod.string(),
-  "name": zod.string(),
-  "type": zod.enum(['MENU', 'API', 'COMPONENT']),
-  "path": zod.string().optional(),
-  "icon": zod.string().optional(),
-  "sortOrder": zod.number().optional(),
-  "actions": zod.array(zod.string()),
-  "mappedAction": zod.string().optional(),
-  "translations": zod.looseObject({
-
-}).optional(),
-  "children": zod.array(zod.unknown())
+  "id": zod.string().describe('리소스 식별자'),
+  "code": zod.string().describe('리소스 코드'),
+  "name": zod.string().describe('리소스 이름'),
+  "type": zod.enum(['MENU', 'API', 'COMPONENT']).describe('리소스 유형'),
+  "path": zod.string().optional().describe('경로'),
+  "icon": zod.string().optional().describe('아이콘 이름'),
+  "sortOrder": zod.number().optional().describe('정렬 순서'),
+  "actions": zod.array(zod.string()).describe('허용 액션 목록'),
+  "constraint": zod.string().optional().describe('제약 조건'),
+  "children": zod.array(zod.unknown()).describe('하위 리소스 목록')
 })).optional()
 }))
 
 
 /**
- * 새로운 메뉴 또는 컴포넌트 리소스를 한 번에 여러 개 생성합니다. 관리자 권한(RESOURCE:CREATE)이 필요합니다.
- * @summary 리소스 일괄 생성
+ * 리소스를 생성합니다.
+ * @summary 리소스 생성
  */
-export const ResourceControllerCreateResourcesV1Body = zod.object({
-  "items": zod.array(zod.object({
-  "operation": zod.enum(['CREATE', 'UPDATE', 'DELETE']),
-  "tempId": zod.string().optional(),
-  "id": zod.string().optional(),
-  "code": zod.string().optional(),
-  "name": zod.string().optional(),
-  "type": zod.enum(['MENU', 'COMPONENT']).optional(),
-  "parentTempId": zod.string().optional(),
-  "path": zod.string().optional(),
-  "icon": zod.string().optional(),
-  "parentId": zod.string().optional(),
-  "sortOrder": zod.number().optional(),
-  "translations": zod.looseObject({
-
-}).optional(),
-  "actions": zod.array(zod.string()).optional()
-}))
+export const ResourceControllerCreateResourceV1Body = zod.object({
+  "code": zod.string().describe('리소스 코드'),
+  "name": zod.string().describe('리소스 이름'),
+  "type": zod.enum(['MENU', 'COMPONENT']).describe('리소스 유형'),
+  "path": zod.string().optional().describe('리소스 경로'),
+  "icon": zod.string().optional().describe('아이콘 이름'),
+  "parentId": zod.string().optional().describe('부모 리소스 식별자')
 })
 
-export const ResourceControllerCreateResourcesV1Response = zod.object({
+export const ResourceControllerCreateResourceV1Response = zod.object({
   "success": zod.boolean().describe('성공 여부'),
   "data": zod.looseObject({
 
@@ -676,10 +936,137 @@ export const ResourceControllerCreateResourcesV1Response = zod.object({
   "requestId": zod.string().describe('요청 ID')
 }).and(zod.object({
   "data": zod.object({
-  "results": zod.array(zod.object({
-  "operation": zod.enum(['CREATE', 'UPDATE', 'DELETE']),
-  "tempId": zod.string().optional(),
-  "id": zod.string()
+  "id": zod.string().describe('생성된 리소스 식별자')
+}).optional()
 }))
+
+
+/**
+ * 리소스를 수정합니다.
+ * @summary 리소스 수정
+ */
+export const ResourceControllerUpdateResourceV1Body = zod.object({
+  "id": zod.string().describe('리소스 식별자'),
+  "code": zod.string().describe('리소스 코드'),
+  "name": zod.string().describe('리소스 이름'),
+  "path": zod.string().optional().describe('리소스 경로'),
+  "icon": zod.string().optional().describe('아이콘 이름')
+})
+
+export const ResourceControllerUpdateResourceV1Response = zod.object({
+  "success": zod.boolean().describe('성공 여부'),
+  "data": zod.looseObject({
+
+}).describe('응답 데이터'),
+  "error": zod.object({
+  "code": zod.string().describe('에러 코드'),
+  "message": zod.union([zod.string(),zod.array(zod.string())]).describe('에러 메시지'),
+  "details": zod.looseObject({
+
+}).optional().describe('상세 정보'),
+  "status": zod.number().describe('HTTP 상태 코드')
+}).optional().describe('에러 상세 정보'),
+  "message": zod.string().optional().describe('응답 메시지'),
+  "traceId": zod.string().describe('추적 ID'),
+  "requestId": zod.string().describe('요청 ID')
+}).and(zod.object({
+  "data": zod.object({
+  "id": zod.string().describe('생성된 리소스 식별자')
+}).optional()
+}))
+
+
+/**
+ * 리소스 권한을 수정합니다.
+ * @summary 리소스 권한 수정
+ */
+export const ResourceControllerUpdateResourcePermissionsV1Body = zod.object({
+  "id": zod.string().describe('리소스 식별자'),
+  "actions": zod.array(zod.string()).describe('리소스 액션 목록'),
+  "constraint": zod.string().optional().describe('제약 조건')
+})
+
+export const ResourceControllerUpdateResourcePermissionsV1Response = zod.object({
+  "success": zod.boolean().describe('성공 여부'),
+  "data": zod.looseObject({
+
+}).describe('응답 데이터'),
+  "error": zod.object({
+  "code": zod.string().describe('에러 코드'),
+  "message": zod.union([zod.string(),zod.array(zod.string())]).describe('에러 메시지'),
+  "details": zod.looseObject({
+
+}).optional().describe('상세 정보'),
+  "status": zod.number().describe('HTTP 상태 코드')
+}).optional().describe('에러 상세 정보'),
+  "message": zod.string().optional().describe('응답 메시지'),
+  "traceId": zod.string().describe('추적 ID'),
+  "requestId": zod.string().describe('요청 ID')
+}).and(zod.object({
+  "data": zod.object({
+  "id": zod.string().describe('생성된 리소스 식별자')
+}).optional()
+}))
+
+
+/**
+ * 리소스 순서를 수정합니다.
+ * @summary 리소스 순서 수정
+ */
+export const ResourceControllerUpdateResourceSortV1Body = zod.object({
+  "id": zod.string().describe('리소스 식별자'),
+  "sortOrder": zod.number().describe('정렬 순서')
+})
+
+export const ResourceControllerUpdateResourceSortV1Response = zod.object({
+  "success": zod.boolean().describe('성공 여부'),
+  "data": zod.looseObject({
+
+}).describe('응답 데이터'),
+  "error": zod.object({
+  "code": zod.string().describe('에러 코드'),
+  "message": zod.union([zod.string(),zod.array(zod.string())]).describe('에러 메시지'),
+  "details": zod.looseObject({
+
+}).optional().describe('상세 정보'),
+  "status": zod.number().describe('HTTP 상태 코드')
+}).optional().describe('에러 상세 정보'),
+  "message": zod.string().optional().describe('응답 메시지'),
+  "traceId": zod.string().describe('추적 ID'),
+  "requestId": zod.string().describe('요청 ID')
+}).and(zod.object({
+  "data": zod.object({
+  "id": zod.string().describe('생성된 리소스 식별자')
+}).optional()
+}))
+
+
+/**
+ * 리소스를 삭제합니다.
+ * @summary 리소스 삭제
+ */
+export const ResourceControllerDeleteResourceV1Body = zod.object({
+  "id": zod.string().describe('리소스 식별자')
+})
+
+export const ResourceControllerDeleteResourceV1Response = zod.object({
+  "success": zod.boolean().describe('성공 여부'),
+  "data": zod.looseObject({
+
+}).describe('응답 데이터'),
+  "error": zod.object({
+  "code": zod.string().describe('에러 코드'),
+  "message": zod.union([zod.string(),zod.array(zod.string())]).describe('에러 메시지'),
+  "details": zod.looseObject({
+
+}).optional().describe('상세 정보'),
+  "status": zod.number().describe('HTTP 상태 코드')
+}).optional().describe('에러 상세 정보'),
+  "message": zod.string().optional().describe('응답 메시지'),
+  "traceId": zod.string().describe('추적 ID'),
+  "requestId": zod.string().describe('요청 ID')
+}).and(zod.object({
+  "data": zod.object({
+  "id": zod.string().describe('삭제된 리소스 식별자')
 }).optional()
 }))

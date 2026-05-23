@@ -6,6 +6,9 @@
  * OpenAPI spec version: 1.0
  */
 
+/**
+ * 버전 상태
+ */
 export type TermsVersionResponseDtoStatus = typeof TermsVersionResponseDtoStatus[keyof typeof TermsVersionResponseDtoStatus];
 
 

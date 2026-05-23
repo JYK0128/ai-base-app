@@ -7,9 +7,12 @@
  */
 
 export interface CreateTermsDocumentDto {
+  /** 약관 문서 코드 */
   code: string;
+  /** 약관 문서 제목 */
   title: string;
+  /** 필수 약관 여부 */
   required?: boolean;
-  /** 조직 전용 약관일 경우 조직 ID (미입력 시 플랫폼 공통 약관) */
+  /** 조직 식별자 */
   organizationId?: string;
 }

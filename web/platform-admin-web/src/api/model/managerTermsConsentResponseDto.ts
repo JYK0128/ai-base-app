@@ -7,7 +7,10 @@
  */
 
 export interface ManagerTermsConsentResponseDto {
+  /** 동의 이력 식별자 */
   id: string;
+  /** 동의 여부 */
   agreed: boolean;
+  /** 동의 일시 */
   agreedAt: string;
 }

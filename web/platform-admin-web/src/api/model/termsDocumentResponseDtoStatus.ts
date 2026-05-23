@@ -6,6 +6,9 @@
  * OpenAPI spec version: 1.0
  */
 
+/**
+ * 문서 상태
+ */
 export type TermsDocumentResponseDtoStatus = typeof TermsDocumentResponseDtoStatus[keyof typeof TermsDocumentResponseDtoStatus];
 
 

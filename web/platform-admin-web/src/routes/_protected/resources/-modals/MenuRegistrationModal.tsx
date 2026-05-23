@@ -1,43 +1,13 @@
 import { Button, Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, Input, Label, toast } from '@pkg/ui';
-import { Activity, Bell, BookOpen, Box, Briefcase, Calendar, Database, FileText,
-         Folder, Globe, Heart, Home, Image as ImageIcon, Key, LayoutDashboard,
-         Lock, Mail, MessageSquare, Server, Settings, Shield, ShoppingBag,
-         ShoppingCart, Star, Users } from 'lucide-react';
 import { useState } from 'react';
+
+import { COMMON_ICONS } from './commonIcons';
 
 interface MenuRegistrationModalProps {
   readonly open: boolean
   readonly onOpenChange: (open: boolean) => void
   readonly onSave: (menu: { code: string, name: string, path: string, icon: string, type: string }) => void
 }
-
-const COMMON_ICONS = [
-  { name: 'Home', icon: Home },
-  { name: 'LayoutDashboard', icon: LayoutDashboard },
-  { name: 'Users', icon: Users },
-  { name: 'Settings', icon: Settings },
-  { name: 'Folder', icon: Folder },
-  { name: 'FileText', icon: FileText },
-  { name: 'Database', icon: Database },
-  { name: 'Shield', icon: Shield },
-  { name: 'Activity', icon: Activity },
-  { name: 'Box', icon: Box },
-  { name: 'Image', icon: ImageIcon },
-  { name: 'Mail', icon: Mail },
-  { name: 'MessageSquare', icon: MessageSquare },
-  { name: 'ShoppingBag', icon: ShoppingBag },
-  { name: 'ShoppingCart', icon: ShoppingCart },
-  { name: 'Star', icon: Star },
-  { name: 'Heart', icon: Heart },
-  { name: 'Calendar', icon: Calendar },
-  { name: 'Bell', icon: Bell },
-  { name: 'BookOpen', icon: BookOpen },
-  { name: 'Briefcase', icon: Briefcase },
-  { name: 'Globe', icon: Globe },
-  { name: 'Lock', icon: Lock },
-  { name: 'Key', icon: Key },
-  { name: 'Server', icon: Server },
-];
 
 export function MenuRegistrationModal({ open, onOpenChange, onSave }: MenuRegistrationModalProps) {
   const [menuForm, setMenuForm] = useState({
@@ -59,8 +29,6 @@ export function MenuRegistrationModal({ open, onOpenChange, onSave }: MenuRegist
       ...menuForm,
       type: 'MENU',
     });
-
-    toast.success('임시 리소스 트리에 추가되었습니다.');
     onOpenChange(false);
     setMenuForm({ code: '', name: '', path: '', icon: '' });
   };

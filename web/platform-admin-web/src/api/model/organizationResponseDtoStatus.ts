@@ -6,6 +6,9 @@
  * OpenAPI spec version: 1.0
  */
 
+/**
+ * 조직 상태
+ */
 export type OrganizationResponseDtoStatus = typeof OrganizationResponseDtoStatus[keyof typeof OrganizationResponseDtoStatus];
 
 

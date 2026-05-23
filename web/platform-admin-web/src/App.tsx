@@ -4,6 +4,7 @@ import { Toaster } from '@pkg/ui';
 import { keepPreviousData, QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { createRouter, RouterProvider } from '@tanstack/react-router';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { NotFound } from './components/NotFound';
 import { useAuth } from './hooks/useAuth';
@@ -67,11 +68,12 @@ const queryClient = new QueryClient({
 
 function AppInner() {
   const { isInitializing, isAuthenticated, mustChangePassword, permissions } = useAuth();
+  const { t } = useTranslation('common');
 
   if (isInitializing) {
     return (
       <div className="flex h-screen items-center justify-center bg-slate-50 font-sans">
-        <div className="text-slate-400 font-medium">인증 정보를 확인 중입니다...</div>
+        <div className="text-slate-400 font-medium">{t('loadingAuth')}</div>
       </div>
     );
   }

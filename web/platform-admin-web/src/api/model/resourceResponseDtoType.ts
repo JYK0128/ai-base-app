@@ -6,6 +6,9 @@
  * OpenAPI spec version: 1.0
  */
 
+/**
+ * 리소스 유형
+ */
 export type ResourceResponseDtoType = typeof ResourceResponseDtoType[keyof typeof ResourceResponseDtoType];
 
 

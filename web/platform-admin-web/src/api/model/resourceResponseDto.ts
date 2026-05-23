@@ -5,19 +5,27 @@
  * The AI Base App Gateway API documentation
  * OpenAPI spec version: 1.0
  */
-import type { ResourceResponseDtoTranslations } from './resourceResponseDtoTranslations';
 import type { ResourceResponseDtoType } from './resourceResponseDtoType';
 
 export interface ResourceResponseDto {
+  /** 리소스 식별자 */
   id: string;
+  /** 리소스 코드 */
   code: string;
+  /** 리소스 이름 */
   name: string;
+  /** 리소스 유형 */
   type: ResourceResponseDtoType;
+  /** 경로 */
   path?: string;
+  /** 아이콘 이름 */
   icon?: string;
+  /** 정렬 순서 */
   sortOrder?: number;
+  /** 허용 액션 목록 */
   actions: string[];
-  mappedAction?: string;
-  translations?: ResourceResponseDtoTranslations;
+  /** 제약 조건 */
+  constraint?: string;
+  /** 하위 리소스 목록 */
   children: ResourceResponseDto[];
 }

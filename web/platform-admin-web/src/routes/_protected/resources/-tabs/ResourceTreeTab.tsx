@@ -1,64 +1,41 @@
-import { Badge, Button, Checkbox, Label, RadioGroup, RadioGroupItem, Switch, toast, useAppForm } from '@pkg/ui';
-import { useStore } from '@tanstack/react-form';
+import { Badge, Button, Checkbox, Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, Label, RadioGroup, RadioGroupItem, Switch, toast } from '@pkg/ui';
+import { useQueryClient } from '@tanstack/react-query';
 import * as LucideIcons from 'lucide-react';
 import { ChevronDown, ChevronRight, Languages, ListTree, Loader2, Pencil, Plus, RefreshCw, Trash2 } from 'lucide-react';
-import { type ComponentType, type ReactNode, useEffect, useMemo, useState } from 'react';
+import { type ReactNode, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
-import { useResourceControllerCreateResourcesV1, useResourceControllerGetResourcesV1 } from '../../../../api/endpoints';
-import { CreateResourceBatchItemDtoType, ResourceResponseDto, ResourceResponseDtoType } from '../../../../api/model';
+import { getResourceControllerGetResourcesV1QueryKey,
+         useResourceControllerCreateResourceV1,
+         useResourceControllerDeleteResourceV1,
+         useResourceControllerGetResourcesV1,
+         useResourceControllerUpdateResourcePermissionsV1,
+         useResourceControllerUpdateResourceV1 } from '../../../../api/endpoints';
+import type { LocaleDto, ResourceResponseDto } from '../../../../api/model';
 import { ResourceControl } from '../../../../components/resource/ResourceControl';
+import { getStoredAdminLocale } from '../../../../lib/locale';
 import { MenuRegistrationModal } from '../-modals/MenuRegistrationModal';
 import { ResourceEditModal } from '../-modals/ResourceEditModal';
 import { ResourceLanguageModal } from '../-modals/ResourceLanguageModal';
 import { SubResourceRegistrationModal } from '../-modals/SubResourceRegistrationModal';
 import { ResourcePanel } from './ResourcePanel';
 
-interface FormValues {
-  permissions: ResourcePermissions
-}
-
 type ResourcePermissionValue = string[] | string | null | undefined;
 type ResourcePermissions = Record<string, ResourcePermissionValue>;
-type ResourceFieldValue = string[] | string | null | undefined;
-type ResourceBatchOperation = 'CREATE' | 'UPDATE' | 'DELETE';
 
 const RESOURCE_ACTIONS = ['CREATE', 'READ', 'UPDATE', 'DELETE'] as const;
 const RESOURCE_GROUP_CLASS = 'flex w-fit max-w-full flex-none items-center gap-2 rounded-xl border border-slate-200/50 bg-slate-50/50 px-2 py-1.2 shadow-sm transition-all duration-200 hover:bg-slate-50/90 md:px-3.5 md:py-1.5';
 const RESOURCE_GROUP_LABEL_CLASS = 'w-[84px] shrink-0 select-none font-mono text-[9px] font-extrabold tracking-wider text-slate-400';
 const EMPTY_PERMISSIONS: ResourcePermissions = {};
+const EMPTY_RESOURCES: ResourceResponseDto[] = [];
 
-interface ResourceCreateBatchItem {
-  operation: ResourceBatchOperation
-  tempId?: string
-  id?: string
-  code?: string
-  name?: string
-  type?: CreateResourceBatchItemDtoType
-  path?: string
-  icon?: string
-  parentId?: string
-  parentTempId?: string
-  sortOrder?: number
-}
-
-function buildResourceMap(nodes: ResourceResponseDto[]): Map<string, ResourceResponseDto> {
-  const map = new Map<string, ResourceResponseDto>();
-
-  const traverse = (items: ResourceResponseDto[]) => {
-    items.forEach((item) => {
-      map.set(item.id, item);
-      if (item.children?.length) {
-        traverse(item.children);
-      }
-    });
-  };
-
-  traverse(nodes);
-  return map;
+interface ResourceTreeTabProps {
+  readonly locales: LocaleDto[]
 }
 
 function buildInitialPermissions(nodes: ResourceResponseDto[]): ResourcePermissions {
   const initialPermissions: ResourcePermissions = {};
+
   const traverse = (items: ResourceResponseDto[]) => {
     items.forEach((item) => {
       if (item.type === 'MENU') {
@@ -68,8 +45,9 @@ function buildInitialPermissions(nodes: ResourceResponseDto[]): ResourcePermissi
         initialPermissions[item.id] = item.actions[0];
       }
       else {
-        initialPermissions[item.id] = item.mappedAction || '';
+        initialPermissions[item.id] = item.constraint || '';
       }
+
       if (item.children?.length) {
         traverse(item.children);
       }
@@ -82,6 +60,7 @@ function buildInitialPermissions(nodes: ResourceResponseDto[]): ResourcePermissi
 
 function buildInitialExpandedNodes(nodes: ResourceResponseDto[]): Record<string, boolean> {
   const initialExpanded: Record<string, boolean> = {};
+
   nodes.forEach((node) => {
     if (node.children && node.children.length > 0) {
       initialExpanded[node.id] = true;
@@ -112,185 +91,6 @@ function findParentName(nodes: ResourceResponseDto[], parentId: string | null): 
   };
 
   return findName(nodes);
-}
-
-function isTemporaryNode(nodeId: string): boolean {
-  return nodeId.startsWith('new-') || nodeId.startsWith('sub-');
-}
-
-function toCreateResourceType(type: ResourceResponseDto['type']): CreateResourceBatchItemDtoType {
-  return type === ResourceResponseDtoType.MENU
-    ? CreateResourceBatchItemDtoType.MENU
-    : CreateResourceBatchItemDtoType.COMPONENT;
-}
-
-function syncResourceActions(
-  nodes: ResourceResponseDto[],
-  permissions: ResourcePermissions,
-): { resources: ResourceResponseDto[], changed: boolean } {
-  let changed = false;
-
-  const resources = nodes.map((node) => {
-    const formValue = permissions[node.id];
-    let nextActions: string[];
-    if (node.type === 'MENU') {
-      nextActions = Array.isArray(formValue) ? formValue : [];
-    }
-    else if (typeof formValue === 'string' && formValue !== '') {
-      nextActions = [formValue];
-    }
-    else {
-      nextActions = [];
-    }
-
-    const hasActionsChanged = JSON.stringify(node.actions || []) !== JSON.stringify(nextActions);
-    let nextChildren = node.children;
-
-    if (node.children?.length) {
-      const childResult = syncResourceActions(node.children, permissions);
-      if (childResult.changed) {
-        nextChildren = childResult.resources;
-        changed = true;
-      }
-    }
-
-    if (hasActionsChanged) {
-      changed = true;
-      return {
-        ...node,
-        actions: nextActions,
-        children: nextChildren,
-      };
-    }
-
-    if (nextChildren !== node.children) {
-      return {
-        ...node,
-        children: nextChildren,
-      };
-    }
-
-    return node;
-  });
-
-  return { resources, changed };
-}
-
-function addChildResource(
-  nodes: ResourceResponseDto[],
-  selectedParentId: string,
-  newChild: ResourceResponseDto,
-): ResourceResponseDto[] {
-  return nodes.map((node) => {
-    if (node.id === selectedParentId) {
-      return {
-        ...node,
-        children: [...(node.children || []), newChild],
-      };
-    }
-
-    if (node.children?.length) {
-      return { ...node, children: addChildResource(node.children, selectedParentId, newChild) };
-    }
-
-    return node;
-  });
-}
-
-function getNextParentActions(node: ResourceResponseDto, currentActions: string[], parentActions: string[]): string[] {
-  return node.type === 'MENU' ? currentActions : parentActions;
-}
-
-function collectCreateBatchItems(nodes: ResourceResponseDto[]): ResourceCreateBatchItem[] {
-  const items: ResourceCreateBatchItem[] = [];
-
-  const traverse = (
-    list: ResourceResponseDto[],
-    parentRef?: { readonly id: string, readonly isTemporary: boolean },
-  ) => {
-    list.forEach((node) => {
-      const temporary = isTemporaryNode(node.id);
-      if (temporary) {
-        items.push({
-          operation: 'CREATE',
-          tempId: node.id,
-          code: node.code,
-          name: node.name,
-          type: toCreateResourceType(node.type),
-          path: node.path,
-          icon: node.icon,
-          sortOrder: node.sortOrder,
-          parentId: parentRef && !parentRef.isTemporary ? parentRef.id : undefined,
-          parentTempId: parentRef && parentRef.isTemporary ? parentRef.id : undefined,
-          translations: node.translations,
-          actions: node.actions,
-        });
-      }
-
-      if (node.children?.length) {
-        traverse(node.children, { id: node.id, isTemporary: temporary });
-      }
-    });
-  };
-
-  traverse(nodes);
-  return items;
-}
-
-function collectDeleteBatchItems(ids: string[]): ResourceCreateBatchItem[] {
-  return ids.map((id) => ({
-    operation: 'DELETE',
-    id,
-  }));
-}
-
-function isResourceChanged(original: ResourceResponseDto, current: ResourceResponseDto): boolean {
-  return (
-    original.code !== current.code
-    || original.name !== current.name
-    || original.type !== current.type
-    || original.path !== current.path
-    || original.icon !== current.icon
-    || original.sortOrder !== current.sortOrder
-    || JSON.stringify(original.translations) !== JSON.stringify(current.translations)
-    || JSON.stringify(original.actions || []) !== JSON.stringify(current.actions || [])
-  );
-}
-
-function collectUpdateBatchItems(
-  nodes: ResourceResponseDto[],
-  originalMap: Map<string, ResourceResponseDto>,
-): ResourceCreateBatchItem[] {
-  const items: ResourceCreateBatchItem[] = [];
-
-  const traverse = (list: ResourceResponseDto[]) => {
-    list.forEach((node) => {
-      if (!isTemporaryNode(node.id)) {
-        const original = originalMap.get(node.id);
-        if (original && isResourceChanged(original, node)) {
-          items.push({
-            operation: 'UPDATE',
-            id: node.id,
-            code: node.code,
-            name: node.name,
-            type: toCreateResourceType(node.type),
-            path: node.path,
-            icon: node.icon,
-            sortOrder: node.sortOrder,
-            translations: node.translations,
-            actions: node.actions,
-          });
-        }
-      }
-
-      if (node.children?.length) {
-        traverse(node.children);
-      }
-    });
-  };
-
-  traverse(nodes);
-  return items;
 }
 
 function collectSubtreeIds(nodes: ResourceResponseDto[], targetId: string): string[] {
@@ -329,42 +129,6 @@ function collectSubtreeIds(nodes: ResourceResponseDto[], targetId: string): stri
   return collected;
 }
 
-function removeNodeById(nodes: ResourceResponseDto[], targetId: string): ResourceResponseDto[] {
-  return nodes
-    .filter((node) => node.id !== targetId)
-    .map((node) => {
-      if (!node.children?.length) {
-        return node;
-      }
-
-      return {
-        ...node,
-        children: removeNodeById(node.children, targetId),
-      };
-    });
-}
-
-function updateNodeById(
-  nodes: ResourceResponseDto[],
-  targetId: string,
-  updater: (node: ResourceResponseDto) => ResourceResponseDto,
-): ResourceResponseDto[] {
-  return nodes.map((node) => {
-    if (node.id === targetId) {
-      return updater(node);
-    }
-
-    if (!node.children?.length) {
-      return node;
-    }
-
-    return {
-      ...node,
-      children: updateNodeById(node.children, targetId, updater),
-    };
-  });
-}
-
 function renderNodeIcon(node: ResourceResponseDto): ReactNode {
   if (node.type === 'COMPONENT') {
     return null;
@@ -380,147 +144,172 @@ function renderNodeIcon(node: ResourceResponseDto): ReactNode {
   return <LucideIcons.Folder className="w-4 h-4 md:w-5 md:h-5" />;
 }
 
-interface ResourceNodeActionsProps {
-  readonly node: ResourceResponseDto
-  readonly AppField: ResourceFieldComponent
-  readonly parentActions: string[]
+function toCreateResourceType(type: ResourceResponseDto['type']): 'MENU' | 'COMPONENT' {
+  return type === 'MENU'
+    ? 'MENU'
+    : 'COMPONENT';
 }
 
-function ResourceNodeActions({ node, AppField, parentActions }: ResourceNodeActionsProps) {
+interface ResourceNodeActionsProps {
+  readonly node: ResourceResponseDto
+  readonly currentValue: ResourcePermissionValue
+  readonly onChange: (node: ResourceResponseDto, value: ResourcePermissionValue) => void
+  readonly parentActions: string[]
+  readonly permissions: ResourcePermissions
+}
+
+function ResourceNodeActions({ node, currentValue, onChange, parentActions, permissions }: ResourceNodeActionsProps) {
   if (node.type === 'MENU') {
+    const currentActions = Array.isArray(currentValue) ? currentValue : [];
+
+    const handleToggle = (val: string, checked: boolean) => {
+      if (!checked) {
+        const isActionUsedByComponents = (children: ResourceResponseDto[], action: string): boolean => {
+          return children.some((child) => {
+            if (child.type === 'COMPONENT') {
+              const childVal = permissions[child.id];
+              if (childVal === action) {
+                return true;
+              }
+            }
+            if (child.children && child.children.length > 0) {
+              return isActionUsedByComponents(child.children, action);
+            }
+            return false;
+          });
+        };
+
+        if (node.children && isActionUsedByComponents(node.children, val)) {
+          toast.error(`하위 컴포넌트가 '${val}' 제약을 사용 중이므로 이 액션을 해제할 수 없습니다.`);
+          return;
+        }
+      }
+
+      const nextValue = checked
+        ? [...currentActions, val]
+        : currentActions.filter((v) => v !== val);
+      onChange(node, nextValue);
+    };
+
     return (
-      <AppField name={`permissions.${node.id}`}>
-        {(field) => {
-          const currentValue = Array.isArray(field.state.value) ? field.state.value : [];
-          const handleToggle = (val: string, checked: boolean) => {
-            const newValue = checked
-              ? [...currentValue, val]
-              : currentValue.filter((v) => v !== val);
-            field.handleChange(newValue);
-          };
+      <div className={RESOURCE_GROUP_CLASS}>
+        <span className={RESOURCE_GROUP_LABEL_CLASS}>ACTIONS</span>
+        <div className="flex flex-wrap items-center gap-2">
+          {RESOURCE_ACTIONS.map((action) => {
+            const id = `perm-${node.id}-${action}`;
+            const isChecked = currentActions.includes(action);
 
-          return (
-            <div className={RESOURCE_GROUP_CLASS}>
-              <span className={RESOURCE_GROUP_LABEL_CLASS}>ACTIONS</span>
-              <div className="flex flex-wrap items-center gap-2">
-                {RESOURCE_ACTIONS.map((action) => {
-                  const id = `perm-${node.id}-${action}`;
-                  const isChecked = currentValue.includes(action);
-
-                  return (
-                    <div
-                      key={action}
-                      className="flex items-center gap-1.5 select-none"
-                    >
-                      <Checkbox
-                        id={id}
-                        checked={isChecked}
-                        onCheckedChange={(checked) => handleToggle(action, !!checked)}
-                      />
-                      <Label
-                        htmlFor={id}
-                        className="text-xs font-semibold text-slate-700 cursor-pointer"
-                      >
-                        {action}
-                      </Label>
-                    </div>
-                  );
-                })}
+            return (
+              <div
+                key={action}
+                className="flex items-center gap-1.5 select-none"
+              >
+                <Checkbox
+                  id={id}
+                  checked={isChecked}
+                  onCheckedChange={(checked) => handleToggle(action, !!checked)}
+                />
+                <Label
+                  htmlFor={id}
+                  className="text-xs font-semibold text-slate-700 cursor-pointer"
+                >
+                  {action}
+                </Label>
               </div>
-            </div>
-          );
-        }}
-      </AppField>
+            );
+          })}
+        </div>
+      </div>
     );
   }
 
+  const currentAction = typeof currentValue === 'string' ? currentValue : null;
+  const allowedActions = parentActions.length > 0 ? parentActions : ['READ'];
+  const isEnabled = currentAction !== null && currentAction !== '';
+  const activeValue = currentAction ?? 'READ';
+
+  if (!isEnabled) {
+    return null;
+  }
+
   return (
-    <AppField name={`permissions.${node.id}`}>
-      {(field) => {
-        const currentValue = typeof field.state.value === 'string' ? field.state.value : null;
-        const allowedActions = parentActions.length > 0 ? parentActions : ['READ'];
-        const isEnabled = currentValue !== null && currentValue !== '';
-        const activeValue = currentValue ?? 'READ';
+    <div className={RESOURCE_GROUP_CLASS}>
+      <span className={RESOURCE_GROUP_LABEL_CLASS}>CONSTRAINTS</span>
+      <RadioGroup
+        name={node.id}
+        value={activeValue}
+        onValueChange={(value) => onChange(node, value)}
+        className="flex flex-wrap items-center gap-2"
+      >
+        {RESOURCE_ACTIONS.map((action) => {
+          const id = `perm-${node.id}-${action}`;
+          const isAllowed = allowedActions.includes(action);
 
-        if (!isEnabled) {
-          return null;
-        }
-
-        return (
-          <div className={RESOURCE_GROUP_CLASS}>
-            <span className={RESOURCE_GROUP_LABEL_CLASS}>CONSTRAINTS</span>
-            <RadioGroup
-              name={field.name}
-              value={activeValue}
-              onValueChange={(value) => field.handleChange(value)}
-              className="flex flex-wrap items-center gap-2"
+          return (
+            <div
+              key={action}
+              className={`flex items-center gap-1.5 select-none ${!isAllowed ? 'opacity-35' : ''}`}
             >
-              {RESOURCE_ACTIONS.map((action) => {
-                const id = `perm-${node.id}-${action}`;
-                const isAllowed = allowedActions.includes(action);
-
-                return (
-                  <div
-                    key={action}
-                    className={`flex items-center gap-1.5 select-none ${!isAllowed ? 'opacity-35' : ''}`}
-                  >
-                    <RadioGroupItem
-                      id={id}
-                      value={action}
-                      disabled={!isAllowed}
-                    />
-                    <Label
-                      htmlFor={id}
-                      className={`text-xs font-semibold cursor-pointer ${
-                        isAllowed ? 'text-slate-700' : 'text-slate-400 cursor-not-allowed line-through'
-                      }`}
-                    >
-                      {action}
-                    </Label>
-                  </div>
-                );
-              })}
-            </RadioGroup>
-          </div>
-        );
-      }}
-    </AppField>
+              <RadioGroupItem
+                id={id}
+                value={action}
+                disabled={!isAllowed}
+              />
+              <Label
+                htmlFor={id}
+                className={`text-xs font-semibold cursor-pointer ${
+                  isAllowed ? 'text-slate-700' : 'text-slate-400 cursor-not-allowed line-through'
+                }`}
+              >
+                {action}
+              </Label>
+            </div>
+          );
+        })}
+      </RadioGroup>
+    </div>
   );
 }
 
-interface ResourceFieldApi {
-  readonly name: string
-  readonly state: {
-    readonly value: ResourceFieldValue
-  }
-  handleChange: (value: ResourceFieldValue) => void
+interface ResourceNodeComponentToggleProps {
+  readonly node: ResourceResponseDto
+  readonly currentValue: ResourcePermissionValue
+  readonly onChange: (node: ResourceResponseDto, value: ResourcePermissionValue) => void
 }
 
-type ResourceFieldComponent = ComponentType<{
-  name: string
-  children: (field: ResourceFieldApi) => ReactNode
-}>;
+function ResourceNodeComponentToggle({ node, currentValue, onChange }: ResourceNodeComponentToggleProps) {
+  const isEnabled = typeof currentValue === 'string' && currentValue !== '';
+
+  return (
+    <div className="ml-auto flex items-center gap-2 shrink-0">
+      <Switch
+        checked={isEnabled}
+        onCheckedChange={(checked) => {
+          onChange(node, checked ? 'READ' : null);
+        }}
+      />
+      <Label className="text-xs font-semibold text-slate-700">
+        제약 적용
+      </Label>
+    </div>
+  );
+}
 
 interface ResourceTreeNodeProps {
   readonly node: ResourceResponseDto
   readonly depth: number
-  readonly AppField: ResourceFieldComponent
-  readonly permissions: Record<string, string[] | string | null | undefined>
+  readonly permissions: ResourcePermissions
   readonly expandedNodes: Record<string, boolean>
   readonly onToggleExpand: (id: string) => void
   readonly onOpenSubModal: (parentId: string) => void
   readonly onOpenEditModal: (node: ResourceResponseDto) => void
   readonly onOpenLanguageModal: (node: ResourceResponseDto) => void
   readonly onDeleteNode: (node: ResourceResponseDto) => void
+  readonly onChangePermission: (node: ResourceResponseDto, value: ResourcePermissionValue) => void
   readonly parentActions: string[]
 }
 
-interface ResourceNodeMenuButtonProps {
-  readonly nodeId: string
-  readonly onOpenSubModal: (parentId: string) => void
-}
-
-function ResourceNodeMenuButton({ nodeId, onOpenSubModal }: ResourceNodeMenuButtonProps) {
+function ResourceNodeMenuButton({ nodeId, onOpenSubModal }: { readonly nodeId: string, readonly onOpenSubModal: (parentId: string) => void }) {
   return (
     <Button
       size="sm"
@@ -535,12 +324,7 @@ function ResourceNodeMenuButton({ nodeId, onOpenSubModal }: ResourceNodeMenuButt
   );
 }
 
-interface ResourceNodeEditButtonProps {
-  readonly node: ResourceResponseDto
-  readonly onOpenEditModal: (node: ResourceResponseDto) => void
-}
-
-function ResourceNodeEditButton({ node, onOpenEditModal }: ResourceNodeEditButtonProps) {
+function ResourceNodeEditButton({ node, onOpenEditModal }: { readonly node: ResourceResponseDto, readonly onOpenEditModal: (node: ResourceResponseDto) => void }) {
   return (
     <Button
       size="sm"
@@ -555,12 +339,7 @@ function ResourceNodeEditButton({ node, onOpenEditModal }: ResourceNodeEditButto
   );
 }
 
-interface ResourceNodeDeleteButtonProps {
-  readonly node: ResourceResponseDto
-  readonly onDeleteNode: (node: ResourceResponseDto) => void
-}
-
-function ResourceNodeDeleteButton({ node, onDeleteNode }: ResourceNodeDeleteButtonProps) {
+function ResourceNodeDeleteButton({ node, onDeleteNode }: { readonly node: ResourceResponseDto, readonly onDeleteNode: (node: ResourceResponseDto) => void }) {
   return (
     <Button
       size="sm"
@@ -575,12 +354,7 @@ function ResourceNodeDeleteButton({ node, onDeleteNode }: ResourceNodeDeleteButt
   );
 }
 
-interface ResourceNodeLanguageButtonProps {
-  readonly node: ResourceResponseDto
-  readonly onOpenLanguageModal: (node: ResourceResponseDto) => void
-}
-
-function ResourceNodeLanguageButton({ node, onOpenLanguageModal }: ResourceNodeLanguageButtonProps) {
+function ResourceNodeLanguageButton({ node, onOpenLanguageModal }: { readonly node: ResourceResponseDto, readonly onOpenLanguageModal: (node: ResourceResponseDto) => void }) {
   return (
     <Button
       size="sm"
@@ -595,40 +369,9 @@ function ResourceNodeLanguageButton({ node, onOpenLanguageModal }: ResourceNodeL
   );
 }
 
-interface ResourceNodeComponentToggleProps {
-  readonly nodeId: string
-  readonly AppField: ResourceFieldComponent
-}
-
-function ResourceNodeComponentToggle({ nodeId, AppField }: ResourceNodeComponentToggleProps) {
-  return (
-    <AppField name={`permissions.${nodeId}`}>
-      {(field) => {
-        const currentValue = typeof field.state.value === 'string' ? field.state.value : null;
-        const isEnabled = currentValue !== null && currentValue !== '';
-
-        return (
-          <div className="ml-auto flex items-center gap-2 shrink-0">
-            <Switch
-              checked={isEnabled}
-              onCheckedChange={(checked) => {
-                field.handleChange(checked ? 'READ' : null);
-              }}
-            />
-            <Label className="text-xs font-semibold text-slate-700">
-              제약 적용
-            </Label>
-          </div>
-        );
-      }}
-    </AppField>
-  );
-}
-
 function ResourceTreeNode({
   node,
   depth,
-  AppField,
   permissions,
   expandedNodes,
   onToggleExpand,
@@ -636,28 +379,23 @@ function ResourceTreeNode({
   onOpenEditModal,
   onOpenLanguageModal,
   onDeleteNode,
+  onChangePermission,
   parentActions,
 }: ResourceTreeNodeProps) {
   const hasChildren = node.children?.length > 0;
   const isExpanded = expandedNodes[node.id];
   const isComponent = node.type === 'COMPONENT';
-  const nodeActions = permissions[node.id] || [];
-  let currentActions: string[];
-  if (Array.isArray(nodeActions)) {
-    currentActions = nodeActions;
-  }
-  else if (typeof nodeActions === 'string') {
-    currentActions = [nodeActions];
-  }
-  else {
-    currentActions = [];
-  }
-  const nextParentActions = getNextParentActions(node, currentActions, parentActions);
+  const currentValue = permissions[node.id];
+  const currentActions = Array.isArray(currentValue)
+    ? currentValue
+    : typeof currentValue === 'string' && currentValue !== ''
+      ? [currentValue]
+      : [];
+  const nextParentActions = node.type === 'MENU' ? currentActions : parentActions;
 
-  let expandIcon: ReactNode = <div className="w-5 h-5" />;
-  if (hasChildren) {
-    expandIcon = isExpanded ? <ChevronDown className="w-5 h-5" /> : <ChevronRight className="w-5 h-5" />;
-  }
+  const expandIcon = hasChildren
+    ? (isExpanded ? <ChevronDown className="w-5 h-5" /> : <ChevronRight className="w-5 h-5" />)
+    : <div className="w-5 h-5" />;
 
   return (
     <div className="select-none">
@@ -705,7 +443,7 @@ function ResourceTreeNode({
               </div>
 
               {node.type === 'COMPONENT' && (
-                <ResourceNodeComponentToggle nodeId={node.id} AppField={AppField} />
+                <ResourceNodeComponentToggle node={node} currentValue={currentValue} onChange={onChangePermission} />
               )}
             </div>
 
@@ -730,50 +468,53 @@ function ResourceTreeNode({
 
               {node.type === 'MENU' && (
                 <div className="flex items-center gap-2 shrink-0">
-                  <ResourceNodeActions node={node} AppField={AppField} parentActions={nextParentActions} />
+                  <ResourceNodeActions
+                    node={node}
+                    currentValue={currentValue}
+                    onChange={onChangePermission}
+                    parentActions={nextParentActions}
+                    permissions={permissions}
+                  />
                 </div>
               )}
 
               {node.type === 'COMPONENT' && (
                 <div className="flex items-center gap-2 shrink-0">
-                  <ResourceNodeActions node={node} AppField={AppField} parentActions={nextParentActions} />
+                  <ResourceNodeActions
+                    node={node}
+                    currentValue={currentValue}
+                    onChange={onChangePermission}
+                    parentActions={nextParentActions}
+                    permissions={permissions}
+                  />
                 </div>
               )}
             </div>
           </div>
         </div>
-
       </div>
 
-      {
-        (() => {
-          if (!hasChildren || !isExpanded) {
-            return null;
-          }
-
-          return (
-            <div className="mt-0.5 relative">
-              <div
-                className="absolute top-0 bottom-0 w-px bg-slate-200/50 pointer-events-none"
-                style={{ left: `${depth * 28 + 30}px` }}
-              />
-              <ResourceTreeList
-                nodes={node.children || []}
-                depth={depth + 1}
-                AppField={AppField}
-                permissions={permissions}
-                expandedNodes={expandedNodes}
-                onToggleExpand={onToggleExpand}
-                onOpenSubModal={onOpenSubModal}
-                onOpenLanguageModal={onOpenLanguageModal}
-                onOpenEditModal={onOpenEditModal}
-                onDeleteNode={onDeleteNode}
-                parentActions={nextParentActions}
-              />
-            </div>
-          );
-        })()
-      }
+      {hasChildren && isExpanded && (
+        <div className="mt-0.5 relative">
+          <div
+            className="absolute top-0 bottom-0 w-px bg-slate-200/50 pointer-events-none"
+            style={{ left: `${depth * 28 + 30}px` }}
+          />
+          <ResourceTreeList
+            nodes={node.children || []}
+            depth={depth + 1}
+            permissions={permissions}
+            expandedNodes={expandedNodes}
+            onToggleExpand={onToggleExpand}
+            onOpenSubModal={onOpenSubModal}
+            onOpenLanguageModal={onOpenLanguageModal}
+            onOpenEditModal={onOpenEditModal}
+            onDeleteNode={onDeleteNode}
+            onChangePermission={onChangePermission}
+            parentActions={nextParentActions}
+          />
+        </div>
+      )}
     </div>
   );
 }
@@ -781,21 +522,20 @@ function ResourceTreeNode({
 interface ResourceTreeListProps {
   readonly nodes: ResourceResponseDto[]
   readonly depth?: number
-  readonly AppField: ResourceFieldComponent
-  readonly permissions: Record<string, string[] | string | null | undefined>
+  readonly permissions: ResourcePermissions
   readonly expandedNodes: Record<string, boolean>
   readonly onToggleExpand: (id: string) => void
   readonly onOpenSubModal: (parentId: string) => void
   readonly onOpenEditModal: (node: ResourceResponseDto) => void
   readonly onOpenLanguageModal: (node: ResourceResponseDto) => void
   readonly onDeleteNode: (node: ResourceResponseDto) => void
+  readonly onChangePermission: (node: ResourceResponseDto, value: ResourcePermissionValue) => void
   readonly parentActions?: string[]
 }
 
 function ResourceTreeList({
   nodes,
   depth = 0,
-  AppField,
   permissions,
   expandedNodes,
   onToggleExpand,
@@ -803,6 +543,7 @@ function ResourceTreeList({
   onOpenEditModal,
   onOpenLanguageModal,
   onDeleteNode,
+  onChangePermission,
   parentActions = ['CREATE', 'READ', 'UPDATE', 'DELETE'],
 }: ResourceTreeListProps) {
   if (nodes.length === 0 && depth === 0) {
@@ -820,7 +561,6 @@ function ResourceTreeList({
           key={node.id}
           node={node}
           depth={depth}
-          AppField={AppField}
           permissions={permissions}
           expandedNodes={expandedNodes}
           onToggleExpand={onToggleExpand}
@@ -828,6 +568,7 @@ function ResourceTreeList({
           onOpenEditModal={onOpenEditModal}
           onOpenLanguageModal={onOpenLanguageModal}
           onDeleteNode={onDeleteNode}
+          onChangePermission={onChangePermission}
           parentActions={parentActions}
         />
       ))}
@@ -835,199 +576,129 @@ function ResourceTreeList({
   );
 }
 
-export function ResourceTreeTab() {
-  const [localResources, setLocalResources] = useState<ResourceResponseDto[]>([]);
+export function ResourceTreeTab({ locales }: ResourceTreeTabProps) {
   const [expandedNodes, setExpandedNodes] = useState<Record<string, boolean>>({});
   const [isMenuModalOpen, setIsMenuModalOpen] = useState(false);
   const [subModalOpen, setSubModalOpen] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [languageModalOpen, setLanguageModalOpen] = useState(false);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [selectedParentId, setSelectedParentId] = useState<string | null>(null);
   const [selectedEditNode, setSelectedEditNode] = useState<ResourceResponseDto | null>(null);
   const [selectedLanguageNode, setSelectedLanguageNode] = useState<ResourceResponseDto | null>(null);
-  const [deletedResourceIds, setDeletedResourceIds] = useState<string[]>([]);
-  const [originalResources, setOriginalResources] = useState<ResourceResponseDto[]>([]);
+  const [selectedDeleteNode, setSelectedDeleteNode] = useState<ResourceResponseDto | null>(null);
+  const [permissions, setPermissions] = useState<ResourcePermissions>(EMPTY_PERMISSIONS);
+  const { t } = useTranslation('common');
 
-  // 🌟 localStorage 기반 현재 언어 (사이드바와 동일)
-  const [currentLang, setCurrentLang] = useState<string>(
-    () => localStorage.getItem('admin_lang') || 'ko',
-  );
+  const [currentLang, setCurrentLang] = useState<string>(getStoredAdminLocale);
   useEffect(() => {
     const id = setInterval(() => {
-      const lang = localStorage.getItem('admin_lang') || 'ko';
+      const lang = getStoredAdminLocale();
       setCurrentLang((prev) => (prev !== lang ? lang : prev));
     }, 300);
     return () => clearInterval(id);
   }, []);
 
-  // 실시간 API 데이터 가져오기
+  const queryClient = useQueryClient();
   const { data: apiResponse, isLoading, isError, refetch } = useResourceControllerGetResourcesV1();
-  const { mutateAsync: createResources, isPending: isSaving } = useResourceControllerCreateResourcesV1();
+  const { mutateAsync: createResource, isPending: isCreating } = useResourceControllerCreateResourceV1();
+  const { mutateAsync: updateResource, isPending: isUpdating } = useResourceControllerUpdateResourceV1();
+  const { mutateAsync: deleteResource, isPending: isDeleting } = useResourceControllerDeleteResourceV1();
+  const { mutateAsync: updateResourcePermissions, isPending: isUpdatingPermissions } = useResourceControllerUpdateResourcePermissionsV1();
 
-  // 🌟 버튼 코드별 다국어 라벨 — apiResponse 트리에서 코드로 리소스를 찾아 translations 활용
-  const buttonLabels = useMemo(() => {
-    const findByCode = (nodes: ResourceResponseDto[], code: string): ResourceResponseDto | undefined => {
-      for (const node of nodes) {
-        if (node.code === code) return node;
-        if (node.children?.length) {
-          const found = findByCode(node.children, code);
-          if (found) return found;
-        }
-      }
-      return undefined;
-    };
-    const all = apiResponse?.data ?? [];
-    const getLabel = (code: string, fallback: string) => {
-      const res = findByCode(all, code);
-      if (!res?.translations) return fallback;
-      return res.translations[currentLang] || res.translations['ko'] || fallback;
-    };
-    return {
-      addMenu: getLabel('ROLE_RESOURCE_CREATE_BUTTON', '메뉴 추가'),
-      save: getLabel('ROLE_RESOURCE_SAVE_BUTTON', '저장'),
-    };
-  }, [apiResponse, currentLang]);
+  const isSaving = isCreating || isUpdating || isDeleting || isUpdatingPermissions;
+  const resourceTree = apiResponse?.data ?? EMPTY_RESOURCES;
 
-  const form = useAppForm({
-    defaultValues: {
-      permissions: EMPTY_PERMISSIONS,
-    },
-    onSubmit: async () => {
-      const batchItems = [
-        ...collectCreateBatchItems(localResources),
-        ...collectUpdateBatchItems(localResources, buildResourceMap(originalResources)),
-        ...collectDeleteBatchItems(deletedResourceIds),
-      ];
-
-      if (batchItems.length === 0) {
-        toast.error('저장할 새 리소스가 없습니다.');
-        return;
-      }
-
-      try {
-        const response = await createResources({
-          data: {
-            items: batchItems,
-          },
-        });
-
-        const results = response.data?.results ?? [];
-        const createdCount = results.filter((result) => result.operation === 'CREATE').length;
-        const updatedCount = results.filter((result) => result.operation === 'UPDATE').length;
-        const deletedCount = results.filter((result) => result.operation === 'DELETE').length;
-
-        const messages = [
-          createdCount > 0 ? `생성 ${createdCount}개` : '',
-          updatedCount > 0 ? `수정 ${updatedCount}개` : '',
-          deletedCount > 0 ? `삭제 ${deletedCount}개` : '',
-        ].filter(Boolean);
-
-        if (messages.length > 0) {
-          toast.success(`${messages.join(', ')} 처리되었습니다.`);
-        }
-
-        setDeletedResourceIds([]);
-        await refetch();
-      }
-      catch {
-        toast.error('리소스 저장 중 오류가 발생했습니다.');
-        return;
-      }
-    },
-  });
-
-  // permissions 값 실시간 구독 (하위 노드의 Radio 선택지 갱신 반응용)
-  const permissions = useStore(form.baseStore, (state: { values: FormValues }) => state.values.permissions) ?? EMPTY_PERMISSIONS;
-  const AppField = form.AppField as ResourceFieldComponent;
-
-  // permissions 값 실시간 동기화
-  useEffect(() => {
-    let cancelled = false;
-
-    queueMicrotask(() => {
-      if (cancelled) {
-        return;
-      }
-
-      setLocalResources((prevResources) => {
-        const { resources, changed } = syncResourceActions(prevResources, permissions);
-        return changed ? resources : prevResources;
-      });
-    });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [permissions]);
-
-  // API 데이터 로드 완료 시 로컬 상태 및 Form 값 동기화
-
-  useEffect(() => {
-    if (apiResponse?.data) {
-      let cancelled = false;
-      queueMicrotask(() => {
-        if (cancelled) {
-          return;
-        }
-
-        setLocalResources(apiResponse.data);
-        setOriginalResources(apiResponse.data);
-        setDeletedResourceIds([]);
-        form.setFieldValue('permissions', buildInitialPermissions(apiResponse.data));
-        setExpandedNodes(buildInitialExpandedNodes(apiResponse.data));
-      });
-
-      return () => {
-        cancelled = true;
-      };
-    }
-  }, [apiResponse, form]);
-
-  // 최상위 메뉴 추가 (로컬 상태 및 Form 값 업데이트)
-  const handleAddResource = (newMenu: { code: string, name: string, path: string, icon: string, type: string }) => {
-    // eslint-disable-next-line sonarjs/pseudo-random
-    const newId = `new-${Math.random().toString(36).substring(7)}`;
-    const newResource: ResourceResponseDto = {
-      id: newId,
-      code: newMenu.code,
-      name: newMenu.name,
-      type: newMenu.type as ResourceResponseDtoType,
-      path: newMenu.path,
-      icon: newMenu.icon,
-      actions: ['READ'],
-      children: [],
-    };
-    setLocalResources((prev) => [...prev, newResource]);
-    form.setFieldValue(`permissions.${newId}`, ['READ']);
+  const initialPermissions = apiResponse?.data ? buildInitialPermissions(apiResponse.data) : EMPTY_PERMISSIONS;
+  const displayPermissions = {
+    ...initialPermissions,
+    ...permissions,
   };
 
-  // 컴포넌트 리소스 추가 모달 열기
+  const initialExpandedNodes = apiResponse?.data ? buildInitialExpandedNodes(apiResponse.data) : {};
+  const displayExpandedNodes = {
+    ...initialExpandedNodes,
+    ...expandedNodes,
+  };
+
+  const handleAddResource = async (newMenu: { code: string, name: string, path: string, icon: string, type: string }) => {
+    const response = await createResource({
+      data: {
+        code: newMenu.code,
+        name: newMenu.name,
+        type: toCreateResourceType(newMenu.type as ResourceResponseDto['type']),
+        path: newMenu.path,
+        icon: newMenu.icon,
+      },
+    });
+
+    const newCreatedNode = response.data;
+    if (!newCreatedNode) return;
+
+    queryClient.setQueryData(
+      getResourceControllerGetResourcesV1QueryKey(),
+      (oldData: { data?: ResourceResponseDto[] } | undefined) => {
+        if (!oldData || !oldData.data) return oldData;
+        return {
+          ...oldData,
+          data: [...oldData.data, newCreatedNode],
+        };
+      }
+    );
+
+    toast.success('메뉴 리소스가 생성되었습니다.');
+  };
+
   const handleOpenSubModal = (parentId: string) => {
     setSelectedParentId(parentId);
     setSubModalOpen(true);
   };
 
-  // 컴포넌트 리소스 추가 로직 (로컬 상태 및 Form 값 업데이트)
-  const handleAddSubResource = (newResource: { code: string, name: string, type: string, actions: string[] }) => {
+  const handleAddSubResource = async (newResource: { code: string, name: string, type: string, actions: string[] }) => {
     if (!selectedParentId) return;
 
-    // eslint-disable-next-line sonarjs/pseudo-random
-    const newId = `sub-${Math.random().toString(36).substring(7)}`;
-    const mappedAction = 'READ';
+    const response = await createResource({
+      data: {
+        code: newResource.code,
+        name: newResource.name,
+        type: toCreateResourceType(newResource.type as ResourceResponseDto['type']),
+        parentId: selectedParentId,
+      },
+    });
 
-    const newChild: ResourceResponseDto = {
-      id: newId,
-      code: newResource.code,
-      name: newResource.name,
-      type: newResource.type as ResourceResponseDtoType,
-      actions: [mappedAction],
-      mappedAction,
-      children: [],
+    const newCreatedNode = response.data;
+    if (!newCreatedNode) return;
+
+    const appendNodeToTree = (nodes: ResourceResponseDto[]): ResourceResponseDto[] => {
+      return nodes.map((node) => {
+        if (node.id === selectedParentId) {
+          return {
+            ...node,
+            children: [...(node.children || []), newCreatedNode],
+          };
+        }
+        if (node.children && node.children.length > 0) {
+          return {
+            ...node,
+            children: appendNodeToTree(node.children),
+          };
+        }
+        return node;
+      });
     };
 
-    setLocalResources((prev) => addChildResource(prev, selectedParentId, newChild));
-    form.setFieldValue(`permissions.${newId}`, mappedAction);
-    setExpandedNodes((prev) => ({ ...prev, [selectedParentId]: true }));
+    queryClient.setQueryData(
+      getResourceControllerGetResourcesV1QueryKey(),
+      (oldData: { data?: ResourceResponseDto[] } | undefined) => {
+        if (!oldData || !oldData.data) return oldData;
+        return {
+          ...oldData,
+          data: appendNodeToTree(oldData.data),
+        };
+      }
+    );
+
+    toast.success('컴포넌트 리소스가 생성되었습니다.');
   };
 
   const handleOpenEditModal = (node: ResourceResponseDto) => {
@@ -1040,58 +711,194 @@ export function ResourceTreeTab() {
     setLanguageModalOpen(true);
   };
 
-  const handleSaveLanguage = ({
-    resourceId,
-    translations,
-  }: {
-    resourceId: string
-    translations: Record<string, string>
-  }) => {
-    setLocalResources((prev) => updateNodeById(prev, resourceId, (node) => ({
-      ...node,
-      translations,
-    })));
-  };
-
-  const handleSaveEdit = (updated: { code: string, name: string, path?: string, icon?: string }) => {
+  const handleSaveEdit = async (updated: { code: string, name: string, path?: string, icon?: string }) => {
     if (!selectedEditNode) {
       return;
     }
 
-    setLocalResources((prev) => updateNodeById(prev, selectedEditNode.id, (node) => ({
-      ...node,
-      code: updated.code,
-      name: updated.name,
-      path: node.type === 'MENU' ? updated.path : undefined,
-      icon: node.type === 'MENU' ? updated.icon : undefined,
-    })));
+    const changed = (
+      selectedEditNode.code !== updated.code
+      || selectedEditNode.name !== updated.name
+      || selectedEditNode.path !== (selectedEditNode.type === 'MENU' ? updated.path : undefined)
+      || selectedEditNode.icon !== (selectedEditNode.type === 'MENU' ? updated.icon : undefined)
+    );
+
+    if (!changed) {
+      toast.error('변경된 내용이 없습니다.');
+      return;
+    }
+
+    await updateResource({
+      data: {
+        id: selectedEditNode.id,
+        code: updated.code,
+        name: updated.name,
+        path: selectedEditNode.type === 'MENU' ? updated.path : undefined,
+        icon: selectedEditNode.type === 'MENU' ? updated.icon : undefined,
+      },
+    });
+
+    const updateNodeInTree = (nodes: ResourceResponseDto[]): ResourceResponseDto[] => {
+      return nodes.map((node) => {
+        if (node.id === selectedEditNode.id) {
+          return {
+            ...node,
+            code: updated.code,
+            name: updated.name,
+            path: selectedEditNode.type === 'MENU' ? updated.path : undefined,
+            icon: selectedEditNode.type === 'MENU' ? updated.icon : undefined,
+          };
+        }
+        if (node.children && node.children.length > 0) {
+          return {
+            ...node,
+            children: updateNodeInTree(node.children),
+          };
+        }
+        return node;
+      });
+    };
+
+    queryClient.setQueryData(
+      getResourceControllerGetResourcesV1QueryKey(),
+      (oldData: { data?: ResourceResponseDto[] } | undefined) => {
+        if (!oldData || !oldData.data) return oldData;
+        return {
+          ...oldData,
+          data: updateNodeInTree(oldData.data),
+        };
+      },
+    );
+
+    toast.success('리소스 정보가 수정되었습니다.');
     setEditModalOpen(false);
     setSelectedEditNode(null);
   };
 
   const handleDeleteNode = (node: ResourceResponseDto) => {
-    const confirmed = window.confirm(`'${node.name}' 리소스를 삭제할까요?`);
-    if (!confirmed) {
+    setSelectedDeleteNode(node);
+    setDeleteConfirmOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!selectedDeleteNode) {
       return;
     }
 
-    const deletedIds = collectSubtreeIds(localResources, node.id);
-    setDeletedResourceIds((prev) => Array.from(new Set([...prev, ...deletedIds])));
-    setLocalResources((prev) => removeNodeById(prev, node.id));
-    if (selectedEditNode && deletedIds.includes(selectedEditNode.id)) {
+    await deleteResource({ data: { id: selectedDeleteNode.id } });
+
+    const deleteNodeFromTree = (nodes: ResourceResponseDto[]): ResourceResponseDto[] => {
+      return nodes
+        .filter((item) => item.id !== selectedDeleteNode.id)
+        .map((item) => {
+          if (item.children && item.children.length > 0) {
+            return {
+              ...item,
+              children: deleteNodeFromTree(item.children),
+            };
+          }
+          return item;
+        });
+    };
+
+    queryClient.setQueryData(
+      getResourceControllerGetResourcesV1QueryKey(),
+      (oldData: { data?: ResourceResponseDto[] } | undefined) => {
+        if (!oldData || !oldData.data) return oldData;
+        return {
+          ...oldData,
+          data: deleteNodeFromTree(oldData.data),
+        };
+      },
+    );
+
+    toast.success('리소스가 삭제되었습니다.');
+
+    const subtreeIds = collectSubtreeIds(resourceTree, selectedDeleteNode.id);
+    if (selectedEditNode && subtreeIds.includes(selectedEditNode.id)) {
       setEditModalOpen(false);
       setSelectedEditNode(null);
     }
+
+    if (selectedLanguageNode && subtreeIds.includes(selectedLanguageNode.id)) {
+      setLanguageModalOpen(false);
+      setSelectedLanguageNode(null);
+    }
+
+    setDeleteConfirmOpen(false);
+    setSelectedDeleteNode(null);
+  };
+
+  const handleChangePermission = async (node: ResourceResponseDto, value: ResourcePermissionValue) => {
+    const nextValue = node.type === 'MENU'
+      ? (Array.isArray(value) ? value : [])
+      : (typeof value === 'string' && value !== '' ? value : null);
+
+    setPermissions((prev) => ({
+      ...prev,
+      [node.id]: nextValue,
+    }));
+
+    if (node.type === 'MENU') {
+      await updateResourcePermissions({
+        data: {
+          id: node.id,
+          actions: Array.isArray(nextValue) ? nextValue : [],
+        },
+      });
+    }
+    else {
+      await updateResourcePermissions({
+        data: {
+          id: node.id,
+          actions: typeof nextValue === 'string' && nextValue !== '' ? [nextValue] : [],
+          constraint: typeof nextValue === 'string' && nextValue !== '' ? nextValue : '',
+        },
+      });
+    }
+
+    const updatePermissionsInTree = (nodes: ResourceResponseDto[]): ResourceResponseDto[] => {
+      return nodes.map((item) => {
+        if (item.id === node.id) {
+          return {
+            ...item,
+            actions: node.type === 'MENU'
+              ? (Array.isArray(nextValue) ? nextValue : [])
+              : (typeof nextValue === 'string' && nextValue !== '' ? [nextValue] : []),
+            constraint: node.type === 'MENU'
+              ? undefined
+              : (typeof nextValue === 'string' && nextValue !== '' ? nextValue : null),
+          };
+        }
+        if (item.children && item.children.length > 0) {
+          return {
+            ...item,
+            children: updatePermissionsInTree(item.children),
+          };
+        }
+        return item;
+      });
+    };
+
+    queryClient.setQueryData(
+      getResourceControllerGetResourcesV1QueryKey(),
+      (oldData: { data?: ResourceResponseDto[] } | undefined) => {
+        if (!oldData || !oldData.data) return oldData;
+        return {
+          ...oldData,
+          data: updatePermissionsInTree(oldData.data),
+        };
+      }
+    );
+
+    toast.success('권한 정보가 변경되었습니다.');
   };
 
   const toggleExpand = (id: string) => {
     setExpandedNodes((prev) => ({ ...prev, [id]: !prev[id] }));
   };
 
-  // 모달을 위한 상위 노드 명칭 찾기 함수
-  const getParentName = (parentId: string | null): string => {
-    return findParentName(localResources, parentId);
-  };
+  const getParentName = (parentId: string | null): string => findParentName(resourceTree, parentId);
 
   let content: React.ReactNode;
   if (isLoading) {
@@ -1116,83 +923,69 @@ export function ResourceTreeTab() {
   else {
     content = (
       <ResourceTreeList
-        nodes={localResources}
-        AppField={AppField}
-        permissions={permissions}
-        expandedNodes={expandedNodes}
+        nodes={resourceTree}
+        permissions={displayPermissions}
+        expandedNodes={displayExpandedNodes}
         onToggleExpand={toggleExpand}
         onOpenSubModal={handleOpenSubModal}
         onOpenEditModal={handleOpenEditModal}
         onOpenLanguageModal={handleOpenLanguageModal}
         onDeleteNode={handleDeleteNode}
+        onChangePermission={handleChangePermission}
       />
     );
   }
 
   return (
     <>
-      <form.AppForm>
-        <form.Layout
-          onSubmit={(e) => {
-            e.preventDefault();
-            void form.handleSubmit();
-          }}
-        >
-          <ResourcePanel
-            icon={<ListTree className="h-5 w-5" />}
-            title="리소스 구조"
-            description="메뉴 자원과 하위 컴포넌트의 권한을 계층 구조로 관리합니다."
-            actions={(
-              <>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  type="button"
-                  onClick={() => { void refetch(); }}
-                  title="새로고침"
-                  disabled={isLoading}
-                >
-                  <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
-                </Button>
-                <ResourceControl code="ROLE_RESOURCE_CREATE_BUTTON">
-                  <Button
-                    type="button"
-                    className="gap-2"
-                    onClick={() => setIsMenuModalOpen(true)}
-                  >
-                    <Plus className="w-4 h-4" />
-                    {buttonLabels.addMenu}
-                  </Button>
-                </ResourceControl>
-                <ResourceControl code="ROLE_RESOURCE_SAVE_BUTTON">
-                  <form.Submit className="gap-2" disabled={isSaving}>
-                    {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
-                    {buttonLabels.save}
-                  </form.Submit>
-                </ResourceControl>
-              </>
-            )}
-          >
-            {content}
-          </ResourcePanel>
-        </form.Layout>
-      </form.AppForm>
+      <ResourcePanel
+        icon={<ListTree className="h-5 w-5" />}
+        title="리소스 구조"
+        description="메뉴 자원과 하위 컴포넌트의 권한을 계층 구조로 관리합니다."
+        actions={(
+          <>
+            <Button
+              variant="outline"
+              size="icon"
+              type="button"
+              onClick={() => { void refetch(); }}
+              title="새로고침"
+              disabled={isLoading || isSaving}
+            >
+              <RefreshCw className={`w-4 h-4 ${isLoading || isSaving ? 'animate-spin' : ''}`} />
+            </Button>
+            <ResourceControl code="ROLE_RESOURCE_CREATE_BUTTON">
+              <Button
+                type="button"
+                className="gap-2"
+                onClick={() => setIsMenuModalOpen(true)}
+                disabled={isSaving}
+              >
+                <Plus className="w-4 h-4" />
+                {t('ROLE_RESOURCE_CREATE_BUTTON', { ns: 'resource', defaultValue: '메뉴 추가' })}
+              </Button>
+            </ResourceControl>
+          </>
+        )}
+      >
+        {content}
+      </ResourcePanel>
 
       <MenuRegistrationModal
         open={isMenuModalOpen}
         onOpenChange={setIsMenuModalOpen}
-        onSave={handleAddResource}
+        onSave={(menu) => { void handleAddResource(menu); }}
       />
 
       <SubResourceRegistrationModal
         open={subModalOpen}
         onOpenChange={setSubModalOpen}
-        onSave={handleAddSubResource}
+        onSave={(resource) => { void handleAddSubResource(resource); }}
         parentName={getParentName(selectedParentId)}
       />
 
       <ResourceEditModal
-        key={`${selectedEditNode?.id ?? 'none'}-${editModalOpen ? 'open' : 'closed'}`}
+        key={`edit-${selectedEditNode?.id ?? 'none'}-${editModalOpen ? 'open' : 'closed'}`}
         open={editModalOpen}
         onOpenChange={(open) => {
           setEditModalOpen(open);
@@ -1201,11 +994,11 @@ export function ResourceTreeTab() {
           }
         }}
         resource={selectedEditNode}
-        onSave={handleSaveEdit}
+        onSave={(updated) => { void handleSaveEdit(updated); }}
       />
 
       <ResourceLanguageModal
-        key={`${selectedLanguageNode?.id ?? 'none'}-${languageModalOpen ? 'open' : 'closed'}`}
+        key={`lang-${selectedLanguageNode?.id ?? 'none'}-${languageModalOpen ? 'open' : 'closed'}`}
         open={languageModalOpen}
         onOpenChange={(open) => {
           setLanguageModalOpen(open);
@@ -1214,9 +1007,50 @@ export function ResourceTreeTab() {
           }
         }}
         resource={selectedLanguageNode}
-        translations={selectedLanguageNode?.translations}
-        onSave={handleSaveLanguage}
+        locales={locales}
       />
+
+      <Dialog open={deleteConfirmOpen} onOpenChange={setDeleteConfirmOpen}>
+        <DialogContent className="sm:max-w-md p-6">
+          <DialogHeader className="pb-2 border-b border-border/40">
+            <DialogTitle className="flex items-center gap-2 text-lg font-bold tracking-tight text-red-600">
+              <LucideIcons.Trash2 className="size-5 stroke-[2.5]" />
+              <span>리소스 삭제 확인</span>
+            </DialogTitle>
+            <DialogDescription className="text-muted-foreground text-xs mt-1">
+              삭제된 리소스는 영구히 복구할 수 없으며 하위 자식 리소스도 함께 삭제됩니다.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4">
+            <p className="text-sm font-medium text-slate-800">
+              '
+              <span className="font-bold text-red-600">
+                {selectedDeleteNode?.name}
+              </span>
+              ' 리소스를 정말로 삭제하시겠습니까?
+            </p>
+          </div>
+          <DialogFooter className="gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                setDeleteConfirmOpen(false);
+                setSelectedDeleteNode(null);
+              }}
+            >
+              취소
+            </Button>
+            <Button
+              type="button"
+              variant="destructive"
+              onClick={() => { void handleConfirmDelete(); }}
+            >
+              삭제
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }

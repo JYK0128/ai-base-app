@@ -7,6 +7,7 @@
  */
 
 /**
+ * 조직 식별자
  * @nullable
  */
 export type TermsDocumentResponseDtoOrganizationId = { [key: string]: unknown } | null;

@@ -6,6 +6,9 @@
  * OpenAPI spec version: 1.0
  */
 
+/**
+ * 티켓 상태
+ */
 export type TicketResponseDtoStatus = typeof TicketResponseDtoStatus[keyof typeof TicketResponseDtoStatus];
 
 

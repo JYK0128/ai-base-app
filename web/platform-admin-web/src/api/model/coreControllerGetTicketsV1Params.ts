@@ -8,6 +8,12 @@
 import type { CoreControllerGetTicketsV1Status } from './coreControllerGetTicketsV1Status';
 
 export type CoreControllerGetTicketsV1Params = {
+/**
+ * 조직 식별자 필터
+ */
 organizationId?: string;
+/**
+ * 티켓 상태 필터
+ */
 status?: CoreControllerGetTicketsV1Status;
 };

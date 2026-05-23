@@ -8,13 +8,16 @@
 import type { CreateTermsVersionDtoStatus } from './createTermsVersionDtoStatus';
 
 export interface CreateTermsVersionDto {
+  /** 약관 문서 식별자 */
   termsDocumentId: string;
+  /** 약관 버전 라벨 */
   label: string;
+  /** 약관 본문 */
   content: string;
-  /** 효력 발생일 (미입력 시 현재 시간) */
+  /** 효력 시작일 */
   effectiveFrom?: string;
-  /** 효력 종료일 (미입력 시 무제한) */
+  /** 효력 종료일 */
   effectiveTo?: string;
-  /** 약관 버전 상태 (미입력 시 DRAFT) */
+  /** 버전 상태 */
   status?: CreateTermsVersionDtoStatus;
 }

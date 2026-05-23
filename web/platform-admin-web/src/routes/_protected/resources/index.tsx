@@ -1,5 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router';
 
+import type { LocaleDto } from '../../../api/model';
 import { ResourceTreeTab } from './-tabs/ResourceTreeTab';
 
 export const Route = createFileRoute('/_protected/resources/')({
@@ -7,6 +8,8 @@ export const Route = createFileRoute('/_protected/resources/')({
 });
 
 function ResourceManagementPage() {
+  const { locales } = Route.useRouteContext() as { locales: LocaleDto[] };
+
   return (
     <div className="p-6 max-w-[1200px] mx-auto space-y-6 flex flex-col">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between border-b pb-4 border-slate-200">
@@ -17,7 +20,7 @@ function ResourceManagementPage() {
       </div>
 
       <div className="flex-1">
-        <ResourceTreeTab />
+        <ResourceTreeTab locales={locales} />
       </div>
     </div>
   );

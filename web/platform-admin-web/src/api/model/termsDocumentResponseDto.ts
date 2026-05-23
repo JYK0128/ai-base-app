@@ -9,11 +9,19 @@ import type { TermsDocumentResponseDtoOrganizationId } from './termsDocumentResp
 import type { TermsDocumentResponseDtoStatus } from './termsDocumentResponseDtoStatus';
 
 export interface TermsDocumentResponseDto {
+  /** 약관 문서 식별자 */
   id: string;
-  /** @nullable */
+  /**
+     * 조직 식별자
+     * @nullable
+     */
   organizationId: TermsDocumentResponseDtoOrganizationId;
+  /** 약관 문서 코드 */
   code: string;
+  /** 약관 제목 */
   title: string;
+  /** 필수 약관 여부 */
   required: boolean;
+  /** 문서 상태 */
   status: TermsDocumentResponseDtoStatus;
 }

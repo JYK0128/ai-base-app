@@ -6,10 +6,13 @@
  * OpenAPI spec version: 1.0
  */
 
-export type CreateResourceBatchItemDtoOperation = typeof CreateResourceBatchItemDtoOperation[keyof typeof CreateResourceBatchItemDtoOperation];
+/**
+ * 처리 유형
+ */
+export type TranslationBulkOperationDtoAction = typeof TranslationBulkOperationDtoAction[keyof typeof TranslationBulkOperationDtoAction];
 
 
-export const CreateResourceBatchItemDtoOperation = {
+export const TranslationBulkOperationDtoAction = {
   CREATE: 'CREATE',
   UPDATE: 'UPDATE',
   DELETE: 'DELETE',

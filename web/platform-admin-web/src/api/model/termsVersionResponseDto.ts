@@ -8,8 +8,12 @@
 import type { TermsVersionResponseDtoStatus } from './termsVersionResponseDtoStatus';
 
 export interface TermsVersionResponseDto {
+  /** 약관 버전 식별자 */
   id: string;
+  /** 버전 라벨 */
   versionLabel: string;
+  /** 약관 본문 */
   content: string;
+  /** 버전 상태 */
   status: TermsVersionResponseDtoStatus;
 }

@@ -8,5 +8,8 @@
 import type { CoreControllerGetOrganizationsV1Status } from './coreControllerGetOrganizationsV1Status';
 
 export type CoreControllerGetOrganizationsV1Params = {
+/**
+ * 조직 상태 필터
+ */
 status?: CoreControllerGetOrganizationsV1Status;
 };
