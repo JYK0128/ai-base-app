@@ -3,15 +3,15 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
 
 import { ENV } from '@/common/env';
 
-import { CORE_SERVICE } from '../core/core.constants';
 import { ResourceClient } from './resource.client';
+import { RESOURCE_SERVICE } from './resource.constants';
 import { ResourceController } from './resource.controller';
 
 @Module({
   imports: [
     ClientsModule.register([
       {
-        name: CORE_SERVICE,
+        name: RESOURCE_SERVICE,
         transport: Transport.TCP,
         options: {
           host: ENV.CORE_SERVICE_HOST,

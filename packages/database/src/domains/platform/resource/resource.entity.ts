@@ -12,7 +12,7 @@ export enum ResourceType {
 
 @Entity({ schema: 'platform', repository: () => ResourceRepository })
 export class Resource extends CoreEntity<Resource> {
-  @Property({ unique: true })
+  @Property()
   code!: string;
 
   @Property()
@@ -40,8 +40,5 @@ export class Resource extends CoreEntity<Resource> {
   actions?: string[];
 
   @Property({ nullable: true })
-  mappedAction?: string;
-
-  @Property({ type: 'json', nullable: true })
-  translations?: Record<string, string>;
+  constraint?: string;
 }

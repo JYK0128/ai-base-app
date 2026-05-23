@@ -1,6 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { Type } from 'class-transformer';
-import { IsArray, IsEnum, IsOptional, IsString, IsUUID, ValidateNested } from 'class-validator';
+import { IsArray, IsEnum, IsOptional, IsString, IsUUID } from 'class-validator';
 
 export enum ResourceTypeDto {
   MENU = 'MENU',
@@ -8,132 +7,72 @@ export enum ResourceTypeDto {
 }
 
 export class CreateResourceDto {
-  @ApiProperty({ example: 'DASHBOARD' })
+  @ApiProperty({ example: 'DASHBOARD', description: '리소스 코드' })
   @IsString()
   code!: string;
 
-  @ApiProperty({ example: '대시보드' })
+  @ApiProperty({ example: '대시보드', description: '리소스 이름' })
   @IsString()
   name!: string;
 
-  @ApiProperty({ enum: ResourceTypeDto, example: 'MENU' })
+  @ApiProperty({ enum: ResourceTypeDto, example: 'MENU', description: '리소스 유형' })
   @IsEnum(ResourceTypeDto)
   type!: ResourceTypeDto;
 
-  @ApiPropertyOptional({ example: '/dashboard' })
+  @ApiPropertyOptional({ example: '/dashboard', description: '리소스 경로' })
   @IsOptional()
   @IsString()
   path?: string;
 
-  @ApiPropertyOptional({ example: 'LayoutDashboard' })
+  @ApiPropertyOptional({ example: 'LayoutDashboard', description: '아이콘 이름' })
   @IsOptional()
   @IsString()
   icon?: string;
 
-  @ApiPropertyOptional({ example: 'uuid-of-parent-resource' })
+  @ApiPropertyOptional({ example: '019e5236-adae-70d7-a8f7-2dc90bdf7097', description: '부모 리소스 식별자' })
   @IsOptional()
   @IsUUID()
   parentId?: string;
 }
 
 export class CreateResourceResponseDto {
-  @ApiProperty({ example: 'uuid-of-new-resource' })
+  @ApiProperty({ example: '019e5236-adae-70d7-a8f7-2dc90bdf7098', description: '생성된 리소스 식별자' })
   id!: string;
 }
 
-export enum ResourceBatchOperationDto {
-  CREATE = 'CREATE',
-  UPDATE = 'UPDATE',
-  DELETE = 'DELETE',
-}
-
-export class CreateResourceBatchItemDto {
-  @ApiProperty({ enum: ResourceBatchOperationDto, example: 'CREATE' })
-  @IsEnum(ResourceBatchOperationDto)
-  operation!: ResourceBatchOperationDto;
-
-  @ApiPropertyOptional({ example: 'tmp_123' })
-  @IsOptional()
-  @IsString()
-  tempId?: string;
-
-  @ApiPropertyOptional({ example: 'uuid-of-resource' })
-  @IsOptional()
+export class UpdateResourceDetailBodyDto {
+  @ApiProperty({ example: '019e5236-adae-70d7-a8f7-2dc90bdf7099', description: '리소스 식별자' })
   @IsUUID()
-  id?: string;
+  id!: string;
 
-  @ApiPropertyOptional({ example: 'DASHBOARD' })
-  @IsOptional()
+  @ApiProperty({ example: 'DASHBOARD', description: '리소스 코드' })
   @IsString()
-  code?: string;
+  code!: string;
 
-  @ApiPropertyOptional({ example: '대시보드' })
-  @IsOptional()
+  @ApiProperty({ example: '대시보드', description: '리소스 이름' })
   @IsString()
-  name?: string;
+  name!: string;
 
-  @ApiPropertyOptional({ enum: ResourceTypeDto, example: 'MENU' })
-  @IsOptional()
-  @IsEnum(ResourceTypeDto)
-  type?: ResourceTypeDto;
-
-  @ApiPropertyOptional({ example: 'tmp_parent_123' })
-  @IsOptional()
-  @IsString()
-  parentTempId?: string;
-
-  @ApiPropertyOptional({ example: '/dashboard' })
+  @ApiPropertyOptional({ example: '/dashboard', description: '리소스 경로' })
   @IsOptional()
   @IsString()
   path?: string;
 
-  @ApiPropertyOptional({ example: 'LayoutDashboard' })
+  @ApiPropertyOptional({ example: 'LayoutDashboard', description: '아이콘 이름' })
   @IsOptional()
   @IsString()
   icon?: string;
-
-  @ApiPropertyOptional({ example: 'uuid-of-parent-resource' })
-  @IsOptional()
-  @IsUUID()
-  parentId?: string;
-
-  @ApiPropertyOptional({ example: 1 })
-  @IsOptional()
-  sortOrder?: number;
-
-  @ApiPropertyOptional({ example: { en: 'Dashboard' } })
-  @IsOptional()
-  translations?: Record<string, string>;
-
-  @ApiPropertyOptional({ type: [String], example: ['READ'] })
-  @IsOptional()
-  @IsArray()
-  @IsString({ each: true })
-  actions?: string[];
 }
 
-export class CreateResourcesDto {
-  @ApiProperty({ type: [CreateResourceBatchItemDto] })
-  @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => CreateResourceBatchItemDto)
-  items!: CreateResourceBatchItemDto[];
-}
-
-export class CreateResourceBatchResultDto {
-  @ApiProperty({ enum: ResourceBatchOperationDto, example: 'CREATE' })
-  operation!: ResourceBatchOperationDto;
-
-  @ApiPropertyOptional({ example: 'tmp_123' })
-  tempId?: string;
-
-  @ApiProperty({ example: 'uuid-of-new-resource' })
+export class DeleteResourceResponseDto {
+  @ApiProperty({ example: '019e5236-adae-70d7-a8f7-2dc90bdf7099', description: '삭제된 리소스 식별자' })
   id!: string;
 }
 
-export class CreateResourcesResponseDto {
-  @ApiProperty({ type: [CreateResourceBatchResultDto] })
-  results!: CreateResourceBatchResultDto[];
+export class DeleteResourceBodyDto {
+  @ApiProperty({ example: '019e5236-adae-70d7-a8f7-2dc90bdf7099', description: '리소스 식별자' })
+  @IsUUID()
+  id!: string;
 }
 
 export class UpdateRolePermissionsDto {
@@ -148,67 +87,121 @@ export class UpdateRolePermissionsDto {
 }
 
 export class PermissionResponseDto {
-  @ApiProperty({ example: 'perm_123' })
+  @ApiProperty({ example: '019e5236-adae-70d7-a8f7-2dc90bdf7100', description: '권한 식별자' })
   id!: string;
 
-  @ApiProperty({ example: 'ORGANIZATION:READ' })
+  @ApiProperty({ example: 'ORGANIZATION:READ', description: '권한 코드' })
   code!: string;
 
-  @ApiProperty({ example: '조직 조회 권한' })
+  @ApiProperty({ example: '조직 조회 권한', description: '권한 이름' })
   name!: string;
 
-  @ApiProperty({ example: 'READ' })
+  @ApiProperty({ example: 'READ', description: '권한 액션' })
   action!: string;
 }
 
 export class ResourceResponseDto {
-  @ApiProperty({ example: 'res_123' })
+  @ApiProperty({ example: '019e5236-adae-70d7-a8f7-2dc90bdf7101', description: '리소스 식별자' })
   id!: string;
 
-  @ApiProperty({ example: 'ORGANIZATION' })
+  @ApiProperty({ example: 'ORGANIZATION', description: '리소스 코드' })
   code!: string;
 
-  @ApiProperty({ example: '조직 관리' })
+  @ApiProperty({ example: '조직 관리', description: '리소스 이름' })
   name!: string;
 
-  @ApiProperty({ example: 'MENU', enum: ['MENU', 'API', 'COMPONENT'] })
+  @ApiProperty({ example: 'MENU', enum: ['MENU', 'API', 'COMPONENT'], description: '리소스 유형' })
   type!: string;
 
-  @ApiPropertyOptional({ example: '/organizations' })
+  @ApiPropertyOptional({ example: '/organizations', description: '경로' })
   path?: string;
 
-  @ApiPropertyOptional({ example: 'Shield' })
+  @ApiPropertyOptional({ example: 'Shield', description: '아이콘 이름' })
   icon?: string;
 
-  @ApiPropertyOptional({ example: 1 })
+  @ApiPropertyOptional({ example: 1, description: '정렬 순서' })
   sortOrder?: number;
 
-  @ApiProperty({ type: [String], example: ['CREATE', 'READ'] })
+  @ApiProperty({ type: [String], example: ['CREATE', 'READ'], description: '허용 액션 목록' })
   actions!: string[];
 
-  @ApiPropertyOptional({ example: 'READ' })
-  mappedAction?: string;
+  @ApiPropertyOptional({ example: 'READ', description: '제약 조건' })
+  constraint?: string;
 
-  @ApiPropertyOptional({ example: { en: 'Dashboard' } })
-  translations?: Record<string, string>;
-
-  @ApiProperty({ type: () => [ResourceResponseDto] })
+  @ApiProperty({ type: () => [ResourceResponseDto], description: '하위 리소스 목록' })
   children!: ResourceResponseDto[];
 }
 
 export class RoleResponseDto {
-  @ApiProperty({ example: 'role_123' })
+  @ApiProperty({ example: '019e5236-adae-70d7-a8f7-2dc90bdf7102', description: '역할 식별자' })
   id!: string;
 
-  @ApiProperty({ example: 'ORGANIZATION.ADMIN' })
+  @ApiProperty({ example: 'ORGANIZATION.ADMIN', description: '역할 코드' })
   code!: string;
 
-  @ApiProperty({ example: '조직 관리자' })
+  @ApiProperty({ example: '조직 관리자', description: '역할 이름' })
   name!: string;
 
-  @ApiProperty({ example: 'ORGANIZATION', enum: ['PLATFORM', 'ORGANIZATION'] })
+  @ApiProperty({ example: 'ORGANIZATION', enum: ['PLATFORM', 'ORGANIZATION'], description: '역할 범위' })
   scope!: string;
 
-  @ApiPropertyOptional({ example: '조직 내 모든 리소스 권한 관리자' })
+  @ApiPropertyOptional({ example: '조직 내 모든 리소스 권한 관리자', description: '역할 설명' })
   description?: string;
+}
+
+export class UpdateResourcePermissionsDto {
+  @ApiProperty({ example: '019e5236-adae-70d7-a8f7-2dc90bdf7099', description: '리소스 식별자' })
+  @IsUUID()
+  id!: string;
+
+  @ApiProperty({ type: [String], example: ['CREATE', 'READ'], description: '리소스 액션 목록' })
+  @IsArray()
+  @IsString({ each: true })
+  actions!: string[];
+
+  @ApiPropertyOptional({ example: 'READ', description: '제약 조건' })
+  @IsOptional()
+  @IsString()
+  constraint?: string;
+}
+
+export class UpdateResourceSortDto {
+  @ApiProperty({ example: '019e5236-adae-70d7-a8f7-2dc90bdf7099', description: '리소스 식별자' })
+  @IsUUID()
+  id!: string;
+
+  @ApiProperty({ example: 1, description: '정렬 순서' })
+  sortOrder!: number;
+}
+
+export class ResourceDetailResponseDto {
+  @ApiProperty({ example: '019e5236-adae-70d7-a8f7-2dc90bdf7101', description: '리소스 식별자' })
+  id!: string;
+
+  @ApiProperty({ example: 'ORGANIZATION', description: '리소스 코드' })
+  code!: string;
+
+  @ApiProperty({ example: '조직 관리', description: '리소스 이름' })
+  name!: string;
+
+  @ApiProperty({ example: 'MENU', enum: ['MENU', 'API', 'COMPONENT'], description: '리소스 유형' })
+  type!: string;
+
+  @ApiPropertyOptional({ example: '/organizations', description: '경로' })
+  path?: string;
+
+  @ApiPropertyOptional({ example: 'Shield', description: '아이콘 이름' })
+  icon?: string;
+
+  @ApiPropertyOptional({ example: 1, description: '정렬 순서' })
+  sortOrder?: number;
+
+  @ApiProperty({ type: [String], example: ['CREATE', 'READ'], description: '허용 액션 목록' })
+  actions!: string[];
+
+  @ApiPropertyOptional({ example: 'READ', description: '제약 조건' })
+  constraint?: string;
+
+  @ApiPropertyOptional({ example: '019e5236-adae-70d7-a8f7-2dc90bdf7100', description: '부모 리소스 식별자' })
+  parentId?: string;
 }

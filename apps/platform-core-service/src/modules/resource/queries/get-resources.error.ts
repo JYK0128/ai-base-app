@@ -1,15 +1,5 @@
 import { defineErrors, ExceptionGuard } from '../../../common/utils/exception.util';
 
-/**
- * 자원 트리 조회 커맨드
- */
-export class GetResourcesCommand {
-  constructor(
-    readonly permissions?: string[],
-    readonly roles?: string[],
-  ) {}
-}
-
 const ERROR_MESSAGES = defineErrors({
   LOAD_FAILED: {
     message: {

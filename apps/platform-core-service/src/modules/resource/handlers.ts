@@ -1,4 +1,5 @@
 import * as Commands from './commands';
+import * as Events from './events';
 import * as Queries from './queries';
 
 /**
@@ -16,4 +17,5 @@ const filterHandlers = (modules: Record<string, unknown>) =>
 export const ResourceHandlers = [
   ...filterHandlers(Commands),
   ...filterHandlers(Queries),
+  ...filterHandlers(Events),
 ];

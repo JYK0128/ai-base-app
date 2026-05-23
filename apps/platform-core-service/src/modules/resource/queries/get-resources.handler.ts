@@ -1,8 +1,9 @@
 import { EntityManager } from '@mikro-orm/core';
-import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
+import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
 import { Resource } from '@pkg/database';
 
-import { GetResourcesAsserter, GetResourcesCommand } from './get-resources.helpers';
+import { GetResourcesAsserter } from './get-resources.error';
+import { GetResourcesQuery } from './get-resources.query';
 
 export interface ResourceTreeNode {
   id: string
@@ -13,29 +14,28 @@ export interface ResourceTreeNode {
   icon?: string
   sortOrder?: number
   actions: string[]
-  mappedAction?: string
-  translations?: Record<string, string>
+  constraint?: string
   children: ResourceTreeNode[]
 }
 
 /**
  * 자원 트리 조회 핸들러
  */
-@CommandHandler(GetResourcesCommand)
-export class GetResourcesHandler implements ICommandHandler<GetResourcesCommand> {
+@QueryHandler(GetResourcesQuery)
+export class GetResourcesHandler implements IQueryHandler<GetResourcesQuery> {
   private readonly Asserter = GetResourcesAsserter;
 
   constructor(private readonly em: EntityManager) {}
 
-  async execute(command: GetResourcesCommand): Promise<ResourceTreeNode[]> {
+  async execute(query: GetResourcesQuery): Promise<ResourceTreeNode[]> {
     const resources = await this.identifyResources();
     const tree = this.processResources(resources);
 
-    if (command.permissions || command.roles) {
+    if (query.permissions || query.roles) {
       return this.filterAllowedResources(
         tree,
-        command.permissions ?? [],
-        command.roles ?? [],
+        query.permissions ?? [],
+        query.roles ?? [],
       );
     }
 
@@ -102,8 +102,7 @@ export class GetResourcesHandler implements ICommandHandler<GetResourcesCommand>
         icon: res.icon,
         sortOrder: res.sortOrder,
         actions: res.actions || [],
-        mappedAction: res.mappedAction,
-        translations: res.translations,
+        constraint: res.constraint,
         children: [],
       });
     }

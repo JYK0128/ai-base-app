@@ -3,12 +3,12 @@ import { ClientProxy } from '@nestjs/microservices';
 import { ClsService } from 'nestjs-cls';
 import { defaultIfEmpty, firstValueFrom } from 'rxjs';
 
-import { CORE_SERVICE } from '../core/core.constants';
+import { RESOURCE_SERVICE, RESOURCE_SERVICE_PATTERNS } from './resource.constants';
 
 @Injectable()
 export class ResourceClient {
   constructor(
-    @Inject(CORE_SERVICE)
+    @Inject(RESOURCE_SERVICE)
     private readonly client: ClientProxy,
     private readonly cls: ClsService,
   ) {}
@@ -19,7 +19,7 @@ export class ResourceClient {
       traceId: this.cls.get('traceId'),
       sid: this.cls.get('sid'),
       clientIp: this.cls.get('clientIp'),
-      id: this.cls.get('id'),
+      userId: this.cls.get('userId'),
       organizationId: this.cls.get('organizationId'),
     };
 
@@ -31,28 +31,55 @@ export class ResourceClient {
   }
 
   async getResources() {
-    return this.send('resources.get', {});
+    return this.send(RESOURCE_SERVICE_PATTERNS.RESOURCE.LIST, {});
+  }
+
+  async getResource(id: string) {
+    return this.send(RESOURCE_SERVICE_PATTERNS.RESOURCE.GET, { id });
   }
 
   async getMyResources(permissions: string[], roles: string[]) {
-    return this.send('resources.get', { permissions, roles });
+    return this.send(RESOURCE_SERVICE_PATTERNS.RESOURCE.LIST, { permissions, roles });
   }
 
-  async createResources(items: Array<{
-    operation: 'CREATE' | 'UPDATE' | 'DELETE'
-    tempId?: string
-    id?: string
-    code?: string
-    name?: string
-    type?: string
+  async createResource(data: {
+    code: string
+    name: string
+    type: string
     path?: string
     icon?: string
     parentId?: string
-    parentTempId?: string
     sortOrder?: number
-    actions?: string[]
-    translations?: Record<string, string>
-  }>) {
-    return this.send<{ results: Array<{ operation: 'CREATE' | 'UPDATE' | 'DELETE', tempId?: string, id: string }> }>('resources.create-batch', { items });
+  }) {
+    return this.send<{ id: string }>(RESOURCE_SERVICE_PATTERNS.RESOURCE.CREATE, data);
+  }
+
+  async updateResourceDetail(data: {
+    id: string
+    code: string
+    name: string
+    path?: string
+    icon?: string
+  }) {
+    return this.send<{ id: string }>(RESOURCE_SERVICE_PATTERNS.RESOURCE.UPDATE_DETAIL, data);
+  }
+
+  async deleteResource(id: string) {
+    return this.send<{ id: string }>(RESOURCE_SERVICE_PATTERNS.RESOURCE.DELETE, { id });
+  }
+
+  async updateResourcePermissions(data: {
+    id: string
+    actions: string[]
+    constraint?: string
+  }) {
+    return this.send<{ id: string }>(RESOURCE_SERVICE_PATTERNS.RESOURCE.UPDATE_PERMISSIONS, data);
+  }
+
+  async updateResourceSort(data: {
+    id: string
+    sortOrder: number
+  }) {
+    return this.send<{ id: string }>(RESOURCE_SERVICE_PATTERNS.RESOURCE.UPDATE_SORT, data);
   }
 }
