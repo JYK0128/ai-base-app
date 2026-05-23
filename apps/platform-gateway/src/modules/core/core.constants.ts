@@ -1,19 +1,19 @@
 export const CORE_SERVICE = 'CORE_SERVICE';
 
 export const CORE_SERVICE_PATTERNS = {
-  ORGANIZATIONS: {
-    GET: 'organizations.get',
+  ORGANIZATION: {
+    LIST: 'organizations.get',
     APPROVE: 'organizations.approve',
   },
-  ANNOUNCEMENTS: {
-    GET: 'announcements.get',
+  ANNOUNCEMENT: {
+    LIST: 'announcements.get',
     CREATE: 'announcements.create',
   },
   SUPPORT: {
-    TICKETS_GET: 'support.tickets.get',
+    TICKET_LIST: 'support.tickets.get',
   },
-  TERMS: {
-    GET_ACTIVE: 'terms.get.active',
+  TERM: {
+    ACTIVE: 'terms.get.active',
     CREATE_DOCUMENT: 'terms.create.document',
     CREATE_VERSION: 'terms.create.version',
     AGREE: 'terms.agree',

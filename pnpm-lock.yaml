@@ -760,6 +760,9 @@ importers:
       axios:
         specifier: 1.16.0
         version: 1.16.0
+      i18next:
+        specifier: 26.2.0
+        version: 26.2.0(typescript@5.9.3)
       jose:
         specifier: 6.2.3
         version: 6.2.3
@@ -775,6 +778,9 @@ importers:
       react-dom:
         specifier: 19.2.6
         version: 19.2.6(react@19.2.6)
+      react-i18next:
+        specifier: 17.0.8
+        version: 17.0.8(i18next@26.2.0(typescript@5.9.3))(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(typescript@5.9.3)
     devDependencies:
       '@dotenvx/dotenvx':
         specifier: 1.61.0
@@ -1426,6 +1432,7 @@ packages:
   '@esbuild/linux-x64@0.28.0':
     resolution: {integrity: sha512-us0dSb9iFxIi8srnpl931Nvs65it/Jd2a2K3qs7fz2WfGPHqzfzZTfec7oxZJRNPXPnNYZtanmRc4AL/JwVzHQ==}
     engines: {node: '>=18'}
+    cpu: [x64]
     os: [linux]
 
   '@esbuild/netbsd-arm64@0.25.5':
@@ -6475,6 +6482,9 @@ packages:
   html-escaper@2.0.2:
     resolution: {integrity: sha512-H2iMtd0I4Mt5eYiapRdIDjp+XzelXQ0tFE4JS7YFwFevXXMmOp9myNrUvCg0D6ws8iqkRPBfKHgbwig1SmlLfg==}
 
+  html-parse-stringify@3.0.1:
+    resolution: {integrity: sha512-KknJ50kTInJ7qIScF3jeaFRpMpE8/lfiTdzf/twXyPBLAGrLRTmkz3AdTnKeh40X8k9L2fdYwEp/42WGXIRGcg==}
+
   html-tags@5.1.0:
     resolution: {integrity: sha512-n6l5uca7/y5joxZ3LUePhzmBFUJ+U2YWzhMa8XUTecSeSlQiZdF5XAd/Q3/WUl0VsXgUwWi8I7CNIwdI5WN1SQ==}
     engines: {node: '>=20.10'}
@@ -6509,6 +6519,14 @@ packages:
   hyperdyperid@1.2.0:
     resolution: {integrity: sha512-Y93lCzHYgGWdrJ66yIktxiaGULYc6oGiABxhcO5AufBeOyoIdZF7bIfLaOrbM0iGIOXQQgxxRrFEnb+Y6w1n4A==}
     engines: {node: '>=10.18'}
+
+  i18next@26.2.0:
+    resolution: {integrity: sha512-zwBHldHdTmwN7r6UNc7lC6GWNN+YYg3DrRSeHR5PRRBf5QnJZcYHrQc0uaU26qZeYxR7iFZD+Y315dPnKP47wA==}
+    peerDependencies:
+      typescript: ^5 || ^6
+    peerDependenciesMeta:
+      typescript:
+        optional: true
 
   iconv-lite@0.7.2:
     resolution: {integrity: sha512-im9DjEDQ55s9fL4EYzOAv0yMqmMBSZp6G0VvFyTMPKWxiSBHUj9NW/qqLmXUwXrrM7AvqSlTCfvqRb0cM8yYqw==}
@@ -7923,6 +7941,22 @@ packages:
     peerDependencies:
       react: ^19.2.6
 
+  react-i18next@17.0.8:
+    resolution: {integrity: sha512-0ooKbGLU8JXhe1zwpQUWIeXSgLPOfwJmgheWRIUpcoA0CpyabpGhayjdG+/eA5esC1AQ8h2jWpXjJfzQzeDOCw==}
+    peerDependencies:
+      i18next: '>= 26.2.0'
+      react: '>= 16.8.0'
+      react-dom: '*'
+      react-native: '*'
+      typescript: ^5 || ^6
+    peerDependenciesMeta:
+      react-dom:
+        optional: true
+      react-native:
+        optional: true
+      typescript:
+        optional: true
+
   react-is@16.13.1:
     resolution: {integrity: sha512-24e6ynE2H+OKt4kqsOvNd8kBpV65zoxbA4BVsEOB3ARVWQki/DHzaUoC5KuON/BiccDaCCTZBuOcfZs70kR8bQ==}
 
@@ -9082,6 +9116,10 @@ packages:
         optional: true
       jsdom:
         optional: true
+
+  void-elements@3.1.0:
+    resolution: {integrity: sha512-Dhxzh5HZuiHQhbvTW9AMetFfBHDMYpo23Uo9btPXgdYP+3T5S+p+jgNy7spra+veYhBP2dCSgxR/i2Y02h5/6w==}
+    engines: {node: '>=0.10.0'}
 
   vscode-uri@3.1.0:
     resolution: {integrity: sha512-/BpdSx+yCQGnCvecbyXdxHDkuk55/G3xwnC0GqY4gmQ3j+A+g8kzzgB4Nk/SINjqn6+waqw3EgbVF2QKExkRxQ==}
@@ -13216,9 +13254,9 @@ snapshots:
       obug: 2.1.1
       std-env: 4.0.0
       tinyrainbow: 3.1.0
-      vitest: 4.1.4(@types/node@22.13.9)(@vitest/browser-playwright@4.1.4)(@vitest/coverage-v8@4.1.4)(msw@2.13.3(@types/node@22.13.9)(typescript@5.9.3))(vite@8.0.11(@types/node@22.13.9)(esbuild@0.27.7)(jiti@2.7.0)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3))
+      vitest: 4.1.4(@types/node@25.6.0)(@vitest/browser-playwright@4.1.4)(@vitest/coverage-v8@4.1.4)(msw@2.13.3(@types/node@25.6.0)(typescript@5.9.3))(vite@8.0.11(@types/node@25.6.0)(esbuild@0.25.5)(jiti@2.7.0)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3))
     optionalDependencies:
-      '@vitest/browser': 4.1.4(msw@2.13.3(@types/node@22.13.9)(typescript@5.9.3))(vite@8.0.11(@types/node@22.13.9)(esbuild@0.27.7)(jiti@2.7.0)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3))(vitest@4.1.4)
+      '@vitest/browser': 4.1.4(msw@2.13.3(@types/node@25.6.0)(typescript@5.9.3))(vite@8.0.11(@types/node@25.6.0)(esbuild@0.25.5)(jiti@2.7.0)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3))(vitest@4.1.4)
 
   '@vitest/expect@3.2.4':
     dependencies:
@@ -15319,6 +15357,10 @@ snapshots:
 
   html-escaper@2.0.2: {}
 
+  html-parse-stringify@3.0.1:
+    dependencies:
+      void-elements: 3.1.0
+
   html-tags@5.1.0: {}
 
   http-cache-semantics@4.2.0: {}
@@ -15356,6 +15398,10 @@ snapshots:
   human-signals@8.0.1: {}
 
   hyperdyperid@1.2.0: {}
+
+  i18next@26.2.0(typescript@5.9.3):
+    optionalDependencies:
+      typescript: 5.9.3
 
   iconv-lite@0.7.2:
     dependencies:
@@ -16837,6 +16883,17 @@ snapshots:
       react: 19.2.6
       scheduler: 0.27.0
 
+  react-i18next@17.0.8(i18next@26.2.0(typescript@5.9.3))(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(typescript@5.9.3):
+    dependencies:
+      '@babel/runtime': 7.29.2
+      html-parse-stringify: 3.0.1
+      i18next: 26.2.0(typescript@5.9.3)
+      react: 19.2.6
+      use-sync-external-store: 1.6.0(react@19.2.6)
+    optionalDependencies:
+      react-dom: 19.2.6(react@19.2.6)
+      typescript: 5.9.3
+
   react-is@16.13.1: {}
 
   react-is@17.0.2: {}
@@ -18315,6 +18372,8 @@ snapshots:
       '@vitest/coverage-v8': 4.1.4(@vitest/browser@4.1.4)(vitest@4.1.4)
     transitivePeerDependencies:
       - msw
+
+  void-elements@3.1.0: {}
 
   vscode-uri@3.1.0: {}
 

@@ -2,7 +2,8 @@ import { InjectRepository } from '@mikro-orm/nestjs';
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
 import { Organization, OrganizationRepository } from '@pkg/database';
 
-import { GetOrganizationsAsserter, GetOrganizationsQuery } from './get-organizations.helpers';
+import { GetOrganizationsAsserter } from './get-organizations.error';
+import { GetOrganizationsQuery } from './get-organizations.query';
 
 /**
  * 조직 목록 조회 핸들러

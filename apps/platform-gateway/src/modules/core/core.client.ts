@@ -23,8 +23,9 @@ export class CoreClient {
       traceId: this.cls.get('traceId'),
       sid: this.cls.get('sid'),
       clientIp: this.cls.get('clientIp'),
-      id: this.cls.get('id'),
+      userId: this.cls.get('userId'),
       organizationId: this.cls.get('organizationId'),
+      acceptLanguage: this.cls.get('acceptLanguage'),
     };
 
     return firstValueFrom(
@@ -36,41 +37,41 @@ export class CoreClient {
 
   // --- Organizations ---
   async getOrganizations(query: { status?: string }) {
-    return this.send(CORE_SERVICE_PATTERNS.ORGANIZATIONS.GET, query);
+    return this.send(CORE_SERVICE_PATTERNS.ORGANIZATION.LIST, query);
   }
 
   async approveOrganization(id: string, approve: boolean) {
-    return this.send(CORE_SERVICE_PATTERNS.ORGANIZATIONS.APPROVE, { id, approve });
+    return this.send(CORE_SERVICE_PATTERNS.ORGANIZATION.APPROVE, { id, approve });
   }
 
   // --- Announcements ---
   async getAnnouncements(query: { isPublishedOnly?: boolean }) {
-    return this.send(CORE_SERVICE_PATTERNS.ANNOUNCEMENTS.GET, query);
+    return this.send(CORE_SERVICE_PATTERNS.ANNOUNCEMENT.LIST, query);
   }
 
   async createAnnouncement(authorId: string, data: CreateAnnouncementDto) {
-    return this.send(CORE_SERVICE_PATTERNS.ANNOUNCEMENTS.CREATE, { authorId, data });
+    return this.send(CORE_SERVICE_PATTERNS.ANNOUNCEMENT.CREATE, { authorId, data });
   }
 
   // --- Support ---
   async getTickets(query: { organizationId?: string, status?: string }) {
-    return this.send(CORE_SERVICE_PATTERNS.SUPPORT.TICKETS_GET, query);
+    return this.send(CORE_SERVICE_PATTERNS.SUPPORT.TICKET_LIST, query);
   }
 
   // --- Terms ---
   async getActiveTerms(organizationId?: string) {
-    return this.send(CORE_SERVICE_PATTERNS.TERMS.GET_ACTIVE, { organizationId });
+    return this.send(CORE_SERVICE_PATTERNS.TERM.ACTIVE, { organizationId });
   }
 
   async createTermsDocument(data: CreateTermsDocumentDto) {
-    return this.send(CORE_SERVICE_PATTERNS.TERMS.CREATE_DOCUMENT, data);
+    return this.send(CORE_SERVICE_PATTERNS.TERM.CREATE_DOCUMENT, data);
   }
 
   async createTermsVersion(data: CreateTermsVersionDto) {
-    return this.send(CORE_SERVICE_PATTERNS.TERMS.CREATE_VERSION, data);
+    return this.send(CORE_SERVICE_PATTERNS.TERM.CREATE_VERSION, data);
   }
 
   async agreeTerms(data: AgreeTermsDto) {
-    return this.send(CORE_SERVICE_PATTERNS.TERMS.AGREE, data);
+    return this.send(CORE_SERVICE_PATTERNS.TERM.AGREE, data);
   }
 }

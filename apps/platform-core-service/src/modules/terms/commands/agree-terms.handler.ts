@@ -4,7 +4,8 @@ import { EntityManager } from '@mikro-orm/postgresql';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { Manager, ManagerTermsConsent, ManagerTermsConsentRepository, Organization, TermsVersion, TermsVersionRepository } from '@pkg/database';
 
-import { AgreeTermsAsserter, AgreeTermsCommand } from './agree-terms.helpers';
+import { AgreeTermsCommand } from './agree-terms.command';
+import { AgreeTermsAsserter } from './agree-terms.error';
 
 /**
  * 약관 동의 핸들러

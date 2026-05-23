@@ -2,6 +2,7 @@ import { Controller } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 
+import { ANNOUNCEMENT_SERVICE_PATTERNS } from './announcement.constants';
 import { CreateAnnouncementCommand } from './commands';
 import { GetAnnouncementsQuery } from './queries';
 
@@ -12,12 +13,12 @@ export class AnnouncementController {
     private readonly commandBus: CommandBus,
   ) {}
 
-  @MessagePattern('announcements.get')
+  @MessagePattern(ANNOUNCEMENT_SERVICE_PATTERNS.ANNOUNCEMENT.LIST)
   async getAnnouncements(@Payload() data: { isPublishedOnly?: boolean }) {
     return this.queryBus.execute(new GetAnnouncementsQuery(data.isPublishedOnly));
   }
 
-  @MessagePattern('announcements.create')
+  @MessagePattern(ANNOUNCEMENT_SERVICE_PATTERNS.ANNOUNCEMENT.CREATE)
   async createAnnouncement(@Payload() data: { authorId: string, data: { title: string, content: string, isPublished?: boolean } }) {
     return this.commandBus.execute(
       new CreateAnnouncementCommand(

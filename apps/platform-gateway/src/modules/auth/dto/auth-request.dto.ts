@@ -5,7 +5,7 @@ import { IsEmail, IsNotEmpty, IsString, MinLength } from 'class-validator';
 import { Match } from '@/common/decorators/match.decorator';
 
 export class LoginDto {
-  @ApiProperty({ example: 'admin@example.com', description: '관리자 이메일' })
+  @ApiProperty({ example: 'admin@example.co.kr', description: '관리자 이메일' })
   @Transform(({ value }) =>
     typeof value === 'string'
       ? value?.trim().toLowerCase()
@@ -15,7 +15,7 @@ export class LoginDto {
   @IsNotEmpty({ message: '이메일은 필수 입력 항목입니다.' })
   email!: string;
 
-  @ApiProperty({ example: 'password123', description: '비밀번호' })
+  @ApiProperty({ example: '비밀번호123!', description: '비밀번호' })
   @IsNotEmpty({ message: '비밀번호는 필수 입력 항목입니다.' })
   @MinLength(6, { message: '비밀번호는 최소 6자 이상이어야 합니다.' })
   password!: string;

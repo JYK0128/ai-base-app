@@ -7,8 +7,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { ENV } from '@/common/env';
 
+import { ChangePasswordCommand } from './change-password.command';
 import { ChangePasswordHandler } from './change-password.handler';
-import { ChangePasswordCommand } from './change-password.helpers';
 
 describe('ChangePasswordHandler', () => {
   function mockTransactionalContext() {

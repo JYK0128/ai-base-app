@@ -3,7 +3,8 @@ import { InjectRepository } from '@mikro-orm/nestjs';
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
 import { SupportTicket, SupportTicketRepository } from '@pkg/database';
 
-import { GetTicketsAsserter, GetTicketsQuery } from './get-tickets.helpers';
+import { GetTicketsAsserter } from './get-tickets.error';
+import { GetTicketsQuery } from './get-tickets.query';
 
 /**
  * 문의 티켓 목록 조회 핸들러

@@ -4,9 +4,10 @@ import { ClsService } from 'nestjs-cls';
 
 import { CheckPermissions } from '@/common/decorators/permissions.decorator';
 import { SwaggerResult } from '@/common/decorators/swagger.decorator';
+import { ApiResponse } from '@/common/types/response.type';
 
 import { CoreClient } from './core.client';
-import { AgreeTermsDto, CreateAnnouncementDto, CreateTermsDocumentDto, CreateTermsVersionDto, GetAnnouncementsQueryDto, GetOrganizationsQueryDto, GetTermsQueryDto, GetTicketsQueryDto } from './dto/core-request.dto';
+import { AgreeTermsDto, CreateAnnouncementDto, CreateTermsDocumentDto, CreateTermsVersionDto, GetAnnouncementsQueryDto, GetOrganizationsQueryDto, GetTermsQueryDto, GetTicketsQueryDto, OrganizationParamDto } from './dto/core-request.dto';
 import { AnnouncementResponseDto, ManagerTermsConsentResponseDto, OrganizationResponseDto, TermsDocumentResponseDto, TermsVersionResponseDto, TicketResponseDto } from './dto/core-response.dto';
 
 @ApiTags('Core')
@@ -22,90 +23,100 @@ export class CoreController {
 
   @Get('organizations')
   @CheckPermissions('ORGANIZATION:READ')
-  @ApiOperation({ summary: '조직 목록 조회', description: '플랫폼의 모든 조직 목록을 조회합니다.' })
+  @ApiOperation({ summary: '조직 목록 조회', description: '조직 목록을 조회합니다.' })
   @SwaggerResult([OrganizationResponseDto])
   async getOrganizations(@Query() query: GetOrganizationsQueryDto) {
-    return this.coreClient.getOrganizations({ status: query.status });
+    const result = await this.coreClient.getOrganizations({ status: query.status });
+    return ApiResponse.success(result, '조직 목록을 조회했습니다.');
   }
 
   @Patch('organizations/:id/approve')
   @CheckPermissions('ORGANIZATION:UPDATE')
-  @ApiOperation({ summary: '조직 승인', description: '가입 대기 중인 조직을 승인합니다.' })
+  @ApiOperation({ summary: '조직 승인', description: '조직을 승인합니다.' })
   @SwaggerResult()
-  async approveOrganization(@Param('id') id: string) {
-    return this.coreClient.approveOrganization(id, true);
+  async approveOrganization(@Param() params: OrganizationParamDto) {
+    const result = await this.coreClient.approveOrganization(params.id, true);
+    return ApiResponse.success(result, '조직을 승인했습니다.');
   }
 
   @Patch('organizations/:id/reject')
   @CheckPermissions('ORGANIZATION:UPDATE')
-  @ApiOperation({ summary: '조직 거절', description: '가입 대기 중인 조직을 거절합니다.' })
+  @ApiOperation({ summary: '조직 거절', description: '조직을 거절합니다.' })
   @SwaggerResult()
-  async rejectOrganization(@Param('id') id: string) {
-    return this.coreClient.approveOrganization(id, false);
+  async rejectOrganization(@Param() params: OrganizationParamDto) {
+    const result = await this.coreClient.approveOrganization(params.id, false);
+    return ApiResponse.success(result, '조직을 거절했습니다.');
   }
 
   // --- Announcements ---
 
   @Get('announcements')
   @CheckPermissions('ANNOUNCEMENT:READ')
-  @ApiOperation({ summary: '공지사항 조회', description: '플랫폼 공지사항 목록을 조회합니다.' })
+  @ApiOperation({ summary: '공지사항 조회', description: '공지사항 목록을 조회합니다.' })
   @SwaggerResult([AnnouncementResponseDto])
   async getAnnouncements(@Query() query: GetAnnouncementsQueryDto) {
-    return this.coreClient.getAnnouncements({ isPublishedOnly: query.isPublishedOnly });
+    const result = await this.coreClient.getAnnouncements({ isPublishedOnly: query.isPublishedOnly });
+    return ApiResponse.success(result, '공지사항 목록을 조회했습니다.');
   }
 
   @Post('announcements')
   @CheckPermissions('ANNOUNCEMENT:CREATE')
-  @ApiOperation({ summary: '공지사항 작성', description: '새로운 공지사항을 작성합니다.' })
+  @ApiOperation({ summary: '공지사항 작성', description: '공지사항을 작성합니다.' })
   @SwaggerResult(AnnouncementResponseDto)
   async createAnnouncement(@Body() data: CreateAnnouncementDto) {
-    return this.coreClient.createAnnouncement(this.cls.get('id'), data);
+    const result = await this.coreClient.createAnnouncement(this.cls.get('id'), data);
+    return ApiResponse.success(result, '공지사항을 작성했습니다.');
   }
 
   // --- Support ---
 
   @Get('support/tickets')
   @CheckPermissions('SUPPORT:READ')
-  @ApiOperation({ summary: '고객지원 티켓 조회', description: '플랫폼 고객지원 티켓 목록을 조회합니다.' })
+  @ApiOperation({ summary: '티켓 조회', description: '티켓 목록을 조회합니다.' })
   @SwaggerResult([TicketResponseDto])
   async getTickets(@Query() query: GetTicketsQueryDto) {
-    return this.coreClient.getTickets({
+    const result = await this.coreClient.getTickets({
       organizationId: query.organizationId,
       status: query.status,
     });
+    return ApiResponse.success(result, '고객지원 티켓 목록을 조회했습니다.');
   }
 
   // --- Terms ---
 
   @Get('terms')
   @CheckPermissions('TERMS:READ')
-  @ApiOperation({ summary: '약관 목록 조회', description: '플랫폼/조직 범위의 현재 활성 약관 목록을 조회합니다.' })
+  @ApiOperation({ summary: '약관 목록 조회', description: '약관 목록을 조회합니다.' })
   @SwaggerResult([TermsDocumentResponseDto])
   async getActiveTerms(@Query() query: GetTermsQueryDto) {
-    return this.coreClient.getActiveTerms(query.organizationId);
+    const result = await this.coreClient.getActiveTerms(query.organizationId);
+    return ApiResponse.success(result, '약관 목록을 조회했습니다.');
   }
 
   @Post('terms/documents')
   @CheckPermissions('TERMS:CREATE')
-  @ApiOperation({ summary: '약관 문서 생성', description: 'PLATFORM 또는 ORGANIZATION 그룹 약관 문서를 생성합니다.' })
+  @ApiOperation({ summary: '약관 문서 생성', description: '약관 문서를 생성합니다.' })
   @SwaggerResult(TermsDocumentResponseDto)
   async createTermsDocument(@Body() data: CreateTermsDocumentDto) {
-    return this.coreClient.createTermsDocument(data);
+    const result = await this.coreClient.createTermsDocument(data);
+    return ApiResponse.success(result, '약관 문서를 생성했습니다.');
   }
 
   @Post('terms/versions')
   @CheckPermissions('TERMS:CREATE')
-  @ApiOperation({ summary: '약관 버전 생성', description: '약관 버전을 생성하고 선택적으로 즉시 게시합니다.' })
+  @ApiOperation({ summary: '약관 버전 생성', description: '약관 버전을 생성합니다.' })
   @SwaggerResult(TermsVersionResponseDto)
   async createTermsVersion(@Body() data: CreateTermsVersionDto) {
-    return this.coreClient.createTermsVersion(data);
+    const result = await this.coreClient.createTermsVersion(data);
+    return ApiResponse.success(result, '약관 버전을 생성했습니다.');
   }
 
   @Post('terms/agreements')
   @CheckPermissions('TERMS:UPDATE')
-  @ApiOperation({ summary: '약관 동의 저장', description: '매니저의 특정 약관 버전 동의 이력을 저장합니다.' })
+  @ApiOperation({ summary: '약관 동의 저장', description: '약관 동의 이력을 저장합니다.' })
   @SwaggerResult(ManagerTermsConsentResponseDto)
   async agreeTerms(@Body() data: AgreeTermsDto) {
-    return this.coreClient.agreeTerms(data);
+    const result = await this.coreClient.agreeTerms(data);
+    return ApiResponse.success(result, '약관 동의를 저장했습니다.');
   }
 }

@@ -2,7 +2,8 @@ import { InjectRepository } from '@mikro-orm/nestjs';
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
 import { TermsDocument, TermsDocumentRepository, TermsDocumentStatus } from '@pkg/database';
 
-import { GetActiveTermsAsserter, GetActiveTermsQuery } from './get-active-terms.helpers';
+import { GetActiveTermsAsserter } from './get-active-terms.error';
+import { GetActiveTermsQuery } from './get-active-terms.query';
 
 /**
  * 활성 약관 목록 조회 핸들러

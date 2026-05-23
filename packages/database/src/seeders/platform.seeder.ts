@@ -11,11 +11,11 @@ import bcrypt from 'bcrypt';
 
 import { ManagerAccount } from '@/domains/platform/manager/manager.account.entity';
 import { Manager, ManagerStatus } from '@/domains/platform/manager/manager.entity';
+import { ManagerRole } from '@/domains/platform/manager/manager.role.entity';
 import { Organization, OrganizationStatus } from '@/domains/platform/organization/organization.entity';
-import { ManagerRole } from '@/domains/platform/resource/manager.role.entity';
 import { Resource } from '@/domains/platform/resource/resource.entity';
-import { Role, RoleScope } from '@/domains/platform/resource/role.entity';
-import { RolePermission } from '@/domains/platform/resource/role.permission.entity';
+import { Role, RoleScope } from '@/domains/platform/role/role.entity';
+import { RolePermission } from '@/domains/platform/role/role.permission.entity';
 
 type CodedEntityData<TEntity extends BaseEntity> = RequiredEntityData<TEntity> & { code: string };
 type InitialManagerAccountData = Omit<RequiredEntityData<ManagerAccount>, 'email' | 'manager' | 'password' | 'passwordExpiresAt'> & {

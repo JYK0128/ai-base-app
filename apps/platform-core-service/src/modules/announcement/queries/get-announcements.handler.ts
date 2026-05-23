@@ -2,7 +2,8 @@ import { InjectRepository } from '@mikro-orm/nestjs';
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
 import { Announcement, AnnouncementRepository } from '@pkg/database';
 
-import { GetAnnouncementsAsserter, GetAnnouncementsQuery } from './get-announcements.helpers';
+import { GetAnnouncementsAsserter } from './get-announcements.error';
+import { GetAnnouncementsQuery } from './get-announcements.query';
 
 /**
  * 공지사항 목록 조회 핸들러

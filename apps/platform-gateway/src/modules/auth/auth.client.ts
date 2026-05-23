@@ -27,7 +27,7 @@ export class AuthClient {
       traceId: this.cls.get('traceId'),
       sid: this.cls.get('sid'),
       clientIp: this.cls.get('clientIp'),
-      id: this.cls.get('id'),
+      userId: this.cls.get('userId'),
       organizationId: this.cls.get('organizationId'),
       acceptLanguage: this.cls.get('acceptLanguage'),
     };

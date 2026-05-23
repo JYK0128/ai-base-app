@@ -4,7 +4,8 @@ import { ManagerAccount, ManagerAccountRepository } from '@pkg/database';
 
 import { ENV } from '@/common/env';
 
-import { ChangePasswordAsserter, ChangePasswordCommand } from './change-password.helpers';
+import { ChangePasswordCommand } from './change-password.command';
+import { ChangePasswordAsserter } from './change-password.error';
 
 /**
  * 관리자 계정 비밀번호 변경 핸들러

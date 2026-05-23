@@ -26,9 +26,9 @@ export class AuthController {
 
   @Public()
   @Post('login')
-  @ApiOperation({ summary: '로그인', description: '인증 서비스로 로그인 요청을 전달하고 Refresh Token을 쿠키에 설정합니다.' })
+  @ApiOperation({ summary: '로그인', description: '로그인합니다.' })
   @SwaggerResult(AuthTokenResponseDto)
-  @SwaggerResponse({ status: 401, description: '인증 실패 또는 비밀번호 변경 필요', type: ApiResponse })
+  @SwaggerResponse({ status: 401, description: '인증 실패', type: ApiResponse })
   async login(
     @Body() loginDto: LoginDto,
     @Res({ passthrough: true }) res: Response,
@@ -58,7 +58,7 @@ export class AuthController {
 
   @Public()
   @Post('refresh')
-  @ApiOperation({ summary: '토큰 갱신', description: '쿠키의 리프레시 토큰을 사용하여 액세스 토큰을 갱신합니다.' })
+  @ApiOperation({ summary: '토큰 갱신', description: '액세스 토큰을 갱신합니다.' })
   @SwaggerResult(AuthTokenResponseDto)
   async refresh(
     @Cookies('refreshToken') refreshToken: string,
@@ -84,7 +84,7 @@ export class AuthController {
   @ApiBearerAuth()
   @ApiOperation({
     summary: '내 정보 조회',
-    description: 'JWT 토큰을 통해 인증된 현재 관리자 계정의 정보를 반환합니다.',
+    description: '현재 관리자 정보를 조회합니다.',
   })
   @SwaggerResult(AuthMeResponseDto)
   @SwaggerResponse({ status: 401, description: '인증 실패', type: ApiResponse })
@@ -97,7 +97,7 @@ export class AuthController {
 
   @Bypass(BYPASS_POLICIES.PASSWORD)
   @Post('logout')
-  @ApiOperation({ summary: '로그아웃', description: '세션을 종료하고 리프레시 토큰 쿠키를 제거합니다.' })
+  @ApiOperation({ summary: '로그아웃', description: '로그아웃합니다.' })
   @SwaggerResult()
   async logout(
     @Res({ passthrough: true }) res: Response,
@@ -119,7 +119,7 @@ export class AuthController {
   @Bypass(BYPASS_POLICIES.PASSWORD)
   @Post('password/defer')
   @ApiBearerAuth()
-  @ApiOperation({ summary: '비밀번호 변경 연장', description: '비밀번호 변경 안내를 확인하고 90일 연장합니다.' })
+  @ApiOperation({ summary: '비밀번호 변경 연장', description: '비밀번호 변경을 연장합니다.' })
   @SwaggerResult()
   async deferPasswordChange() {
     await this.authClient.deferPasswordChange();
@@ -132,9 +132,9 @@ export class AuthController {
   @Bypass(BYPASS_POLICIES.PASSWORD)
   @Post('password/change')
   @ApiBearerAuth()
-  @ApiOperation({ summary: '비밀번호 변경', description: '현재 비밀번호를 확인하고 새로운 비밀번호로 변경합니다.' })
+  @ApiOperation({ summary: '비밀번호 변경', description: '비밀번호를 변경합니다.' })
   @SwaggerResult()
-  @SwaggerResponse({ status: 400, description: '비밀번호 규칙 위반 또는 현재 비밀번호 불일치', type: ApiResponse })
+  @SwaggerResponse({ status: 400, description: '비밀번호 오류', type: ApiResponse })
   async changePassword(
     @Body() changePasswordDto: ChangePasswordDto,
   ) {

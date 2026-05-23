@@ -9,16 +9,16 @@ export class AuthTokenResponseDto {
  * 사용자 상세 정보 DTO
  */
 export class AuthUserInfoDto {
-  @ApiProperty({ description: '관리자 고유 ID' })
+  @ApiProperty({ description: '관리자 식별자' })
   id!: string;
 
   @ApiProperty({ description: '이메일 주소' })
   email!: string;
 
-  @ApiProperty({ description: '관리자 상태 (ACTIVE, INACTIVE)' })
+  @ApiProperty({ description: '관리자 상태' })
   status!: string;
 
-  @ApiProperty({ description: '소속 조직 ID', required: false })
+  @ApiProperty({ description: '소속 조직 식별자', required: false })
   organizationId?: string;
 }
 

@@ -4,8 +4,8 @@ import { ManagerAccount, ManagerAccountRepository } from '@pkg/database';
 
 import { ENV } from '@/common/env';
 
-import { DeferPasswordChangeAsserter,
-         DeferPasswordChangeCommand } from './defer-password-change.helpers';
+import { DeferPasswordChangeCommand } from './defer-password-change.command';
+import { DeferPasswordChangeAsserter } from './defer-password-change.error';
 
 /**
  * 관리자 계정 비밀번호 변경 연기 핸들러

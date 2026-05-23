@@ -3,7 +3,8 @@ import { InjectRepository } from '@mikro-orm/nestjs';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { Organization, OrganizationRepository, OrganizationStatus } from '@pkg/database';
 
-import { ApproveOrganizationAsserter, ApproveOrganizationCommand } from './approve-organization.helpers';
+import { ApproveOrganizationCommand } from './approve-organization.command';
+import { ApproveOrganizationAsserter } from './approve-organization.error';
 
 /**
  * 조직 승인 핸들러

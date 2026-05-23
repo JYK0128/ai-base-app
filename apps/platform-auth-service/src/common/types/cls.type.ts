@@ -8,8 +8,8 @@ declare module 'nestjs-cls' {
     clientIp: string
     /** 브라우저 세션 ID (쿠키) */
     sid: string
-    /** 사용자 고유 ID (UUID) */
-    id?: string
+    /** 로그인한 사용자 ID (UUID) */
+    userId?: string
     /** 조직 ID */
     organizationId?: string
     /** 클라이언트 선호 언어 */

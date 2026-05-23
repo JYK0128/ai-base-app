@@ -4,6 +4,7 @@ import { MessagePattern, Payload } from '@nestjs/microservices';
 import { OrganizationStatus } from '@pkg/database';
 
 import { ApproveOrganizationCommand } from './commands';
+import { ORGANIZATION_SERVICE_PATTERNS } from './organization.constants';
 import { GetOrganizationsQuery } from './queries';
 
 @Controller()
@@ -13,12 +14,12 @@ export class OrganizationController {
     private readonly commandBus: CommandBus,
   ) {}
 
-  @MessagePattern('organizations.get')
+  @MessagePattern(ORGANIZATION_SERVICE_PATTERNS.ORGANIZATION.LIST)
   async getOrganizations(@Payload() data: { status?: OrganizationStatus }) {
     return this.queryBus.execute(new GetOrganizationsQuery(data.status));
   }
 
-  @MessagePattern('organizations.approve')
+  @MessagePattern(ORGANIZATION_SERVICE_PATTERNS.ORGANIZATION.APPROVE)
   async approveOrganization(@Payload() data: { id: string, approve: boolean }) {
     return this.commandBus.execute(new ApproveOrganizationCommand(data.id, data.approve));
   }

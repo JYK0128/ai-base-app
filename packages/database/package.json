@@ -38,9 +38,10 @@
   "scripts": {
     "dx": "dotenvx run --env=development --convention=nextjs --",
     "mo": "npm run dx -- mikro-orm",
-    "predev": "npm run prebuild",
+    "predev": "npm run cache:build",
     "dev": "node esbuild.config.js --watch",
     "lint": "eslint . --fix",
+    "prebuild": "npm run cache:build",
     "build": "node esbuild.config.js",
     "play": "vitest run src/test/play.test.ts",
     "migration:create": "npm run mo -- migration:create",
@@ -49,6 +50,7 @@
     "migration:list": "npm run mo -- migration:list",
     "migration:pending": "npm run mo -- migration:pending",
     "migration:blank": "npm run mo -- migration:create --blank",
+    "preseed": "npm run cache:build",
     "seed": "npm run mo -- schema:fresh --run --seed",
     "cache:build": "npm run mo -- cache:generate --ts -c"
   },

@@ -5,7 +5,8 @@ import { EntityManager } from '@mikro-orm/postgresql';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { TermsDocument, TermsDocumentRepository, TermsDocumentStatus, TermsVersion, TermsVersionRepository, TermsVersionStatus } from '@pkg/database';
 
-import { CreateTermsVersionAsserter, CreateTermsVersionCommand } from './create-terms-version.helpers';
+import { CreateTermsVersionCommand } from './create-terms-version.command';
+import { CreateTermsVersionAsserter } from './create-terms-version.error';
 
 /**
  * 약관 버전 생성 핸들러

@@ -23,6 +23,7 @@ export class RpcContextInterceptor implements NestInterceptor {
         this.cls.set('clientIp', data.clientIp);
         this.cls.set('id', data.id);
         this.cls.set('organizationId', data.organizationId);
+        this.cls.set('acceptLanguage', data.acceptLanguage);
 
         return RequestContext.create(this.em, () => lastValueFrom(next.handle()));
       }),

@@ -8,8 +8,8 @@ import { afterEach, beforeEach, describe, expect, it, type MockInstance, vi } fr
 import { CryptoUtil } from '@/common/utils/crypto.util';
 import { TokenUtil } from '@/common/utils/token.util';
 
+import { LoginCommand } from './login.command';
 import { LoginHandler } from './login.handler';
-import { LoginCommand } from './login.helpers';
 
 describe('LoginHandler', () => {
   let generateTokensSpy: MockInstance<typeof TokenUtil.generateTokens>;

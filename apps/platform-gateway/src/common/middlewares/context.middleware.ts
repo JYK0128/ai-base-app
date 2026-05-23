@@ -51,7 +51,22 @@ export class ContextMiddleware implements NestMiddleware {
     this.cls.set('method', req.method);
     this.cls.set('url', req.url);
     this.cls.set('startTime', Date.now());
-    this.cls.set('acceptLanguage', req.headers['accept-language']);
+
+    // Accept-Language 헤더 분석 및 'ko' | 'en' 로케일 조기 결정
+    const acceptLanguageHeader = req.headers['accept-language'];
+    let resolvedLocale = 'ko';
+
+    if (acceptLanguageHeader) {
+      const rawLanguage = typeof acceptLanguageHeader === 'string'
+        ? acceptLanguageHeader
+        : acceptLanguageHeader[0];
+
+      if (rawLanguage?.split(',')[0]?.trim().toLowerCase().startsWith('en')) {
+        resolvedLocale = 'en';
+      }
+    }
+
+    this.cls.set('acceptLanguage', resolvedLocale);
   }
 
   private setUserContext(req: AppRequest) {
@@ -63,7 +78,7 @@ export class ContextMiddleware implements NestMiddleware {
 
     try {
       const payload = this.jwtService.verify<JWTPayload>(token);
-      this.cls.set('id', payload.sub);
+      this.cls.set('userId', payload.sub);
       this.cls.set('organizationId', payload.organizationId);
     }
     catch {

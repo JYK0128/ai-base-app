@@ -4,7 +4,8 @@ import { EntityManager } from '@mikro-orm/postgresql';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { Manager, Organization, SupportTicket, SupportTicketRepository, TicketStatus } from '@pkg/database';
 
-import { CreateTicketAsserter, CreateTicketCommand } from './create-ticket.helpers';
+import { CreateTicketCommand } from './create-ticket.command';
+import { CreateTicketAsserter } from './create-ticket.error';
 
 /**
  * 문의 티켓 생성 핸들러

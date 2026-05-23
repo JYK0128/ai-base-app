@@ -4,7 +4,8 @@ import { EntityManager } from '@mikro-orm/postgresql';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { TermsDocument, TermsDocumentRepository, TermsDocumentStatus } from '@pkg/database';
 
-import { CreateTermsDocumentAsserter, CreateTermsDocumentCommand } from './create-terms-document.helpers';
+import { CreateTermsDocumentCommand } from './create-terms-document.command';
+import { CreateTermsDocumentAsserter } from './create-terms-document.error';
 
 /**
  * 약관 문서 생성 핸들러

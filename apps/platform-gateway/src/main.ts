@@ -10,6 +10,7 @@ import helmet from 'helmet';
 import { Logger } from 'nestjs-pino';
 
 import { AppModule } from '@/app.module';
+import { applySwaggerSchemas } from '@/common/decorators/swagger-schema.decorator';
 import { ENV } from '@/common/env';
 
 export function configureApp(app: NestExpressApplication) {
@@ -79,7 +80,13 @@ async function bootstrap() {
       .addBearerAuth()
       .build();
     const document = SwaggerModule.createDocument(app, config);
-    SwaggerModule.setup('docs', app, document);
+    applySwaggerSchemas(document);
+    SwaggerModule.setup('docs', app, document, {
+      swaggerOptions: {
+        tagsSorter: 'alpha',
+        operationsSorter: 'alpha',
+      },
+    });
   }
 
   const port = ENV.PORT;

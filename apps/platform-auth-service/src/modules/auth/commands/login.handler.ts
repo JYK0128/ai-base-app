@@ -7,7 +7,8 @@ import { TokenUtil } from '@/common/utils/token.util';
 import { RedisService } from '@/modules/redis/redis.service';
 
 import { extractPermissions } from '../auth.helpers';
-import { type LOGIN_CONTEXT, LOGIN_METADATA, LoginAsserter, LoginCommand } from './login.helpers';
+import { type LOGIN_CONTEXT, LOGIN_METADATA, LoginCommand } from './login.command';
+import { LoginAsserter } from './login.error';
 
 /**
  * 로그인 처리 핸들러

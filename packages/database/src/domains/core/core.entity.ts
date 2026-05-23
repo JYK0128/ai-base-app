@@ -94,4 +94,14 @@ export abstract class CoreEntity<
   is(id: string): boolean {
     return this.id === id;
   }
+
+  /**
+   * 엔티티를 영속화합니다.
+   */
+  persist() {
+    const em = RequestContext.getEntityManager();
+    if (!em) throw new Error('EntityManager not found in RequestContext.');
+    em.persist(this);
+    return this;
+  }
 }

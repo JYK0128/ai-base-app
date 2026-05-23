@@ -5,6 +5,7 @@ import { TicketPriority, TicketStatus } from '@pkg/database';
 
 import { CreateTicketCommand } from './commands';
 import { GetTicketsQuery } from './queries';
+import { SUPPORT_SERVICE_PATTERNS } from './support.constants';
 
 @Controller()
 export class SupportController {
@@ -13,12 +14,12 @@ export class SupportController {
     private readonly commandBus: CommandBus,
   ) {}
 
-  @MessagePattern('support.tickets.get')
+  @MessagePattern(SUPPORT_SERVICE_PATTERNS.TICKET.LIST)
   async getTickets(@Payload() data: { organizationId?: string, status?: TicketStatus }) {
     return this.queryBus.execute(new GetTicketsQuery(data.organizationId, data.status));
   }
 
-  @MessagePattern('support.tickets.create')
+  @MessagePattern(SUPPORT_SERVICE_PATTERNS.TICKET.CREATE)
   async createTicket(@Payload() data: { authorId: string, data: { organizationId: string, title: string, content: string, priority?: TicketPriority } }) {
     return this.commandBus.execute(
       new CreateTicketCommand(

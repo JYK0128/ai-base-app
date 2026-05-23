@@ -142,7 +142,6 @@
     @apply size-full m-0 p-0;
     @apply bg-background text-foreground;
     @apply font-sans antialiased;
-    @apply break-keep whitespace-pre-line;
     @apply select-none;
   }
 
@@ -154,5 +153,11 @@
   /* 4. REACT 루트 컨테이너 */
   #root {
     @apply size-full;
+    @apply break-keep whitespace-pre-line;
+  }
+
+  /* 5. 브라우저 자동완성 배경색 */
+  input:-webkit-autofill,input:-webkit-autofill:hover,input:-webkit-autofill:focus,input:-webkit-autofill:active {
+    transition: background-color var(--autofill-lock-duration) ease-in-out 0s, color var(--autofill-lock-duration) ease-in-out 0s !important;
   }
 }

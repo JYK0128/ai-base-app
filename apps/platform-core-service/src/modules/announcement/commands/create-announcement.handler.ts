@@ -4,7 +4,8 @@ import { EntityManager } from '@mikro-orm/postgresql';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { Announcement, AnnouncementRepository, Manager } from '@pkg/database';
 
-import { CreateAnnouncementAsserter, CreateAnnouncementCommand } from './create-announcement.helpers';
+import { CreateAnnouncementCommand } from './create-announcement.command';
+import { CreateAnnouncementAsserter } from './create-announcement.error';
 
 /**
  * 공지사항 생성 핸들러

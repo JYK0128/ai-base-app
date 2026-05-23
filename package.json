@@ -6,8 +6,8 @@
     "k8s:init": "bash ./.k8s/scripts/setup-infra.sh",
 
     "// --- Deployment Pipeline --- //": "",
-    "k8s:up:server": "bash ./.k8s/scripts/up-server.sh",
-    "k8s:up:web": "bash ./.k8s/scripts/up-web.sh",
+    "server:up": "bash ./.k8s/scripts/up-server.sh",
+    "web:up": "bash ./.k8s/scripts/up-web.sh",
 
     "// --- Local Development & Utility --- //": "",
     "web:dev": "pnpm --filter=platform-admin-web dev",

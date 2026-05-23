@@ -16,8 +16,8 @@ declare module 'nestjs-cls' {
     acceptLanguage?: string
 
     // 3. 사용자 정보
-    /** 사용자 고유 ID (UUID) */
-    id?: string
+    /** 로그인한 사용자 ID (UUID) */
+    userId?: string
     /** 조직 ID */
     organizationId?: string
   }

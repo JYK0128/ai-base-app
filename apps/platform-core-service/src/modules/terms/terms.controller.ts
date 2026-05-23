@@ -5,6 +5,7 @@ import { TermsVersionStatus } from '@pkg/database';
 
 import { AgreeTermsCommand, CreateTermsDocumentCommand, CreateTermsVersionCommand } from './commands';
 import { GetActiveTermsQuery } from './queries';
+import { TERMS_SERVICE_PATTERNS } from './terms.constants';
 
 @Controller()
 export class TermsController {
@@ -13,12 +14,12 @@ export class TermsController {
     private readonly commandBus: CommandBus,
   ) {}
 
-  @MessagePattern('terms.get.active')
+  @MessagePattern(TERMS_SERVICE_PATTERNS.TERM.ACTIVE)
   async getActiveTerms(@Payload() data: { organizationId?: string }) {
     return this.queryBus.execute(new GetActiveTermsQuery(data.organizationId));
   }
 
-  @MessagePattern('terms.create.document')
+  @MessagePattern(TERMS_SERVICE_PATTERNS.TERM.CREATE_DOCUMENT)
   async createDocument(@Payload() data: { code: string, title: string, required?: boolean, organizationId?: string }) {
     return this.commandBus.execute(new CreateTermsDocumentCommand(
       data.code,
@@ -28,7 +29,7 @@ export class TermsController {
     ));
   }
 
-  @MessagePattern('terms.create.version')
+  @MessagePattern(TERMS_SERVICE_PATTERNS.TERM.CREATE_VERSION)
   async createVersion(@Payload() data: {
     termsDocumentId: string
     label: string
@@ -47,7 +48,7 @@ export class TermsController {
     ));
   }
 
-  @MessagePattern('terms.agree')
+  @MessagePattern(TERMS_SERVICE_PATTERNS.TERM.AGREE)
   async agreeTerms(@Payload() data: { managerId: string, termsVersionId: string, organizationId?: string, source?: string, ipAddress?: string, userAgent?: string }) {
     return this.commandBus.execute(new AgreeTermsCommand(
       data.managerId,

@@ -2,7 +2,8 @@ import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 
 import { RedisService } from '@/modules/redis/redis.service';
 
-import { LogoutAsserter, LogoutCommand } from './logout.helpers';
+import { LogoutCommand } from './logout.command';
+import { LogoutAsserter } from './logout.error';
 
 /**
  * 로그아웃 처리 핸들러
