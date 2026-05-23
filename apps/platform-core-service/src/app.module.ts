@@ -13,6 +13,7 @@ import { RpcContextInterceptor } from './common/interceptors/rpc-context.interce
 import { RpcLoggingInterceptor } from './common/interceptors/rpc-logging.interceptor';
 import { AnnouncementModule } from './modules/announcement/announcement.module';
 import { HealthModule } from './modules/health/health.module';
+import { I18nModule } from './modules/i18n/i18n.module';
 import { OrganizationModule } from './modules/organization/organization.module';
 import { RedisModule } from './modules/redis/redis.module';
 import { ResourceModule } from './modules/resource/resource.module';
@@ -45,6 +46,7 @@ import { TermsModule } from './modules/terms/terms.module';
       maxRetriesPerRequest: null,
     }),
     HealthModule,
+    I18nModule,
     OrganizationModule,
     AnnouncementModule,
     SupportModule,

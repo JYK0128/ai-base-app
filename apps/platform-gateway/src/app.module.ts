@@ -15,6 +15,7 @@ import { ContextMiddleware } from '@/common/middlewares/context.middleware';
 import { AuthModule } from '@/modules/auth/auth.module';
 import { CoreModule } from '@/modules/core/core.module';
 import { HealthModule } from '@/modules/health/health.module';
+import { I18nModule } from '@/modules/i18n/i18n.module';
 import { ResourceModule } from '@/modules/resource/resource.module';
 
 @Module({
@@ -47,6 +48,7 @@ import { ResourceModule } from '@/modules/resource/resource.module';
     }),
     AuthModule,
     CoreModule,
+    I18nModule,
     HealthModule,
     ResourceModule,
   ],
