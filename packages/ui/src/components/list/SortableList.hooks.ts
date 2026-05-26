@@ -3,16 +3,16 @@ import type { DragEndEvent } from '@dnd-kit/react';
 import { isSortable, isSortableOperation } from '@dnd-kit/react/sortable';
 import * as React from 'react';
 
-import type { SortableListItem,
+import type { ListNode,
               UseSortableListHandlersArgs,
               UseSortableListHandlersResult } from './SortableList.types';
 
 export function useSortableListValue<T>(
-  controlledValue: (SortableListItem & T)[] | undefined,
-  defaultValue: (SortableListItem & T)[] | undefined,
-  onChange: ((next: (SortableListItem & T)[]) => void) | undefined,
+  controlledValue: (ListNode & T)[] | undefined,
+  defaultValue: (ListNode & T)[] | undefined,
+  onChange: ((next: (ListNode & T)[]) => void) | undefined,
 ) {
-  const [uncontrolledValue, setUncontrolledValue] = React.useState<(SortableListItem & T)[]>(() => {
+  const [uncontrolledValue, setUncontrolledValue] = React.useState<(ListNode & T)[]>(() => {
     const initialValue = defaultValue ?? controlledValue;
 
     if (!initialValue) {
@@ -24,7 +24,7 @@ export function useSortableListValue<T>(
   const isControlled = controlledValue !== undefined;
   const value = controlledValue ?? uncontrolledValue;
 
-  const setValue = React.useCallback((nextValue: (SortableListItem & T)[]) => {
+  const setValue = React.useCallback((nextValue: (ListNode & T)[]) => {
     if (!isControlled) {
       setUncontrolledValue(nextValue);
     }

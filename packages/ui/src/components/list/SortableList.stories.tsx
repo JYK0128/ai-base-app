@@ -5,9 +5,9 @@ import * as React from 'react';
 import { cn } from '@/lib/utils';
 
 import { SortableList } from './SortableList';
-import type { SortableListItem } from './SortableList.types';
+import type { ListNode } from './SortableList.types';
 
-interface NavigationItem extends SortableListItem {
+interface NavigationItem extends ListNode {
   label: string
   description: string
 }

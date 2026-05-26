@@ -10,13 +10,13 @@ export type SortableListBaseProps = Omit<
   'value' | 'defaultValue' | 'onChange' | 'children'
 >;
 
-export interface SortableListItem {
+export interface ListNode {
   readonly id: string
   readonly disabled?: boolean
 }
 
 export type SortableListChangeHandler<T> = (
-  nextValue: (SortableListItem & T)[],
+  nextValue: (ListNode & T)[],
 ) => void;
 
 // ---------------------------------------------------------------------------
@@ -35,7 +35,7 @@ export interface SortableListDragHandleProps {
 }
 
 export interface SortableListRenderItemArgs<T> {
-  readonly item: SortableListItem & T
+  readonly item: ListNode & T
   readonly index: number
   readonly state: SortableListRenderItemState
   readonly dragHandleProps: SortableListDragHandleProps
@@ -59,13 +59,13 @@ export interface SortableListRenderProps<T> {
 
 export type SortableListValueProps<T>
   = | {
-    readonly value: (SortableListItem & T)[]
+    readonly value: (ListNode & T)[ ]
     readonly defaultValue?: never
     readonly onChange: SortableListChangeHandler<T>
   }
   | {
     readonly value?: never
-    readonly defaultValue: (SortableListItem & T)[]
+    readonly defaultValue: (ListNode & T)[]
     readonly onChange?: SortableListChangeHandler<T>
   };
 
@@ -79,7 +79,7 @@ export type SortableListProps<T>
 // ---------------------------------------------------------------------------
 
 export interface SortableListRowProps<T> {
-  readonly item: SortableListItem & T
+  readonly item: ListNode & T
   readonly index: number
   readonly groupId: string
   readonly renderItem: SortableListRenderItem<T>
@@ -92,7 +92,7 @@ export type SortableListViewportProps<T>
       readonly renderEmpty: SortableListRenderEmpty
     }
     & {
-      readonly value: (SortableListItem & T)[]
+      readonly value: (ListNode & T)[]
       readonly groupId: string
       readonly droppableId: string
     };
@@ -102,8 +102,8 @@ export type SortableListViewportProps<T>
 // ---------------------------------------------------------------------------
 
 export interface UseSortableListHandlersArgs<T> {
-  readonly value: (SortableListItem & T)[]
-  readonly setValue: (next: (SortableListItem & T)[]) => void
+  readonly value: (ListNode & T)[]
+  readonly setValue: (next: (ListNode & T)[]) => void
   readonly droppableId: string
 }
 
