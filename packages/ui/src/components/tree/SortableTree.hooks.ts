@@ -6,18 +6,18 @@ import { moveTreeNode,
          type TreeNodeDropPosition,
          type TreeNodeMoveInput } from '@/lib/tree';
 
-import type { TreeDndChangeHandler,
-              TreeDndMove,
-              TreeDropMoveResolver,
+import type { SortableTreeChangeHandler,
+              SortableTreeDropMoveResolver,
+              SortableTreeExpandedIdsChangeHandler,
+              SortableTreeMove,
+              SortableTreeVisibleItem,
               TreeDropTargetData,
-              TreeDropZoneData,
-              TreeExpandedIdsChangeHandler,
-              TreeVisibleItem } from './Tree.types';
+              TreeDropZoneData } from './SortableTree.types';
 import { collectNodeIdsWithChildren,
          createDropZoneId,
-         TREE_DROP_POSITIONS } from './Tree.utils';
+         TREE_DROP_POSITIONS } from './SortableTree.utils';
 
-export interface TreeDropZoneState {
+export interface SortableTreeDropZoneState {
   readonly id: string
   readonly isOver: boolean
   readonly isDropAllowed: boolean
@@ -27,23 +27,23 @@ export interface TreeDropZoneState {
 /**
  * value가 있으면 외부 상태를 쓰고, defaultValue만 있으면 내부 상태를 갱신한다.
  */
-export function useTreeValue<T>(
+export function useSortableTreeValue<T>(
   controlledValue: TreeNode<T> | undefined,
   defaultValue: TreeNode<T> | undefined,
-  onChange: TreeDndChangeHandler<T> | undefined,
+  onChange: SortableTreeChangeHandler<T> | undefined,
 ) {
   const [uncontrolledValue, setUncontrolledValue] = React.useState<TreeNode<T>>(() => {
     const initialValue = defaultValue ?? controlledValue;
 
     if (!initialValue) {
-      throw new Error('TreeDnd requires either value or defaultValue.');
+      throw new Error('SortableTree requires either value or defaultValue.');
     }
 
     return initialValue;
   });
   const isControlled = controlledValue !== undefined;
   const value = controlledValue ?? uncontrolledValue;
-  const setValue = React.useCallback((nextValue: TreeNode<T>, move: TreeDndMove<T>) => {
+  const setValue = React.useCallback((nextValue: TreeNode<T>, move: SortableTreeMove<T>) => {
     if (!isControlled) {
       setUncontrolledValue(nextValue);
     }
@@ -57,18 +57,18 @@ export function useTreeValue<T>(
 /**
  * 드래그 종료 이벤트를 해석하고, 실제 트리 이동과 접힘/펼침 갱신을 연결한다.
  */
-export function useTreeMoveController<T>({
+export function useSortableTreeMoveController<T>({
   value,
   canDrop,
   setValue,
   setNodeExpanded,
 }: {
   readonly value: TreeNode<T>
-  readonly canDrop?: (move: TreeDndMove<T>) => boolean
-  readonly setValue: (nextValue: TreeNode<T>, move: TreeDndMove<T>) => void
+  readonly canDrop?: (move: SortableTreeMove<T>) => boolean
+  readonly setValue: (nextValue: TreeNode<T>, move: SortableTreeMove<T>) => void
   readonly setNodeExpanded: (nodeId: string, expanded: boolean) => void
 }) {
-  const resolveMove = React.useCallback((input: TreeNodeMoveInput): TreeDndMove<T> | undefined => {
+  const resolveMove = React.useCallback((input: TreeNodeMoveInput): SortableTreeMove<T> | undefined => {
     const result = moveTreeNode(value, input);
 
     if (!result) {
@@ -138,7 +138,7 @@ export function useTreeMoveController<T>({
 /**
  * 확장 상태를 controlled/uncontrolled 양쪽 방식으로 관리한다.
  */
-export function useExpandedNodeIds<T>({
+export function useSortableTreeExpandedNodeIds<T>({
   root,
   expandedIds,
   defaultExpandedIds,
@@ -147,7 +147,7 @@ export function useExpandedNodeIds<T>({
   readonly root: TreeNode<T>
   readonly expandedIds?: readonly string[]
   readonly defaultExpandedIds?: readonly string[]
-  readonly onExpandedIdsChange?: TreeExpandedIdsChangeHandler
+  readonly onExpandedIdsChange?: SortableTreeExpandedIdsChangeHandler
 }) {
   const [uncontrolledExpandedIds, setUncontrolledExpandedIds] = React.useState<string[]>(() => [
     ...(defaultExpandedIds ?? collectNodeIdsWithChildren(root)),
@@ -187,7 +187,7 @@ export function useExpandedNodeIds<T>({
 /**
  * 현재 드래그에서 가능한 모든 드롭 결과를 미리 계산해 드롭존별로 빠르게 조회한다.
  */
-export function useDropMoveResolver<T>({
+export function useSortableTreeDropMoveResolver<T>({
   activeSourceId,
   rootId,
   visibleItems,
@@ -195,11 +195,11 @@ export function useDropMoveResolver<T>({
 }: {
   readonly activeSourceId: string | null
   readonly rootId: string
-  readonly visibleItems: readonly TreeVisibleItem<T>[]
-  readonly resolveMove: (input: TreeNodeMoveInput) => TreeDndMove<T> | undefined
-}): TreeDropMoveResolver<T> {
+  readonly visibleItems: readonly SortableTreeVisibleItem<T>[]
+  readonly resolveMove: (input: TreeNodeMoveInput) => SortableTreeMove<T> | undefined
+}): SortableTreeDropMoveResolver<T> {
   const moveByTargetId = React.useMemo(() => {
-    const moves = new Map<string, Partial<Record<TreeNodeDropPosition, TreeDndMove<T>>>>();
+    const moves = new Map<string, Partial<Record<TreeNodeDropPosition, SortableTreeMove<T>>>>();
 
     if (!activeSourceId) {
       return moves;
@@ -245,15 +245,15 @@ export function useDropMoveResolver<T>({
 /**
  * 드롭존 id 생성, dnd-kit 등록, 현재 드롭 가능 여부 조회를 한곳에서 처리한다.
  */
-export function useTreeDropZone<T>({
+export function useSortableTreeDropZone<T>({
   targetId,
   position,
   resolveDropMove,
 }: {
-  readonly resolveDropMove: TreeDropMoveResolver<T>
+  readonly resolveDropMove: SortableTreeDropMoveResolver<T>
   readonly targetId: string
   readonly position: TreeNodeDropPosition
-}): TreeDropZoneState {
+}): SortableTreeDropZoneState {
   const id = createDropZoneId(targetId, position);
   const isDropAllowed = Boolean(resolveDropMove(targetId, position));
   const { isDropTarget, ref } = useDroppable<TreeDropZoneData>({

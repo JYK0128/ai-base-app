@@ -1,15 +1,15 @@
 import { cn } from '@/lib/utils';
 
-import type { TreeDndRenderDropIndicatorArgs,
-              TreeDndRenderNodeArgs } from './Tree.types';
-import { getDefaultNodeLabel } from './Tree.utils';
+import type { SortableTreeRenderDropIndicatorArgs,
+              SortableTreeRenderNodeArgs } from './SortableTree.types';
+import { getDefaultNodeLabel } from './SortableTree.utils';
 
 /**
  * renderNode가 없을 때 동작 확인이 가능한 최소 마크업을 렌더링한다.
  */
 export function renderDefaultNodeContent<T>({
   node,
-}: TreeDndRenderNodeArgs<T>) {
+}: SortableTreeRenderNodeArgs<T>) {
   return (
     <span className="truncate font-medium">
       {getDefaultNodeLabel(node)}
@@ -22,7 +22,7 @@ export function renderDefaultNodeContent<T>({
  */
 export function renderDefaultDropIndicator({
   state,
-}: TreeDndRenderDropIndicatorArgs) {
+}: SortableTreeRenderDropIndicatorArgs) {
   return (
     <div
       className={cn(

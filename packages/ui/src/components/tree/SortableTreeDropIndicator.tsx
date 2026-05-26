@@ -1,10 +1,10 @@
-import { useTreeDropZone } from './Tree.hooks';
-import type { TreeDropIndicatorProps } from './Tree.types';
+import { useSortableTreeDropZone } from './SortableTree.hooks';
+import type { SortableTreeDropIndicatorProps } from './SortableTree.types';
 
 /**
  * before/after 위치에 보이는 얇은 드롭 표시선을 렌더링한다.
  */
-export function TreeDropIndicator<T>({
+export function SortableTreeDropIndicator<T>({
   isDragging,
   targetId,
   position,
@@ -12,13 +12,13 @@ export function TreeDropIndicator<T>({
   indentationWidth,
   renderDropIndicator,
   resolveDropMove,
-}: TreeDropIndicatorProps<T>) {
+}: SortableTreeDropIndicatorProps<T>) {
   const {
     id: dropZoneId,
     isOver,
     isDropAllowed,
     setNodeRef,
-  } = useTreeDropZone({
+  } = useSortableTreeDropZone({
     targetId,
     position,
     resolveDropMove,

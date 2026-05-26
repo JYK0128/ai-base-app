@@ -5,10 +5,10 @@ import { Button } from '@/components/ui/button';
 import type { TreeNode } from '@/lib/tree';
 import { cn } from '@/lib/utils';
 
-import { TreeDnd } from './Tree';
-import type { TreeDndMove,
-              TreeDndRenderDropIndicatorArgs,
-              TreeDndRenderNodeArgs } from './Tree.types';
+import { SortableTree } from './SortableTree';
+import type { SortableTreeMove,
+              SortableTreeRenderDropIndicatorArgs,
+              SortableTreeRenderNodeArgs } from './SortableTree.types';
 
 interface WorkspaceNode {
   readonly label: string
@@ -50,17 +50,17 @@ const initialTree: TreeNode<WorkspaceNode> = {
   ],
 };
 
-const meta: Meta<typeof TreeDnd<WorkspaceNode>> = {
-  title: 'Components/TreeDnd',
-  component: TreeDnd<WorkspaceNode>,
+const meta: Meta<typeof SortableTree<WorkspaceNode>> = {
+  title: 'Components/SortableTree',
+  component: SortableTree<WorkspaceNode>,
   parameters: {
     layout: 'fullscreen',
   },
-} satisfies Meta<typeof TreeDnd<WorkspaceNode>>;
+} satisfies Meta<typeof SortableTree<WorkspaceNode>>;
 
 export default meta;
 
-type Story = StoryObj<typeof TreeDnd<WorkspaceNode>>;
+type Story = StoryObj<typeof SortableTree<WorkspaceNode>>;
 
 export const Standard: Story = {
   render: () => <WorkspaceTreeStory mode="controlled" />,
@@ -83,7 +83,7 @@ function WorkspaceTreeStory({ mode }: WorkspaceTreeStoryProps) {
 
   const handleChange = React.useCallback((
     nextTree: TreeNode<WorkspaceNode>,
-    move: TreeDndMove<WorkspaceNode>,
+    move: SortableTreeMove<WorkspaceNode>,
   ) => {
     if (isControlled) {
       setControlledTree(nextTree);
@@ -130,7 +130,7 @@ function WorkspaceTreeStory({ mode }: WorkspaceTreeStoryProps) {
         <div className="min-w-0">
           {isControlled
             ? (
-              <TreeDnd
+              <SortableTree
                 value={controlledTree}
                 onChange={handleChange}
                 aria-label="Workspace tree"
@@ -141,7 +141,7 @@ function WorkspaceTreeStory({ mode }: WorkspaceTreeStoryProps) {
               />
             )
             : (
-              <TreeDnd
+              <SortableTree
                 key={uncontrolledKey}
                 defaultValue={initialTree}
                 onChange={handleChange}
@@ -168,7 +168,7 @@ function WorkspaceTreeStory({ mode }: WorkspaceTreeStoryProps) {
 function renderWorkspaceNode({
   node,
   state,
-}: TreeDndRenderNodeArgs<WorkspaceNode>) {
+}: SortableTreeRenderNodeArgs<WorkspaceNode>) {
   const childrenCount = node.children?.length ?? 0;
 
   return (
@@ -183,7 +183,7 @@ function renderWorkspaceNode({
 
 function renderWorkspaceDropIndicator({
   state,
-}: TreeDndRenderDropIndicatorArgs) {
+}: SortableTreeRenderDropIndicatorArgs) {
   return (
     <div
       className={cn(

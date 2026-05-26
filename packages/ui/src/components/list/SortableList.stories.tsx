@@ -4,7 +4,7 @@ import * as React from 'react';
 
 import { cn } from '@/lib/utils';
 
-import { SortableListDnd } from './SortableList';
+import { SortableList } from './SortableList';
 import type { SortableListItem } from './SortableList.types';
 
 interface NavigationItem extends SortableListItem {
@@ -30,17 +30,17 @@ const initialItems: NavigationItem[] = [
   },
 ];
 
-const meta: Meta<typeof SortableListDnd<NavigationItem>> = {
-  title: 'Components/SortableListDnd',
-  component: SortableListDnd<NavigationItem>,
+const meta: Meta<typeof SortableList<NavigationItem>> = {
+  title: 'Components/SortableList',
+  component: SortableList<NavigationItem>,
   parameters: {
     layout: 'fullscreen',
   },
-} satisfies Meta<typeof SortableListDnd<NavigationItem>>;
+} satisfies Meta<typeof SortableList<NavigationItem>>;
 
 export default meta;
 
-type Story = StoryObj<typeof SortableListDnd<NavigationItem>>;
+type Story = StoryObj<typeof SortableList<NavigationItem>>;
 
 function NavigationListStory() {
   const [items, setItems] = React.useState<NavigationItem[]>(initialItems);
@@ -53,7 +53,7 @@ function NavigationListStory() {
           <p className="text-sm text-muted-foreground">Drag and reorder your active site sections.</p>
         </div>
 
-        <SortableListDnd
+        <SortableList
           value={items}
           onChange={setItems}
           className="space-y-2 rounded-lg border bg-muted/40 p-4"

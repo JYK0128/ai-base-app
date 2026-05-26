@@ -1,5 +1,4 @@
-import type { ComponentPropsWithoutRef,
-              ReactNode } from 'react';
+import type { ComponentPropsWithoutRef, ReactNode } from 'react';
 
 import type { TreeNode,
               TreeNodeDropPosition,
@@ -10,78 +9,78 @@ import type { TreeNode,
 // 공개 입력 타입
 // ---------------------------------------------------------------------------
 
-export type TreeDndBaseProps = Omit<
+export type SortableTreeBaseProps = Omit<
   ComponentPropsWithoutRef<'div'>,
   'children' | 'onChange' | 'role' | 'defaultValue'
 >;
 
-export interface TreeDndMove<T> extends TreeNodeMoveResult<T> {
+export interface SortableTreeMove<T> extends TreeNodeMoveResult<T> {
   readonly previousRoot: TreeNode<T>
 }
 
-export type TreeDndChangeHandler<T> = (
+export type SortableTreeChangeHandler<T> = (
   nextValue: TreeNode<T>,
-  move: TreeDndMove<T>,
+  move: SortableTreeMove<T>,
 ) => void;
 
-export type TreeExpandedIdsChangeHandler = (expandedIds: string[]) => void;
+export type SortableTreeExpandedIdsChangeHandler = (expandedIds: string[]) => void;
 
-export type TreeRenderNode<T> = (args: TreeDndRenderNodeArgs<T>) => ReactNode;
+export type SortableTreeRenderNode<T> = (args: SortableTreeRenderNodeArgs<T>) => ReactNode;
 
-export type TreeRenderDropIndicator = (
-  args: TreeDndRenderDropIndicatorArgs,
+export type SortableTreeRenderDropIndicator = (
+  args: SortableTreeRenderDropIndicatorArgs,
 ) => ReactNode;
 
-export type TreeRenderEmpty<T> = (
-  args: TreeDndRenderEmptyArgs<T>,
+export type SortableTreeRenderEmpty<T> = (
+  args: SortableTreeRenderEmptyArgs<T>,
 ) => ReactNode;
 
-export type TreeNodeDisabledResolver<T> = (node: TreeNode<T>) => boolean;
+export type SortableTreeNodeDisabledResolver<T> = (node: TreeNode<T>) => boolean;
 
-export type TreeCanDropHandler<T> = (move: TreeDndMove<T>) => boolean;
+export type SortableTreeCanDropHandler<T> = (move: SortableTreeMove<T>) => boolean;
 
-export interface TreeRenderProps<T> {
-  readonly renderNode?: TreeRenderNode<T>
-  readonly renderDropIndicator?: TreeRenderDropIndicator
-  readonly renderEmpty?: TreeRenderEmpty<T>
+export interface SortableTreeRenderProps<T> {
+  readonly renderNode?: SortableTreeRenderNode<T>
+  readonly renderDropIndicator?: SortableTreeRenderDropIndicator
+  readonly renderEmpty?: SortableTreeRenderEmpty<T>
 }
 
-export interface TreeBehaviorProps<T> {
-  readonly getNodeDisabled?: TreeNodeDisabledResolver<T>
-  readonly canDrop?: TreeCanDropHandler<T>
+export interface SortableTreeBehaviorProps<T> {
+  readonly getNodeDisabled?: SortableTreeNodeDisabledResolver<T>
+  readonly canDrop?: SortableTreeCanDropHandler<T>
   readonly indentationWidth?: number
 }
 
-export type TreeExpandedStateProps
+export type SortableTreeExpandedStateProps
   = | {
     readonly expandedIds: readonly string[]
     readonly defaultExpandedIds?: never
-    readonly onExpandedIdsChange: TreeExpandedIdsChangeHandler
+    readonly onExpandedIdsChange: SortableTreeExpandedIdsChangeHandler
   }
   | {
     readonly expandedIds?: never
     readonly defaultExpandedIds?: readonly string[]
-    readonly onExpandedIdsChange?: TreeExpandedIdsChangeHandler
+    readonly onExpandedIdsChange?: SortableTreeExpandedIdsChangeHandler
   };
 
-export type TreeValueProps<T>
+export type SortableTreeValueProps<T>
   = | {
     readonly value: TreeNode<T>
     readonly defaultValue?: never
-    readonly onChange: TreeDndChangeHandler<T>
+    readonly onChange: SortableTreeChangeHandler<T>
   }
   | {
     readonly value?: never
     readonly defaultValue: TreeNode<T>
-    readonly onChange?: TreeDndChangeHandler<T>
+    readonly onChange?: SortableTreeChangeHandler<T>
   };
 
-export type TreeDndProps<T>
-  = & TreeDndBaseProps
-    & TreeRenderProps<T>
-    & TreeBehaviorProps<T>
-    & TreeExpandedStateProps
-    & TreeValueProps<T>;
+export type SortableTreeProps<T>
+  = & SortableTreeBaseProps
+    & SortableTreeRenderProps<T>
+    & SortableTreeBehaviorProps<T>
+    & SortableTreeExpandedStateProps
+    & SortableTreeValueProps<T>;
 
 // ---------------------------------------------------------------------------
 // render 함수 인자
@@ -89,38 +88,38 @@ export type TreeDndProps<T>
 
 /**
  * renderNode에서 스타일 분기에만 쓰는 노드 상태다.
- * DND ref나 버튼 이벤트 같은 DOM 연결은 TreeNodeRow 내부에서 처리한다.
+ * DND ref나 버튼 이벤트 같은 DOM 연결은 SortableTreeNodeRow 내부에서 처리한다.
  */
-export interface TreeDndRenderNodeState {
+export interface SortableTreeRenderNodeState {
   readonly isExpanded: boolean
   readonly isDragging: boolean
   readonly isDropTarget: boolean
   readonly isDisabled: boolean
 }
 
-export interface TreeDndRenderNodeArgs<T> {
+export interface SortableTreeRenderNodeArgs<T> {
   readonly node: TreeNode<T>
   readonly depth: number
-  readonly state: TreeDndRenderNodeState
+  readonly state: SortableTreeRenderNodeState
 }
 
 /**
  * drop indicator가 드래그 상태에 따라 UI를 바꿀 때 쓰는 상태다.
  */
-export interface TreeDndRenderDropState {
+export interface SortableTreeRenderDropState {
   readonly isOver: boolean
   readonly isDropAllowed: boolean
   readonly isDragging: boolean
 }
 
-export interface TreeDndRenderDropIndicatorArgs {
+export interface SortableTreeRenderDropIndicatorArgs {
   readonly targetId: string
   readonly position: Exclude<TreeNodeDropPosition, 'inside'>
   readonly depth: number
-  readonly state: TreeDndRenderDropState
+  readonly state: SortableTreeRenderDropState
 }
 
-export interface TreeDndRenderEmptyArgs<T> {
+export interface SortableTreeRenderEmptyArgs<T> {
   readonly root: TreeNode<T>
 }
 
@@ -146,47 +145,47 @@ export type TreeDropTargetData = TreeNodeDropTargetData | TreeDropZoneData;
 // 내부 계산 타입
 // ---------------------------------------------------------------------------
 
-export interface TreeVisibleItem<T> {
+export interface SortableTreeVisibleItem<T> {
   readonly node: TreeNode<T>
   readonly parentId: string
   readonly depth: number
   readonly index: number
 }
 
-export type TreeDropMoveResolver<T> = (
+export type SortableTreeDropMoveResolver<T> = (
   targetId: string,
   position: TreeNodeDropPosition,
-) => TreeDndMove<T> | undefined;
+) => SortableTreeMove<T> | undefined;
 
-export type TreeResolvedRenderProps<T> = {
-  readonly [K in keyof TreeRenderProps<T>]-?: NonNullable<TreeRenderProps<T>[K]>
+export type SortableTreeResolvedRenderProps<T> = {
+  readonly [K in keyof SortableTreeRenderProps<T>]-?: NonNullable<SortableTreeRenderProps<T>[K]>
 };
 
-export type TreeResolvedBehaviorProps<T> = {
+export type SortableTreeResolvedBehaviorProps<T> = {
   readonly [K in keyof Pick<
-    TreeBehaviorProps<T>,
+    SortableTreeBehaviorProps<T>,
     'getNodeDisabled' | 'indentationWidth'
-  >]-?: NonNullable<TreeBehaviorProps<T>[K]>
+  >]-?: NonNullable<SortableTreeBehaviorProps<T>[K]>
 };
 
 // ---------------------------------------------------------------------------
 // 내부 컴포넌트 props
 // ---------------------------------------------------------------------------
 
-export type TreeViewportProps<T>
-  = & TreeDndBaseProps
-    & TreeResolvedRenderProps<T>
-    & TreeResolvedBehaviorProps<T>
+export type SortableTreeViewportProps<T>
+  = & SortableTreeBaseProps
+    & SortableTreeResolvedRenderProps<T>
+    & SortableTreeResolvedBehaviorProps<T>
     & {
       readonly value: TreeNode<T>
       readonly expandedIdSet: ReadonlySet<string>
       readonly toggleExpanded: (nodeId: string) => void
-      readonly resolveMove: (input: TreeNodeMoveInput) => TreeDndMove<T> | undefined
+      readonly resolveMove: (input: TreeNodeMoveInput) => SortableTreeMove<T> | undefined
     };
 
-export type TreeNodeRowProps<T>
+export type SortableTreeNodeRowProps<T>
   = & Pick<
-    TreeViewportProps<T>,
+    SortableTreeViewportProps<T>,
     | 'getNodeDisabled'
     | 'indentationWidth'
     | 'renderDropIndicator'
@@ -194,32 +193,32 @@ export type TreeNodeRowProps<T>
     | 'toggleExpanded'
   >
   & {
-    readonly item: TreeVisibleItem<T>
+    readonly item: SortableTreeVisibleItem<T>
     readonly sortableGroupId: string
     readonly isDragging: boolean
     readonly isExpanded: boolean
-    readonly resolveDropMove: TreeDropMoveResolver<T>
+    readonly resolveDropMove: SortableTreeDropMoveResolver<T>
     readonly showAfterIndicator: boolean
   };
 
-export type TreeDropIndicatorProps<T>
+export type SortableTreeDropIndicatorProps<T>
   = & Pick<
-    TreeNodeRowProps<T>,
+    SortableTreeNodeRowProps<T>,
     | 'indentationWidth'
     | 'isDragging'
     | 'renderDropIndicator'
     | 'resolveDropMove'
   >
   & Pick<
-    TreeDndRenderDropIndicatorArgs,
+    SortableTreeRenderDropIndicatorArgs,
     | 'depth'
     | 'position'
     | 'targetId'
   >;
 
-export type TreeDragOverlayNodeProps<T>
+export type SortableTreeDragOverlayNodeProps<T>
   = & Pick<
-    TreeViewportProps<T>,
+    SortableTreeViewportProps<T>,
     | 'expandedIdSet'
     | 'getNodeDisabled'
     | 'indentationWidth'

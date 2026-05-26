@@ -4,19 +4,19 @@ import { DragDropProvider } from '@dnd-kit/react';
 
 import { renderDefaultDropIndicator,
          renderDefaultEmpty,
-         renderDefaultNodeContent } from './Tree.defaults';
-import { useExpandedNodeIds,
-         useTreeMoveController,
-         useTreeValue } from './Tree.hooks';
-import type { TreeDndProps } from './Tree.types';
+         renderDefaultNodeContent } from './SortableTree.defaults';
+import { useSortableTreeExpandedNodeIds,
+         useSortableTreeMoveController,
+         useSortableTreeValue } from './SortableTree.hooks';
+import type { SortableTreeProps } from './SortableTree.types';
 import { DEFAULT_INDENT,
-         getDefaultNodeDisabled } from './Tree.utils';
-import { TreeViewport } from './TreeViewport';
+         getDefaultNodeDisabled } from './SortableTree.utils';
+import { SortableTreeViewport } from './SortableTreeViewport';
 
 /**
  * TreeNode 루트 데이터를 DND 가능한 트리 UI로 렌더링한다.
  */
-export function TreeDnd<T>(props: Readonly<TreeDndProps<T>>) {
+export function SortableTree<T>(props: Readonly<SortableTreeProps<T>>) {
   const {
     value: controlledValue,
     defaultValue,
@@ -33,12 +33,12 @@ export function TreeDnd<T>(props: Readonly<TreeDndProps<T>>) {
     ...rootProps
   } = props;
 
-  const [value, setValue] = useTreeValue(controlledValue, defaultValue, onChange);
+  const [value, setValue] = useSortableTreeValue(controlledValue, defaultValue, onChange);
   const {
     expandedIdSet,
     setNodeExpanded,
     toggleExpanded,
-  } = useExpandedNodeIds({
+  } = useSortableTreeExpandedNodeIds({
     root: value,
     expandedIds,
     defaultExpandedIds,
@@ -47,7 +47,7 @@ export function TreeDnd<T>(props: Readonly<TreeDndProps<T>>) {
   const {
     handleDragEnd,
     resolveMove,
-  } = useTreeMoveController({
+  } = useSortableTreeMoveController({
     value,
     canDrop,
     setValue,
@@ -62,7 +62,7 @@ export function TreeDnd<T>(props: Readonly<TreeDndProps<T>>) {
 
   return (
     <DragDropProvider onDragEnd={handleDragEnd}>
-      <TreeViewport
+      <SortableTreeViewport
         value={value}
         expandedIdSet={expandedIdSet}
         toggleExpanded={toggleExpanded}

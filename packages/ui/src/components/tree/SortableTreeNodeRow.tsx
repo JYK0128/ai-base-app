@@ -4,14 +4,14 @@ import * as React from 'react';
 import { cn } from '@/lib/utils';
 
 import type { TreeNodeDropTargetData,
-              TreeNodeRowProps } from './Tree.types';
-import { getDefaultNodeLabel } from './Tree.utils';
-import { TreeDropIndicator } from './TreeDropIndicator';
+              SortableTreeNodeRowProps } from './SortableTree.types';
+import { getDefaultNodeLabel } from './SortableTree.utils';
+import { SortableTreeDropIndicator } from './SortableTreeDropIndicator';
 
 /**
- * 하나의 TreeNode를 행으로 그리고, 행 자체를 sortable inside 대상로 사용한다.
+ * 하나의 TreeNode를 행으로 그리고, 행 자체를 sortable inside 대상으로 사용한다.
  */
-export function TreeNodeRow<T>(props: Readonly<TreeNodeRowProps<T>>) {
+export function SortableTreeNodeRow<T>(props: Readonly<SortableTreeNodeRowProps<T>>) {
   const {
     item,
     indentationWidth,
@@ -71,7 +71,7 @@ export function TreeNodeRow<T>(props: Readonly<TreeNodeRowProps<T>>) {
       data-tree-row-id={node.id}
       className="grid"
     >
-      <TreeDropIndicator
+      <SortableTreeDropIndicator
         isDragging={isDragging}
         targetId={node.id}
         position="before"
@@ -138,7 +138,7 @@ export function TreeNodeRow<T>(props: Readonly<TreeNodeRowProps<T>>) {
 
       {showAfterIndicator
         ? (
-          <TreeDropIndicator
+          <SortableTreeDropIndicator
             isDragging={isDragging}
             targetId={node.id}
             position="after"

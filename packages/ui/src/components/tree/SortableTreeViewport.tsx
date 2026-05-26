@@ -6,22 +6,22 @@ import * as React from 'react';
 
 import { cn } from '@/lib/utils';
 
-import { useDropMoveResolver } from './Tree.hooks';
-import type { TreeDragOverlayNodeProps,
-              TreeViewportProps } from './Tree.types';
+import { useSortableTreeDropMoveResolver } from './SortableTree.hooks';
+import type { SortableTreeDragOverlayNodeProps,
+              SortableTreeViewportProps } from './SortableTree.types';
 import { buildVisibleTreeItems,
          collectNodeAndDescendantIds,
          findNodeById,
          getDefaultNodeLabel,
-         getNodeChildren } from './Tree.utils';
-import { TreeNodeRow } from './TreeNodeRow';
+         getNodeChildren } from './SortableTree.utils';
+import { SortableTreeNodeRow } from './SortableTreeNodeRow';
 
 /**
  * 현재 트리 상태를 화면에만 그리는 전용 뷰다.
  *
  * 드래그 상태를 읽고, 보이는 노드 목록과 overlay를 함께 만든다.
  */
-export function TreeViewport<T>(props: Readonly<TreeViewportProps<T>>) {
+export function SortableTreeViewport<T>(props: Readonly<SortableTreeViewportProps<T>>) {
   const {
     value,
     expandedIdSet,
@@ -65,7 +65,7 @@ export function TreeViewport<T>(props: Readonly<TreeViewportProps<T>>) {
 
     return visibleItems.filter(({ node }) => !hiddenNodeIdSet.has(node.id));
   }, [hiddenNodeIdSet, visibleItems]);
-  const resolveDropMove = useDropMoveResolver({
+  const resolveDropMove = useSortableTreeDropMoveResolver({
     activeSourceId,
     rootId: value.id,
     visibleItems: renderedVisibleItems,
@@ -77,7 +77,7 @@ export function TreeViewport<T>(props: Readonly<TreeViewportProps<T>>) {
       const isLastVisibleItem = index === renderedVisibleItems.length - 1;
 
       return (
-        <TreeNodeRow
+        <SortableTreeNodeRow
           key={item.node.id}
           item={item}
           indentationWidth={indentationWidth}
@@ -108,7 +108,7 @@ export function TreeViewport<T>(props: Readonly<TreeViewportProps<T>>) {
       {activeSourceNode
         ? (
           <DragOverlay className="pointer-events-none opacity-70">
-            <TreeDragOverlayNode
+            <SortableTreeDragOverlayNode
               node={activeSourceNode}
               depth={0}
               expandedIdSet={expandedIdSet}
@@ -123,7 +123,7 @@ export function TreeViewport<T>(props: Readonly<TreeViewportProps<T>>) {
   );
 }
 
-function TreeDragOverlayNode<T>(props: Readonly<TreeDragOverlayNodeProps<T>>) {
+function SortableTreeDragOverlayNode<T>(props: Readonly<SortableTreeDragOverlayNodeProps<T>>) {
   const {
     node,
     depth,
@@ -150,7 +150,7 @@ function TreeDragOverlayNode<T>(props: Readonly<TreeDragOverlayNodeProps<T>>) {
     }
 
     return children.map((child) => (
-      <TreeDragOverlayNode
+      <SortableTreeDragOverlayNode
         key={child.id}
         node={child}
         depth={depth + 1}

@@ -2,14 +2,14 @@
 
 import { useSortable } from '@dnd-kit/react/sortable';
 
-import type { SortableListDndRowProps } from './SortableList.types';
+import type { SortableListRowProps } from './SortableList.types';
 
-export function SortableListDndRow<T>({
+export function SortableListRow<T>({
   item,
   index,
   groupId,
   renderItem,
-}: SortableListDndRowProps<T>) {
+}: SortableListRowProps<T>) {
   const {
     ref: sortableRef,
     handleRef: sortableHandleRef,

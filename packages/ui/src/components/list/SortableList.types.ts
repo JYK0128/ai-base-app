@@ -4,7 +4,7 @@ import type { ComponentPropsWithoutRef, CSSProperties, ReactNode } from 'react';
 // 공개 입력 타입
 // ---------------------------------------------------------------------------
 
-export type SortableListDndBaseProps = Omit<
+export type SortableListBaseProps = Omit<
   ComponentPropsWithoutRef<'div'>,
   'value' | 'defaultValue' | 'onChange' | 'children'
 >;
@@ -14,12 +14,12 @@ export interface SortableListItem {
   readonly disabled?: boolean
 }
 
-export type SortableListDndChangeHandler<T> = (
+export type SortableListChangeHandler<T> = (
   nextValue: (SortableListItem & T)[],
 ) => void;
 
 export type SortableListRenderItem<T> = (
-  args: SortableListDndRenderItemArgs<T>,
+  args: SortableListRenderItemArgs<T>,
 ) => ReactNode;
 
 export type SortableListRenderEmpty = () => ReactNode;
@@ -33,16 +33,16 @@ export type SortableListValueProps<T>
   = | {
     readonly value: (SortableListItem & T)[]
     readonly defaultValue?: never
-    readonly onChange: SortableListDndChangeHandler<T>
+    readonly onChange: SortableListChangeHandler<T>
   }
   | {
     readonly value?: never
     readonly defaultValue: (SortableListItem & T)[]
-    readonly onChange?: SortableListDndChangeHandler<T>
+    readonly onChange?: SortableListChangeHandler<T>
   };
 
-export type SortableListDndProps<T>
-  = & SortableListDndBaseProps
+export type SortableListProps<T>
+  = & SortableListBaseProps
     & SortableListRenderProps<T>
     & SortableListValueProps<T>;
 
@@ -50,7 +50,7 @@ export type SortableListDndProps<T>
 // render 함수 인자
 // ---------------------------------------------------------------------------
 
-export interface SortableListDndRenderItemState {
+export interface SortableListRenderItemState {
   readonly isDragging: boolean
   readonly isDropTarget: boolean
   readonly isDisabled: boolean
@@ -61,10 +61,10 @@ export interface SortableListDragHandleProps {
   readonly style: CSSProperties
 }
 
-export interface SortableListDndRenderItemArgs<T> {
+export interface SortableListRenderItemArgs<T> {
   readonly item: SortableListItem & T
   readonly index: number
-  readonly state: SortableListDndRenderItemState
+  readonly state: SortableListRenderItemState
   readonly dragHandleProps: SortableListDragHandleProps
   readonly ref: (element: HTMLElement | null) => void
 }
@@ -73,7 +73,7 @@ export interface SortableListDndRenderItemArgs<T> {
 // 내부 컴포넌트 props
 // ---------------------------------------------------------------------------
 
-export interface SortableListDndRowProps<T> {
+export interface SortableListRowProps<T> {
   readonly item: SortableListItem & T
   readonly index: number
   readonly groupId: string
@@ -81,7 +81,7 @@ export interface SortableListDndRowProps<T> {
 }
 
 export type SortableListViewportProps<T>
-  = & SortableListDndBaseProps
+  = & SortableListBaseProps
     & {
       readonly renderItem: SortableListRenderItem<T>
       readonly renderEmpty: SortableListRenderEmpty

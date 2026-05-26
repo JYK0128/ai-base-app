@@ -1,2 +1,2 @@
-export * from './Tree';
-export * from './Tree.types';
+export * from './SortableTree';
+export * from './SortableTree.types';

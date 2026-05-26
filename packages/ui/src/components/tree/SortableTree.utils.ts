@@ -1,6 +1,6 @@
 import type { TreeNode, TreeNodeDropPosition } from '@/lib/tree';
 
-import type { TreeVisibleItem } from './Tree.types';
+import type { SortableTreeVisibleItem } from './SortableTree.types';
 
 export const TREE_DROP_ZONE_PREFIX = '__tree_dnd_drop__';
 export const TREE_DROP_POSITIONS = ['before', 'after', 'inside'] as const satisfies readonly TreeNodeDropPosition[];
@@ -8,7 +8,7 @@ export const DEFAULT_INDENT = 24;
 
 /**
  * 기본값으로는 어떤 노드도 비활성화하지 않는다.
- * TreeDnd에서 `getNodeDisabled`를 따로 주지 않았을 때 쓰는 기본 함수다.
+ * SortableTree에서 `getNodeDisabled`를 따로 주지 않았을 때 쓰는 기본 함수다.
  */
 export const getDefaultNodeDisabled = () => false;
 
@@ -84,7 +84,7 @@ export function findNodeById<T>(
 }
 
 /**
- * 노드 자신과 모든 자식 노드의 id를 전부 모은다.
+ * 노드 자신 and 모든 자식 노드의 id를 전부 모은다.
  *
  * 드래그 중 원본 서브트리를 화면에서 숨길 때 사용한다.
  *
@@ -119,8 +119,8 @@ export function buildVisibleTreeItems<T>(
   expandedIds: ReadonlySet<string>,
   parentId: string,
   depth = 0,
-): TreeVisibleItem<T>[] {
-  const visibleItems: TreeVisibleItem<T>[] = [];
+ ): SortableTreeVisibleItem<T>[] {
+  const visibleItems: SortableTreeVisibleItem<T>[] = [];
 
   for (let index = 0; index < nodes.length; index += 1) {
     const node = nodes[index];

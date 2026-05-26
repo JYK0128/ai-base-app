@@ -5,10 +5,10 @@ import * as React from 'react';
 
 import { renderDefaultEmpty, renderDefaultItem } from './SortableList.defaults';
 import { useSortableListHandlers, useSortableListValue } from './SortableList.hooks';
-import type { SortableListDndProps } from './SortableList.types';
+import type { SortableListProps } from './SortableList.types';
 import { SortableListViewport } from './SortableListViewport';
 
-export function SortableListDnd<T>({
+export function SortableList<T>({
   value: controlledValue,
   defaultValue,
   onChange,
@@ -16,7 +16,7 @@ export function SortableListDnd<T>({
   renderEmpty,
   className,
   ...props
-}: Readonly<SortableListDndProps<T>>) {
+}: Readonly<SortableListProps<T>>) {
   const instanceId = React.useId().replaceAll(':', '');
   const groupId = `__sortable-list-group__${instanceId}`;
   const droppableId = `__sortable-list-dropzone__${instanceId}`;

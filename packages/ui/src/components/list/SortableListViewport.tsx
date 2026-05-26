@@ -3,7 +3,7 @@
 import { useDroppable } from '@dnd-kit/react';
 
 import type { SortableListViewportProps } from './SortableList.types';
-import { SortableListDndRow } from './SortableListDndRow';
+import { SortableListRow } from './SortableListRow';
 
 export function SortableListViewport<T>({
   value,
@@ -27,7 +27,7 @@ export function SortableListViewport<T>({
     >
       {value.length > 0
         ? value.map((item, index) => (
-          <SortableListDndRow
+          <SortableListRow
             key={item.id}
             item={item}
             index={index}

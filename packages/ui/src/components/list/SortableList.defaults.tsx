@@ -1,6 +1,6 @@
 import { GripVertical } from 'lucide-react';
 
-import type { SortableListDndRenderItemArgs } from './SortableList.types';
+import type { SortableListRenderItemArgs } from './SortableList.types';
 
 /**
  * renderItem이 없을 때 동작 확인 및 즉시 활용 가능한 프리미엄 마크업을 기본 렌더링한다.
@@ -10,7 +10,7 @@ export function renderDefaultItem<T>({
   state,
   dragHandleProps,
   ref,
-}: SortableListDndRenderItemArgs<T>) {
+}: SortableListRenderItemArgs<T>) {
   return (
     <div
       ref={ref}
