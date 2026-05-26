@@ -3,7 +3,9 @@ import type { DragEndEvent } from '@dnd-kit/react';
 import { isSortable, isSortableOperation } from '@dnd-kit/react/sortable';
 import * as React from 'react';
 
-import type { SortableListItem } from './SortableList.types';
+import type { SortableListItem,
+              UseSortableListHandlersArgs,
+              UseSortableListHandlersResult } from './SortableList.types';
 
 export function useSortableListValue<T>(
   controlledValue: (SortableListItem & T)[] | undefined,
@@ -37,11 +39,7 @@ export function useSortableListHandlers<T>({
   value,
   setValue,
   droppableId,
-}: {
-  readonly value: (SortableListItem & T)[]
-  readonly setValue: (next: (SortableListItem & T)[]) => void
-  readonly droppableId: string
-}) {
+}: UseSortableListHandlersArgs<T>): UseSortableListHandlersResult {
   const handleDragEnd = React.useCallback((event: DragEndEvent) => {
     if (event.canceled) {
       return;

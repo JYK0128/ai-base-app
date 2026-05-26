@@ -9,11 +9,13 @@ import { moveTreeNode,
 import type { SortableTreeChangeHandler,
               SortableTreeDropMoveResolver,
               SortableTreeDropZoneState,
-              SortableTreeExpandedIdsChangeHandler,
               SortableTreeMove,
-              SortableTreeVisibleItem,
               TreeDropTargetData,
-              TreeDropZoneData } from './SortableTree.types';
+              TreeDropZoneData,
+              UseSortableTreeDropMoveResolverArgs,
+              UseSortableTreeDropZoneArgs,
+              UseSortableTreeExpandedNodeIdsArgs,
+              UseSortableTreeMoveControllerArgs } from './SortableTree.types';
 import { collectNodeIdsWithChildren,
          createDropZoneId,
          TREE_DROP_POSITIONS } from './SortableTree.utils';
@@ -56,12 +58,7 @@ export function useSortableTreeMoveController<T>({
   canDrop,
   setValue,
   setNodeExpanded,
-}: {
-  readonly value: TreeNode<T>
-  readonly canDrop?: (move: SortableTreeMove<T>) => boolean
-  readonly setValue: (nextValue: TreeNode<T>, move: SortableTreeMove<T>) => void
-  readonly setNodeExpanded: (nodeId: string, expanded: boolean) => void
-}) {
+}: UseSortableTreeMoveControllerArgs<T>) {
   const resolveMove = React.useCallback((input: TreeNodeMoveInput): SortableTreeMove<T> | undefined => {
     const result = moveTreeNode(value, input);
 
@@ -137,12 +134,7 @@ export function useSortableTreeExpandedNodeIds<T>({
   expandedIds,
   defaultExpandedIds,
   onExpandedIdsChange,
-}: {
-  readonly root: TreeNode<T>
-  readonly expandedIds?: readonly string[]
-  readonly defaultExpandedIds?: readonly string[]
-  readonly onExpandedIdsChange?: SortableTreeExpandedIdsChangeHandler
-}) {
+}: UseSortableTreeExpandedNodeIdsArgs<T>) {
   const [uncontrolledExpandedIds, setUncontrolledExpandedIds] = React.useState<string[]>(() => [
     ...(defaultExpandedIds ?? collectNodeIdsWithChildren(root)),
   ]);
@@ -186,12 +178,7 @@ export function useSortableTreeDropMoveResolver<T>({
   rootId,
   visibleItems,
   resolveMove,
-}: {
-  readonly activeSourceId: string | null
-  readonly rootId: string
-  readonly visibleItems: readonly SortableTreeVisibleItem<T>[]
-  readonly resolveMove: (input: TreeNodeMoveInput) => SortableTreeMove<T> | undefined
-}): SortableTreeDropMoveResolver<T> {
+}: UseSortableTreeDropMoveResolverArgs<T>): SortableTreeDropMoveResolver<T> {
   const moveByTargetId = React.useMemo(() => {
     const moves = new Map<string, Partial<Record<TreeNodeDropPosition, SortableTreeMove<T>>>>();
 
@@ -243,11 +230,7 @@ export function useSortableTreeDropZone<T>({
   targetId,
   position,
   resolveDropMove,
-}: {
-  readonly resolveDropMove: SortableTreeDropMoveResolver<T>
-  readonly targetId: string
-  readonly position: TreeNodeDropPosition
-}): SortableTreeDropZoneState {
+}: UseSortableTreeDropZoneArgs<T>): SortableTreeDropZoneState {
   const id = createDropZoneId(targetId, position);
   const isDropAllowed = Boolean(resolveDropMove(targetId, position));
   const { isDropTarget, ref } = useDroppable<TreeDropZoneData>({

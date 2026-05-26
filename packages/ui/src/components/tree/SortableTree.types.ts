@@ -235,3 +235,34 @@ export type SortableTreeDragOverlayNodeProps<T>
     readonly node: TreeNode<T>
     readonly depth: number
   };
+
+// ---------------------------------------------------------------------------
+// 훅 타입 명세
+// ---------------------------------------------------------------------------
+
+export interface UseSortableTreeMoveControllerArgs<T> {
+  readonly value: TreeNode<T>
+  readonly canDrop?: (move: SortableTreeMove<T>) => boolean
+  readonly setValue: (nextValue: TreeNode<T>, move: SortableTreeMove<T>) => void
+  readonly setNodeExpanded: (nodeId: string, expanded: boolean) => void
+}
+
+export interface UseSortableTreeExpandedNodeIdsArgs<T> {
+  readonly root: TreeNode<T>
+  readonly expandedIds?: readonly string[]
+  readonly defaultExpandedIds?: readonly string[]
+  readonly onExpandedIdsChange?: SortableTreeExpandedIdsChangeHandler
+}
+
+export interface UseSortableTreeDropMoveResolverArgs<T> {
+  readonly activeSourceId: string | null
+  readonly rootId: string
+  readonly visibleItems: readonly SortableTreeVisibleItem<T>[]
+  readonly resolveMove: (input: TreeNodeMoveInput) => SortableTreeMove<T> | undefined
+}
+
+export interface UseSortableTreeDropZoneArgs<T> {
+  readonly resolveDropMove: SortableTreeDropMoveResolver<T>
+  readonly targetId: string
+  readonly position: TreeNodeDropPosition
+}

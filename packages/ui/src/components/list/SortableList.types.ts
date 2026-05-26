@@ -1,3 +1,4 @@
+import type { DragEndEvent } from '@dnd-kit/react';
 import type { ComponentPropsWithoutRef, CSSProperties, ReactNode } from 'react';
 
 // ---------------------------------------------------------------------------
@@ -91,3 +92,17 @@ export type SortableListViewportProps<T>
       readonly groupId: string
       readonly droppableId: string
     };
+
+// ---------------------------------------------------------------------------
+// 훅 타입 명세
+// ---------------------------------------------------------------------------
+
+export interface UseSortableListHandlersArgs<T> {
+  readonly value: (SortableListItem & T)[]
+  readonly setValue: (next: (SortableListItem & T)[]) => void
+  readonly droppableId: string
+}
+
+export interface UseSortableListHandlersResult {
+  readonly handleDragEnd: (event: DragEndEvent) => void
+}
