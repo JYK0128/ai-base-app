@@ -25,7 +25,7 @@ export type SortableListRenderItem<T> = (
 export type SortableListRenderEmpty = () => ReactNode;
 
 export interface SortableListRenderProps<T> {
-  readonly renderItem: SortableListRenderItem<T>
+  readonly renderItem?: SortableListRenderItem<T>
   readonly renderEmpty?: SortableListRenderEmpty
 }
 
@@ -82,7 +82,10 @@ export interface SortableListDndRowProps<T> {
 
 export type SortableListViewportProps<T>
   = & SortableListDndBaseProps
-    & SortableListRenderProps<T>
+    & {
+      readonly renderItem: SortableListRenderItem<T>
+      readonly renderEmpty: SortableListRenderEmpty
+    }
     & {
       readonly value: (SortableListItem & T)[]
       readonly groupId: string

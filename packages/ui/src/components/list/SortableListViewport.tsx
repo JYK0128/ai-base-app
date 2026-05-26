@@ -1,10 +1,9 @@
 'use client';
 
 import { useDroppable } from '@dnd-kit/react';
-import * as React from 'react';
 
-import { SortableListDndRow } from './SortableListDndRow';
 import type { SortableListViewportProps } from './SortableList.types';
+import { SortableListDndRow } from './SortableListDndRow';
 
 export function SortableListViewport<T>({
   value,

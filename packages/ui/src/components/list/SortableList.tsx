@@ -3,6 +3,7 @@
 import { DragDropProvider } from '@dnd-kit/react';
 import * as React from 'react';
 
+import { renderDefaultEmpty, renderDefaultItem } from './SortableList.defaults';
 import { useSortableListHandlers, useSortableListValue } from './SortableList.hooks';
 import type { SortableListDndProps } from './SortableList.types';
 import { SortableListViewport } from './SortableListViewport';
@@ -11,8 +12,8 @@ export function SortableListDnd<T>({
   value: controlledValue,
   defaultValue,
   onChange,
-  renderItem,
-  renderEmpty,
+  renderItem = renderDefaultItem,
+  renderEmpty = renderDefaultEmpty,
   className,
   ...props
 }: Readonly<SortableListDndProps<T>>) {
