@@ -7,8 +7,6 @@ import * as React from 'react';
 import { useSortableListHandlers, useSortableListValue } from './SortableList.hooks';
 import type { SortableListItem, SortableListProps, SortableListRenderItem } from './SortableList.types';
 
-export type { SortableListItem, SortableListProps };
-
 interface SortableListItemWrapperProps<T> {
   readonly item: SortableListItem & T
   readonly index: number
