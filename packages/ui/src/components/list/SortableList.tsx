@@ -12,8 +12,8 @@ export function SortableListDnd<T>({
   value: controlledValue,
   defaultValue,
   onChange,
-  renderItem = renderDefaultItem,
-  renderEmpty = renderDefaultEmpty,
+  renderItem,
+  renderEmpty,
   className,
   ...props
 }: Readonly<SortableListDndProps<T>>) {
@@ -42,8 +42,8 @@ export function SortableListDnd<T>({
         value={value}
         groupId={groupId}
         droppableId={droppableId}
-        renderItem={renderItem}
-        renderEmpty={renderEmpty}
+        renderItem={renderItem ?? renderDefaultItem}
+        renderEmpty={renderEmpty ?? renderDefaultEmpty}
         className={className}
         {...rootPropsWithAriaLabel}
       />

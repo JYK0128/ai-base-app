@@ -1,5 +1,4 @@
 import { GripVertical } from 'lucide-react';
-import * as React from 'react';
 
 import type { SortableListDndRenderItemArgs } from './SortableList.types';
 
