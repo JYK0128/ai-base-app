@@ -78,3 +78,12 @@ export interface SortableListDndItemWrapperProps<T> {
   readonly groupId: string
   readonly renderItem: SortableListRenderItem<T>
 }
+
+export type SortableListViewportProps<T>
+  = & SortableListDndBaseProps
+    & SortableListRenderProps<T>
+    & {
+      readonly value: (SortableListItem & T)[]
+      readonly groupId: string
+      readonly droppableId: string
+    };

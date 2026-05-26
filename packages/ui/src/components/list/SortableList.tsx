@@ -5,7 +5,9 @@ import { useSortable } from '@dnd-kit/react/sortable';
 import * as React from 'react';
 
 import { useSortableListHandlers, useSortableListValue } from './SortableList.hooks';
-import type { SortableListDndItemWrapperProps, SortableListDndProps } from './SortableList.types';
+import type { SortableListDndItemWrapperProps,
+              SortableListDndProps,
+              SortableListViewportProps } from './SortableList.types';
 
 function SortableListDndItemWrapper<T>({
   item,
@@ -57,6 +59,47 @@ function SortableListDndItemWrapper<T>({
   );
 }
 
+function SortableListViewport<T>({
+  value,
+  groupId,
+  droppableId,
+  renderItem,
+  renderEmpty,
+  className,
+  ...props
+}: SortableListViewportProps<T>) {
+  const { ref: rootDropRef } = useDroppable({
+    id: droppableId,
+  });
+
+  return (
+    <div
+      ref={rootDropRef}
+      role="list"
+      className={className}
+      {...props}
+    >
+      {value.length > 0
+        ? (
+          <div className="space-y-2">
+            {value.map((item, index) => (
+              <SortableListDndItemWrapper
+                key={item.id}
+                item={item}
+                index={index}
+                groupId={groupId}
+                renderItem={renderItem}
+              />
+            ))}
+          </div>
+        )
+        : (
+          renderEmpty?.()
+        )}
+    </div>
+  );
+}
+
 export function SortableListDnd<T>({
   value: controlledValue,
   defaultValue,
@@ -70,10 +113,6 @@ export function SortableListDnd<T>({
   const groupId = `__sortable-list-group__${instanceId}`;
   const droppableId = `__sortable-list-dropzone__${instanceId}`;
 
-  const { ref: rootDropRef } = useDroppable({
-    id: droppableId,
-  });
-
   const [value, setValue] = useSortableListValue(controlledValue, defaultValue, onChange);
 
   const { handleDragEnd } = useSortableListHandlers({
@@ -82,33 +121,24 @@ export function SortableListDnd<T>({
     droppableId,
   });
 
+  const rootPropsWithAriaLabel = props['aria-label'] === undefined
+    ? {
+      ...props,
+      'aria-label': 'Sortable list editor',
+    }
+    : props;
+
   return (
     <DragDropProvider onDragEnd={handleDragEnd}>
-      <div
-        ref={rootDropRef}
-        role="list"
-        aria-label="Sortable list editor"
+      <SortableListViewport
+        value={value}
+        groupId={groupId}
+        droppableId={droppableId}
+        renderItem={renderItem}
+        renderEmpty={renderEmpty}
         className={className}
-        {...props}
-      >
-        {value.length > 0
-          ? (
-            <div className="space-y-2">
-              {value.map((item, index) => (
-                <SortableListDndItemWrapper
-                  key={item.id}
-                  item={item}
-                  index={index}
-                  groupId={groupId}
-                  renderItem={renderItem}
-                />
-              ))}
-            </div>
-          )
-          : (
-            renderEmpty?.()
-          )}
-      </div>
+        {...rootPropsWithAriaLabel}
+      />
     </DragDropProvider>
   );
 }
