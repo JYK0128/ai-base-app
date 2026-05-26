@@ -6,10 +6,13 @@ import { GripVertical } from 'lucide-react';
 import * as React from 'react';
 
 import { SortableListContext,
+         SortableListItemContext,
          useSortableListContext,
-         useSortableListHandlers } from './SortableList.hooks';
+         useSortableListHandlers,
+         useSortableListItemContext } from './SortableList.hooks';
 import type { SortableListItem,
               SortableListItemProps,
+              SortableListItemContextValue,
               SortableListNoContentProps,
               SortableListProps } from './SortableList.types';
 
@@ -21,6 +24,8 @@ export type { SortableListItem,
 function SortableListItem({
   id,
   children,
+  className,
+  ...props
 }: Readonly<SortableListItemProps>) {
   const { value, groupId } = useSortableListContext();
   const index = value.findIndex((item) => item.id === id);
@@ -41,31 +46,49 @@ function SortableListItem({
     return null;
   }
 
+  const contextValue: SortableListItemContextValue = {
+    handleRef: sortableHandleRef,
+    isDragging,
+    isDropTarget,
+    disabled: item.disabled ?? false,
+  };
+
   return (
-    <div
-      role="listitem"
-      className={item.disabled ? 'opacity-60' : undefined}
-    >
+    <SortableListItemContext.Provider value={contextValue}>
       <div
         ref={sortableRef}
-        className={
-          isDragging || isDropTarget
-            ? 'flex items-center gap-2 opacity-80 touch-none'
-            : 'flex items-center gap-2 touch-none'
-        }
+        role="listitem"
+        className={className}
+        style={{
+          opacity: isDragging ? 0.4 : 1,
+          ...props.style,
+        }}
+        {...props}
       >
-        <button
-          ref={sortableHandleRef}
-          type="button"
-          aria-label={`Drag ${item.id}`}
-          className="inline-flex size-8 shrink-0 items-center justify-center cursor-grab select-none touch-none active:cursor-grabbing"
-        >
-          <GripVertical className="size-4" />
-        </button>
-
-        <div className="min-w-0 flex-1">{children}</div>
+        {children}
       </div>
-    </div>
+    </SortableListItemContext.Provider>
+  );
+}
+
+function SortableListDragHandle({
+  children,
+  className,
+  ...props
+}: Readonly<React.ComponentPropsWithoutRef<'button'>>) {
+  const { handleRef, disabled } = useSortableListItemContext();
+
+  return (
+    <button
+      ref={handleRef}
+      type="button"
+      disabled={disabled}
+      aria-label="Drag item to reorder"
+      className={className ?? 'inline-flex size-8 shrink-0 items-center justify-center cursor-grab select-none touch-none active:cursor-grabbing disabled:cursor-not-allowed disabled:opacity-50'}
+      {...props}
+    >
+      {children ?? <GripVertical className="size-4" />}
+    </button>
   );
 }
 
@@ -80,6 +103,7 @@ function SortableList({
   onChange,
   className,
   children,
+  ...props
 }: Readonly<SortableListProps>) {
   const instanceId = React.useId().replaceAll(':', '');
   const groupId = `__sortable-list-group__${instanceId}`;
@@ -126,7 +150,13 @@ function SortableList({
   return (
     <DragDropProvider onDragEnd={handleDragEnd}>
       <SortableListContext.Provider value={contextValue}>
-        <div ref={rootDropRef} role="list" aria-label="Sortable list editor" className={className}>
+        <div
+          ref={rootDropRef}
+          role="list"
+          aria-label="Sortable list editor"
+          className={className}
+          {...props}
+        >
           {value.length > 0
             ? (
               <div className="space-y-2">{children}</div>
@@ -140,11 +170,13 @@ function SortableList({
 
 interface SortableListCompound extends React.FC<SortableListProps> {
   Item: typeof SortableListItem
+  DragHandle: typeof SortableListDragHandle
   NoContent: typeof SortableListNoContent
 }
 
 const SortableListCompound = Object.assign(SortableList, {
   Item: SortableListItem,
+  DragHandle: SortableListDragHandle,
   NoContent: SortableListNoContent,
 }) as SortableListCompound;
 
