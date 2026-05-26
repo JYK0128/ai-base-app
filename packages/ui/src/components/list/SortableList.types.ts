@@ -73,7 +73,7 @@ export interface SortableListDndRenderItemArgs<T> {
 // 내부 컴포넌트 props
 // ---------------------------------------------------------------------------
 
-export interface SortableListDndItemWrapperProps<T> {
+export interface SortableListDndRowProps<T> {
   readonly item: SortableListItem & T
   readonly index: number
   readonly groupId: string

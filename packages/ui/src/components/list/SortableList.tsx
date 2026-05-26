@@ -5,16 +5,16 @@ import { useSortable } from '@dnd-kit/react/sortable';
 import * as React from 'react';
 
 import { useSortableListHandlers, useSortableListValue } from './SortableList.hooks';
-import type { SortableListDndItemWrapperProps,
-              SortableListDndProps,
+import type { SortableListDndProps,
+              SortableListDndRowProps,
               SortableListViewportProps } from './SortableList.types';
 
-function SortableListDndItemWrapper<T>({
+function SortableListDndRow<T>({
   item,
   index,
   groupId,
   renderItem,
-}: SortableListDndItemWrapperProps<T>) {
+}: SortableListDndRowProps<T>) {
   const {
     ref: sortableRef,
     handleRef: sortableHandleRef,
@@ -76,7 +76,7 @@ function SortableListViewport<T>({
     >
       {value.length > 0
         ? value.map((item, index) => (
-          <SortableListDndItemWrapper
+          <SortableListDndRow
             key={item.id}
             item={item}
             index={index}
