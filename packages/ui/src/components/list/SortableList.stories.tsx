@@ -58,8 +58,9 @@ export const Default: Story = {
             value={items}
             onChange={setItems}
             className="space-y-2 rounded-lg border bg-muted/40 p-4"
-            renderItem={({ item, state, dragHandleProps }) => (
+            renderItem={({ item, state, dragHandleProps, ref }) => (
               <div
+                ref={ref}
                 className={cn(
                   'flex items-center gap-3 rounded-md border bg-card p-3 shadow-sm hover:shadow-md hover:border-accent-foreground/10 transition-all duration-200',
                   state.isDragging && 'opacity-40 border-primary',

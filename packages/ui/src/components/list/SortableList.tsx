@@ -42,20 +42,15 @@ function SortableListDndItemWrapper<T>({
   };
 
   return (
-    <div
-      ref={sortableRef}
-      role="listitem"
-      style={{
-        opacity: isDragging ? 0.4 : 1,
-      }}
-    >
+    <>
       {renderItem({
         item,
         index,
         state,
         dragHandleProps,
+        ref: sortableRef,
       })}
-    </div>
+    </>
   );
 }
 
@@ -80,22 +75,16 @@ function SortableListViewport<T>({
       {...props}
     >
       {value.length > 0
-        ? (
-          <div className="space-y-2">
-            {value.map((item, index) => (
-              <SortableListDndItemWrapper
-                key={item.id}
-                item={item}
-                index={index}
-                groupId={groupId}
-                renderItem={renderItem}
-              />
-            ))}
-          </div>
-        )
-        : (
-          renderEmpty?.()
-        )}
+        ? value.map((item, index) => (
+          <SortableListDndItemWrapper
+            key={item.id}
+            item={item}
+            index={index}
+            groupId={groupId}
+            renderItem={renderItem}
+          />
+        ))
+        : renderEmpty?.()}
     </div>
   );
 }

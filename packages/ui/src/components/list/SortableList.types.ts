@@ -66,6 +66,7 @@ export interface SortableListDndRenderItemArgs<T> {
   readonly index: number
   readonly state: SortableListDndRenderItemState
   readonly dragHandleProps: SortableListDragHandleProps
+  readonly ref: (element: HTMLElement | null) => void
 }
 
 // ---------------------------------------------------------------------------
