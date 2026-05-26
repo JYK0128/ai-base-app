@@ -643,7 +643,7 @@ export function ResourceTreeTab({ locales }: ResourceTreeTabProps) {
           ...oldData,
           data: [...oldData.data, newCreatedNode],
         };
-      }
+      },
     );
 
     toast.success('메뉴 리소스가 생성되었습니다.');
@@ -695,7 +695,7 @@ export function ResourceTreeTab({ locales }: ResourceTreeTabProps) {
           ...oldData,
           data: appendNodeToTree(oldData.data),
         };
-      }
+      },
     );
 
     toast.success('컴포넌트 리소스가 생성되었습니다.');
@@ -888,7 +888,7 @@ export function ResourceTreeTab({ locales }: ResourceTreeTabProps) {
           ...oldData,
           data: updatePermissionsInTree(oldData.data),
         };
-      }
+      },
     );
 
     toast.success('권한 정보가 변경되었습니다.');

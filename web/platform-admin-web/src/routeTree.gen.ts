@@ -18,9 +18,11 @@ import { Route as ProtectedTermsIndexRouteImport } from './routes/_protected/ter
 import { Route as ProtectedSupportIndexRouteImport } from './routes/_protected/support/index'
 import { Route as ProtectedResourcesIndexRouteImport } from './routes/_protected/resources/index'
 import { Route as ProtectedOrganizationsIndexRouteImport } from './routes/_protected/organizations/index'
+import { Route as ProtectedMembersIndexRouteImport } from './routes/_protected/members/index'
 import { Route as ProtectedDashboardIndexRouteImport } from './routes/_protected/dashboard/index'
 import { Route as ProtectedAuditIndexRouteImport } from './routes/_protected/audit/index'
 import { Route as ProtectedAnnouncementsIndexRouteImport } from './routes/_protected/announcements/index'
+import { Route as ProtectedMembersIndexBackupRouteImport } from './routes/_protected/members/index.backup'
 
 const PublicRoute = PublicRouteImport.update({
   id: '/_public',
@@ -66,6 +68,11 @@ const ProtectedOrganizationsIndexRoute =
     path: '/organizations/',
     getParentRoute: () => ProtectedRoute,
   } as any)
+const ProtectedMembersIndexRoute = ProtectedMembersIndexRouteImport.update({
+  id: '/members/',
+  path: '/members/',
+  getParentRoute: () => ProtectedRoute,
+} as any)
 const ProtectedDashboardIndexRoute = ProtectedDashboardIndexRouteImport.update({
   id: '/dashboard/',
   path: '/dashboard/',
@@ -82,6 +89,12 @@ const ProtectedAnnouncementsIndexRoute =
     path: '/announcements/',
     getParentRoute: () => ProtectedRoute,
   } as any)
+const ProtectedMembersIndexBackupRoute =
+  ProtectedMembersIndexBackupRouteImport.update({
+    id: '/members/index/backup',
+    path: '/members/index/backup',
+    getParentRoute: () => ProtectedRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof PublicIndexRoute
@@ -90,10 +103,12 @@ export interface FileRoutesByFullPath {
   '/announcements/': typeof ProtectedAnnouncementsIndexRoute
   '/audit/': typeof ProtectedAuditIndexRoute
   '/dashboard/': typeof ProtectedDashboardIndexRoute
+  '/members/': typeof ProtectedMembersIndexRoute
   '/organizations/': typeof ProtectedOrganizationsIndexRoute
   '/resources/': typeof ProtectedResourcesIndexRoute
   '/support/': typeof ProtectedSupportIndexRoute
   '/terms/': typeof ProtectedTermsIndexRoute
+  '/members/index/backup': typeof ProtectedMembersIndexBackupRoute
 }
 export interface FileRoutesByTo {
   '/': typeof PublicIndexRoute
@@ -102,10 +117,12 @@ export interface FileRoutesByTo {
   '/announcements': typeof ProtectedAnnouncementsIndexRoute
   '/audit': typeof ProtectedAuditIndexRoute
   '/dashboard': typeof ProtectedDashboardIndexRoute
+  '/members': typeof ProtectedMembersIndexRoute
   '/organizations': typeof ProtectedOrganizationsIndexRoute
   '/resources': typeof ProtectedResourcesIndexRoute
   '/support': typeof ProtectedSupportIndexRoute
   '/terms': typeof ProtectedTermsIndexRoute
+  '/members/index/backup': typeof ProtectedMembersIndexBackupRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -117,10 +134,12 @@ export interface FileRoutesById {
   '/_protected/announcements/': typeof ProtectedAnnouncementsIndexRoute
   '/_protected/audit/': typeof ProtectedAuditIndexRoute
   '/_protected/dashboard/': typeof ProtectedDashboardIndexRoute
+  '/_protected/members/': typeof ProtectedMembersIndexRoute
   '/_protected/organizations/': typeof ProtectedOrganizationsIndexRoute
   '/_protected/resources/': typeof ProtectedResourcesIndexRoute
   '/_protected/support/': typeof ProtectedSupportIndexRoute
   '/_protected/terms/': typeof ProtectedTermsIndexRoute
+  '/_protected/members/index/backup': typeof ProtectedMembersIndexBackupRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -131,10 +150,12 @@ export interface FileRouteTypes {
     | '/announcements/'
     | '/audit/'
     | '/dashboard/'
+    | '/members/'
     | '/organizations/'
     | '/resources/'
     | '/support/'
     | '/terms/'
+    | '/members/index/backup'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -143,10 +164,12 @@ export interface FileRouteTypes {
     | '/announcements'
     | '/audit'
     | '/dashboard'
+    | '/members'
     | '/organizations'
     | '/resources'
     | '/support'
     | '/terms'
+    | '/members/index/backup'
   id:
     | '__root__'
     | '/_protected'
@@ -157,10 +180,12 @@ export interface FileRouteTypes {
     | '/_protected/announcements/'
     | '/_protected/audit/'
     | '/_protected/dashboard/'
+    | '/_protected/members/'
     | '/_protected/organizations/'
     | '/_protected/resources/'
     | '/_protected/support/'
     | '/_protected/terms/'
+    | '/_protected/members/index/backup'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -233,6 +258,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProtectedOrganizationsIndexRouteImport
       parentRoute: typeof ProtectedRoute
     }
+    '/_protected/members/': {
+      id: '/_protected/members/'
+      path: '/members'
+      fullPath: '/members/'
+      preLoaderRoute: typeof ProtectedMembersIndexRouteImport
+      parentRoute: typeof ProtectedRoute
+    }
     '/_protected/dashboard/': {
       id: '/_protected/dashboard/'
       path: '/dashboard'
@@ -254,6 +286,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProtectedAnnouncementsIndexRouteImport
       parentRoute: typeof ProtectedRoute
     }
+    '/_protected/members/index/backup': {
+      id: '/_protected/members/index/backup'
+      path: '/members/index/backup'
+      fullPath: '/members/index/backup'
+      preLoaderRoute: typeof ProtectedMembersIndexBackupRouteImport
+      parentRoute: typeof ProtectedRoute
+    }
   }
 }
 
@@ -261,20 +300,24 @@ interface ProtectedRouteChildren {
   ProtectedAnnouncementsIndexRoute: typeof ProtectedAnnouncementsIndexRoute
   ProtectedAuditIndexRoute: typeof ProtectedAuditIndexRoute
   ProtectedDashboardIndexRoute: typeof ProtectedDashboardIndexRoute
+  ProtectedMembersIndexRoute: typeof ProtectedMembersIndexRoute
   ProtectedOrganizationsIndexRoute: typeof ProtectedOrganizationsIndexRoute
   ProtectedResourcesIndexRoute: typeof ProtectedResourcesIndexRoute
   ProtectedSupportIndexRoute: typeof ProtectedSupportIndexRoute
   ProtectedTermsIndexRoute: typeof ProtectedTermsIndexRoute
+  ProtectedMembersIndexBackupRoute: typeof ProtectedMembersIndexBackupRoute
 }
 
 const ProtectedRouteChildren: ProtectedRouteChildren = {
   ProtectedAnnouncementsIndexRoute: ProtectedAnnouncementsIndexRoute,
   ProtectedAuditIndexRoute: ProtectedAuditIndexRoute,
   ProtectedDashboardIndexRoute: ProtectedDashboardIndexRoute,
+  ProtectedMembersIndexRoute: ProtectedMembersIndexRoute,
   ProtectedOrganizationsIndexRoute: ProtectedOrganizationsIndexRoute,
   ProtectedResourcesIndexRoute: ProtectedResourcesIndexRoute,
   ProtectedSupportIndexRoute: ProtectedSupportIndexRoute,
   ProtectedTermsIndexRoute: ProtectedTermsIndexRoute,
+  ProtectedMembersIndexBackupRoute: ProtectedMembersIndexBackupRoute,
 }
 
 const ProtectedRouteWithChildren = ProtectedRoute._addFileChildren(
