@@ -23,16 +23,17 @@ type Story = StoryObj<typeof FormCheckbox>;
 const schema = z.object({
   terms: z.boolean().refine((val) => val === true, 'You must accept the terms'),
   notifications: z.boolean(),
-}).default({
+});
+const defaultValues = {
   terms: false,
   notifications: true,
-});
+};
 
 function FormTemplate(args: Readonly<FormCheckboxProps>) {
   const form = useAppForm({
-    defaultValues: schema.def.defaultValue,
+    defaultValues,
     validators: {
-      onSubmit: schema.unwrap(),
+      onSubmit: schema,
     },
     onSubmitInvalid: ({ value, formApi }) => {
       console.error('Submitted invalid values:', value, formApi.getAllErrors().form.errors);

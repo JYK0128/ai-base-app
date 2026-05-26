@@ -22,15 +22,16 @@ type Story = StoryObj<typeof FormTextarea>;
  */
 const schema = z.object({
   bio: z.string().min(1, 'Bio is required'),
-}).default({
-  bio: '',
 });
+const defaultValues = {
+  bio: '',
+};
 
 function FormTemplate(args: Readonly<FormTextareaProps>) {
   const form = useAppForm({
-    defaultValues: schema.def.defaultValue,
+    defaultValues,
     validators: {
-      onSubmit: schema.unwrap(),
+      onSubmit: schema,
     },
     onSubmitInvalid: ({ value, formApi }) => {
       console.error('Submitted invalid values:', value, formApi.getAllErrors().form.errors);

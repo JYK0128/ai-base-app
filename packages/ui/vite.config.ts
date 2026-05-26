@@ -26,7 +26,10 @@ export default defineConfig({
       include: ['src'],
       exclude: [
         'src/**/*.stories.tsx',
+        'src/**/*.test.ts',
         'src/**/*.test.tsx',
+        'src/**/*.spec.ts',
+        'src/**/*.spec.tsx',
       ],
       insertTypesEntry: true,
     }),
@@ -34,7 +37,7 @@ export default defineConfig({
   build: {
     lib: {
       entry: Object.fromEntries(
-        globSync('src/**/*.{ts,tsx}', { ignore: ['src/**/*.stories.tsx', 'src/**/*.test.tsx'] })
+        globSync('src/**/*.{ts,tsx}', { ignore: ['src/**/*.stories.tsx', 'src/**/*.test.ts', 'src/**/*.test.tsx'] })
           .filter(Boolean)
           .map((file) => {
             const { dir, name } = path.parse(file);
@@ -83,6 +86,13 @@ export default defineConfig({
             browser: 'chromium',
           }],
         },
+      },
+    },
+    {
+      test: {
+        name: 'unit',
+        environment: 'node',
+        include: ['src/**/*.test.ts', 'src/**/*.test.tsx'],
       },
     }],
   },

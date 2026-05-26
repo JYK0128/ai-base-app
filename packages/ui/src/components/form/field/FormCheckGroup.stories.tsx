@@ -30,15 +30,16 @@ type Story = StoryObj<typeof FormCheckGroup>;
  */
 const schema = z.object({
   fruits: z.array(z.string()).min(1, 'Select at least one fruit'),
-}).default({
-  fruits: ['apple'],
 });
+const defaultValues = {
+  fruits: ['apple'],
+};
 
 function FormTemplate(args: Readonly<FormCheckGroupProps>) {
   const form = useAppForm({
-    defaultValues: schema.def.defaultValue,
+    defaultValues,
     validators: {
-      onSubmit: schema.unwrap(),
+      onSubmit: schema,
     },
     onSubmitInvalid: ({ value, formApi }) => {
       console.error('Submitted invalid values:', value, formApi.getAllErrors().form.errors);

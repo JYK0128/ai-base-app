@@ -31,15 +31,16 @@ type Story = StoryObj<typeof FormRadioGroup>;
  */
 const schema = z.object({
   framework: z.string().min(1, 'Select a framework'),
-}).default({
-  framework: 'react',
 });
+const defaultValues = {
+  framework: 'react',
+};
 
 function FormTemplate(args: Readonly<FormRadioGroupProps>) {
   const form = useAppForm({
-    defaultValues: schema.def.defaultValue,
+    defaultValues,
     validators: {
-      onSubmit: schema.unwrap(),
+      onSubmit: schema,
     },
     onSubmitInvalid: ({ value, formApi }) => {
       console.error('Submitted invalid values:', value, formApi.getAllErrors().form.errors);

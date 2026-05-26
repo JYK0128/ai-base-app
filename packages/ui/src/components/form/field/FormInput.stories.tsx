@@ -24,16 +24,17 @@ type Story = StoryObj<typeof FormInput>;
  */
 const schema = z.object({
   username: z.string(),
-  email: z.email(),
-}).default({
+  email: z.string().email(),
+});
+const defaultValues = {
   username: '',
   email: '',
-});
+};
 function FormTemplate(args: Readonly<FormInputProps>) {
   const form = useAppForm({
-    defaultValues: schema.def.defaultValue,
+    defaultValues,
     validators: {
-      onSubmit: schema.unwrap(),
+      onSubmit: schema,
     },
     onSubmitInvalid: ({ value, formApi }) => {
       console.error('Submitted invalid values:', value, formApi.getAllErrors().form.errors);

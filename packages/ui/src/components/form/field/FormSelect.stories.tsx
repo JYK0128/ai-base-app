@@ -31,15 +31,16 @@ type Story = StoryObj<typeof FormSelect>;
  */
 const schema = z.object({
   fruit: z.string().min(1, 'Please select a fruit'),
-}).default({
-  fruit: '',
 });
+const defaultValues = {
+  fruit: '',
+};
 
 function FormTemplate(args: Readonly<FormSelectProps>) {
   const form = useAppForm({
-    defaultValues: schema.def.defaultValue,
+    defaultValues,
     validators: {
-      onSubmit: schema.unwrap(),
+      onSubmit: schema,
     },
     onSubmitInvalid: ({ value, formApi }) => {
       console.error('Submitted invalid values:', value, formApi.getAllErrors().form.errors);
