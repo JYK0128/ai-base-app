@@ -16,6 +16,7 @@
     "db:seed": "pnpm --filter=@pkg/database seed",
     "db:meta": "pnpm --filter=@pkg/database cache:build",
     "ui:build": "pnpm --filter=@pkg/ui build",
+    "ui:dev": "pnpm --filter=@pkg/ui storybook",
 
     "// --- Standard Tasks --- //": "",
     "build": "turbo run build",

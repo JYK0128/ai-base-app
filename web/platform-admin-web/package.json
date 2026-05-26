@@ -11,6 +11,8 @@
     "gen:api": "dotenvx run -- orval"
   },
   "dependencies": {
+    "@dnd-kit/helpers": "0.4.0",
+    "@dnd-kit/react": "0.4.0",
     "@pkg/config": "workspace:*",
     "@pkg/ui": "workspace:*",
     "@pkg/utils": "workspace:*",
