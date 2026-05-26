@@ -3,37 +3,43 @@ import type { DragEndEvent } from '@dnd-kit/react';
 import { isSortable, isSortableOperation } from '@dnd-kit/react/sortable';
 import * as React from 'react';
 
-import type { SortableListContextValue, SortableListItem, SortableListItemContextValue } from './SortableList.types';
+import type { SortableListItem } from './SortableList.types';
 
-export const SortableListContext = React.createContext<SortableListContextValue | null>(null);
+export function useSortableListValue<T>(
+  controlledValue: (SortableListItem & T)[] | undefined,
+  defaultValue: (SortableListItem & T)[] | undefined,
+  onChange: ((next: (SortableListItem & T)[]) => void) | undefined,
+) {
+  const [uncontrolledValue, setUncontrolledValue] = React.useState<(SortableListItem & T)[]>(() => {
+    const initialValue = defaultValue ?? controlledValue;
 
-export function useSortableListContext() {
-  const context = React.useContext(SortableListContext);
+    if (!initialValue) {
+      throw new Error('SortableList requires either value or defaultValue.');
+    }
 
-  if (!context) {
-    throw new Error('SortableList.Item must be used within SortableList.');
-  }
+    return initialValue;
+  });
+  const isControlled = controlledValue !== undefined;
+  const value = controlledValue ?? uncontrolledValue;
 
-  return context;
+  const setValue = React.useCallback((nextValue: (SortableListItem & T)[]) => {
+    if (!isControlled) {
+      setUncontrolledValue(nextValue);
+    }
+
+    onChange?.(nextValue);
+  }, [isControlled, onChange]);
+
+  return [value, setValue] as const;
 }
 
-export const SortableListItemContext = React.createContext<SortableListItemContextValue | null>(null);
-
-export function useSortableListItemContext() {
-  const context = React.useContext(SortableListItemContext);
-
-  if (!context) {
-    throw new Error('SortableList.DragHandle must be used within SortableList.Item.');
-  }
-
-  return context;
-}
-
-export function useSortableListHandlers({
-  onChange,
+export function useSortableListHandlers<T>({
+  value,
+  setValue,
   droppableId,
 }: {
-  readonly onChange: React.Dispatch<React.SetStateAction<SortableListItem[]>>
+  readonly value: (SortableListItem & T)[]
+  readonly setValue: (next: (SortableListItem & T)[]) => void
   readonly droppableId: string
 }) {
   const handleDragEnd = React.useCallback((event: DragEndEvent) => {
@@ -51,14 +57,12 @@ export function useSortableListHandlers({
         return;
       }
 
-      onChange((current) => {
-        const lastIndex = current.length - 1;
-        if (lastIndex < 0 || source.initialIndex === lastIndex) {
-          return current;
-        }
+      const lastIndex = value.length - 1;
+      if (lastIndex < 0 || source.initialIndex === lastIndex) {
+        return;
+      }
 
-        return arrayMove(current, source.initialIndex, lastIndex);
-      });
+      setValue(arrayMove(value, source.initialIndex, lastIndex));
       return;
     }
 
@@ -66,8 +70,8 @@ export function useSortableListHandlers({
       return;
     }
 
-    onChange((current) => move(current, event));
-  }, [onChange, droppableId]);
+    setValue(move(value, event));
+  }, [value, setValue, droppableId]);
 
   return {
     handleDragEnd,
