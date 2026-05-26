@@ -4,7 +4,7 @@ import * as React from 'react';
 
 import { cn } from '@/lib/utils';
 
-import { SortableList } from './SortableList';
+import { SortableListDnd } from './SortableList';
 import type { SortableListItem } from './SortableList.types';
 
 interface NavigationItem extends SortableListItem {
@@ -30,17 +30,17 @@ const initialItems: NavigationItem[] = [
   },
 ];
 
-const meta: Meta<typeof SortableList<NavigationItem>> = {
-  title: 'Components/SortableList',
-  component: SortableList,
+const meta: Meta<typeof SortableListDnd<NavigationItem>> = {
+  title: 'Components/SortableListDnd',
+  component: SortableListDnd,
   parameters: {
     layout: 'fullscreen',
   },
-} satisfies Meta<typeof SortableList<NavigationItem>>;
+} satisfies Meta<typeof SortableListDnd<NavigationItem>>;
 
 export default meta;
 
-type Story = StoryObj<typeof SortableList<NavigationItem>>;
+type Story = StoryObj<typeof SortableListDnd<NavigationItem>>;
 
 export const Default: Story = {
   render: () => {
@@ -54,7 +54,7 @@ export const Default: Story = {
             <p className="text-sm text-muted-foreground">Drag and reorder your active site sections.</p>
           </div>
 
-          <SortableList
+          <SortableListDnd
             value={items}
             onChange={setItems}
             className="space-y-2 rounded-lg border bg-muted/40 p-4"

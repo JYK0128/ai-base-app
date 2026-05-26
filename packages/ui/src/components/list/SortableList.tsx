@@ -5,14 +5,14 @@ import { useSortable } from '@dnd-kit/react/sortable';
 import * as React from 'react';
 
 import { useSortableListHandlers, useSortableListValue } from './SortableList.hooks';
-import type { SortableListItemWrapperProps, SortableListProps } from './SortableList.types';
+import type { SortableListDndItemWrapperProps, SortableListDndProps } from './SortableList.types';
 
-function SortableListItemWrapper<T>({
+function SortableListDndItemWrapper<T>({
   item,
   index,
   groupId,
   renderItem,
-}: SortableListItemWrapperProps<T>) {
+}: SortableListDndItemWrapperProps<T>) {
   const {
     ref: sortableRef,
     handleRef: sortableHandleRef,
@@ -57,7 +57,7 @@ function SortableListItemWrapper<T>({
   );
 }
 
-export function SortableList<T>({
+export function SortableListDnd<T>({
   value: controlledValue,
   defaultValue,
   onChange,
@@ -65,7 +65,7 @@ export function SortableList<T>({
   renderEmpty,
   className,
   ...props
-}: Readonly<SortableListProps<T>>) {
+}: Readonly<SortableListDndProps<T>>) {
   const instanceId = React.useId().replaceAll(':', '');
   const groupId = `__sortable-list-group__${instanceId}`;
   const droppableId = `__sortable-list-dropzone__${instanceId}`;
@@ -95,7 +95,7 @@ export function SortableList<T>({
           ? (
             <div className="space-y-2">
               {value.map((item, index) => (
-                <SortableListItemWrapper
+                <SortableListDndItemWrapper
                   key={item.id}
                   item={item}
                   index={index}
