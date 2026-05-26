@@ -6,31 +6,20 @@ import { isSortable, isSortableOperation, useSortable } from '@dnd-kit/react/sor
 import { GripVertical } from 'lucide-react';
 import * as React from 'react';
 
-export interface SortableListItem {
-  id: string
-  disabled?: boolean
-}
+import type {
+  SortableListContextValue,
+  SortableListItem,
+  SortableListItemProps,
+  SortableListNoContentProps,
+  SortableListProps,
+} from './SortableList.types';
 
-export interface SortableListProps {
-  value: SortableListItem[]
-  onChange: React.Dispatch<React.SetStateAction<SortableListItem[]>>
-  className?: string
-  children?: React.ReactNode
-}
-
-export interface SortableListItemProps {
-  id: string
-  children?: React.ReactNode
-}
-
-export interface SortableListNoContentProps {
-  children?: React.ReactNode
-}
-
-interface SortableListContextValue {
-  value: SortableListItem[]
-  groupId: string
-}
+export type {
+  SortableListItem,
+  SortableListItemProps,
+  SortableListNoContentProps,
+  SortableListProps,
+};
 
 const SortableListContext
   = React.createContext<SortableListContextValue | null>(null);
