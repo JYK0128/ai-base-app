@@ -9,8 +9,7 @@ import type { SortableListItem,
               SortableListProps,
               SortableListRenderItem } from './SortableList.types';
 
-export type { SortableListItem,
-  SortableListProps };
+export type { SortableListItem, SortableListProps };
 
 interface SortableListItemWrapperProps<T> {
   readonly item: SortableListItem & T

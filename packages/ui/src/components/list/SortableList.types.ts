@@ -1,4 +1,4 @@
-import type { ComponentPropsWithoutRef, ReactNode } from 'react';
+import type { ComponentPropsWithoutRef, CSSProperties, ReactNode } from 'react';
 
 export interface SortableListItem {
   id: string
@@ -11,11 +11,16 @@ export interface SortableListItemState {
   readonly isDisabled: boolean
 }
 
+export interface SortableListDragHandleProps {
+  readonly ref: (element: HTMLElement | null) => void
+  readonly style: CSSProperties
+}
+
 export interface SortableListRenderItemArgs<T> {
   readonly item: SortableListItem & T
   readonly index: number
   readonly state: SortableListItemState
-  readonly dragHandleProps: Record<string, any>
+  readonly dragHandleProps: SortableListDragHandleProps
 }
 
 export type SortableListRenderItem<T> = (

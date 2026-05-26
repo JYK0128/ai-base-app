@@ -60,8 +60,8 @@ export const Default: Story = {
             renderItem={({ item, state, dragHandleProps }) => (
               <div
                 className={cn(
-                  "flex items-center gap-3 rounded-md border bg-card p-3 shadow-sm hover:shadow-md hover:border-accent-foreground/10 transition-all duration-200",
-                  state.isDragging && "opacity-40 border-primary",
+                  'flex items-center gap-3 rounded-md border bg-card p-3 shadow-sm hover:shadow-md hover:border-accent-foreground/10 transition-all duration-200',
+                  state.isDragging && 'opacity-40 border-primary',
                 )}
               >
                 <button
@@ -70,7 +70,7 @@ export const Default: Story = {
                 >
                   <GripVertical className="size-4" />
                 </button>
-                
+
                 <div className="min-w-0 flex-1">
                   <div className="font-semibold text-sm">
                     {item.label}
