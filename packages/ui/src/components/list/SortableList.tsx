@@ -4,10 +4,10 @@ import { DragDropProvider, useDroppable } from '@dnd-kit/react';
 import { useSortable } from '@dnd-kit/react/sortable';
 import * as React from 'react';
 
-import { useSortableListHandlers, useSortableListValue } from './SortableList.hooks';
 import type { SortableListItem,
               SortableListProps,
-              SortableListRenderItem } from './SortableList.types';
+              SortableListRenderItem } from './SortableList.d';
+import { useSortableListHandlers, useSortableListValue } from './SortableList.hooks';
 
 export type { SortableListItem, SortableListProps };
 
