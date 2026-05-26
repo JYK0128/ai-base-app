@@ -54,3 +54,10 @@ export type SortableListProps<T>
   = & Omit<ComponentPropsWithoutRef<'div'>, 'value' | 'defaultValue' | 'onChange' | 'children'>
     & SortableListRenderProps<T>
     & SortableListValueProps<T>;
+
+export interface SortableListItemWrapperProps<T> {
+  readonly item: SortableListItem & T
+  readonly index: number
+  readonly groupId: string
+  readonly renderItem: SortableListRenderItem<T>
+}

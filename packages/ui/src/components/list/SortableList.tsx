@@ -5,14 +5,7 @@ import { useSortable } from '@dnd-kit/react/sortable';
 import * as React from 'react';
 
 import { useSortableListHandlers, useSortableListValue } from './SortableList.hooks';
-import type { SortableListItem, SortableListProps, SortableListRenderItem } from './SortableList.types';
-
-interface SortableListItemWrapperProps<T> {
-  readonly item: SortableListItem & T
-  readonly index: number
-  readonly groupId: string
-  readonly renderItem: SortableListRenderItem<T>
-}
+import type { SortableListItemWrapperProps, SortableListProps } from './SortableList.types';
 
 function SortableListItemWrapper<T>({
   item,
