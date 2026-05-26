@@ -5,66 +5,18 @@ import type { TreeNode,
               TreeNodeMoveInput,
               TreeNodeMoveResult } from '@/lib/tree';
 
-// ===========================================================================
-// 1. 기초 및 DND 기본 데이터 구조
-// ===========================================================================
-
-export interface SortableTreeMove<T> extends TreeNodeMoveResult<T> {
-  readonly previousRoot: TreeNode<T>
-}
-
-// ===========================================================================
-// 2. Render 함수 및 상태/인자 관련 명세 (Top-Down 선언)
-// ===========================================================================
-
-export interface SortableTreeRenderNodeState {
-  readonly isExpanded: boolean
-  readonly isDragging: boolean
-  readonly isDropTarget: boolean
-  readonly isDisabled: boolean
-}
-
-export interface SortableTreeRenderNodeArgs<T> {
-  readonly node: TreeNode<T>
-  readonly depth: number
-  readonly state: SortableTreeRenderNodeState
-}
-
-export type SortableTreeRenderNode<T> = (args: SortableTreeRenderNodeArgs<T>) => ReactNode;
-
-export interface SortableTreeRenderDropState {
-  readonly isOver: boolean
-  readonly isDropAllowed: boolean
-  readonly isDragging: boolean
-}
-
-export interface SortableTreeRenderDropIndicatorArgs {
-  readonly targetId: string
-  readonly position: Exclude<TreeNodeDropPosition, 'inside'>
-  readonly depth: number
-  readonly state: SortableTreeRenderDropState
-}
-
-export type SortableTreeRenderDropIndicator = (
-  args: SortableTreeRenderDropIndicatorArgs,
-) => ReactNode;
-
-export interface SortableTreeRenderEmptyArgs<T> {
-  readonly root: TreeNode<T>
-}
-
-export type SortableTreeRenderEmpty<T> = (
-  args: SortableTreeRenderEmptyArgs<T>,
-) => ReactNode;
-
-// ===========================================================================
-// 3. 컴포넌트 Props 및 제어부 명세
-// ===========================================================================
+// ---------------------------------------------------------------------------
+// 공개 입력 타입
+// ---------------------------------------------------------------------------
 
 export type SortableTreeBaseProps = Omit<
   ComponentPropsWithoutRef<'div'>,
   'children' | 'onChange' | 'role' | 'defaultValue'
 >;
+
+export interface SortableTreeMove<T> extends TreeNodeMoveResult<T> {
+  readonly previousRoot: TreeNode<T>
+}
 
 export type SortableTreeChangeHandler<T> = (
   nextValue: TreeNode<T>,
@@ -72,6 +24,16 @@ export type SortableTreeChangeHandler<T> = (
 ) => void;
 
 export type SortableTreeExpandedIdsChangeHandler = (expandedIds: string[]) => void;
+
+export type SortableTreeRenderNode<T> = (args: SortableTreeRenderNodeArgs<T>) => ReactNode;
+
+export type SortableTreeRenderDropIndicator = (
+  args: SortableTreeRenderDropIndicatorArgs,
+) => ReactNode;
+
+export type SortableTreeRenderEmpty<T> = (
+  args: SortableTreeRenderEmptyArgs<T>,
+) => ReactNode;
 
 export type SortableTreeNodeDisabledResolver<T> = (node: TreeNode<T>) => boolean;
 
@@ -120,9 +82,50 @@ export type SortableTreeProps<T>
     & SortableTreeExpandedStateProps
     & SortableTreeValueProps<T>;
 
-// ===========================================================================
-// 4. DND 및 내부 계산 전용 데이터 구조
-// ===========================================================================
+// ---------------------------------------------------------------------------
+// render 함수 인자
+// ---------------------------------------------------------------------------
+
+/**
+ * renderNode에서 스타일 분기에만 쓰는 노드 상태다.
+ * DND ref나 버튼 이벤트 같은 DOM 연결은 SortableTreeNodeRow 내부에서 처리한다.
+ */
+export interface SortableTreeRenderNodeState {
+  readonly isExpanded: boolean
+  readonly isDragging: boolean
+  readonly isDropTarget: boolean
+  readonly isDisabled: boolean
+}
+
+export interface SortableTreeRenderNodeArgs<T> {
+  readonly node: TreeNode<T>
+  readonly depth: number
+  readonly state: SortableTreeRenderNodeState
+}
+
+/**
+ * drop indicator가 드래그 상태에 따라 UI를 바꿀 때 쓰는 상태다.
+ */
+export interface SortableTreeRenderDropState {
+  readonly isOver: boolean
+  readonly isDropAllowed: boolean
+  readonly isDragging: boolean
+}
+
+export interface SortableTreeRenderDropIndicatorArgs {
+  readonly targetId: string
+  readonly position: Exclude<TreeNodeDropPosition, 'inside'>
+  readonly depth: number
+  readonly state: SortableTreeRenderDropState
+}
+
+export interface SortableTreeRenderEmptyArgs<T> {
+  readonly root: TreeNode<T>
+}
+
+// ---------------------------------------------------------------------------
+// DND 메타데이터
+// ---------------------------------------------------------------------------
 
 export interface TreeNodeDropTargetData {
   readonly type: 'tree-node'
@@ -137,6 +140,10 @@ export interface TreeDropZoneData {
 }
 
 export type TreeDropTargetData = TreeNodeDropTargetData | TreeDropZoneData;
+
+// ---------------------------------------------------------------------------
+// 내부 계산 타입
+// ---------------------------------------------------------------------------
 
 export interface SortableTreeVisibleItem<T> {
   readonly node: TreeNode<T>
@@ -168,9 +175,9 @@ export type SortableTreeResolvedBehaviorProps<T> = {
   >]-?: NonNullable<SortableTreeBehaviorProps<T>[K]>
 };
 
-// ===========================================================================
-// 5. 내부 컴포넌트 전용 Props 명세
-// ===========================================================================
+// ---------------------------------------------------------------------------
+// 내부 컴포넌트 props
+// ---------------------------------------------------------------------------
 
 export type SortableTreeViewportProps<T>
   = & SortableTreeBaseProps
@@ -229,9 +236,9 @@ export type SortableTreeDragOverlayNodeProps<T>
     readonly depth: number
   };
 
-// ===========================================================================
-// 6. 훅 전용 타입 명세
-// ===========================================================================
+// ---------------------------------------------------------------------------
+// 훅 타입 명세
+// ---------------------------------------------------------------------------
 
 export interface UseSortableTreeMoveControllerArgs<T> {
   readonly value: TreeNode<T>

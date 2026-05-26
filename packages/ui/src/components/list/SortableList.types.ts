@@ -1,18 +1,27 @@
 import type { DragEndEvent } from '@dnd-kit/react';
 import type { ComponentPropsWithoutRef, CSSProperties, ReactNode } from 'react';
 
-// ===========================================================================
-// 1. 기초 및 DND 기본 데이터 구조
-// ===========================================================================
+// ---------------------------------------------------------------------------
+// 공개 입력 타입
+// ---------------------------------------------------------------------------
+
+export type SortableListBaseProps = Omit<
+  ComponentPropsWithoutRef<'div'>,
+  'value' | 'defaultValue' | 'onChange' | 'children'
+>;
 
 export interface SortableListItem {
   readonly id: string
   readonly disabled?: boolean
 }
 
-// ===========================================================================
-// 2. Render 함수 및 상태/인자 관련 명세 (Top-Down 선언)
-// ===========================================================================
+export type SortableListChangeHandler<T> = (
+  nextValue: (SortableListItem & T)[],
+) => void;
+
+// ---------------------------------------------------------------------------
+// render 함수 인자
+// ---------------------------------------------------------------------------
 
 export interface SortableListRenderItemState {
   readonly isDragging: boolean
@@ -33,24 +42,15 @@ export interface SortableListRenderItemArgs<T> {
   readonly ref: (element: HTMLElement | null) => void
 }
 
+// ---------------------------------------------------------------------------
+// 공개 입력 타입 (계속)
+// ---------------------------------------------------------------------------
+
 export type SortableListRenderItem<T> = (
   args: SortableListRenderItemArgs<T>,
 ) => ReactNode;
 
 export type SortableListRenderEmpty = () => ReactNode;
-
-// ===========================================================================
-// 3. 컴포넌트 Props 및 제어부 명세
-// ===========================================================================
-
-export type SortableListBaseProps = Omit<
-  ComponentPropsWithoutRef<'div'>,
-  'value' | 'defaultValue' | 'onChange' | 'children'
->;
-
-export type SortableListChangeHandler<T> = (
-  nextValue: (SortableListItem & T)[],
-) => void;
 
 export interface SortableListRenderProps<T> {
   readonly renderItem?: SortableListRenderItem<T>
@@ -74,9 +74,9 @@ export type SortableListProps<T>
     & SortableListRenderProps<T>
     & SortableListValueProps<T>;
 
-// ===========================================================================
-// 4. 내부 컴포넌트 전용 Props 명세
-// ===========================================================================
+// ---------------------------------------------------------------------------
+// 내부 컴포넌트 props
+// ---------------------------------------------------------------------------
 
 export interface SortableListRowProps<T> {
   readonly item: SortableListItem & T
@@ -97,9 +97,9 @@ export type SortableListViewportProps<T>
       readonly droppableId: string
     };
 
-// ===========================================================================
-// 5. 훅 전용 타입 명세
-// ===========================================================================
+// ---------------------------------------------------------------------------
+// 훅 타입 명세
+// ---------------------------------------------------------------------------
 
 export interface UseSortableListHandlersArgs<T> {
   readonly value: (SortableListItem & T)[]
