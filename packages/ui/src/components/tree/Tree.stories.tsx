@@ -5,10 +5,10 @@ import { Button } from '@/components/ui/button';
 import type { TreeNode } from '@/lib/tree';
 import { cn } from '@/lib/utils';
 
-import { TreeDnd,
-         type TreeDndMove,
-         type TreeDndRenderDropIndicatorArgs,
-         type TreeDndRenderNodeArgs } from './Tree';
+import { TreeDnd } from './Tree';
+import type { TreeDndMove,
+              TreeDndRenderDropIndicatorArgs,
+              TreeDndRenderNodeArgs } from './Tree.types';
 
 interface WorkspaceNode {
   readonly label: string

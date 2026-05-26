@@ -13,18 +13,10 @@ import { DEFAULT_INDENT,
          getDefaultNodeDisabled } from './Tree.utils';
 import { TreeViewport } from './TreeViewport';
 
-export type { TreeDndMove,
-  TreeDndProps,
-  TreeDndRenderDropIndicatorArgs,
-  TreeDndRenderDropState,
-  TreeDndRenderEmptyArgs,
-  TreeDndRenderNodeArgs,
-  TreeDndRenderNodeState } from './Tree.types';
-
 /**
  * TreeNode 루트 데이터를 DND 가능한 트리 UI로 렌더링한다.
  */
-function TreeDnd<T>(props: Readonly<TreeDndProps<T>>) {
+export function TreeDnd<T>(props: Readonly<TreeDndProps<T>>) {
   const {
     value: controlledValue,
     defaultValue,
@@ -85,5 +77,3 @@ function TreeDnd<T>(props: Readonly<TreeDndProps<T>>) {
     </DragDropProvider>
   );
 }
-
-export { TreeDnd };

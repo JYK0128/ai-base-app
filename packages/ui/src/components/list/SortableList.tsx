@@ -1,38 +1,22 @@
 'use client';
 
-import { arrayMove, move } from '@dnd-kit/helpers';
 import { DragDropProvider, useDroppable } from '@dnd-kit/react';
-import { isSortable, isSortableOperation, useSortable } from '@dnd-kit/react/sortable';
+import { useSortable } from '@dnd-kit/react/sortable';
 import { GripVertical } from 'lucide-react';
 import * as React from 'react';
 
-import type {
-  SortableListContextValue,
-  SortableListItem,
+import { SortableListContext,
+         useSortableListContext,
+         useSortableListHandlers } from './SortableList.hooks';
+import type { SortableListItem,
+              SortableListItemProps,
+              SortableListNoContentProps,
+              SortableListProps } from './SortableList.types';
+
+export type { SortableListItem,
   SortableListItemProps,
   SortableListNoContentProps,
-  SortableListProps,
-} from './SortableList.types';
-
-export type {
-  SortableListItem,
-  SortableListItemProps,
-  SortableListNoContentProps,
-  SortableListProps,
-};
-
-const SortableListContext
-  = React.createContext<SortableListContextValue | null>(null);
-
-function useSortableListContext() {
-  const context = React.useContext(SortableListContext);
-
-  if (!context) {
-    throw new Error('SortableList.Item must be used within SortableList.');
-  }
-
-  return context;
-}
+  SortableListProps };
 
 function SortableListItem({
   id,
@@ -134,41 +118,13 @@ function SortableList({
     );
   }
 
+  const { handleDragEnd } = useSortableListHandlers({
+    onChange,
+    droppableId,
+  });
+
   return (
-    <DragDropProvider
-      onDragEnd={(event) => {
-        if (event.canceled) {
-          return;
-        }
-
-        const { source, target } = event.operation;
-        if (!source || !target) {
-          return;
-        }
-
-        if (target.id === droppableId) {
-          if (!isSortable(source)) {
-            return;
-          }
-
-          onChange((current) => {
-            const lastIndex = current.length - 1;
-            if (lastIndex < 0 || source.initialIndex === lastIndex) {
-              return current;
-            }
-
-            return arrayMove(current, source.initialIndex, lastIndex);
-          });
-          return;
-        }
-
-        if (!isSortableOperation(event.operation)) {
-          return;
-        }
-
-        onChange((current) => move(current, event));
-      }}
-    >
+    <DragDropProvider onDragEnd={handleDragEnd}>
       <SortableListContext.Provider value={contextValue}>
         <div ref={rootDropRef} role="list" aria-label="Sortable list editor" className={className}>
           {value.length > 0
