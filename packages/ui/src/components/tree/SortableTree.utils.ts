@@ -119,7 +119,7 @@ export function buildVisibleTreeItems<T>(
   expandedIds: ReadonlySet<string>,
   parentId: string,
   depth = 0,
- ): SortableTreeVisibleItem<T>[] {
+): SortableTreeVisibleItem<T>[] {
   const visibleItems: SortableTreeVisibleItem<T>[] = [];
 
   for (let index = 0; index < nodes.length; index += 1) {

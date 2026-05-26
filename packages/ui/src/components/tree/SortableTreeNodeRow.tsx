@@ -3,8 +3,7 @@ import * as React from 'react';
 
 import { cn } from '@/lib/utils';
 
-import type { TreeNodeDropTargetData,
-              SortableTreeNodeRowProps } from './SortableTree.types';
+import type { SortableTreeNodeRowProps, TreeNodeDropTargetData } from './SortableTree.types';
 import { getDefaultNodeLabel } from './SortableTree.utils';
 import { SortableTreeDropIndicator } from './SortableTreeDropIndicator';
 

@@ -8,6 +8,7 @@ import { moveTreeNode,
 
 import type { SortableTreeChangeHandler,
               SortableTreeDropMoveResolver,
+              SortableTreeDropZoneState,
               SortableTreeExpandedIdsChangeHandler,
               SortableTreeMove,
               SortableTreeVisibleItem,
@@ -16,13 +17,6 @@ import type { SortableTreeChangeHandler,
 import { collectNodeIdsWithChildren,
          createDropZoneId,
          TREE_DROP_POSITIONS } from './SortableTree.utils';
-
-export interface SortableTreeDropZoneState {
-  readonly id: string
-  readonly isOver: boolean
-  readonly isDropAllowed: boolean
-  readonly setNodeRef: (element: HTMLElement | null) => void
-}
 
 /**
  * value가 있으면 외부 상태를 쓰고, defaultValue만 있으면 내부 상태를 갱신한다.

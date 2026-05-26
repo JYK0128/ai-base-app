@@ -157,6 +157,13 @@ export type SortableTreeDropMoveResolver<T> = (
   position: TreeNodeDropPosition,
 ) => SortableTreeMove<T> | undefined;
 
+export interface SortableTreeDropZoneState {
+  readonly id: string
+  readonly isOver: boolean
+  readonly isDropAllowed: boolean
+  readonly setNodeRef: (element: HTMLElement | null) => void
+}
+
 export type SortableTreeResolvedRenderProps<T> = {
   readonly [K in keyof SortableTreeRenderProps<T>]-?: NonNullable<SortableTreeRenderProps<T>[K]>
 };
