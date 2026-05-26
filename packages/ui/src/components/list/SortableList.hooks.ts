@@ -3,7 +3,7 @@ import type { DragEndEvent } from '@dnd-kit/react';
 import { isSortable, isSortableOperation } from '@dnd-kit/react/sortable';
 import * as React from 'react';
 
-import type { SortableListItem } from './SortableList.d';
+import type { SortableListItem } from './SortableList.types';
 
 export function useSortableListValue<T>(
   controlledValue: (SortableListItem & T)[] | undefined,
