@@ -1,6 +1,6 @@
 import { EntityManager } from '@mikro-orm/core';
 import { NotFoundException } from '@nestjs/common';
-import { Resource, ResourceType } from '@pkg/database';
+import { Resource, ResourceScope, ResourceType } from '@pkg/database';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { GetResourceHandler } from './get-resource.handler';
@@ -20,17 +20,18 @@ describe('GetResourceHandler', () => {
     handler = new GetResourceHandler(em);
   });
 
-  it('returns a single resource', async () => {
+  it('returns a single platform resource', async () => {
     const resource = {
       id: 'res-1',
       code: 'RESOURCE',
-      name: '리소스 관리',
+      name: '권한 관리',
       type: ResourceType.MENU,
+      scope: ResourceScope.PLATFORM,
       path: '/resources',
-      icon: 'Folder',
+      icon: 'Key',
       sortOrder: 1,
-      actions: ['CREATE', 'READ'],
-      constraint: 'READ',
+      actions: ['READ', 'UPDATE'],
+      constraint: undefined,
       parent: { id: 'parent-1' } as Resource,
     } as unknown as Resource;
 
@@ -41,13 +42,14 @@ describe('GetResourceHandler', () => {
     expect(result).toEqual({
       id: 'res-1',
       code: 'RESOURCE',
-      name: '리소스 관리',
+      name: '권한 관리',
       type: ResourceType.MENU,
+      scope: ResourceScope.PLATFORM,
       path: '/resources',
-      icon: 'Folder',
+      icon: 'Key',
       sortOrder: 1,
-      actions: ['CREATE', 'READ'],
-      constraint: 'READ',
+      actions: ['READ', 'UPDATE'],
+      constraint: undefined,
       parentId: 'parent-1',
     });
 

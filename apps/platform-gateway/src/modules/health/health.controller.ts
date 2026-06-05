@@ -6,7 +6,7 @@ import { HealthCheck,
          MicroserviceHealthIndicator } from '@nestjs/terminus';
 
 import { Public } from '@/common/decorators/public.decorator';
-import { ENV } from '@/common/env';
+import { ENV } from '@/env';
 
 @Controller({
   path: 'health',

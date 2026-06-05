@@ -1,7 +1,7 @@
 import { ResourceType } from '@pkg/database';
 
 /**
- * 리소스 생성 커맨드
+ * 플랫폼 리소스 생성 커맨드
  */
 export class CreateResourceCommand {
   constructor(
@@ -9,8 +9,6 @@ export class CreateResourceCommand {
     readonly name: string,
     readonly type: ResourceType,
     readonly path?: string,
-    readonly icon?: string,
     readonly parentId?: string,
-    readonly sortOrder?: number,
   ) {}
 }

@@ -1,47 +1,21 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { ClsService } from 'nestjs-cls';
-import { defaultIfEmpty, firstValueFrom } from 'rxjs';
 
-import { type TranslationBulkDto,
-         type TranslationCreateDto,
-         type TranslationDeleteDto,
-         type TranslationsQueryDto,
-         type TranslationUpdateDto } from './dto/i18n-request.dto';
-import type { LocalesDataDto,
-              TranslationBulkDataDto,
-              TranslationCreateDataDto,
-              TranslationDataDto,
-              TranslationDeleteDataDto,
-              TranslationListDataDto,
-              TranslationUpdateDataDto } from './dto/i18n-response.dto';
+import { CoreClient } from '@/common/clients/core.client';
+
+import { type TranslationBulkDto, type TranslationCreateDto, type TranslationDeleteDto, type TranslationsQueryDto, type TranslationUpdateDto } from './dto/i18n-request.dto';
+import type { LocalesDataDto, TranslationBulkDataDto, TranslationCreateDataDto, TranslationDataDto, TranslationDeleteDataDto, TranslationListDataDto, TranslationUpdateDataDto } from './dto/i18n-response.dto';
 import { I18N_SERVICE, I18N_SERVICE_PATTERNS } from './i18n.constants';
 import { parseKeys } from './i18n.helpers';
 
 @Injectable()
-export class I18nClient {
+export class I18nClient extends CoreClient {
   constructor(
-    @Inject(I18N_SERVICE)
-    private readonly client: ClientProxy,
-    private readonly cls: ClsService,
-  ) {}
-
-  private async send<TResult = unknown, TInput extends object = object>(pattern: string, data: TInput): Promise<TResult> {
-    const payload = {
-      ...data,
-      traceId: this.cls.get('traceId'),
-      sid: this.cls.get('sid'),
-      clientIp: this.cls.get('clientIp'),
-      userId: this.cls.get('userId'),
-      organizationId: this.cls.get('organizationId'),
-      acceptLanguage: this.cls.get('acceptLanguage'),
-    };
-
-    return firstValueFrom(
-      this.client.send<TResult>(pattern, payload).pipe(
-        defaultIfEmpty(undefined as TResult),
-      ),
-    );
+    @Inject(I18N_SERVICE) client: ClientProxy,
+    cls: ClsService,
+  ) {
+    super(client, cls);
   }
 
   async getLocales(): Promise<LocalesDataDto> {

@@ -11,7 +11,7 @@ import { Logger } from 'nestjs-pino';
 
 import { AppModule } from '@/app.module';
 import { applySwaggerSchemas } from '@/common/decorators/swagger-schema.decorator';
-import { ENV } from '@/common/env';
+import { ENV } from '@/env';
 
 export function configureApp(app: NestExpressApplication) {
   const expressApp = app.getHttpAdapter().getInstance();

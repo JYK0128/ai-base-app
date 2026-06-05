@@ -25,11 +25,11 @@ export class DeleteTranslationHandler implements ICommandHandler<DeleteTranslati
     await this.validateKeyPresent(command.key);
 
     const localeCode = await this.identifyActiveLocaleCode(command.locale);
-    const record = await this.identifyTranslation(command.namespace, command.key, localeCode);
+    const translation = await this.identifyTranslation(command.namespace, command.key, localeCode);
 
-    record.deletedAt = new Date();
+    this.softDeleteTranslation(translation);
 
-    return { id: record.id };
+    return { id: translation.id };
   }
 
   private async validateNamespacePresent(namespace?: string) {
@@ -41,18 +41,25 @@ export class DeleteTranslationHandler implements ICommandHandler<DeleteTranslati
   }
 
   private async identifyActiveLocaleCode(locale: string) {
-    const record = await this.localeRepo.findOne({ code: locale, isActive: true });
+    const record: I18nLocale | null = await this.localeRepo.findOne({ code: locale, isActive: true });
     const active = await this.Asserter.assert(record, 'INVALID_LOCALE');
     return active.code;
   }
 
-  private async identifyTranslation(namespace: string, key: string, localeCode: string) {
-    const record = await this.translationRepo.findOne({
+  private async identifyTranslation(namespace: string, key: string, localeCode: string): Promise<I18nTranslation> {
+    const record: I18nTranslation | null = await this.translationRepo.findOne({
       namespace,
       key,
       localeCode,
       deletedAt: null,
     });
-    return this.Asserter.assert(record, 'TRANSLATION_NOT_FOUND');
+    return await this.Asserter.assert(record, 'TRANSLATION_NOT_FOUND');
+  }
+
+  /**
+   * 번역 레코드를 soft delete 합니다.
+   */
+  private softDeleteTranslation(translation: I18nTranslation): void {
+    translation.remove();
   }
 }

@@ -2,12 +2,12 @@ import { CanActivate, ExecutionContext, ForbiddenException, Injectable, Unauthor
 import { Reflector } from '@nestjs/core';
 import { JwtService } from '@nestjs/jwt';
 import { Request } from 'express';
+import type { JWTPayload } from 'jose';
 
 import { BYPASS_KEY, BYPASS_POLICIES } from '@/common/decorators/bypass.decorator';
 import { PERMISSIONS_KEY } from '@/common/decorators/permissions.decorator';
 import { IS_PERSONAL_KEY } from '@/common/decorators/personal.decorator';
 import { IS_PUBLIC_KEY } from '@/common/decorators/public.decorator';
-import type { JWTPayload } from '@/common/types/request.type';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
@@ -31,7 +31,13 @@ export class AuthGuard implements CanActivate {
   }
 
   private verifyToken(request: Request): JWTPayload {
-    const [scheme, token] = request.headers['authorization']?.split(' ') || [];
+    const authorizationHeader = request.headers['authorization'];
+
+    if (typeof authorizationHeader !== 'string') {
+      throw new UnauthorizedException('Authentication token is missing');
+    }
+
+    const [scheme, token] = authorizationHeader.split(' ');
 
     if (scheme !== 'Bearer' || !token) {
       throw new UnauthorizedException('Authentication token is missing');
@@ -53,10 +59,10 @@ export class AuthGuard implements CanActivate {
   }
 
   private handleBypass(context: ExecutionContext, payload: JWTPayload) {
-    const bypassPolicies = this.reflector.getAllAndOverride<string[]>(BYPASS_KEY, [
+    const bypassPolicies = (this.reflector.getAllAndOverride<string[]>(BYPASS_KEY, [
       context.getHandler(),
       context.getClass(),
-    ]) || [];
+    ]) ?? []);
 
     // 비밀번호 변경이 필요한 토큰인데, 해당 정책 우회가 없는 경우
     if (payload.mustChangePassword && !bypassPolicies.some((p) => p === BYPASS_POLICIES.PASSWORD)) {
@@ -77,25 +83,23 @@ export class AuthGuard implements CanActivate {
       const query = request.query as Record<string, unknown>;
       const params = request.params as Record<string, unknown>;
 
-      // 요청에서 id(UUID) 또는 userId(ID로 전송된 경우) 추출
-      const requestId = (params?.id || params?.userId || body?.id || body?.userId || query?.id || query?.userId) as string | undefined;
+      // 요청에서 accountId(UUID)로 전송된 값 추출
+      const ownerId = (params?.id || params?.accountId || body?.id || body?.accountId || query?.id || query?.accountId) as string | undefined;
       const organizationId = (params?.organizationId || body?.organizationId || query?.organizationId) as string | undefined;
 
-      if (!requestId) {
+      if (!ownerId) {
         throw new ForbiddenException('Resource owner identification (id) is required');
       }
 
-      // 토큰의 sub(DB ID)와 요청의 ID가 일치하는지 확인
-      const isOwner = payload.sub === requestId;
+      // 토큰의 accountId(DB ID)와 요청의 ID가 일치하는지 확인
+      const accountId = payload.accountId;
+      const isOwner = accountId === ownerId;
 
       if (!isOwner) {
         throw new ForbiddenException('You do not have permission to access this personal resource');
       }
 
-      if (!organizationId) {
-        throw new ForbiddenException('Organization identification is required');
-      }
-      if (payload.organizationId !== organizationId) {
+      if (organizationId && payload.organizationId && payload.organizationId !== organizationId) {
         throw new ForbiddenException('You do not have permission to access this organization resource');
       }
     }
@@ -108,11 +112,6 @@ export class AuthGuard implements CanActivate {
     ]);
 
     if (!requiredPermissions || requiredPermissions.length === 0) {
-      return;
-    }
-
-    // 슈퍼어드민 바이패스
-    if (payload.roles?.some((role) => role === 'SUPERADMIN')) {
       return;
     }
 

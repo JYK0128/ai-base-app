@@ -1,8 +1,7 @@
 import { Transactional } from '@mikro-orm/decorators/legacy';
 import { InjectRepository } from '@mikro-orm/nestjs';
-import { EntityManager } from '@mikro-orm/postgresql';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { Resource, ResourceRepository, ResourceType } from '@pkg/database';
+import { Resource, ResourceRepository } from '@pkg/database';
 
 import { UpdateResourcePermissionsCommand } from './update-resource-permissions.command';
 import { UpdateResourcePermissionsAsserter } from './update-resource-permissions.error';
@@ -14,7 +13,6 @@ export class UpdateResourcePermissionsHandler implements ICommandHandler<UpdateR
   constructor(
     @InjectRepository(Resource)
     private readonly resourceRepo: ResourceRepository,
-    private readonly em: EntityManager,
   ) {}
 
   @Transactional()
@@ -26,7 +24,7 @@ export class UpdateResourcePermissionsHandler implements ICommandHandler<UpdateR
 
   private async identifyResource(id: string): Promise<Resource> {
     return await this.Asserter.assert(
-      this.resourceRepo.findOne({ id }),
+      this.resourceRepo.findOne({ id }, { populate: ['parent', 'children'] }),
       'RESOURCE_NOT_FOUND',
     );
   }
@@ -35,12 +33,17 @@ export class UpdateResourcePermissionsHandler implements ICommandHandler<UpdateR
     resource: Resource,
     command: UpdateResourcePermissionsCommand,
   ): Promise<void> {
-    if (resource.type === ResourceType.MENU) {
-      const children = await this.resourceRepo.find({ parent: resource });
-      const newActions = command.actions || [];
+    if (resource.isMenu) {
+      const children: Resource[] = await this.resourceRepo.find(
+        {
+          parent: resource,
+        },
+        { populate: ['children'] },
+      );
+      const newActions = command.actions;
 
       for (const child of children) {
-        if (child.type === ResourceType.COMPONENT && child.constraint) {
+        if (child.isComponent && child.constraint) {
           await this.Asserter.throwIf(
             !newActions.includes(child.constraint),
             'CANNOT_REMOVE_ACTIVE_CONSTRAINT',

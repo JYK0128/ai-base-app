@@ -1,6 +1,7 @@
 import { EntityManager } from '@mikro-orm/core';
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
-import { Resource } from '@pkg/database';
+import { Organization, Resource, ResourceScope } from '@pkg/database';
+import { ClsService } from 'nestjs-cls';
 
 import { GetResourcesAsserter } from './get-resources.error';
 import { GetResourcesQuery } from './get-resources.query';
@@ -10,6 +11,7 @@ export interface ResourceTreeNode {
   code: string
   name: string
   type: string
+  scope: ResourceScope
   path?: string
   icon?: string
   sortOrder?: number
@@ -18,24 +20,40 @@ export interface ResourceTreeNode {
   children: ResourceTreeNode[]
 }
 
+interface ResourceNodeSource {
+  id: string
+  code: string
+  name: string
+  type: string
+  scope: ResourceScope
+  path?: string
+  icon?: string
+  sortOrder?: number
+  actions: string[]
+  constraint?: string
+  parentId?: string
+}
+
 /**
- * 자원 트리 조회 핸들러
+ * 플랫폼 리소스 트리 조회 핸들러
  */
 @QueryHandler(GetResourcesQuery)
 export class GetResourcesHandler implements IQueryHandler<GetResourcesQuery> {
   private readonly Asserter = GetResourcesAsserter;
 
-  constructor(private readonly em: EntityManager) {}
+  constructor(
+    private readonly em: EntityManager,
+    private readonly cls: ClsService,
+  ) {}
 
   async execute(query: GetResourcesQuery): Promise<ResourceTreeNode[]> {
-    const resources = await this.identifyResources();
+    const resources = await this.identifyResources(query.scope);
     const tree = this.processResources(resources);
 
-    if (query.permissions || query.roles) {
+    if (query.filterByPermissions) {
       return this.filterAllowedResources(
         tree,
-        query.permissions ?? [],
-        query.roles ?? [],
+        query.permissions,
       );
     }
 
@@ -45,63 +63,78 @@ export class GetResourcesHandler implements IQueryHandler<GetResourcesQuery> {
   private filterAllowedResources(
     nodes: ResourceTreeNode[],
     userPermissions: string[],
-    userRoles: string[],
   ): ResourceTreeNode[] {
-    // 슈퍼어드민 바이패스
-    if (userRoles.some((role) => role === 'SUPERADMIN')) {
-      return nodes;
-    }
-
     return nodes
       .map((node) => {
-        // 자식 노드 필터링
-        const filteredChildren = node.children
-          ? this.filterAllowedResources(node.children, userPermissions, userRoles)
+        const filteredChildren = node.children.length > 0
+          ? this.filterAllowedResources(node.children, userPermissions)
           : [];
 
-        // 현재 노드의 READ 권한 검사
         const requiredPermission = `${node.code}:READ`;
-        const hasDirectPermission = userPermissions.some((owned) => owned === requiredPermission);
+        const hasPermission = userPermissions.some((owned) => owned === requiredPermission);
+        const hasReadAction = node.actions.includes('READ');
 
-        // 직접 권한이 있거나, 자녀 중에 허용된 노드가 있는 경우 노드를 유지
-        if (hasDirectPermission || filteredChildren.length > 0) {
+        if ((hasPermission && hasReadAction) || filteredChildren.length > 0) {
           return {
             ...node,
             children: filteredChildren,
           };
         }
+
         return null;
       })
       .filter((node): node is ResourceTreeNode => node !== null);
   }
 
-  private async identifyResources(): Promise<Resource[]> {
-    return await this.Asserter.assert(
-      this.em.find(
-        Resource,
-        {},
-        {
-          orderBy: { sortOrder: 'ASC' },
-        },
-      ),
+  private async identifyResources(
+    scope: ResourceScope,
+  ): Promise<ResourceNodeSource[]> {
+    const organizationId = this.cls.get('organizationId');
+    const organization = organizationId
+      ? await this.em.findOne(Organization, { id: organizationId })
+      : null;
+
+    const scopes = organization?.code === 'platform' && scope === ResourceScope.ORGANIZATION
+      ? [ResourceScope.PLATFORM, ResourceScope.ORGANIZATION]
+      : [scope];
+
+    const resources: Resource[] = await this.Asserter.assert(
+      this.em.find(Resource, scopes.length === 1 ? { scope: scopes[0] } : { scope: { $in: scopes } }, {
+        populate: ['parent'],
+        orderBy: { sortOrder: 'ASC', code: 'ASC' },
+      }),
       'LOAD_FAILED',
     );
+
+    return resources.map((resource) => ({
+      id: resource.id,
+      code: resource.code,
+      name: resource.name,
+      type: resource.type,
+      scope: resource.scope,
+      path: resource.path,
+      icon: resource.icon,
+      sortOrder: resource.sortOrder,
+      actions: resource.actions,
+      constraint: resource.constraint,
+      parentId: resource.parent?.id,
+    }));
   }
 
-  private processResources(resources: Resource[]): ResourceTreeNode[] {
+  private processResources(resources: ResourceNodeSource[]): ResourceTreeNode[] {
     const map = new Map<string, ResourceTreeNode>();
 
-    // 1. 모든 자원을 트리 노드 형식으로 변환하여 Map에 보관
     for (const res of resources) {
       map.set(res.id, {
         id: res.id,
         code: res.code,
         name: res.name,
         type: res.type,
+        scope: res.scope,
         path: res.path,
         icon: res.icon,
         sortOrder: res.sortOrder,
-        actions: res.actions || [],
+        actions: res.actions,
         constraint: res.constraint,
         children: [],
       });
@@ -109,37 +142,49 @@ export class GetResourcesHandler implements IQueryHandler<GetResourcesQuery> {
 
     const roots: ResourceTreeNode[] = [];
 
-    // 2. 부모-자식 관계에 맞춰 트리 조립
     for (const res of resources) {
       const node = map.get(res.id);
       if (!node) continue;
 
-      if (res.parent) {
-        const parentId = res.parent.id;
-        const parentNode = map.get(parentId);
+      if (res.parentId) {
+        const parentNode = map.get(res.parentId);
         if (parentNode) {
           parentNode.children.push(node);
-        }
-        else {
-          roots.push(node);
+          continue;
         }
       }
-      else {
-        roots.push(node);
-      }
+
+      roots.push(node);
     }
 
-    // 3. 자식 요소들을 sortOrder 기준으로 정렬
-    const sortChildren = (nodes: ResourceTreeNode[]) => {
-      nodes.sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0));
+    const sortNodes = (nodes: ResourceTreeNode[]) => {
+      nodes.sort((a, b) => {
+        if (a.sortOrder === undefined && b.sortOrder === undefined) {
+          return a.code.localeCompare(b.code);
+        }
+        if (a.sortOrder === undefined) {
+          return 1;
+        }
+        if (b.sortOrder === undefined) {
+          return -1;
+        }
+
+        const orderDiff = a.sortOrder - b.sortOrder;
+        if (orderDiff !== 0) {
+          return orderDiff;
+        }
+
+        return a.code.localeCompare(b.code);
+      });
+
       for (const node of nodes) {
         if (node.children.length > 0) {
-          sortChildren(node.children);
+          sortNodes(node.children);
         }
       }
     };
 
-    sortChildren(roots);
+    sortNodes(roots);
     return roots;
   }
 }

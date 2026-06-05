@@ -1,6 +1,6 @@
 import { EntityManager } from '@mikro-orm/core';
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
-import { Resource } from '@pkg/database';
+import { Resource, ResourceScope } from '@pkg/database';
 
 import { GetResourceAsserter } from './get-resource.error';
 import { GetResourceQuery } from './get-resource.query';
@@ -10,6 +10,7 @@ export interface ResourceNodeDetail {
   code: string
   name: string
   type: string
+  scope: ResourceScope
   path?: string
   icon?: string
   sortOrder?: number
@@ -30,10 +31,11 @@ export class GetResourceHandler implements IQueryHandler<GetResourceQuery> {
   }
 
   private async identifyResource(id: string): Promise<Resource> {
-    return await this.Asserter.assert(
+    const resource: Resource = await this.Asserter.assert(
       this.em.findOne(Resource, { id }, { populate: ['parent'] }),
       'RESOURCE_NOT_FOUND',
     );
+    return resource;
   }
 
   private processResource(resource: Resource): ResourceNodeDetail {
@@ -42,10 +44,11 @@ export class GetResourceHandler implements IQueryHandler<GetResourceQuery> {
       code: resource.code,
       name: resource.name,
       type: resource.type,
+      scope: resource.scope,
       path: resource.path,
       icon: resource.icon,
       sortOrder: resource.sortOrder,
-      actions: resource.actions || [],
+      actions: resource.actions,
       constraint: resource.constraint,
       parentId: resource.parent?.id,
     };

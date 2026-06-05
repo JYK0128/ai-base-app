@@ -1,5 +1,5 @@
 /**
- * 단건 자원 조회 쿼리
+ * 단건 플랫폼 리소스 조회 쿼리
  */
 export class GetResourceQuery {
   constructor(

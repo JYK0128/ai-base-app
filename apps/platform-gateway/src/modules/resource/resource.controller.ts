@@ -1,23 +1,25 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import type { JWTPayload } from 'jose';
 
 import { CurrentUser } from '@/common/decorators/current-user.decorator';
 import { CheckPermissions } from '@/common/decorators/permissions.decorator';
 import { SwaggerResult } from '@/common/decorators/swagger.decorator';
-import type { JWTPayload } from '@/common/types/request.type';
 import { ApiResponse } from '@/common/types/response.type';
 
-import {
-  CreateResourceDto,
-  CreateResourceResponseDto,
-  DeleteResourceBodyDto,
-  DeleteResourceResponseDto,
-  ResourceDetailResponseDto,
-  ResourceResponseDto,
-  UpdateResourceDetailBodyDto,
-  UpdateResourcePermissionsDto,
-  UpdateResourceSortDto,
-} from './dto/resource.dto';
+import { CreatePermissionSetDto,
+         CreateResourceDto,
+         CreateResourceResponseDto,
+         DeleteResourceBodyDto,
+         DeleteResourceResponseDto,
+         GetResourcesQueryDto,
+         PermissionSetResponseDto,
+         ResourceDetailResponseDto,
+         ResourceResponseDto,
+         UpdatePermissionSetPermissionsDto,
+         UpdateResourceDetailBodyDto,
+         UpdateResourcePermissionsDto,
+         UpdateResourceSortDto } from './dto/resource.dto';
 import { ResourceClient } from './resource.client';
 
 @ApiTags('Resource')
@@ -29,41 +31,53 @@ export class ResourceController {
   @Get()
   @CheckPermissions('RESOURCE:READ')
   @ApiOperation({
-    summary: '자원 목록 조회',
-    description: '자원 트리를 조회합니다.',
+    summary: '리소스 목록 조회',
+    description: '플랫폼 리소스 트리를 조회합니다.',
   })
   @SwaggerResult([ResourceResponseDto])
   async getResources(
-    // @Query() query: ResourceQueryDto
+    @Query() query: GetResourcesQueryDto,
   ) {
-    const result = await this.resourceClient.getResources();
-    return ApiResponse.success(result, '자원 목록을 조회했습니다.');
+    const result = await this.resourceClient.getResources(query.scope);
+    return ApiResponse.success(result, '리소스 목록을 조회했습니다.');
   }
 
   @Get('my-resources')
   @ApiOperation({
-    summary: '내 자원 목록 조회',
-    description: '내 허용 자원을 조회합니다.',
+    summary: '내 리소스 목록 조회',
+    description: '내 허용 리소스를 조회합니다.',
   })
   @SwaggerResult([ResourceResponseDto])
   async getMyResources(
     @CurrentUser() user: JWTPayload,
     // @Query() query: ResourceQueryDto,
   ) {
-    const result = await this.resourceClient.getMyResources(user.permissions ?? [], user.roles ?? []);
-    return ApiResponse.success(result, '내 허용 자원 목록을 조회했습니다.');
+    const result = await this.resourceClient.getMyResources(user.permissions ?? []);
+    return ApiResponse.success(result, '내 허용 리소스 목록을 조회했습니다.');
+  }
+
+  @Get('permission-sets')
+  @CheckPermissions('PERMISSION:READ')
+  @ApiOperation({
+    summary: '권한 세트 목록 조회',
+    description: '조직의 권한 세트 목록을 조회합니다.',
+  })
+  @SwaggerResult([PermissionSetResponseDto])
+  async getPermissionSets() {
+    const result = await this.resourceClient.getPermissionSets();
+    return ApiResponse.success(result, '권한 세트 목록을 조회했습니다.');
   }
 
   @Get(':id')
   @CheckPermissions('RESOURCE:READ')
   @ApiOperation({
-    summary: '자원 조회',
-    description: '자원 상세를 조회합니다.',
+    summary: '리소스 조회',
+    description: '리소스 상세를 조회합니다.',
   })
   @SwaggerResult(ResourceDetailResponseDto)
   async getResource(@Param('id') id: string) {
     const result = await this.resourceClient.getResource(id);
-    return ApiResponse.success(result, '자원 상세를 조회했습니다.');
+    return ApiResponse.success(result, '리소스 상세를 조회했습니다.');
   }
 
   @Post('create')
@@ -76,6 +90,18 @@ export class ResourceController {
   async createResource(@Body() dto: CreateResourceDto) {
     const result = await this.resourceClient.createResource(dto);
     return ApiResponse.success(result, '리소스가 성공적으로 생성되었습니다.');
+  }
+
+  @Post('permission-sets')
+  @CheckPermissions('PERMISSION:CREATE')
+  @ApiOperation({
+    summary: '권한 세트 생성',
+    description: '조직의 권한 세트를 생성합니다.',
+  })
+  @SwaggerResult(PermissionSetResponseDto)
+  async createPermissionSet(@Body() dto: CreatePermissionSetDto) {
+    const result = await this.resourceClient.createPermissionSet(dto);
+    return ApiResponse.success(result, '권한 세트를 생성했습니다.');
   }
 
   @Post('update')
@@ -116,6 +142,20 @@ export class ResourceController {
   ) {
     const result = await this.resourceClient.updateResourceSort(dto);
     return ApiResponse.success(result, '리소스 정렬 순서를 수정했습니다.');
+  }
+
+  @Post('permission-sets/update-permissions')
+  @CheckPermissions('PERMISSION:UPDATE')
+  @ApiOperation({
+    summary: '권한 세트 퍼미션 수정',
+    description: '권한 세트의 퍼미션을 수정합니다.',
+  })
+  @SwaggerResult(PermissionSetResponseDto)
+  async updatePermissionSetPermissions(
+    @Body() dto: UpdatePermissionSetPermissionsDto,
+  ) {
+    const result = await this.resourceClient.updatePermissionSetPermissions(dto);
+    return ApiResponse.success(result, '권한 세트 퍼미션을 수정했습니다.');
   }
 
   @Post('delete')

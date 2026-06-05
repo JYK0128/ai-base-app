@@ -1,6 +1,5 @@
 import { BadRequestException, NotFoundException } from '@nestjs/common';
-
-import { defineErrors, ExceptionGuard } from '../../../common/utils/exception.util';
+import { defineErrors, ExceptionGuard } from '@pkg/shared/server';
 
 /**
  * 약관 버전 생성 에러 메시지 및 예외 타입 정의
@@ -12,6 +11,10 @@ const ERROR_MESSAGES = defineErrors({
   },
   VERSION_ALREADY_EXISTS: {
     message: '해당 버전 레이블이 이미 존재합니다.',
+    exception: BadRequestException,
+  },
+  DOCUMENT_DEPRECATED: {
+    message: '폐기된 약관 문서는 버전을 생성할 수 없습니다.',
     exception: BadRequestException,
   },
 });

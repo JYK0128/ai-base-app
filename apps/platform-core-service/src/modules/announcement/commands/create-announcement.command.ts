@@ -1,11 +1,11 @@
+import type { AnnouncementInput } from '../announcement.types';
+
 /**
- * 공지사항 생성 커맨드
+ * 공지사항 생성/수정 커맨드
  */
 export class CreateAnnouncementCommand {
   constructor(
-    public readonly authorId: string,
-    public readonly title: string,
-    public readonly content: string,
-    public readonly isPublished?: boolean,
+    public readonly memberId: string,
+    public readonly data: AnnouncementInput,
   ) {}
 }

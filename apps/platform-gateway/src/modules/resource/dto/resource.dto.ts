@@ -1,9 +1,15 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsArray, IsEnum, IsOptional, IsString, IsUUID } from 'class-validator';
+import { Type } from 'class-transformer';
+import { IsArray, IsEnum, IsInt, IsOptional, IsString, IsUUID, ValidateNested } from 'class-validator';
 
 export enum ResourceTypeDto {
   MENU = 'MENU',
   COMPONENT = 'COMPONENT',
+}
+
+export enum ResourceScopeDto {
+  PLATFORM = 'PLATFORM',
+  ORGANIZATION = 'ORGANIZATION',
 }
 
 export class CreateResourceDto {
@@ -24,11 +30,6 @@ export class CreateResourceDto {
   @IsString()
   path?: string;
 
-  @ApiPropertyOptional({ example: 'LayoutDashboard', description: '아이콘 이름' })
-  @IsOptional()
-  @IsString()
-  icon?: string;
-
   @ApiPropertyOptional({ example: '019e5236-adae-70d7-a8f7-2dc90bdf7097', description: '부모 리소스 식별자' })
   @IsOptional()
   @IsUUID()
@@ -44,6 +45,10 @@ export class UpdateResourceDetailBodyDto {
   @ApiProperty({ example: '019e5236-adae-70d7-a8f7-2dc90bdf7099', description: '리소스 식별자' })
   @IsUUID()
   id!: string;
+
+  @ApiProperty({ enum: ResourceScopeDto, example: ResourceScopeDto.PLATFORM, description: '리소스 관리 범위' })
+  @IsEnum(ResourceScopeDto)
+  scope!: ResourceScopeDto;
 
   @ApiProperty({ example: 'DASHBOARD', description: '리소스 코드' })
   @IsString()
@@ -73,6 +78,16 @@ export class DeleteResourceBodyDto {
   @ApiProperty({ example: '019e5236-adae-70d7-a8f7-2dc90bdf7099', description: '리소스 식별자' })
   @IsUUID()
   id!: string;
+}
+
+export class GetResourcesQueryDto {
+  @ApiProperty({
+    enum: ResourceScopeDto,
+    example: ResourceScopeDto.PLATFORM,
+    description: '리소스 관리 범위 필터',
+  })
+  @IsEnum(ResourceScopeDto)
+  scope!: ResourceScopeDto;
 }
 
 export class UpdateRolePermissionsDto {
@@ -110,8 +125,11 @@ export class ResourceResponseDto {
   @ApiProperty({ example: '조직 관리', description: '리소스 이름' })
   name!: string;
 
-  @ApiProperty({ example: 'MENU', enum: ['MENU', 'API', 'COMPONENT'], description: '리소스 유형' })
+  @ApiProperty({ example: 'MENU', enum: ['MENU', 'COMPONENT'], description: '리소스 유형' })
   type!: string;
+
+  @ApiProperty({ example: 'PLATFORM', enum: ResourceScopeDto, description: '리소스 범위' })
+  scope!: ResourceScopeDto;
 
   @ApiPropertyOptional({ example: '/organizations', description: '경로' })
   path?: string;
@@ -149,7 +167,65 @@ export class RoleResponseDto {
   description?: string;
 }
 
+export class PermissionSetResponseDto {
+  @ApiProperty({ example: '019e5236-adae-70d7-a8f7-2dc90bdf7102', description: '권한 세트 식별자' })
+  id!: string;
+
+  @ApiProperty({ example: 'SUPER_ADMIN', description: '권한 세트 코드' })
+  code!: string;
+
+  @ApiProperty({ example: '플랫폼 전체 권한', description: '권한 세트 이름' })
+  name!: string;
+
+  @ApiPropertyOptional({ example: '시스템 내 모든 최상위 리소스 및 자원에 대한 접근과 제어 권한을 가집니다.', description: '권한 세트 설명' })
+  description?: string;
+
+  @ApiProperty({ example: 3, description: '배정된 관리자 수' })
+  assignmentCount!: number;
+
+  @ApiProperty({ example: true, description: '활성 여부' })
+  isActive!: boolean;
+
+  @ApiProperty({ type: [String], example: ['DASHBOARD:READ', 'RESOURCE:READ'], description: '권한 코드 목록' })
+  permissionCodes!: string[];
+}
+
+export class CreatePermissionSetDto {
+  @ApiProperty({ example: 'SYSTEM_OPERATOR', description: '권한 세트 코드' })
+  @IsString()
+  code!: string;
+
+  @ApiProperty({ example: '시스템 운영 담당자', description: '권한 세트 이름' })
+  @IsString()
+  name!: string;
+
+  @ApiPropertyOptional({ example: '운영 및 모니터링 권한 세트', description: '권한 세트 설명' })
+  @IsOptional()
+  @IsString()
+  description?: string;
+
+  @ApiPropertyOptional({ example: '019e5236-adae-70d7-a8f7-2dc90bdf7102', description: '복사할 권한 세트 식별자' })
+  @IsOptional()
+  @IsUUID()
+  copyFromId?: string;
+}
+
+export class UpdatePermissionSetPermissionsDto {
+  @ApiProperty({ example: '019e5236-adae-70d7-a8f7-2dc90bdf7102', description: '권한 세트 식별자' })
+  @IsUUID()
+  id!: string;
+
+  @ApiProperty({ type: [String], example: ['DASHBOARD:READ', 'RESOURCE:READ'], description: '부여할 권한 코드 목록' })
+  @IsArray()
+  @IsString({ each: true })
+  permissionCodes!: string[];
+}
+
 export class UpdateResourcePermissionsDto {
+  @ApiProperty({ enum: ResourceScopeDto, example: ResourceScopeDto.ORGANIZATION, description: '리소스 관리 범위' })
+  @IsEnum(ResourceScopeDto)
+  scope!: ResourceScopeDto;
+
   @ApiProperty({ example: '019e5236-adae-70d7-a8f7-2dc90bdf7099', description: '리소스 식별자' })
   @IsUUID()
   id!: string;
@@ -165,13 +241,26 @@ export class UpdateResourcePermissionsDto {
   constraint?: string;
 }
 
-export class UpdateResourceSortDto {
+export class UpdateResourceSortItemDto {
   @ApiProperty({ example: '019e5236-adae-70d7-a8f7-2dc90bdf7099', description: '리소스 식별자' })
   @IsUUID()
   id!: string;
 
   @ApiProperty({ example: 1, description: '정렬 순서' })
+  @IsInt()
   sortOrder!: number;
+}
+
+export class UpdateResourceSortDto {
+  @ApiProperty({ enum: ResourceScopeDto, example: ResourceScopeDto.ORGANIZATION, description: '리소스 관리 범위' })
+  @IsEnum(ResourceScopeDto)
+  scope!: ResourceScopeDto;
+
+  @ApiProperty({ type: [UpdateResourceSortItemDto], description: '정렬 대상 목록' })
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => UpdateResourceSortItemDto)
+  items!: UpdateResourceSortItemDto[];
 }
 
 export class ResourceDetailResponseDto {
@@ -184,8 +273,11 @@ export class ResourceDetailResponseDto {
   @ApiProperty({ example: '조직 관리', description: '리소스 이름' })
   name!: string;
 
-  @ApiProperty({ example: 'MENU', enum: ['MENU', 'API', 'COMPONENT'], description: '리소스 유형' })
+  @ApiProperty({ example: 'MENU', enum: ['MENU', 'COMPONENT'], description: '리소스 유형' })
   type!: string;
+
+  @ApiProperty({ example: 'PLATFORM', enum: ResourceScopeDto, description: '리소스 범위' })
+  scope!: ResourceScopeDto;
 
   @ApiPropertyOptional({ example: '/organizations', description: '경로' })
   path?: string;

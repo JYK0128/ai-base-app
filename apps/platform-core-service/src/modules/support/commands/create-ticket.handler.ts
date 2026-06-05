@@ -2,7 +2,7 @@ import { Transactional } from '@mikro-orm/decorators/legacy';
 import { InjectRepository } from '@mikro-orm/nestjs';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { Manager, Organization, SupportTicket, SupportTicketRepository, TicketStatus } from '@pkg/database';
+import { MemberAccount, MemberAccountRepository, Organization, SupportTicket, SupportTicketRepository, TicketStatus } from '@pkg/database';
 
 import { CreateTicketCommand } from './create-ticket.command';
 import { CreateTicketAsserter } from './create-ticket.error';
@@ -17,6 +17,8 @@ export class CreateTicketHandler implements ICommandHandler<CreateTicketCommand>
   constructor(
     @InjectRepository(SupportTicket)
     private readonly supportTicketRepo: SupportTicketRepository,
+    @InjectRepository(MemberAccount)
+    private readonly memberAccountRepo: MemberAccountRepository,
     private readonly em: EntityManager,
   ) {}
 
@@ -28,8 +30,13 @@ export class CreateTicketHandler implements ICommandHandler<CreateTicketCommand>
   /**
    * STEP 1: 문의 티켓 생성
    */
-  private processCreation(command: CreateTicketCommand): SupportTicket {
-    const author = this.em.getReference(Manager, command.authorId);
+  private async processCreation(command: CreateTicketCommand): Promise<SupportTicket> {
+    const authorAccount = await this.memberAccountRepo.findOne(
+      { id: command.memberId },
+      { populate: ['member'] },
+    );
+
+    const author = await this.Asserter.assert(authorAccount?.member ?? null, 'AUTHOR_NOT_FOUND');
     const organization = this.em.getReference(Organization, command.organizationId);
 
     const ticket = this.supportTicketRepo.create({

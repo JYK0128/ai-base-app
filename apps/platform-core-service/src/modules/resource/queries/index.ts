@@ -1,3 +1,6 @@
+export * from './get-permission-sets.error';
+export * from './get-permission-sets.handler';
+export * from './get-permission-sets.query';
 export * from './get-resource.error';
 export * from './get-resource.handler';
 export * from './get-resource.query';

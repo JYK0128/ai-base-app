@@ -39,6 +39,6 @@ export class DeleteResourceHandler implements ICommandHandler<DeleteResourceComm
       await Promise.all(children.map((child) => this.softDeleteTree(child)));
     }
 
-    resource.delete();
+    resource.remove();
   }
 }

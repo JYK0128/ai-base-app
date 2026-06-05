@@ -19,4 +19,6 @@ export const AUTH_SERVICE_PATTERNS = {
   /** 비밀번호 변경 */
   // eslint-disable-next-line sonarjs/no-hardcoded-passwords
   CHANGE_PASSWORD: 'auth.change_password',
+  /** 내 정보 조회 */
+  ME: 'auth.me',
 } as const;

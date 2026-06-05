@@ -3,11 +3,8 @@
  */
 export class AgreeTermsCommand {
   constructor(
-    readonly managerId: string,
+    readonly memberId: string,
     readonly termsVersionId: string,
     readonly organizationId?: string,
-    readonly source?: string,
-    readonly ipAddress?: string,
-    readonly userAgent?: string,
   ) {}
 }

@@ -20,10 +20,10 @@ export class SupportController {
   }
 
   @MessagePattern(SUPPORT_SERVICE_PATTERNS.TICKET.CREATE)
-  async createTicket(@Payload() data: { authorId: string, data: { organizationId: string, title: string, content: string, priority?: TicketPriority } }) {
+  async createTicket(@Payload() data: { memberId: string, data: { organizationId: string, title: string, content: string, priority?: TicketPriority } }) {
     return this.commandBus.execute(
       new CreateTicketCommand(
-        data.authorId,
+        data.memberId,
         data.data.organizationId,
         data.data.title,
         data.data.content,

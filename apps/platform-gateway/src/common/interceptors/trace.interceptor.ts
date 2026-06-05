@@ -12,9 +12,10 @@ export class TraceInterceptor<T> implements NestInterceptor<T, ApiResponse<T>> {
   intercept(context: ExecutionContext, next: CallHandler): Observable<ApiResponse<T>> {
     return next.handle().pipe(
       map((data: T): ApiResponse<T> => {
-        const res = data instanceof ApiResponse ? data : ApiResponse.success(data);
-        res.traceId = this.cls.get('traceId');
-        res.requestId = this.cls.get('requestId');
+        const { traceId, requestId } = this.cls.get() as { traceId: string, requestId: string };
+        const res = data instanceof ApiResponse
+          ? data
+          : ApiResponse.success(data, { traceId, requestId });
 
         return res;
       }),

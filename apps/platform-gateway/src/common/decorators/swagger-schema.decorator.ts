@@ -2,13 +2,15 @@ import type { OpenAPIObject } from '@nestjs/swagger';
 
 type SwaggerSchemaObject = Record<string, unknown>;
 
+type ClassConstructor = new (...args: never[]) => unknown;
+
 const SWAGGER_SCHEMA_METADATA_KEY = Symbol('swagger:schema');
-const SWAGGER_SCHEMA_REGISTRY = new Set<Function>();
+const SWAGGER_SCHEMA_REGISTRY = new Set<ClassConstructor>();
 
 export const SwaggerSchema = (schema: SwaggerSchemaObject): ClassDecorator => {
   return (target) => {
     Reflect.defineMetadata(SWAGGER_SCHEMA_METADATA_KEY, schema, target);
-    SWAGGER_SCHEMA_REGISTRY.add(target as Function);
+    SWAGGER_SCHEMA_REGISTRY.add(target as unknown as ClassConstructor);
   };
 };
 

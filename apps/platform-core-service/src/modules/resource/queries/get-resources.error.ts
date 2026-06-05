@@ -1,9 +1,9 @@
-import { defineErrors, ExceptionGuard } from '../../../common/utils/exception.util';
+import { defineErrors, ExceptionGuard } from '@pkg/shared/server';
 
 const ERROR_MESSAGES = defineErrors({
   LOAD_FAILED: {
     message: {
-      ko: '자원 목록을 불러오는 데 실패했습니다.',
+      ko: '리소스 목록을 불러오는 데 실패했습니다.',
       en: 'Failed to load resources.',
     },
     exception: Error,

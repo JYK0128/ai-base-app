@@ -1,6 +1,5 @@
-import { NotFoundException } from '@nestjs/common';
-
-import { defineErrors, ExceptionGuard } from '../../../common/utils/exception.util';
+import { BadRequestException, NotFoundException } from '@nestjs/common';
+import { defineErrors, ExceptionGuard } from '@pkg/shared/server';
 
 const ERROR_MESSAGES = defineErrors({
   RESOURCE_NOT_FOUND: {
@@ -9,6 +8,13 @@ const ERROR_MESSAGES = defineErrors({
       en: 'Resource not found.',
     },
     exception: NotFoundException,
+  },
+  INVALID_SCOPE: {
+    message: {
+      ko: '플랫폼 리소스에서만 정렬 순서를 수정할 수 있습니다.',
+      en: 'Sort order can only be updated for platform resources.',
+    },
+    exception: BadRequestException,
   },
 });
 

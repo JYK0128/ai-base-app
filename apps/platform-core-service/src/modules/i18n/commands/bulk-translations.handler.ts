@@ -68,7 +68,7 @@ export class BulkTranslationsHandler implements ICommandHandler<BulkTranslations
       }
 
       const translation = await this.Asserter.assert(existing, 'TRANSLATION_NOT_FOUND');
-      translation.deletedAt = new Date();
+      translation.remove();
       processedCount++;
     }
 

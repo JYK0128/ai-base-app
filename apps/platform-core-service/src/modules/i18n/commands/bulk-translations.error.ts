@@ -1,6 +1,5 @@
 import { BadRequestException, NotFoundException } from '@nestjs/common';
-
-import { defineErrors, ExceptionGuard } from '../../../common/utils/exception.util';
+import { defineErrors, ExceptionGuard } from '@pkg/shared/server';
 
 const ERROR_MESSAGES = defineErrors({
   EMPTY_OPERATIONS: {

@@ -1,45 +1,47 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { ClsService } from 'nestjs-cls';
-import { defaultIfEmpty, firstValueFrom } from 'rxjs';
 
+import { CoreClient } from '@/common/clients/core.client';
+
+import { type ResourceResponseDto, ResourceScopeDto, UpdatePermissionSetPermissionsDto } from './dto/resource.dto';
 import { RESOURCE_SERVICE, RESOURCE_SERVICE_PATTERNS } from './resource.constants';
 
 @Injectable()
-export class ResourceClient {
+export class ResourceClient extends CoreClient {
   constructor(
-    @Inject(RESOURCE_SERVICE)
-    private readonly client: ClientProxy,
-    private readonly cls: ClsService,
-  ) {}
-
-  private async send<TResult = unknown, TInput extends object = object>(pattern: string, data: TInput): Promise<TResult> {
-    const payload = {
-      ...data,
-      traceId: this.cls.get('traceId'),
-      sid: this.cls.get('sid'),
-      clientIp: this.cls.get('clientIp'),
-      userId: this.cls.get('userId'),
-      organizationId: this.cls.get('organizationId'),
-    };
-
-    return firstValueFrom(
-      this.client.send<TResult>(pattern, payload).pipe(
-        defaultIfEmpty(undefined as TResult),
-      ),
-    );
+    @Inject(RESOURCE_SERVICE) client: ClientProxy,
+    cls: ClsService,
+  ) {
+    super(client, cls);
   }
 
-  async getResources() {
-    return this.send(RESOURCE_SERVICE_PATTERNS.RESOURCE.LIST, {});
+  async getResources(scope: ResourceScopeDto): Promise<ResourceResponseDto[]> {
+    return this.send<ResourceResponseDto[]>(RESOURCE_SERVICE_PATTERNS.RESOURCE.LIST, {
+      scope,
+      permissions: [],
+      filterByPermissions: false,
+      organizationId: this.cls.get('organizationId'),
+    });
   }
 
   async getResource(id: string) {
     return this.send(RESOURCE_SERVICE_PATTERNS.RESOURCE.GET, { id });
   }
 
-  async getMyResources(permissions: string[], roles: string[]) {
-    return this.send(RESOURCE_SERVICE_PATTERNS.RESOURCE.LIST, { permissions, roles });
+  async getMyResources(permissions: string[]): Promise<ResourceResponseDto[]> {
+    return this.send<ResourceResponseDto[]>(RESOURCE_SERVICE_PATTERNS.RESOURCE.LIST, {
+      scope: ResourceScopeDto.ORGANIZATION,
+      permissions,
+      filterByPermissions: true,
+      organizationId: this.cls.get('organizationId'),
+    });
+  }
+
+  async getPermissionSets() {
+    return this.send(RESOURCE_SERVICE_PATTERNS.PERMISSION_SET.LIST, {
+      organizationId: this.cls.get('organizationId'),
+    });
   }
 
   async createResource(data: {
@@ -47,15 +49,14 @@ export class ResourceClient {
     name: string
     type: string
     path?: string
-    icon?: string
     parentId?: string
-    sortOrder?: number
   }) {
     return this.send<{ id: string }>(RESOURCE_SERVICE_PATTERNS.RESOURCE.CREATE, data);
   }
 
   async updateResourceDetail(data: {
     id: string
+    scope: ResourceScopeDto
     code: string
     name: string
     path?: string
@@ -70,6 +71,7 @@ export class ResourceClient {
 
   async updateResourcePermissions(data: {
     id: string
+    scope: ResourceScopeDto
     actions: string[]
     constraint?: string
   }) {
@@ -77,9 +79,28 @@ export class ResourceClient {
   }
 
   async updateResourceSort(data: {
-    id: string
-    sortOrder: number
+    scope: ResourceScopeDto
+    items: Array<{ id: string, sortOrder: number }>
   }) {
-    return this.send<{ id: string }>(RESOURCE_SERVICE_PATTERNS.RESOURCE.UPDATE_SORT, data);
+    return this.send<{ success: boolean }>(RESOURCE_SERVICE_PATTERNS.RESOURCE.UPDATE_SORT, data);
+  }
+
+  async createPermissionSet(data: {
+    code: string
+    name: string
+    description?: string
+    copyFromId?: string
+  }) {
+    return this.send(RESOURCE_SERVICE_PATTERNS.PERMISSION_SET.CREATE, {
+      ...data,
+      organizationId: this.cls.get('organizationId'),
+    });
+  }
+
+  async updatePermissionSetPermissions(data: UpdatePermissionSetPermissionsDto) {
+    return this.send(RESOURCE_SERVICE_PATTERNS.PERMISSION_SET.UPDATE_PERMISSIONS, {
+      ...data,
+      organizationId: this.cls.get('organizationId'),
+    });
   }
 }

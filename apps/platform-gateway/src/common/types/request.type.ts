@@ -1,13 +1,6 @@
 import type { IncomingHttpHeaders } from 'node:http';
 
 import type { Request } from 'express';
-export interface JWTPayload {
-  sub: string
-  organizationId?: string
-  roles?: string[]
-  permissions?: string[]
-  [key: string]: unknown
-}
 
 export interface CustomCookies {
   sid: string

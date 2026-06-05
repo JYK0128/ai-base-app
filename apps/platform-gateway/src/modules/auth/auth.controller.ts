@@ -1,16 +1,14 @@
 import { Body, Controller, Get, Post, Res, UnauthorizedException } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiResponse as SwaggerResponse, ApiTags } from '@nestjs/swagger';
 import type { Response } from 'express';
-import { ClsService } from 'nestjs-cls';
 
 import { Bypass, BYPASS_POLICIES } from '@/common/decorators/bypass.decorator';
 import { Cookies } from '@/common/decorators/cookies.decorator';
-import { CurrentUser } from '@/common/decorators/current-user.decorator';
 import { Public } from '@/common/decorators/public.decorator';
 import { SwaggerResult } from '@/common/decorators/swagger.decorator';
-import { ENV } from '@/common/env';
-import type { JWTPayload } from '@/common/types/request.type';
 import { ApiResponse } from '@/common/types/response.type';
+import { createCookieOptions } from '@/common/utils/cookie';
+import { ENV } from '@/env';
 
 import { AuthClient } from './auth.client';
 import { ChangePasswordDto, LoginDto } from './dto/auth-request.dto';
@@ -21,7 +19,6 @@ import { AuthMeResponseDto, AuthTokenResponseDto } from './dto/auth-response.dto
 export class AuthController {
   constructor(
     private readonly authClient: AuthClient,
-    private readonly cls: ClsService,
   ) {}
 
   @Public()
@@ -35,25 +32,14 @@ export class AuthController {
   ) {
     const { accessToken, refreshToken } = await this.authClient.login(loginDto);
 
-    this.setRefreshTokenCookie(res, refreshToken);
+    res.cookie('refreshToken', refreshToken, createCookieOptions({
+      maxAge: ENV.JWT_REFRESH_EXPIRES_IN * 1000,
+    }));
 
     return ApiResponse.success(
       { accessToken },
       '로그인에 성공했습니다.',
     );
-  }
-
-  /**
-   * Refresh Token 쿠키 설정 공통 함수
-   */
-  private setRefreshTokenCookie(res: Response, refreshToken: string) {
-    res.cookie('refreshToken', refreshToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      path: '/',
-      maxAge: ENV.JWT_REFRESH_EXPIRES_IN * 1000,
-    });
   }
 
   @Public()
@@ -71,7 +57,9 @@ export class AuthController {
     const { accessToken, refreshToken: newRefreshToken } = await this.authClient.refresh(refreshToken);
 
     if (newRefreshToken) {
-      this.setRefreshTokenCookie(res, newRefreshToken);
+      res.cookie('refreshToken', newRefreshToken, createCookieOptions({
+        maxAge: ENV.JWT_REFRESH_EXPIRES_IN * 1000,
+      }));
     }
 
     return ApiResponse.success(
@@ -88,7 +76,8 @@ export class AuthController {
   })
   @SwaggerResult(AuthMeResponseDto)
   @SwaggerResponse({ status: 401, description: '인증 실패', type: ApiResponse })
-  getMe(@CurrentUser() user: JWTPayload) {
+  async getMe() {
+    const user = await this.authClient.me();
     return ApiResponse.success(
       { user },
       '관리자 정보를 성공적으로 가져왔습니다.',
@@ -102,12 +91,7 @@ export class AuthController {
   async logout(
     @Res({ passthrough: true }) res: Response,
   ) {
-    res.clearCookie('refreshToken', {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      path: '/',
-    });
+    res.clearCookie('refreshToken');
 
     await this.authClient.logout();
     return ApiResponse.success(

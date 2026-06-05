@@ -3,9 +3,15 @@ import { randomUUID } from 'node:crypto';
 import { Injectable, NestMiddleware } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { NextFunction, Response } from 'express';
+import type { JWTPayload } from 'jose';
 import { ClsService } from 'nestjs-cls';
 
-import type { AppRequest, JWTPayload } from '../types/request.type';
+import type { AppRequest } from '../types/request.type';
+import { createCookieOptions } from '../utils/cookie';
+
+function getHeaderValue(value: string | string[] | undefined): string | undefined {
+  return Array.isArray(value) ? value[0] : value;
+}
 
 @Injectable()
 export class ContextMiddleware implements NestMiddleware {
@@ -16,17 +22,16 @@ export class ContextMiddleware implements NestMiddleware {
 
   use(req: AppRequest, res: Response, next: NextFunction) {
     this.setTraceContext(req, res);
-    this.setRequestContext(req);
+    this.setClientContext(req);
     this.setUserContext(req);
 
     next();
   }
 
   private setTraceContext(req: AppRequest, res: Response) {
-    const sid = req.cookies?.['sid'] || randomUUID();
-    const traceId = req.headers['x-trace-id'] || randomUUID();
+    const sid = getHeaderValue(req.cookies?.['sid']) || randomUUID();
+    const traceId = getHeaderValue(req.headers['x-trace-id']) || randomUUID();
     const requestId = randomUUID();
-
     this.cls.set('sid', sid);
     this.cls.set('traceId', traceId);
     this.cls.set('requestId', requestId);
@@ -35,37 +40,26 @@ export class ContextMiddleware implements NestMiddleware {
     res.setHeader('x-request-id', requestId);
 
     if (!req.cookies?.['sid']) {
-      res.cookie('sid', sid, {
-        httpOnly: true,
-        path: '/',
-        secure: req.secure,
-        sameSite: 'lax',
-      });
+      res.cookie('sid', sid, createCookieOptions());
     }
   }
 
-  private setRequestContext(req: AppRequest) {
-    this.cls.set('clientIp', req.headers['x-real-ip'] || req.ip || '0.0.0.0');
-    this.cls.set('userAgent', req.headers['user-agent']);
-    this.cls.set('referer', req.headers['referer']);
-    this.cls.set('method', req.method);
-    this.cls.set('url', req.url);
-    this.cls.set('startTime', Date.now());
-
+  private setClientContext(req: AppRequest) {
     // Accept-Language 헤더 분석 및 'ko' | 'en' 로케일 조기 결정
-    const acceptLanguageHeader = req.headers['accept-language'];
+    const acceptLanguageHeader = getHeaderValue(req.headers['accept-language']);
     let resolvedLocale = 'ko';
 
     if (acceptLanguageHeader) {
-      const rawLanguage = typeof acceptLanguageHeader === 'string'
-        ? acceptLanguageHeader
-        : acceptLanguageHeader[0];
-
-      if (rawLanguage?.split(',')[0]?.trim().toLowerCase().startsWith('en')) {
+      if (acceptLanguageHeader.split(',')[0]?.trim().toLowerCase().startsWith('en')) {
         resolvedLocale = 'en';
       }
     }
 
+    this.cls.set('clientIp', getHeaderValue(req.headers['x-real-ip']) || req.ip || '0.0.0.0');
+    this.cls.set('userAgent', getHeaderValue(req.headers['user-agent']));
+    this.cls.set('referer', getHeaderValue(req.headers['referer']));
+    this.cls.set('method', req.method);
+    this.cls.set('url', req.url);
     this.cls.set('acceptLanguage', resolvedLocale);
   }
 
@@ -78,8 +72,16 @@ export class ContextMiddleware implements NestMiddleware {
 
     try {
       const payload = this.jwtService.verify<JWTPayload>(token);
-      this.cls.set('userId', payload.sub);
-      this.cls.set('organizationId', payload.organizationId);
+
+      if (payload.accountId) {
+        this.cls.set('accountId', payload.accountId);
+      }
+      if (payload.memberId) {
+        this.cls.set('memberId', payload.memberId);
+      }
+      if (payload.organizationId) {
+        this.cls.set('organizationId', payload.organizationId);
+      }
     }
     catch {
       // 검증 실패 시 무시 (AuthGuard에서 처리)

@@ -1,8 +1,7 @@
 import { Transactional } from '@mikro-orm/decorators/legacy';
 import { InjectRepository } from '@mikro-orm/nestjs';
-import { EntityManager } from '@mikro-orm/postgresql';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { Resource, ResourceRepository } from '@pkg/database';
+import { Resource, ResourceRepository, ResourceScope } from '@pkg/database';
 
 import { UpdateResourceDetailCommand } from './update-resource-detail.command';
 import { UpdateResourceDetailAsserter } from './update-resource-detail.error';
@@ -14,21 +13,19 @@ export class UpdateResourceDetailHandler implements ICommandHandler<UpdateResour
   constructor(
     @InjectRepository(Resource)
     private readonly resourceRepo: ResourceRepository,
-    private readonly em: EntityManager,
   ) {}
 
   @Transactional()
   async execute(command: UpdateResourceDetailCommand): Promise<{ id: string }> {
-    const resource = await this.identifyResource(command.id);
+    const resource = await this.identifyResource(command.id, command.scope);
     await this.validateNoDuplicateCode(command.code, resource.id);
-
-    this.processResourceModification(resource, command);
+    await this.processResourceModification(resource, command);
     return { id: resource.id };
   }
 
-  private async identifyResource(id: string): Promise<Resource> {
+  private async identifyResource(id: string, scope: ResourceScope): Promise<Resource> {
     return await this.Asserter.assert(
-      this.resourceRepo.findOne({ id }),
+      this.resourceRepo.findOne({ id, scope }),
       'RESOURCE_NOT_FOUND',
     );
   }
@@ -40,13 +37,16 @@ export class UpdateResourceDetailHandler implements ICommandHandler<UpdateResour
     }
   }
 
-  private processResourceModification(
+  private async processResourceModification(
     resource: Resource,
     command: UpdateResourceDetailCommand,
-  ): void {
+  ): Promise<void> {
+    const nextPath = command.path?.trim();
+    const nextIcon = command.icon?.trim();
+
     resource.code = command.code;
     resource.name = command.name;
-    resource.path = command.path;
-    resource.icon = command.icon;
+    resource.path = nextPath;
+    resource.icon = nextIcon;
   }
 }

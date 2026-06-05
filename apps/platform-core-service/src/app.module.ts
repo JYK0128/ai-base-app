@@ -4,16 +4,15 @@ import { MikroOrmModule } from '@mikro-orm/nestjs';
 import { Module } from '@nestjs/common';
 import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
 import { databaseConfig } from '@pkg/database';
+import { RpcContextInterceptor, RpcExceptionFilter, RpcLoggingInterceptor } from '@pkg/shared/server';
 import { ClsModule } from 'nestjs-cls';
 import { LoggerModule } from 'nestjs-pino';
 
-import { ENV } from './common/env';
-import { RpcExceptionFilter } from './common/filters/rpc-exception.filter';
-import { RpcContextInterceptor } from './common/interceptors/rpc-context.interceptor';
-import { RpcLoggingInterceptor } from './common/interceptors/rpc-logging.interceptor';
+import { ENV } from './env';
 import { AnnouncementModule } from './modules/announcement/announcement.module';
 import { HealthModule } from './modules/health/health.module';
 import { I18nModule } from './modules/i18n/i18n.module';
+import { MembersModule } from './modules/members/members.module';
 import { OrganizationModule } from './modules/organization/organization.module';
 import { RedisModule } from './modules/redis/redis.module';
 import { ResourceModule } from './modules/resource/resource.module';
@@ -51,6 +50,7 @@ import { TermsModule } from './modules/terms/terms.module';
     AnnouncementModule,
     SupportModule,
     TermsModule,
+    MembersModule,
     ResourceModule,
   ],
   providers: [

@@ -1,7 +1,6 @@
 import { createParamDecorator, ExecutionContext } from '@nestjs/common';
 import { Request } from 'express';
-
-import type { JWTPayload } from '../types/request.type';
+import type { JWTPayload } from 'jose';
 
 /**
  * 전역 AuthGuard에 의해 request['user']에 담긴 페이로드 정보를 가져옵니다.

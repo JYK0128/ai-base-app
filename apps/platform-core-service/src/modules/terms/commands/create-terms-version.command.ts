@@ -8,8 +8,7 @@ export class CreateTermsVersionCommand {
     readonly termsDocumentId: string,
     readonly label: string,
     readonly content: string,
-    readonly effectiveFrom: Date,
-    readonly effectiveTo: Date,
+    readonly effectiveAt: Date,
     readonly status: TermsVersionStatus,
   ) {}
 }

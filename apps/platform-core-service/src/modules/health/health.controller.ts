@@ -6,7 +6,7 @@ import { HealthCheck,
          MicroserviceHealthIndicator,
          MikroOrmHealthIndicator } from '@nestjs/terminus';
 
-import { ENV } from '../../common/env';
+import { ENV } from '../../env';
 
 @Controller('health')
 export class HealthController {

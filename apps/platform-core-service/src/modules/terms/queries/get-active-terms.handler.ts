@@ -2,7 +2,7 @@ import { InjectRepository } from '@mikro-orm/nestjs';
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
 import { TermsDocument, TermsDocumentRepository, TermsDocumentStatus } from '@pkg/database';
 
-import { GetActiveTermsAsserter } from './get-active-terms.error';
+import { getCurrentPublishedVersion, mapTermsDocumentResponse, type TermsDocumentResponse } from '../terms.mapper';
 import { GetActiveTermsQuery } from './get-active-terms.query';
 
 /**
@@ -10,23 +10,35 @@ import { GetActiveTermsQuery } from './get-active-terms.query';
  */
 @QueryHandler(GetActiveTermsQuery)
 export class GetActiveTermsHandler implements IQueryHandler<GetActiveTermsQuery> {
-  private readonly Asserter = GetActiveTermsAsserter;
-
   constructor(
     @InjectRepository(TermsDocument)
     private readonly termsDocumentRepo: TermsDocumentRepository,
   ) {}
 
-  async execute(query: GetActiveTermsQuery): Promise<TermsDocument[]> {
-    return this.termsDocumentRepo.find({
-      status: TermsDocumentStatus.PUBLISHED,
-      $or: [
-        { organization: null },
-        ...(query.organizationId ? [{ organization: query.organizationId }] : []),
-      ],
-    }, {
-      populate: ['versions'],
-      orderBy: { createdAt: 'DESC' },
-    });
+  async execute(query: GetActiveTermsQuery): Promise<TermsDocumentResponse[]> {
+    const documents = await this.termsDocumentRepo.find(
+      {
+        status: TermsDocumentStatus.PUBLISHED,
+        ...(query.organizationId
+          ? {
+            $or: [
+              { organization: null },
+              { organization: query.organizationId },
+            ],
+          }
+          : {
+            organization: null,
+          }),
+      },
+      {
+        populate: ['organization', 'versions'],
+        orderBy: { createdAt: 'DESC' },
+      },
+    );
+
+    return documents
+      .filter((document) => !!getCurrentPublishedVersion(document.versions.getItems()))
+      .filter((document) => !document.isDeprecated)
+      .map((document) => mapTermsDocumentResponse(document));
   }
 }

@@ -2,6 +2,8 @@ import { InjectRepository } from '@mikro-orm/nestjs';
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
 import { Announcement, AnnouncementRepository } from '@pkg/database';
 
+import { buildAnnouncementRecord } from '../announcement.mapper';
+import type { AnnouncementRecord } from '../announcement.types';
 import { GetAnnouncementsAsserter } from './get-announcements.error';
 import { GetAnnouncementsQuery } from './get-announcements.query';
 
@@ -17,12 +19,14 @@ export class GetAnnouncementsHandler implements IQueryHandler<GetAnnouncementsQu
     private readonly announcementRepo: AnnouncementRepository,
   ) {}
 
-  async execute(query: GetAnnouncementsQuery): Promise<Announcement[]> {
+  async execute(query: GetAnnouncementsQuery): Promise<AnnouncementRecord[]> {
     const filter = query.isPublishedOnly ? { isPublished: true } : {};
 
-    return this.announcementRepo.find(filter, {
-      populate: ['author'],
+    const announcements = await this.announcementRepo.find(filter, {
+      populate: ['author.accounts'],
       orderBy: { createdAt: 'DESC' },
     });
+
+    return announcements.map((announcement) => buildAnnouncementRecord(announcement));
   }
 }

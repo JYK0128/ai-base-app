@@ -1,10 +1,12 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { ClsService } from 'nestjs-cls';
-import { defaultIfEmpty, firstValueFrom } from 'rxjs';
+
+import { CoreClient } from '@/common/clients/core.client';
 
 import { AUTH_SERVICE, AUTH_SERVICE_PATTERNS } from './auth.constants';
 import { type ChangePasswordDto, LoginDto } from './dto/auth-request.dto';
+import { type AuthMeUserDto } from './dto/auth-response.dto';
 
 export interface LoginResult {
   accessToken: string
@@ -12,33 +14,14 @@ export interface LoginResult {
 }
 
 @Injectable()
-export class AuthClient {
+export class AuthClient extends CoreClient {
   constructor(
-    @Inject(AUTH_SERVICE) private readonly client: ClientProxy,
-    private readonly cls: ClsService,
-  ) {}
-
-  /**
-   * 인증 마이크로서비스로 요청을 보낼 때 공통 메타데이터(traceId 등)를 주입합니다.
-   */
-  private send<TResult = unknown, TInput extends object = object>(pattern: string, data: TInput) {
-    const payload = {
-      ...data,
-      traceId: this.cls.get('traceId'),
-      sid: this.cls.get('sid'),
-      clientIp: this.cls.get('clientIp'),
-      userId: this.cls.get('userId'),
-      organizationId: this.cls.get('organizationId'),
-      acceptLanguage: this.cls.get('acceptLanguage'),
-    };
-    return firstValueFrom(
-      this.client.send<TResult>(pattern, payload).pipe(
-        defaultIfEmpty(undefined as TResult),
-      ),
-    );
+    @Inject(AUTH_SERVICE) client: ClientProxy,
+    cls: ClsService,
+  ) {
+    super(client, cls);
   }
 
-  // --- 비즈니스 메서드 ---
   async login(loginDto: LoginDto): Promise<LoginResult> {
     return this.send<LoginResult>(AUTH_SERVICE_PATTERNS.LOGIN, loginDto);
   }
@@ -48,14 +31,25 @@ export class AuthClient {
   }
 
   async logout(): Promise<void> {
-    await this.send<void>(AUTH_SERVICE_PATTERNS.LOGOUT, {});
+    await this.send<void>(AUTH_SERVICE_PATTERNS.LOGOUT, {
+      accountId: this.cls.get('accountId'),
+    });
   }
 
   async deferPasswordChange(): Promise<void> {
-    await this.send<void>(AUTH_SERVICE_PATTERNS.DEFER_PASSWORD_CHANGE, {});
+    await this.send<void>(AUTH_SERVICE_PATTERNS.DEFER_PASSWORD_CHANGE, {
+      accountId: this.cls.get('accountId'),
+    });
   }
 
   async changePassword(changePasswordDto: ChangePasswordDto): Promise<void> {
-    await this.send<void>(AUTH_SERVICE_PATTERNS.CHANGE_PASSWORD, changePasswordDto);
+    await this.send<void>(AUTH_SERVICE_PATTERNS.CHANGE_PASSWORD, {
+      accountId: this.cls.get('accountId'),
+      ...changePasswordDto,
+    });
+  }
+
+  async me(): Promise<AuthMeUserDto> {
+    return this.send<AuthMeUserDto>(AUTH_SERVICE_PATTERNS.ME, {});
   }
 }

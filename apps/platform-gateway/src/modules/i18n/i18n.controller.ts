@@ -4,16 +4,16 @@ import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { SwaggerResult } from '@/common/decorators/swagger.decorator';
 import { ApiResponse } from '@/common/types/response.type';
 
-import { TranslationCreateDto,
-         TranslationBulkDto,
+import { TranslationBulkDto,
+         TranslationCreateDto,
          TranslationDeleteDto,
          TranslationParamDto,
          TranslationQueryDto,
          TranslationsQueryDto,
          TranslationUpdateDto } from './dto/i18n-request.dto';
 import { LocalesDataDto,
-         TranslationCreateDataDto,
          TranslationBulkDataDto,
+         TranslationCreateDataDto,
          TranslationDataDto,
          TranslationDeleteDataDto,
          TranslationListDataDto,

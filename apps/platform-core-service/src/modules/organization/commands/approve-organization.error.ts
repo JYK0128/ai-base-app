@@ -1,6 +1,5 @@
 import { NotFoundException } from '@nestjs/common';
-
-import { defineErrors, ExceptionGuard } from '../../../common/utils/exception.util';
+import { defineErrors, ExceptionGuard } from '@pkg/shared/server';
 
 /**
  * 조직 승인 에러 메시지 및 예외 타입 정의

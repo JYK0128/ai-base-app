@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 
-import { ENV } from '@/common/env';
+import { ENV } from '@/env';
 
 import { I18nClient } from './i18n.client';
 import { I18N_SERVICE } from './i18n.constants';

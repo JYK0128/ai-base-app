@@ -3,6 +3,7 @@ import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 
 import { ANNOUNCEMENT_SERVICE_PATTERNS } from './announcement.constants';
+import type { AnnouncementInput } from './announcement.types';
 import { CreateAnnouncementCommand } from './commands';
 import { GetAnnouncementsQuery } from './queries';
 
@@ -19,14 +20,9 @@ export class AnnouncementController {
   }
 
   @MessagePattern(ANNOUNCEMENT_SERVICE_PATTERNS.ANNOUNCEMENT.CREATE)
-  async createAnnouncement(@Payload() data: { authorId: string, data: { title: string, content: string, isPublished?: boolean } }) {
+  async createAnnouncement(@Payload() data: { memberId: string, data: AnnouncementInput }) {
     return this.commandBus.execute(
-      new CreateAnnouncementCommand(
-        data.authorId,
-        data.data.title,
-        data.data.content,
-        data.data.isPublished,
-      ),
+      new CreateAnnouncementCommand(data.memberId, data.data),
     );
   }
 }

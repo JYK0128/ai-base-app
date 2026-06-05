@@ -1,6 +1,6 @@
 import { Transactional } from '@mikro-orm/decorators/legacy';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { Resource, ResourceRepository, ResourceType } from '@pkg/database';
+import { Resource, ResourceRepository, ResourceScope } from '@pkg/database';
 
 import { CreateResourceCommand } from './create-resource.command';
 import { CreateResourceAsserter } from './create-resource.error';
@@ -26,7 +26,7 @@ export class CreateResourceHandler implements ICommandHandler<CreateResourceComm
     await this.Asserter.throwIf(!!existing, 'ALREADY_EXISTS');
   }
 
-  /** 상위 리소스 조회 (없으면 undefined 허용) */
+  /** 상위 플랫폼 리소스 조회 (없으면 undefined 허용) */
   private async identifyParent(parentId?: string): Promise<Resource | undefined> {
     if (!parentId) return undefined;
     return await this.Asserter.assert(
@@ -35,7 +35,7 @@ export class CreateResourceHandler implements ICommandHandler<CreateResourceComm
     );
   }
 
-  /** 리소스 생성 */
+  /** 플랫폼 리소스 생성 */
   private processResourceCreation(
     command: CreateResourceCommand,
     parent: Resource | undefined,
@@ -44,13 +44,10 @@ export class CreateResourceHandler implements ICommandHandler<CreateResourceComm
       code: command.code,
       name: command.name,
       type: command.type,
+      scope: ResourceScope.PLATFORM,
       path: command.path,
-      icon: command.icon,
       parent,
-      sortOrder: command.sortOrder,
-      actions: command.type === ResourceType.MENU
-        ? ['CREATE', 'READ', 'UPDATE', 'DELETE']
-        : undefined,
+      actions: [],
     });
 
     return { id: resource.id };
