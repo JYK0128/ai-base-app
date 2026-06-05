@@ -1,8 +1,8 @@
 import { Transactional } from '@mikro-orm/decorators/legacy';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { ManagerAccount, ManagerAccountRepository } from '@pkg/database';
+import { MemberAccount, MemberAccountRepository } from '@pkg/database';
 
-import { ENV } from '@/common/env';
+import { ENV } from '@/env';
 
 import { DeferPasswordChangeCommand } from './defer-password-change.command';
 import { DeferPasswordChangeAsserter } from './defer-password-change.error';
@@ -14,13 +14,13 @@ import { DeferPasswordChangeAsserter } from './defer-password-change.error';
 export class DeferPasswordChangeHandler implements ICommandHandler<DeferPasswordChangeCommand> {
   private readonly Asserter = DeferPasswordChangeAsserter;
 
-  constructor(private readonly managerAccountRepository: ManagerAccountRepository) {}
+  constructor(private readonly memberAccountRepository: MemberAccountRepository) {}
 
   @Transactional()
   async execute(command: DeferPasswordChangeCommand): Promise<void> {
-    const { id } = command;
+    const { accountId } = command;
 
-    const account = await this.identifyAccount(id);
+    const account = await this.identifyAccount(accountId);
     await this.validatePolicies(account);
 
     this.processDeferment(account);
@@ -29,9 +29,9 @@ export class DeferPasswordChangeHandler implements ICommandHandler<DeferPassword
   /**
    * STEP 1: 계정 식별
    */
-  private async identifyAccount(id: string): Promise<ManagerAccount> {
+  private async identifyAccount(accountId: string): Promise<MemberAccount> {
     return await this.Asserter.assert(
-      this.managerAccountRepository.findOne(id),
+      this.memberAccountRepository.findOne(accountId),
       'ACCOUNT_NOT_FOUND',
     );
   }
@@ -39,14 +39,14 @@ export class DeferPasswordChangeHandler implements ICommandHandler<DeferPassword
   /**
    * STEP 2: 정책 검증
    */
-  private async validatePolicies(account: ManagerAccount) {
-    await this.Asserter.throwIf(!account.isActive(), 'INACTIVE_ACCOUNT');
+  private async validatePolicies(account: MemberAccount) {
+    await this.Asserter.throwIf(!account.isActive, 'INACTIVE_ACCOUNT');
   }
 
   /**
    * STEP 3: 유예 처리
    */
-  private processDeferment(account: ManagerAccount) {
+  private processDeferment(account: MemberAccount) {
     account.deferPasswordExpiry(ENV.PASSWORD_EXPIRY_DAYS);
   }
 }

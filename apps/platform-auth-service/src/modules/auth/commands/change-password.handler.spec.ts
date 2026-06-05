@@ -5,7 +5,7 @@ import { BadRequestException, NotFoundException, UnauthorizedException } from '@
 import { AccountStatus } from '@pkg/database';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { ENV } from '@/common/env';
+import { ENV } from '@/env';
 
 import { ChangePasswordCommand } from './change-password.command';
 import { ChangePasswordHandler } from './change-password.handler';
@@ -35,8 +35,12 @@ describe('ChangePasswordHandler', () => {
       status: AccountStatus.ACTIVE,
       lockUntil: null as Date | null,
       passwordExpiresAt: new Date('2026-01-01T00:00:00.000Z'),
-      isActive: () => account.status === AccountStatus.ACTIVE,
-      isLocked: () => !!account.lockUntil && account.lockUntil.getTime() > Date.now(),
+      get isActive() {
+        return account.status === AccountStatus.ACTIVE;
+      },
+      get isLocked() {
+        return !!account.lockUntil && account.lockUntil.getTime() > Date.now();
+      },
       verifyPassword: (password: string) => password !== 'wrong-password',
       updatePassword: (password: string, expiryDays: number) => {
         account.password = password;

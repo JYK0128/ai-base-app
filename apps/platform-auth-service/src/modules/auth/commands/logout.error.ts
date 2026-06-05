@@ -1,4 +1,4 @@
-import { defineErrors, ExceptionGuard } from '@/common/utils/exception.util';
+import { defineErrors, ExceptionGuard } from '@pkg/shared/server';
 
 /**
  * 로그아웃 에러 메시지 정의 (현재는 특이사항 없음)

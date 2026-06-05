@@ -7,6 +7,7 @@ import { ChangePasswordCommand,
          LoginCommand,
          LogoutCommand,
          RefreshTokenCommand } from './commands';
+import { GetMeQuery } from './queries';
 
 @Controller()
 export class AuthController {
@@ -28,21 +29,26 @@ export class AuthController {
   }
 
   @MessagePattern('auth.logout')
-  async handleLogout(@Payload() data: { id: string }) {
-    return this.commandBus.execute(new LogoutCommand(data.id));
+  async handleLogout(@Payload() data: { accountId: string }) {
+    return this.commandBus.execute(new LogoutCommand(data.accountId));
   }
 
   @MessagePattern('auth.defer_password_change')
-  async handleDeferPasswordChange(@Payload() data: { id: string }) {
-    return this.commandBus.execute(new DeferPasswordChangeCommand(data.id));
+  async handleDeferPasswordChange(@Payload() data: { accountId: string }) {
+    return this.commandBus.execute(new DeferPasswordChangeCommand(data.accountId));
   }
 
   @MessagePattern('auth.change_password')
   async handleChangePassword(
-    @Payload() data: { id: string, currentPassword: string, newPassword: string },
+    @Payload() data: { accountId: string, currentPassword: string, newPassword: string },
   ) {
     return this.commandBus.execute(
-      new ChangePasswordCommand(data.id, data.currentPassword, data.newPassword),
+      new ChangePasswordCommand(data.accountId, data.currentPassword, data.newPassword),
     );
+  }
+
+  @MessagePattern('auth.me')
+  async handleMe() {
+    return this.queryBus.execute(new GetMeQuery());
   }
 }

@@ -1,6 +1,5 @@
 import { ForbiddenException, UnauthorizedException } from '@nestjs/common';
-
-import { defineErrors, ExceptionGuard } from '@/common/utils/exception.util';
+import { defineErrors, ExceptionGuard } from '@pkg/shared/server';
 
 import type { LOGIN_CONTEXT, LOGIN_METADATA } from './login.command';
 
@@ -50,10 +49,10 @@ const ERROR_MESSAGES = defineErrors({
     },
     exception: ForbiddenException,
   },
-  INACTIVE_MANAGER: {
+  INACTIVE_MEMBER: {
     message: {
-      ko: '비활성화된 관리자 권한입니다. 관리자에게 문의하세요.',
-      en: 'Inactive manager permissions. Please contact the administrator.',
+      ko: '비활성화된 멤버 권한입니다. 관리자에게 문의하세요.',
+      en: 'Inactive member permissions. Please contact the administrator.',
     },
     exception: ForbiddenException,
   },

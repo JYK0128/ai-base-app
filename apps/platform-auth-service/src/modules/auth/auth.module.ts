@@ -1,10 +1,7 @@
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import { Module } from '@nestjs/common';
 import { CqrsModule } from '@nestjs/cqrs';
-import { JwtModule } from '@nestjs/jwt';
-import { ManagerAccount, ManagerRole, Role, RolePermission } from '@pkg/database';
-
-import { ENV } from '@/common/env';
+import { MemberAccount } from '@pkg/database';
 
 import { RedisModule } from '../redis/redis.module';
 import { AuthController } from './auth.controller';
@@ -13,16 +10,7 @@ import { Handlers } from './handlers';
 @Module({
   imports: [
     CqrsModule,
-    MikroOrmModule.forFeature([
-      ManagerAccount,
-      ManagerRole,
-      Role,
-      RolePermission,
-    ]),
-    JwtModule.register({
-      secret: ENV.JWT_ACCESS_SECRET,
-      signOptions: { expiresIn: ENV.JWT_ACCESS_EXPIRES_IN },
-    }),
+    MikroOrmModule.forFeature([MemberAccount]),
     RedisModule.forFeature({ namespace: 'auth' }),
   ],
   controllers: [AuthController],

@@ -15,10 +15,10 @@ export class LogoutHandler implements ICommandHandler<LogoutCommand> {
   constructor(private readonly redisService: RedisService) {}
 
   async execute(command: LogoutCommand) {
-    const { id } = command;
+    const { accountId } = command;
 
     // 세션 삭제
-    await this.redisService.del(`refresh:${id}`);
+    await this.redisService.del(`refresh:${accountId}`);
 
     return { success: true };
   }

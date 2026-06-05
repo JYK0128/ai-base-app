@@ -1,9 +1,9 @@
 import { Transactional } from '@mikro-orm/decorators/legacy';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { ManagerAccount, ManagerAccountRepository } from '@pkg/database';
+import { MemberAccount, MemberAccountRepository } from '@pkg/database';
+import { JwtUtil } from '@pkg/shared/common';
 
-import { ENV } from '@/common/env';
-import { TokenUtil } from '@/common/utils/token.util';
+import { ENV } from '@/env';
 import { RedisService } from '@/modules/redis/redis.service';
 
 import { extractPermissions } from '../auth.helpers';
@@ -23,7 +23,7 @@ export class LoginHandler implements ICommandHandler<LoginCommand> {
   });
 
   constructor(
-    private readonly managerAccountRepository: ManagerAccountRepository,
+    private readonly memberAccountRepository: MemberAccountRepository,
     private readonly redisService: RedisService,
   ) {}
 
@@ -49,32 +49,38 @@ export class LoginHandler implements ICommandHandler<LoginCommand> {
       },
     });
 
-    return await this.Asserter.assert(
-      this.managerAccountRepository.findOne(
+    const account = await this.Asserter.assert(
+      this.memberAccountRepository.findOne(
         { email },
-        { populate: ['manager.organization', 'manager.roles.role.permissions.resource'] },
+        { populate: ['member.organization', 'member.organizationRoles.role.permissions.resource'] },
       ),
       'INVALID_CREDENTIALS',
       { context: { email } },
     );
+
+    return account;
   }
 
   /**
    * STEP 2: 정책 검증
    */
-  private async validatePolicies(account: ManagerAccount) {
-    await this.Asserter.throwIf(!account.isActive(), 'INACTIVE_ACCOUNT');
-    await this.Asserter.throwIf(!account.manager.isActive(), 'INACTIVE_MANAGER');
-    await this.Asserter.throwIf(!account.manager.organization?.isActive(), 'INACTIVE_ORGANIZATION');
+  private async validatePolicies(account: MemberAccount) {
+    await this.Asserter.throwIf(!account.isActive, 'INACTIVE_ACCOUNT');
+    await this.Asserter.throwIf(!account.member.isActive, 'INACTIVE_MEMBER');
+
+    const organization = account.member.organization;
+    if (organization) {
+      await this.Asserter.throwIf(!organization.isActive, 'INACTIVE_ORGANIZATION');
+    }
 
     // 휴면 계정 확인
-    await this.Asserter.throwIf(account.isDormant(), 'DORMANT_ACCOUNT');
+    await this.Asserter.throwIf(account.isDormant, 'DORMANT_ACCOUNT');
   }
 
   /**
    * STEP 3: 자격 증명 확인
    */
-  private async verifyCredentials(account: ManagerAccount, password: string) {
+  private async verifyCredentials(account: MemberAccount, password: string) {
     const isPasswordValid = account.verifyPassword(password);
     await this.Asserter.assert(isPasswordValid, 'INVALID_CREDENTIALS', {
       context: { email: account.email },
@@ -85,7 +91,7 @@ export class LoginHandler implements ICommandHandler<LoginCommand> {
   /**
    * STEP 4: 성공 처리 및 응답
    */
-  private async processLoginSuccess(account: ManagerAccount, clientIp: string) {
+  private async processLoginSuccess(account: MemberAccount, clientIp: string) {
     // 실패 이력 초기화
     await Promise.all([
       this.redisService.del(this.loginKeys.build('attempt', account.email)),
@@ -97,21 +103,38 @@ export class LoginHandler implements ICommandHandler<LoginCommand> {
     account.lastLoginIp = clientIp;
 
     // 비밀번호 만료 확인
-    const isPasswordExpired = account.isPasswordExpired();
+    const isPasswordExpired = account.isPasswordExpired;
 
-    const organizationId = account.manager?.organization?.id;
+    const organizationId = account.member.organization?.id;
+    const memberId = account.member.id;
+    const accessExpiresAt = Math.floor(Date.now() / 1000) + ENV.JWT_ACCESS_EXPIRES_IN;
+    const refreshExpiresAt = Math.floor(Date.now() / 1000) + ENV.JWT_REFRESH_EXPIRES_IN;
 
     // 권한 정보 조회
-    const { roles, permissions } = extractPermissions(account.manager, organizationId);
+    const { permissions } = extractPermissions(account.member, organizationId);
+    const accountId = account.id;
 
     // 토큰 생성
-    const tokens = await TokenUtil.generateTokens({
-      sub: account.id,
-      organizationId,
-      mustChangePassword: isPasswordExpired,
-      roles,
-      permissions,
-    });
+    const tokens = await JwtUtil.issuePair(
+      {
+        sub: accountId,
+        accountId,
+        memberId,
+        ...(organizationId ? { organizationId } : {}),
+        mustChangePassword: isPasswordExpired,
+        permissions,
+      },
+      {
+        access: {
+          secret: ENV.JWT_ACCESS_SECRET,
+          expires: accessExpiresAt,
+        },
+        refresh: {
+          secret: ENV.JWT_REFRESH_SECRET,
+          expires: refreshExpiresAt,
+        },
+      },
+    );
 
     await this.redisService.set(
       `refresh:${account.id}`,

@@ -1,15 +1,10 @@
 import { UnauthorizedException } from '@nestjs/common';
-
-import { defineErrors, ExceptionGuard } from '@/common/utils/exception.util';
+import { defineErrors, ExceptionGuard } from '@pkg/shared/server';
 
 /**
  * 리프레시 토큰 에러 메시지 및 예외 타입 정의
  */
 const ERROR_MESSAGES = defineErrors({
-  INVALID_TOKEN_TYPE: {
-    message: '유효하지 않은 리프레시 토큰입니다.',
-    exception: UnauthorizedException,
-  },
   SESSION_EXPIRED: {
     message: '유효하지 않거나 만료된 세션입니다.',
     exception: UnauthorizedException,
@@ -22,8 +17,8 @@ const ERROR_MESSAGES = defineErrors({
     message: '비활성화된 계정입니다. 관리자에게 문의하세요.',
     exception: UnauthorizedException,
   },
-  INACTIVE_MANAGER: {
-    message: '조직 권한이 비활성화되었습니다. 관리자에게 문의하세요.',
+  INACTIVE_MEMBER: {
+    message: '멤버 권한이 비활성화되었습니다. 관리자에게 문의하세요.',
     exception: UnauthorizedException,
   },
   INACTIVE_ORGANIZATION: {

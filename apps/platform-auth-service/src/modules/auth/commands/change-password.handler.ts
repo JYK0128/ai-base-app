@@ -1,8 +1,8 @@
 import { Transactional } from '@mikro-orm/decorators/legacy';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { ManagerAccount, ManagerAccountRepository } from '@pkg/database';
+import { MemberAccount, MemberAccountRepository } from '@pkg/database';
 
-import { ENV } from '@/common/env';
+import { ENV } from '@/env';
 
 import { ChangePasswordCommand } from './change-password.command';
 import { ChangePasswordAsserter } from './change-password.error';
@@ -15,14 +15,14 @@ export class ChangePasswordHandler implements ICommandHandler<ChangePasswordComm
   private readonly Asserter = ChangePasswordAsserter;
 
   constructor(
-    private readonly managerAccountRepository: ManagerAccountRepository,
+    private readonly memberAccountRepository: MemberAccountRepository,
   ) {}
 
   @Transactional()
   async execute(command: ChangePasswordCommand): Promise<void> {
-    const { id, currentPassword, newPassword } = command;
+    const { accountId, currentPassword, newPassword } = command;
 
-    const account = await this.identifyAccount(id);
+    const account = await this.identifyAccount(accountId);
     await this.validatePolicies(account, currentPassword);
 
     this.processPasswordUpdate(account, newPassword);
@@ -31,9 +31,9 @@ export class ChangePasswordHandler implements ICommandHandler<ChangePasswordComm
   /**
    * STEP 1: 계정 식별
    */
-  private async identifyAccount(id: string): Promise<ManagerAccount> {
+  private async identifyAccount(accountId: string): Promise<MemberAccount> {
     return await this.Asserter.assert(
-      this.managerAccountRepository.findOne(id),
+      this.memberAccountRepository.findOne(accountId),
       'ACCOUNT_NOT_FOUND',
     );
   }
@@ -41,16 +41,16 @@ export class ChangePasswordHandler implements ICommandHandler<ChangePasswordComm
   /**
    * STEP 2: 정책 및 비밀번호 검증
    */
-  private async validatePolicies(account: ManagerAccount, currentPassword: string) {
+  private async validatePolicies(account: MemberAccount, currentPassword: string) {
     // 2-1. 계정 활성화 여부 확인
     await this.Asserter.throwIf(
-      !account.isActive(),
+      !account.isActive,
       'INACTIVE_ACCOUNT',
     );
 
     // 2-2. 계정 잠금 여부 확인
     await this.Asserter.throwIf(
-      account.isLocked(),
+      account.isLocked,
       'ACCOUNT_LOCKED',
     );
 
@@ -64,7 +64,7 @@ export class ChangePasswordHandler implements ICommandHandler<ChangePasswordComm
   /**
    * STEP 3: 비밀번호 업데이트
    */
-  private processPasswordUpdate(account: ManagerAccount, newPassword: string) {
+  private processPasswordUpdate(account: MemberAccount, newPassword: string) {
     account.updatePassword(newPassword, ENV.PASSWORD_EXPIRY_DAYS);
   }
 }
