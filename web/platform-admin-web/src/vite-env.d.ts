@@ -9,12 +9,3 @@ declare global {
     readonly env: ImportMetaEnv
   }
 }
-
-import 'jose';
-
-declare module 'jose' {
-  interface JWTPayload {
-    mustChangePassword?: boolean
-    organizationId?: string
-  }
-}

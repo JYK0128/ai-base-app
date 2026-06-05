@@ -35,7 +35,7 @@ const resources = {
       newPasswordPlaceholder: '최소 6자 이상',
       confirmNewPasswordPlaceholder: '새 비밀번호를 다시 입력해 주세요',
       updatePassword: '비밀번호 변경',
-      updatingPassword: '변경 중...',
+      updatingStatus: '변경 중...',
       securedBy: 'Platform Auth Service로 보호됩니다.',
     },
   },
@@ -70,7 +70,7 @@ const resources = {
       newPasswordPlaceholder: 'At least 6 characters',
       confirmNewPasswordPlaceholder: 'Re-enter the new password',
       updatePassword: 'Update password',
-      updatingPassword: 'Updating...',
+      updatingStatus: 'Updating...',
       securedBy: 'Protected by Platform Auth Service.',
     },
   },
@@ -103,4 +103,3 @@ export function setAdminLanguage(locale: string) {
   }
   return nextLocale;
 }
-

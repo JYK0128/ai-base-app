@@ -40,7 +40,11 @@ export const Route = createRootRouteWithContext<RouterContext>()({
   ),
 });
 
-function RootErrorFallback({ reset }: { reset: () => void }) {
+interface RootErrorFallbackProps {
+  readonly reset: () => void
+}
+
+function RootErrorFallback({ reset }: RootErrorFallbackProps) {
   const { t } = useTranslation('common');
 
   return (

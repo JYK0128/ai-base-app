@@ -33,6 +33,10 @@ function findMatchingMenuResource(flattened: ResourceResponseDto[], path: string
   });
 }
 
+function isDashboardPath(path: string): boolean {
+  return path === '/dashboard' || path === '/dashboard/';
+}
+
 export const Route = createFileRoute('/_protected')({
   beforeLoad: async ({ context, location }) => {
     if (!context.auth.isAuthenticated) {
@@ -84,9 +88,18 @@ export const Route = createFileRoute('/_protected')({
 
     const permissions = context.auth.permissions;
     const path = location.pathname;
+    const allowDashboardWithoutResource = isDashboardPath(path);
 
     // 보호 구간은 리소스가 없으면 기본 차단(fail-closed)
     if (resources.length === 0) {
+      if (allowDashboardWithoutResource) {
+        return {
+          resources,
+          flatResources: [],
+          locales,
+        };
+      }
+
       throw notFound();
     }
 
@@ -95,6 +108,14 @@ export const Route = createFileRoute('/_protected')({
 
     // 보호 구간에서는 MENU 자원에 매칭되지 않는 경로도 접근 불가로 처리
     if (!matchingMenuResource) {
+      if (allowDashboardWithoutResource) {
+        return {
+          resources,
+          flatResources: flattened,
+          locales,
+        };
+      }
+
       throw notFound();
     }
 

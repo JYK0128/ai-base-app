@@ -137,7 +137,7 @@ function ChangePassword() {
                 disabled={isChanging}
                 className="w-full"
               >
-                {isChanging ? t('updatingPassword') : t('updatePassword')}
+                {isChanging ? t('updatingStatus') : t('updatePassword')}
                 <ArrowRight />
               </form.Submit>
             </form.Layout>

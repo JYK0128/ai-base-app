@@ -72,7 +72,7 @@ const MOCK_AUDIT_LOGS: AuditLogMock[] = [
   },
   {
     id: 'log-003',
-    actor: 'manager@platform.com',
+    actor: 'member@platform.com',
     action: 'CREATE',
     target: 'ANNOUNCEMENT:System Maintenance',
     ipAddress: '10.0.0.x',
@@ -150,37 +150,35 @@ function AuditPage() {
   };
 
   return (
-    <div className="p-6 space-y-6 max-w-[1400px] mx-auto">
-      {/* Header */}
-      <div className="flex justify-between items-center border-b pb-4">
-        <div>
-          <h1 className="text-2xl font-bold flex items-center gap-2 text-slate-900">
-            <ShieldAlert className="w-6 h-6 text-rose-500" />
-            감사 로그 (Audit Logs)
+    <div className="size-full mx-auto flex max-w-300 min-h-0 flex-col gap-6 overflow-hidden p-6">
+      <header className="flex items-center justify-between gap-3 border-b border-slate-200 pb-4">
+        <div className="space-y-2">
+          <h1 className="flex items-center gap-2 text-2xl font-bold tracking-tight text-slate-950">
+            <ShieldAlert className="h-6 w-6 text-rose-500" />
+            감사 로그
           </h1>
-          <p className="text-slate-500 text-sm">
+          <p className="max-w-3xl text-sm text-slate-500">
             플랫폼 관리자 계정이 수행한 모든 데이터 생성, 변경, 권한 제어 활동이 기록되는 감사 레코드 보관소입니다.
           </p>
         </div>
         <Button variant="outline" className="gap-1.5" onClick={() => {}}>
-          <RefreshCw className="w-3.5 h-3.5" />
+          <RefreshCw className="h-3.5 w-3.5" />
           새로고침
         </Button>
-      </div>
+      </header>
 
-      {/* Filters Controls Grid */}
-      <Card className="border-slate-200/80 shadow-sm">
-        <CardHeader className="py-4">
+      <Card className="flex-none border-slate-200 bg-white shadow-sm">
+        <CardHeader className="border-b border-slate-200 py-4">
           <CardTitle className="text-sm font-semibold text-slate-800">검색 및 필터링 제어</CardTitle>
         </CardHeader>
-        <CardContent className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <CardContent className="grid grid-cols-1 gap-4 md:grid-cols-4">
           <div className="relative">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-slate-400" />
             <Input
               placeholder="수행자, 변경 대상, IP로 검색..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-9 bg-white"
+              className="bg-white pl-9"
             />
           </div>
 
@@ -210,7 +208,7 @@ function AuditPage() {
             </select>
           </div>
 
-          <div className="flex items-center text-xs text-slate-400 justify-end">
+          <div className="flex items-center justify-end text-xs text-slate-400">
             총
             {' '}
             {filteredLogs.length}
@@ -219,19 +217,18 @@ function AuditPage() {
         </CardContent>
       </Card>
 
-      {/* Table Card */}
-      <Card className="border-slate-200/80 shadow-sm overflow-hidden">
-        <CardContent className="p-0">
+      <Card className="flex min-h-0 flex-1 flex-col overflow-hidden border-slate-200 bg-white shadow-sm">
+        <CardContent className="min-h-0 flex-1 overflow-auto p-0">
           <Table>
             <TableHeader className="bg-slate-50/50">
               <TableRow>
-                <TableHead className="font-semibold text-slate-700 w-[180px]">일시 (UTC)</TableHead>
-                <TableHead className="font-semibold text-slate-700 w-[240px]">수행 계정 (Actor)</TableHead>
-                <TableHead className="font-semibold text-slate-700 w-[140px]">수행 액션</TableHead>
+                <TableHead className="w-[180px] font-semibold text-slate-700">일시 (UTC)</TableHead>
+                <TableHead className="w-[240px] font-semibold text-slate-700">수행 계정 (Actor)</TableHead>
+                <TableHead className="w-[140px] font-semibold text-slate-700">수행 액션</TableHead>
                 <TableHead className="font-semibold text-slate-700">변경 대상 (Target)</TableHead>
-                <TableHead className="font-semibold text-slate-700 w-[130px]">수행 IP</TableHead>
-                <TableHead className="font-semibold text-slate-700 w-[100px] text-center">결과</TableHead>
-                <TableHead className="font-semibold text-slate-700 w-[80px] text-center">상세</TableHead>
+                <TableHead className="w-[130px] font-semibold text-slate-700">수행 IP</TableHead>
+                <TableHead className="w-[100px] text-center font-semibold text-slate-700">결과</TableHead>
+                <TableHead className="w-[80px] text-center font-semibold text-slate-700">상세</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -240,7 +237,7 @@ function AuditPage() {
                   <TableCell className="font-mono text-xs">{log.timestamp}</TableCell>
                   <TableCell className="font-semibold text-slate-800">{log.actor}</TableCell>
                   <TableCell>{getActionBadge(log.action)}</TableCell>
-                  <TableCell className="font-mono text-xs text-slate-600 max-w-[250px] truncate" title={log.target}>
+                  <TableCell className="max-w-[250px] truncate font-mono text-xs text-slate-600" title={log.target}>
                     {log.target}
                   </TableCell>
                   <TableCell className="font-mono text-xs">{log.ipAddress}</TableCell>
@@ -263,7 +260,7 @@ function AuditPage() {
               ))}
               {filteredLogs.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center text-slate-400 py-12">
+                  <TableCell colSpan={7} className="py-12 text-center text-slate-400">
                     조건에 일치하는 감사 로그 레코드가 없습니다.
                   </TableCell>
                 </TableRow>
