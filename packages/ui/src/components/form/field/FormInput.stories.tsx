@@ -24,7 +24,7 @@ type Story = StoryObj<typeof FormInput>;
  */
 const schema = z.object({
   username: z.string(),
-  email: z.string().email(),
+  email: z.email(),
 });
 const defaultValues = {
   username: '',

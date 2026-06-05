@@ -25,7 +25,7 @@
 
 ```json
 {
-  "userId": "antigravity_user",
+  "memberId": "antigravity_user",
   "email": "admin@example.com",
   "tenantId": "org-123",
   "clientIp": "127.0.0.1",
@@ -52,7 +52,7 @@
 
 ```json
 {
-  "userId": "antigravity_user",
+  "memberId": "antigravity_user",
   "email": "admin@example.com",
   "tenantId": "org-123",
   "roles": ["platform_admin"],
@@ -94,7 +94,7 @@ RabbitMQ를 통해 단순 테스트용 이벤트를 발행합니다.
 
 ```json
 {
-  "userId": "manager-123"
+  "memberId": "member-123"
 }
 ```
 

@@ -57,7 +57,7 @@ function NavigationListStory() {
           value={items}
           onChange={setItems}
           className="space-y-2 rounded-lg border bg-muted/40 p-4"
-          renderItem={({ item, state, dragHandleProps, ref }) => (
+          renderNode={({ node, state, dragHandleProps, ref }) => (
             <div
               ref={ref}
               className={cn(
@@ -74,10 +74,10 @@ function NavigationListStory() {
 
               <div className="min-w-0 flex-1">
                 <div className="font-semibold text-sm">
-                  {item.label}
+                  {node.label}
                 </div>
                 <div className="text-xs text-muted-foreground">
-                  {item.description}
+                  {node.description}
                 </div>
               </div>
             </div>

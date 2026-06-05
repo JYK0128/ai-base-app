@@ -3,7 +3,7 @@
 import { DragDropProvider } from '@dnd-kit/react';
 import * as React from 'react';
 
-import { renderDefaultEmpty, renderDefaultItem } from './SortableList.defaults';
+import { renderDefaultEmpty, renderDefaultNode } from './SortableList.defaults';
 import { useSortableListHandlers, useSortableListValue } from './SortableList.hooks';
 import type { SortableListProps } from './SortableList.types';
 import { SortableListViewport } from './SortableListViewport';
@@ -12,7 +12,7 @@ export function SortableList<T>({
   value: controlledValue,
   defaultValue,
   onChange,
-  renderItem,
+  renderNode,
   renderEmpty,
   className,
   ...props
@@ -42,7 +42,7 @@ export function SortableList<T>({
         value={value}
         groupId={groupId}
         droppableId={droppableId}
-        renderItem={renderItem ?? renderDefaultItem}
+        renderNode={renderNode ?? renderDefaultNode}
         renderEmpty={renderEmpty ?? renderDefaultEmpty}
         className={className}
         {...rootPropsWithAriaLabel}

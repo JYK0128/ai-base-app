@@ -23,7 +23,7 @@ export type SortableListChangeHandler<T> = (
 // render 함수 인자
 // ---------------------------------------------------------------------------
 
-export interface SortableListRenderItemState {
+export interface SortableListRenderNodeState {
   readonly isDragging: boolean
   readonly isDropTarget: boolean
   readonly isDisabled: boolean
@@ -34,10 +34,10 @@ export interface SortableListDragHandleProps {
   readonly style: CSSProperties
 }
 
-export interface SortableListRenderItemArgs<T> {
-  readonly item: ListNode & T
+export interface SortableListRenderNodeArgs<T> {
+  readonly node: ListNode & T
   readonly index: number
-  readonly state: SortableListRenderItemState
+  readonly state: SortableListRenderNodeState
   readonly dragHandleProps: SortableListDragHandleProps
   readonly ref: (element: HTMLElement | null) => void
 }
@@ -46,20 +46,20 @@ export interface SortableListRenderItemArgs<T> {
 // 공개 입력 타입 (계속)
 // ---------------------------------------------------------------------------
 
-export type SortableListRenderItem<T> = (
-  args: SortableListRenderItemArgs<T>,
+export type SortableListRenderNode<T> = (
+  args: SortableListRenderNodeArgs<T>,
 ) => ReactNode;
 
 export type SortableListRenderEmpty = () => ReactNode;
 
 export interface SortableListRenderProps<T> {
-  readonly renderItem?: SortableListRenderItem<T>
+  readonly renderNode?: SortableListRenderNode<T>
   readonly renderEmpty?: SortableListRenderEmpty
 }
 
 export type SortableListValueProps<T>
   = | {
-    readonly value: (ListNode & T)[ ]
+    readonly value: (ListNode & T)[]
     readonly defaultValue?: never
     readonly onChange: SortableListChangeHandler<T>
   }
@@ -79,16 +79,16 @@ export type SortableListProps<T>
 // ---------------------------------------------------------------------------
 
 export interface SortableListRowProps<T> {
-  readonly item: ListNode & T
+  readonly node: ListNode & T
   readonly index: number
   readonly groupId: string
-  readonly renderItem: SortableListRenderItem<T>
+  readonly renderNode: SortableListRenderNode<T>
 }
 
 export type SortableListViewportProps<T>
   = & SortableListBaseProps
     & {
-      readonly renderItem: SortableListRenderItem<T>
+      readonly renderNode: SortableListRenderNode<T>
       readonly renderEmpty: SortableListRenderEmpty
     }
     & {

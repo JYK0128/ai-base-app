@@ -2,7 +2,6 @@
 
 import { type ColumnDef,
          type ColumnFiltersState,
-         type ColumnPinningState,
          type FilterFn,
          getCoreRowModel,
          getFacetedRowModel,
@@ -11,17 +10,22 @@ import { type ColumnDef,
          getPaginationRowModel,
          getSortedRowModel,
          type PaginationState,
-         type RowPinningState,
+         type RowData,
          type SortingState,
+         type TableMeta,
          type Updater,
-         useReactTable,
-         type VisibilityState } from '@tanstack/react-table';
+         useReactTable } from '@tanstack/react-table';
 import * as React from 'react';
 
 declare module '@tanstack/react-table' {
   interface FilterFns {
     faceted: FilterFn<unknown>
     dateRange: FilterFn<unknown>
+  }
+  interface TableMeta<TData extends RowData> {
+    data?: Record<string, unknown>
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    action?: Record<string, (row: TData, ...args: any[]) => any>
   }
 }
 import { Pin,
@@ -55,6 +59,7 @@ interface DataTableProps<TData> {
   pageSizeOptions?: number[]
   enableRowPinning?: boolean
   enableColumnPinning?: boolean
+  meta?: TableMeta<TData>
 }
 
 export function DataTable<TData>({
@@ -73,24 +78,15 @@ export function DataTable<TData>({
   pageSizeOptions = [10, 20, 30, 50, 100],
   enableRowPinning = false,
   enableColumnPinning = true,
+  meta,
 }: Readonly<DataTableProps<TData>>) {
   'use no memo';
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
-  const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
-  const [rowSelection, setRowSelection] = React.useState({});
   const [globalFilter, setGlobalFilter] = React.useState('');
   const [pagination, setPagination] = React.useState<PaginationState>({
     pageIndex: 0,
     pageSize: defaultPageSize,
-  });
-  const [rowPinning, setRowPinning] = React.useState<RowPinningState>({
-    top: [],
-    bottom: [],
-  });
-  const [columnPinning, setColumnPinning] = React.useState<ColumnPinningState>({
-    left: [],
-    right: [],
   });
 
   const finalColumns = React.useMemo(() => {
@@ -181,6 +177,9 @@ export function DataTable<TData>({
   const table = useReactTable({
     data,
     columns: finalColumns,
+    // Meta is intentionally permissive so feature tables can attach their own action signatures.
+
+    meta,
     rowCount,
     pageCount: pageCountProp,
     manualPagination: !!onPaginationChangeProp,
@@ -212,20 +211,12 @@ export function DataTable<TData>({
       setColumnFilters(nextValue);
       onColumnFiltersChangeProp?.(nextValue);
     },
-    onColumnVisibilityChange: setColumnVisibility,
-    onRowSelectionChange: setRowSelection,
     state: {
       sorting,
       columnFilters,
-      columnVisibility,
-      rowSelection,
       globalFilter,
       pagination,
-      rowPinning,
-      columnPinning,
     },
-    onRowPinningChange: setRowPinning,
-    onColumnPinningChange: setColumnPinning,
     enablePinning: true,
     enableSorting: true,
     enableMultiSort: true,

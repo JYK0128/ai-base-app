@@ -30,6 +30,7 @@ export function SortableTree<T>(props: Readonly<SortableTreeProps<T>>) {
     renderDropIndicator,
     renderEmpty,
     indentationWidth = DEFAULT_INDENT,
+    disabled = false,
     ...rootProps
   } = props;
 
@@ -72,6 +73,7 @@ export function SortableTree<T>(props: Readonly<SortableTreeProps<T>>) {
         renderEmpty={renderEmpty ?? renderDefaultEmpty}
         getNodeDisabled={getNodeDisabled ?? getDefaultNodeDisabled}
         indentationWidth={indentationWidth}
+        disabled={disabled}
         {...rootPropsWithAriaLabel}
       />
     </DragDropProvider>

@@ -32,6 +32,7 @@ export function SortableTreeViewport<T>(props: Readonly<SortableTreeViewportProp
     renderEmpty,
     getNodeDisabled,
     indentationWidth,
+    disabled = false,
     ...rootProps
   } = props;
 
@@ -90,6 +91,7 @@ export function SortableTreeViewport<T>(props: Readonly<SortableTreeViewportProp
           renderDropIndicator={renderDropIndicator}
           resolveDropMove={resolveDropMove}
           showAfterIndicator={isLastVisibleItem}
+          disabled={disabled}
         />
       );
     })

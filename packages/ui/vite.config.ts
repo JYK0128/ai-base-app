@@ -53,10 +53,16 @@ export default defineConfig({
       fileName: (format, entryName) => `${entryName}.${format === 'es' ? 'js' : 'cjs'}`,
     },
     rollupOptions: {
-      external: [
-        'react/jsx-runtime',
-        ...Object.keys(pkg.peerDependencies || {}),
-      ],
+      external: (id) => {
+        if (id === 'react/jsx-runtime') {
+          return true;
+        }
+        const allDeps = [
+          ...Object.keys(pkg.peerDependencies || {}),
+          ...Object.keys(pkg.dependencies || {}),
+        ];
+        return allDeps.some((dep) => id === dep || id.startsWith(`${dep}/`));
+      },
       output: {
         chunkFileNames: 'chunks/[name]-[hash].js',
         globals: {

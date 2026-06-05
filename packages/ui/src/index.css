@@ -54,6 +54,8 @@
 :root {
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
+  --input-bg-color: var(--background);
+  --input-text-color: var(--foreground);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.145 0 0);
   --popover: oklch(1 0 0);
@@ -156,8 +158,14 @@
     @apply break-keep whitespace-pre-line;
   }
 
+  [role='dialog'] {
+    @apply break-keep whitespace-pre-line;
+  }
+
   /* 5. 브라우저 자동완성 배경색 */
   input:-webkit-autofill,input:-webkit-autofill:hover,input:-webkit-autofill:focus,input:-webkit-autofill:active {
-    transition: background-color var(--autofill-lock-duration) ease-in-out 0s, color var(--autofill-lock-duration) ease-in-out 0s !important;
+    transition: background-color var(--autofill-lock-duration, 9999s) ease-in-out 0s !important;
+
+    -webkit-text-fill-color: var(--foreground) !important;
   }
 }

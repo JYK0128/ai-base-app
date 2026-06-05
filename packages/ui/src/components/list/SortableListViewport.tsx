@@ -9,7 +9,7 @@ export function SortableListViewport<T>({
   value,
   groupId,
   droppableId,
-  renderItem,
+  renderNode,
   renderEmpty,
   className,
   ...props
@@ -26,13 +26,13 @@ export function SortableListViewport<T>({
       {...props}
     >
       {value.length > 0
-        ? value.map((item, index) => (
+        ? value.map((node, index) => (
           <SortableListRow
-            key={item.id}
-            item={item}
+            key={node.id}
+            node={node}
             index={index}
             groupId={groupId}
-            renderItem={renderItem}
+            renderNode={renderNode}
           />
         ))
         : renderEmpty?.()}

@@ -10,6 +10,7 @@ import FormSubmit from './components/FormSubmit';
 import FormCheckbox from './field/FormCheckbox';
 import FormCheckGroup from './field/FormCheckGroup';
 import FormInput from './field/FormInput';
+import FormMarkdownEditor from './field/FormMarkdownEditor';
 import FormRadioGroup from './field/FormRadioGroup';
 import FormSelect from './field/FormSelect';
 import FormTextarea from './field/FormTextarea';
@@ -27,6 +28,7 @@ const hook = createFormHook({
     Select: FormSelect,
     Checkbox: FormCheckbox,
     CheckGroup: FormCheckGroup,
+    MarkdownEditor: FormMarkdownEditor,
     RadioGroup: FormRadioGroup,
     Textarea: FormTextarea,
   },

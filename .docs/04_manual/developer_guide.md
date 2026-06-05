@@ -14,8 +14,6 @@
 ## 엔티티 공통 감사 필드 및 삭제 정책
 
 * 모든 엔티티는 `CoreEntity`를 상속하고 공통 필드 `id`, `createdAt`, `createdBy`, `updatedAt`, `updatedBy`, `deletedAt`, `deletedBy`를 사용함.
-* 기본 삭제 정책은 soft delete이며, `delete()` 호출 시 기본값으로 `deletedAt`을 갱신함.
-* 하드 삭제가 필요한 경우에만 `delete(true)` 경로를 사용함.
 * MikroORM 전역 필터 `softDelete`가 기본 활성화되어 일반 조회에서 `deletedAt != null` 데이터는 자동 제외됨.
 
 ## 네이밍 및 모델링 컨벤션

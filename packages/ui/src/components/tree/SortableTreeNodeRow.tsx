@@ -23,6 +23,7 @@ export function SortableTreeNodeRow<T>(props: Readonly<SortableTreeNodeRowProps<
     renderDropIndicator,
     resolveDropMove,
     showAfterIndicator,
+    disabled = false,
   } = props;
 
   const {
@@ -48,7 +49,7 @@ export function SortableTreeNodeRow<T>(props: Readonly<SortableTreeNodeRowProps<
     id: node.id,
     index,
     group: sortableGroupId,
-    disabled: isDisabled,
+    disabled: disabled || isDisabled,
     data: {
       type: 'tree-node',
       nodeId: node.id,
@@ -68,17 +69,19 @@ export function SortableTreeNodeRow<T>(props: Readonly<SortableTreeNodeRowProps<
     <div
       role="presentation"
       data-tree-row-id={node.id}
-      className="grid"
+      className="grid border-b border-slate-100 last:border-b-0"
     >
-      <SortableTreeDropIndicator
-        isDragging={isDragging}
-        targetId={node.id}
-        position="before"
-        depth={depth}
-        indentationWidth={indentationWidth}
-        renderDropIndicator={renderDropIndicator}
-        resolveDropMove={resolveDropMove}
-      />
+      {!disabled && (
+        <SortableTreeDropIndicator
+          isDragging={isDragging}
+          targetId={node.id}
+          position="before"
+          depth={depth}
+          indentationWidth={indentationWidth}
+          renderDropIndicator={renderDropIndicator}
+          resolveDropMove={resolveDropMove}
+        />
+      )}
 
       <div
         ref={setSortableNodeRef}
@@ -109,15 +112,17 @@ export function SortableTreeNodeRow<T>(props: Readonly<SortableTreeNodeRowProps<
             {expandIcon}
           </button>
 
-          <button
-            ref={setActivatorNodeRef}
-            type="button"
-            disabled={isDisabled}
-            aria-label={`Drag ${label}`}
-            className="inline-flex size-7 shrink-0 cursor-grab items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground active:cursor-grabbing disabled:cursor-not-allowed"
-          >
-            ::
-          </button>
+          {!disabled && (
+            <button
+              ref={setActivatorNodeRef}
+              type="button"
+              disabled={isDisabled}
+              aria-label={`Drag ${label}`}
+              className="inline-flex size-7 shrink-0 cursor-grab items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground active:cursor-grabbing disabled:cursor-not-allowed"
+            >
+              ::
+            </button>
+          )}
 
           <div className="flex min-w-0 flex-1 items-center justify-between gap-3">
             {renderNode({
@@ -135,7 +140,7 @@ export function SortableTreeNodeRow<T>(props: Readonly<SortableTreeNodeRowProps<
 
       </div>
 
-      {showAfterIndicator
+      {showAfterIndicator && !disabled
         ? (
           <SortableTreeDropIndicator
             isDragging={isDragging}

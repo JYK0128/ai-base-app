@@ -5,10 +5,10 @@ import { useSortable } from '@dnd-kit/react/sortable';
 import type { SortableListRowProps } from './SortableList.types';
 
 export function SortableListRow<T>({
-  item,
+  node,
   index,
   groupId,
-  renderItem,
+  renderNode,
 }: SortableListRowProps<T>) {
   const {
     ref: sortableRef,
@@ -16,30 +16,30 @@ export function SortableListRow<T>({
     isDragging,
     isDropTarget,
   } = useSortable({
-    id: item.id,
+    id: node.id,
     index,
     group: groupId,
-    disabled: item.disabled ?? false,
+    disabled: node.disabled ?? false,
   });
 
   const state = {
     isDragging,
     isDropTarget,
-    isDisabled: item.disabled ?? false,
+    isDisabled: node.disabled ?? false,
   };
 
   const dragHandleProps = {
     ref: sortableHandleRef,
     style: {
-      cursor: item.disabled ? 'not-allowed' : 'grab',
+      cursor: node.disabled ? 'not-allowed' : 'grab',
       touchAction: 'none',
     },
   };
 
   return (
     <>
-      {renderItem({
-        item,
+      {renderNode({
+        node,
         index,
         state,
         dragHandleProps,

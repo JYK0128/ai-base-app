@@ -23,8 +23,18 @@ echo -e "${BLUE}==================================================${NC}"
 log_info "Step 1: Preparing CLI tools..."
 OS="$(uname -s)"
 
-if [[ "$OS" != "Darwin" ]]; then
-    log_error "This script is optimized for macOS (Darwin) with Docker Desktop."
+IS_MACOS=false
+IS_WINDOWS=false
+IS_LINUX=false
+
+if [[ "$OS" == "Darwin" ]]; then
+    IS_MACOS=true
+elif [[ "$OS" == MINGW* || "$OS" == MSYS* || "$OS" == CYGWIN* ]]; then
+    IS_WINDOWS=true
+elif [[ "$OS" == "Linux" ]]; then
+    IS_LINUX=true
+else
+    log_error "Unsupported OS: $OS. This script supports macOS, Windows (Git Bash), and Linux."
     exit 1
 fi
 
@@ -56,15 +66,32 @@ install_tools() {
     fi
     log_success "'docker' and 'docker-buildx' are available."
 
-    # K8s 관리 도구는 brew를 통해 설치 가능
+    # K8s 관리 도구는 OS별 환경에 맞게 확인 또는 설치
     local k8s_tools=("kubectl" "helm" "telepresence")
     for tool in "${k8s_tools[@]}"; do
         if ! command -v "$tool" &> /dev/null; then
-            log_warn "'$tool' not found. Installing via Homebrew..."
-            if [[ "$tool" == "telepresence" ]]; then
-                brew install telepresenceio/telepresence/telepresence-oss
+            if [ "$IS_MACOS" = true ]; then
+                log_warn "'$tool' not found. Installing via Homebrew..."
+                if [[ "$tool" == "telepresence" ]]; then
+                    brew install telepresenceio/telepresence/telepresence-oss
+                else
+                    brew install "$tool"
+                fi
             else
-                brew install "$tool"
+                log_error "'$tool'이 설치되어 있지 않습니다."
+                if [ "$IS_WINDOWS" = true ]; then
+                    log_warn "Windows 환경에서는 아래 도구를 직접 수동 설치하고 PATH에 추가해야 합니다:"
+                    if [[ "$tool" == "kubectl" ]]; then
+                        log_warn "👉 kubectl: https://kubernetes.io/docs/tasks/tools/install-kubectl-windows/"
+                    elif [[ "$tool" == "helm" ]]; then
+                        log_warn "👉 helm: https://helm.sh/docs/intro/install/ (또는 'winget install Helm.Helm' 실행)"
+                    elif [[ "$tool" == "telepresence" ]]; then
+                        log_warn "👉 telepresence: https://telepresence.io/docs/install/client/"
+                    fi
+                else
+                    log_warn "Linux 환경에서는 패키지 매니저를 통해 '$tool'을 설치해 주세요."
+                fi
+                exit 1
             fi
         else
             log_success "'$tool' is already installed."

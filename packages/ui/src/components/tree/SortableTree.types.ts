@@ -49,6 +49,7 @@ export interface SortableTreeBehaviorProps<T> {
   readonly getNodeDisabled?: SortableTreeNodeDisabledResolver<T>
   readonly canDrop?: SortableTreeCanDropHandler<T>
   readonly indentationWidth?: number
+  readonly disabled?: boolean
 }
 
 export type SortableTreeExpandedStateProps
@@ -188,6 +189,7 @@ export type SortableTreeViewportProps<T>
       readonly expandedIdSet: ReadonlySet<string>
       readonly toggleExpanded: (nodeId: string) => void
       readonly resolveMove: (input: TreeNodeMoveInput) => SortableTreeMove<T> | undefined
+      readonly disabled?: boolean
     };
 
 export type SortableTreeNodeRowProps<T>
@@ -206,6 +208,7 @@ export type SortableTreeNodeRowProps<T>
     readonly isExpanded: boolean
     readonly resolveDropMove: SortableTreeDropMoveResolver<T>
     readonly showAfterIndicator: boolean
+    readonly disabled?: boolean
   };
 
 export type SortableTreeDropIndicatorProps<T>

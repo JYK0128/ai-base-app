@@ -1,16 +1,16 @@
 import { GripVertical } from 'lucide-react';
 
-import type { SortableListRenderItemArgs } from './SortableList.types';
+import type { SortableListRenderNodeArgs } from './SortableList.types';
 
 /**
- * renderItem이 없을 때 동작 확인 및 즉시 활용 가능한 프리미엄 마크업을 기본 렌더링한다.
+ * renderNode가 없을 때 동작 확인 및 즉시 활용 가능한 프리미엄 마크업을 기본 렌더링한다.
  */
-export function renderDefaultItem<T>({
-  item,
+export function renderDefaultNode<T>({
+  node,
   state,
   dragHandleProps,
   ref,
-}: SortableListRenderItemArgs<T>) {
+}: SortableListRenderNodeArgs<T>) {
   return (
     <div
       ref={ref}
@@ -25,7 +25,7 @@ export function renderDefaultItem<T>({
       >
         <GripVertical className="size-4" />
       </button>
-      <span className="font-semibold text-sm text-foreground">{String(item.id)}</span>
+      <span className="font-semibold text-sm text-foreground">{String(node.id)}</span>
     </div>
   );
 }

@@ -9,6 +9,7 @@ export * from './context';
 export * from './field/FormCheckbox';
 export * from './field/FormCheckGroup';
 export * from './field/FormInput';
+export * from './field/FormMarkdownEditor';
 export * from './field/FormRadioGroup';
 export * from './field/FormSelect';
 export * from './field/FormTextarea';
