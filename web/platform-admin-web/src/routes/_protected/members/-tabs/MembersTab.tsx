@@ -245,10 +245,10 @@ export function MembersTab({ isActive }: MembersTabProps) {
   const metaValue = {
     action: {
       updateMemberRole: (row: MemberItem, nextRole: MemberRole) => {
-        updateMemberRoleMutation.mutate({ data: { id: row.id, role: nextRole } });
+        void updateMemberRoleMutation.mutateAsync({ data: { id: row.id, role: nextRole } });
       },
       toggleMemberStatus: (row: MemberItem) => {
-        toggleMemberStatusMutation.mutate({ data: { id: row.id } });
+        void toggleMemberStatusMutation.mutateAsync({ data: { id: row.id } });
       },
       handleOpenDetail: (row: MemberItem) => {
         setSelectedMemberId(row.id);
@@ -281,7 +281,9 @@ export function MembersTab({ isActive }: MembersTabProps) {
         open={selectedMemberId !== null}
         member={selectedMember}
         onOpenChange={handleDrawerOpenChange}
-        onToggleStatus={(id) => toggleMemberStatusMutation.mutate({ data: { id } })}
+        onToggleStatus={(id) => {
+          void toggleMemberStatusMutation.mutateAsync({ data: { id } });
+        }}
       />
     </div>
   );
