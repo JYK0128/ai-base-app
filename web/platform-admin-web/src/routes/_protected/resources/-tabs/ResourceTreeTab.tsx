@@ -1,23 +1,18 @@
-import { Badge, Button, Checkbox, Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, Label, RadioGroup, RadioGroupItem, Switch, toast } from '@pkg/ui';
+import { Badge, Button, Checkbox, Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, Label, RadioGroup, RadioGroupItem, SortableTree, type SortableTreeMove, Switch, toast, type TreeNode } from '@pkg/ui';
 import { useQueryClient } from '@tanstack/react-query';
 import * as LucideIcons from 'lucide-react';
-import { ChevronDown, ChevronRight, Languages, ListTree, Loader2, Pencil, Plus, RefreshCw, Trash2 } from 'lucide-react';
-import { type ReactNode, useEffect, useState } from 'react';
+import { Languages, ListTree, Loader2, Pencil, Plus, RefreshCw, Trash2 } from 'lucide-react';
+import React, { type ReactNode, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { getResourceControllerGetResourcesV1QueryKey,
-         useResourceControllerCreateResourceV1,
-         useResourceControllerDeleteResourceV1,
-         useResourceControllerGetResourcesV1,
-         useResourceControllerUpdateResourcePermissionsV1,
-         useResourceControllerUpdateResourceV1 } from '../../../../api/endpoints';
+import { getResourceControllerGetResourcesV1QueryKey, useResourceControllerCreateResourceV1, useResourceControllerDeleteResourceV1, useResourceControllerGetResourcesV1, useResourceControllerUpdateResourcePermissionsV1, useResourceControllerUpdateResourceSortV1, useResourceControllerUpdateResourceV1 } from '../../../../api/endpoints';
 import type { LocaleDto, ResourceResponseDto } from '../../../../api/model';
+import { ResourceResponseDtoScope } from '../../../../api/model';
 import { ResourceControl } from '../../../../components/resource/ResourceControl';
-import { getStoredAdminLocale } from '../../../../lib/locale';
-import { MenuRegistrationModal } from '../-modals/MenuRegistrationModal';
+import { CreateMenuInput, MenuRegistrationModal } from '../-modals/MenuRegistrationModal';
 import { ResourceEditModal } from '../-modals/ResourceEditModal';
 import { ResourceLanguageModal } from '../-modals/ResourceLanguageModal';
-import { SubResourceRegistrationModal } from '../-modals/SubResourceRegistrationModal';
+import { CreateSubResourceInput, SubResourceRegistrationModal } from '../-modals/SubResourceRegistrationModal';
 import { ResourcePanel } from './ResourcePanel';
 
 type ResourcePermissionValue = string[] | string | null | undefined;
@@ -39,16 +34,16 @@ function buildInitialPermissions(nodes: ResourceResponseDto[]): ResourcePermissi
   const traverse = (items: ResourceResponseDto[]) => {
     items.forEach((item) => {
       if (item.type === 'MENU') {
-        initialPermissions[item.id] = item.actions || [];
+        initialPermissions[item.id] = item.actions;
       }
       else if (item.actions && item.actions.length > 0) {
         initialPermissions[item.id] = item.actions[0];
       }
       else {
-        initialPermissions[item.id] = item.constraint || '';
+        initialPermissions[item.id] = item.constraint;
       }
 
-      if (item.children?.length) {
+      if (item.children.length) {
         traverse(item.children);
       }
     });
@@ -62,7 +57,7 @@ function buildInitialExpandedNodes(nodes: ResourceResponseDto[]): Record<string,
   const initialExpanded: Record<string, boolean> = {};
 
   nodes.forEach((node) => {
-    if (node.children && node.children.length > 0) {
+    if (node.children.length > 0) {
       initialExpanded[node.id] = true;
     }
   });
@@ -79,7 +74,7 @@ function findParentName(nodes: ResourceResponseDto[], parentId: string | null): 
         return node.name;
       }
 
-      if (node.children?.length) {
+      if (node.children.length > 0) {
         const found = findName(node.children);
         if (found !== '') {
           return found;
@@ -104,20 +99,20 @@ function collectSubtreeIds(nodes: ResourceResponseDto[], targetId: string): stri
         const collectChildren = (children: ResourceResponseDto[]) => {
           children.forEach((child) => {
             collected.push(child.id);
-            if (child.children?.length) {
+            if (child.children.length > 0) {
               collectChildren(child.children);
             }
           });
         };
 
-        if (node.children?.length) {
+        if (node.children.length > 0) {
           collectChildren(node.children);
         }
 
         return true;
       }
 
-      if (node.children?.length && traverse(node.children)) {
+      if (node.children.length > 0 && traverse(node.children)) {
         return true;
       }
     }
@@ -160,7 +155,7 @@ interface ResourceNodeActionsProps {
 
 function ResourceNodeActions({ node, currentValue, onChange, parentActions, permissions }: ResourceNodeActionsProps) {
   if (node.type === 'MENU') {
-    const currentActions = Array.isArray(currentValue) ? currentValue : [];
+    const currentActions = currentValue as string[];
 
     const handleToggle = (val: string, checked: boolean) => {
       if (!checked) {
@@ -172,14 +167,14 @@ function ResourceNodeActions({ node, currentValue, onChange, parentActions, perm
                 return true;
               }
             }
-            if (child.children && child.children.length > 0) {
+            if (child.children.length > 0) {
               return isActionUsedByComponents(child.children, action);
             }
             return false;
           });
         };
 
-        if (node.children && isActionUsedByComponents(node.children, val)) {
+        if (node.children.length > 0 && isActionUsedByComponents(node.children, val)) {
           toast.error(`하위 컴포넌트가 '${val}' 제약을 사용 중이므로 이 액션을 해제할 수 없습니다.`);
           return;
         }
@@ -224,9 +219,9 @@ function ResourceNodeActions({ node, currentValue, onChange, parentActions, perm
   }
 
   const currentAction = typeof currentValue === 'string' ? currentValue : null;
-  const allowedActions = parentActions.length > 0 ? parentActions : ['READ'];
+  const allowedActions = parentActions;
   const isEnabled = currentAction !== null && currentAction !== '';
-  const activeValue = currentAction ?? 'READ';
+  const activeValue = currentAction as string;
 
   if (!isEnabled) {
     return null;
@@ -295,20 +290,6 @@ function ResourceNodeComponentToggle({ node, currentValue, onChange }: ResourceN
   );
 }
 
-interface ResourceTreeNodeProps {
-  readonly node: ResourceResponseDto
-  readonly depth: number
-  readonly permissions: ResourcePermissions
-  readonly expandedNodes: Record<string, boolean>
-  readonly onToggleExpand: (id: string) => void
-  readonly onOpenSubModal: (parentId: string) => void
-  readonly onOpenEditModal: (node: ResourceResponseDto) => void
-  readonly onOpenLanguageModal: (node: ResourceResponseDto) => void
-  readonly onDeleteNode: (node: ResourceResponseDto) => void
-  readonly onChangePermission: (node: ResourceResponseDto, value: ResourcePermissionValue) => void
-  readonly parentActions: string[]
-}
-
 function ResourceNodeMenuButton({ nodeId, onOpenSubModal }: { readonly nodeId: string, readonly onOpenSubModal: (parentId: string) => void }) {
   return (
     <Button
@@ -324,14 +305,22 @@ function ResourceNodeMenuButton({ nodeId, onOpenSubModal }: { readonly nodeId: s
   );
 }
 
-function ResourceNodeEditButton({ node, onOpenEditModal }: { readonly node: ResourceResponseDto, readonly onOpenEditModal: (node: ResourceResponseDto) => void }) {
+function ResourceNodeEditButton({
+  node,
+  onOpenEditModal,
+  title = '리소스 수정',
+}: {
+  readonly node: ResourceResponseDto
+  readonly onOpenEditModal: (node: ResourceResponseDto) => void
+  readonly title?: string
+}) {
   return (
     <Button
       size="sm"
       type="button"
       variant="ghost"
       className="h-7 w-7 p-0 hover:text-slate-700 hover:bg-slate-100 rounded-md shrink-0"
-      title="리소스 수정"
+      title={title}
       onClick={() => onOpenEditModal(node)}
     >
       <Pencil className="w-4 h-4" />
@@ -361,7 +350,7 @@ function ResourceNodeLanguageButton({ node, onOpenLanguageModal }: { readonly no
       type="button"
       variant="ghost"
       className="h-7 w-7 p-0 hover:text-indigo-600 hover:bg-indigo-50 rounded-md shrink-0"
-      title="다국어 관리"
+      title="다국어 메시지 작업"
       onClick={() => onOpenLanguageModal(node)}
     >
       <Languages className="w-4 h-4" />
@@ -369,215 +358,46 @@ function ResourceNodeLanguageButton({ node, onOpenLanguageModal }: { readonly no
   );
 }
 
-function ResourceTreeNode({
-  node,
-  depth,
-  permissions,
-  expandedNodes,
-  onToggleExpand,
-  onOpenSubModal,
-  onOpenEditModal,
-  onOpenLanguageModal,
-  onDeleteNode,
-  onChangePermission,
-  parentActions,
-}: ResourceTreeNodeProps) {
-  const hasChildren = node.children?.length > 0;
-  const isExpanded = expandedNodes[node.id];
-  const isComponent = node.type === 'COMPONENT';
-  const currentValue = permissions[node.id];
-  const currentActions = Array.isArray(currentValue)
-    ? currentValue
-    : typeof currentValue === 'string' && currentValue !== ''
-      ? [currentValue]
-      : [];
-  const nextParentActions = node.type === 'MENU' ? currentActions : parentActions;
-
-  const expandIcon = hasChildren
-    ? (isExpanded ? <ChevronDown className="w-5 h-5" /> : <ChevronRight className="w-5 h-5" />)
-    : <div className="w-5 h-5" />;
-
-  return (
-    <div className="select-none">
-      <div
-        className="flex flex-row flex-wrap items-center justify-between px-4 border-b border-slate-100/60 group transition-all duration-200 gap-y-2.5 gap-x-4 py-2.5 hover:bg-slate-50"
-        style={{ paddingLeft: `${isComponent ? depth * 28 + 16 : depth * 28 + 14}px` }}
-      >
-        <div className="flex items-center gap-3.5 md:gap-4 flex-1 min-w-[280px]">
-          <button
-            type="button"
-            onClick={() => {
-              if (hasChildren) {
-                onToggleExpand(node.id);
-              }
-            }}
-            className={`flex items-center justify-center w-7 h-7 cursor-pointer rounded-md hover:bg-slate-200/70 transition-colors ${
-              hasChildren ? 'text-slate-700' : 'text-slate-300 pointer-events-none'
-            }`}
-          >
-            {expandIcon}
-          </button>
-
-          <div className={`flex items-center justify-center shrink-0 ${isComponent ? 'hidden' : 'w-8 h-8 rounded-md bg-slate-100 text-slate-500'}`}>
-            {renderNodeIcon(node)}
-          </div>
-
-          <div className="flex flex-col gap-1 min-w-0 w-full">
-            <div className="flex items-center gap-1.5 md:gap-2.5 flex-wrap">
-              <span className={`font-semibold truncate ${isComponent ? 'text-slate-800 text-[13px] md:text-[14px] font-medium' : 'text-slate-900 text-[13px] md:text-[14px] font-medium'}`}>
-                {node.name}
-              </span>
-              <Badge
-                variant={isComponent ? 'outline' : 'default'}
-                className={`rounded-md font-mono shadow-sm ${isComponent ? 'text-[9px] px-1.5 py-0.5 border-slate-200 text-slate-600 bg-slate-100' : 'text-[9px] md:text-[10px] px-1.5 py-0.5 border-slate-200 text-slate-600 bg-slate-100'}`}
-              >
-                {node.type}
-              </Badge>
-              <div className="ml-1.5 flex items-center gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity shrink-0">
-                {node.type === 'MENU' && (
-                  <ResourceNodeMenuButton nodeId={node.id} onOpenSubModal={onOpenSubModal} />
-                )}
-                <ResourceNodeLanguageButton node={node} onOpenLanguageModal={onOpenLanguageModal} />
-                <ResourceNodeEditButton node={node} onOpenEditModal={onOpenEditModal} />
-                <ResourceNodeDeleteButton node={node} onDeleteNode={onDeleteNode} />
-              </div>
-
-              {node.type === 'COMPONENT' && (
-                <ResourceNodeComponentToggle node={node} currentValue={currentValue} onChange={onChangePermission} />
-              )}
-            </div>
-
-            <div className="flex items-center justify-between gap-4 flex-wrap">
-              <div className="flex items-center gap-1.5 md:gap-2 text-[11px] md:text-[12px] text-slate-500 font-mono flex-wrap">
-                <div className="flex items-center gap-1">
-                  <span className="text-slate-400">Code:</span>
-                  <span className="text-slate-700 font-medium">{node.code}</span>
-                </div>
-                {node.path && (
-                  <>
-                    <span className="text-slate-300">•</span>
-                    <div className="flex items-center gap-1">
-                      <span className="text-slate-400">Path:</span>
-                      <span className="px-1.5 py-0.2 rounded-md font-medium text-indigo-600 bg-indigo-50/70">
-                        {node.path}
-                      </span>
-                    </div>
-                  </>
-                )}
-              </div>
-
-              {node.type === 'MENU' && (
-                <div className="flex items-center gap-2 shrink-0">
-                  <ResourceNodeActions
-                    node={node}
-                    currentValue={currentValue}
-                    onChange={onChangePermission}
-                    parentActions={nextParentActions}
-                    permissions={permissions}
-                  />
-                </div>
-              )}
-
-              {node.type === 'COMPONENT' && (
-                <div className="flex items-center gap-2 shrink-0">
-                  <ResourceNodeActions
-                    node={node}
-                    currentValue={currentValue}
-                    onChange={onChangePermission}
-                    parentActions={nextParentActions}
-                    permissions={permissions}
-                  />
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {hasChildren && isExpanded && (
-        <div className="mt-0.5 relative">
-          <div
-            className="absolute top-0 bottom-0 w-px bg-slate-200/50 pointer-events-none"
-            style={{ left: `${depth * 28 + 30}px` }}
-          />
-          <ResourceTreeList
-            nodes={node.children || []}
-            depth={depth + 1}
-            permissions={permissions}
-            expandedNodes={expandedNodes}
-            onToggleExpand={onToggleExpand}
-            onOpenSubModal={onOpenSubModal}
-            onOpenLanguageModal={onOpenLanguageModal}
-            onOpenEditModal={onOpenEditModal}
-            onDeleteNode={onDeleteNode}
-            onChangePermission={onChangePermission}
-            parentActions={nextParentActions}
-          />
-        </div>
-      )}
-    </div>
-  );
+function mapResourcesToTreeNodes(resources: ResourceResponseDto[]): TreeNode<ResourceResponseDto | null>[] {
+  return resources.map((res) => ({
+    id: res.id,
+    value: res,
+    children: res.children ? mapResourcesToTreeNodes(res.children) : [],
+  }));
 }
 
-interface ResourceTreeListProps {
-  readonly nodes: ResourceResponseDto[]
-  readonly depth?: number
-  readonly permissions: ResourcePermissions
-  readonly expandedNodes: Record<string, boolean>
-  readonly onToggleExpand: (id: string) => void
-  readonly onOpenSubModal: (parentId: string) => void
-  readonly onOpenEditModal: (node: ResourceResponseDto) => void
-  readonly onOpenLanguageModal: (node: ResourceResponseDto) => void
-  readonly onDeleteNode: (node: ResourceResponseDto) => void
-  readonly onChangePermission: (node: ResourceResponseDto, value: ResourcePermissionValue) => void
-  readonly parentActions?: string[]
+function mapTreeNodesToResources(nodes: readonly TreeNode<ResourceResponseDto | null>[]): ResourceResponseDto[] {
+  return nodes
+    .filter((node) => node.value !== null)
+    .map((node, index) => ({
+      ...node.value!,
+      sortOrder: index + 1,
+      children: node.children ? mapTreeNodesToResources(node.children) : [],
+    }));
 }
 
-function ResourceTreeList({
-  nodes,
-  depth = 0,
-  permissions,
-  expandedNodes,
-  onToggleExpand,
-  onOpenSubModal,
-  onOpenEditModal,
-  onOpenLanguageModal,
-  onDeleteNode,
-  onChangePermission,
-  parentActions = ['CREATE', 'READ', 'UPDATE', 'DELETE'],
-}: ResourceTreeListProps) {
-  if (nodes.length === 0 && depth === 0) {
-    return (
-      <div className="flex flex-col items-center justify-center py-20 text-slate-500 bg-slate-50/50 rounded-lg border border-dashed border-slate-200">
-        <p>등록된 리소스가 없습니다.</p>
-      </div>
-    );
+function collectSortUpdates(
+  node: TreeNode<ResourceResponseDto | null>,
+  updates: Array<{ id: string, sortOrder: number }> = [],
+): Array<{ id: string, sortOrder: number }> {
+  if (node.children) {
+    node.children.forEach((child, index) => {
+      const expectedSortOrder = index + 1;
+      if (child.value && child.value.sortOrder !== expectedSortOrder) {
+        updates.push({
+          id: child.id,
+          sortOrder: expectedSortOrder,
+        });
+      }
+      collectSortUpdates(child, updates);
+    });
   }
-
-  return (
-    <>
-      {nodes.map((node) => (
-        <ResourceTreeNode
-          key={node.id}
-          node={node}
-          depth={depth}
-          permissions={permissions}
-          expandedNodes={expandedNodes}
-          onToggleExpand={onToggleExpand}
-          onOpenSubModal={onOpenSubModal}
-          onOpenEditModal={onOpenEditModal}
-          onOpenLanguageModal={onOpenLanguageModal}
-          onDeleteNode={onDeleteNode}
-          onChangePermission={onChangePermission}
-          parentActions={parentActions}
-        />
-      ))}
-    </>
-  );
+  return updates;
 }
 
 export function ResourceTreeTab({ locales }: ResourceTreeTabProps) {
-  const [expandedNodes, setExpandedNodes] = useState<Record<string, boolean>>({});
+  const activeScope = ResourceResponseDtoScope.ORGANIZATION;
+  const [expandedIds, setExpandedIds] = useState<readonly string[]>([]);
   const [isMenuModalOpen, setIsMenuModalOpen] = useState(false);
   const [subModalOpen, setSubModalOpen] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
@@ -589,24 +409,23 @@ export function ResourceTreeTab({ locales }: ResourceTreeTabProps) {
   const [selectedDeleteNode, setSelectedDeleteNode] = useState<ResourceResponseDto | null>(null);
   const [permissions, setPermissions] = useState<ResourcePermissions>(EMPTY_PERMISSIONS);
   const { t } = useTranslation('common');
+  const isOrganizationScope = true;
 
-  const [currentLang, setCurrentLang] = useState<string>(getStoredAdminLocale);
-  useEffect(() => {
-    const id = setInterval(() => {
-      const lang = getStoredAdminLocale();
-      setCurrentLang((prev) => (prev !== lang ? lang : prev));
-    }, 300);
-    return () => clearInterval(id);
-  }, []);
+  const [isSortingMode, setIsSortingMode] = useState(false);
+  const [localTree, setLocalTree] = useState<TreeNode<ResourceResponseDto | null> | null>(null);
+  const [backupTree, setBackupTree] = useState<TreeNode<ResourceResponseDto | null> | null>(null);
+  const [isSortingSaving, setIsSortingSaving] = useState(false);
 
   const queryClient = useQueryClient();
-  const { data: apiResponse, isLoading, isError, refetch } = useResourceControllerGetResourcesV1();
+  const resourceParams = React.useMemo(() => ({ scope: activeScope }), [activeScope]);
+  const { data: apiResponse, isLoading, isError, refetch } = useResourceControllerGetResourcesV1(resourceParams);
   const { mutateAsync: createResource, isPending: isCreating } = useResourceControllerCreateResourceV1();
   const { mutateAsync: updateResource, isPending: isUpdating } = useResourceControllerUpdateResourceV1();
   const { mutateAsync: deleteResource, isPending: isDeleting } = useResourceControllerDeleteResourceV1();
   const { mutateAsync: updateResourcePermissions, isPending: isUpdatingPermissions } = useResourceControllerUpdateResourcePermissionsV1();
+  const { mutateAsync: updateResourceSort } = useResourceControllerUpdateResourceSortV1();
 
-  const isSaving = isCreating || isUpdating || isDeleting || isUpdatingPermissions;
+  const isSaving = isCreating || isUpdating || isDeleting || isUpdatingPermissions || isSortingSaving;
   const resourceTree = apiResponse?.data ?? EMPTY_RESOURCES;
 
   const initialPermissions = apiResponse?.data ? buildInitialPermissions(apiResponse.data) : EMPTY_PERMISSIONS;
@@ -615,28 +434,136 @@ export function ResourceTreeTab({ locales }: ResourceTreeTabProps) {
     ...permissions,
   };
 
-  const initialExpandedNodes = apiResponse?.data ? buildInitialExpandedNodes(apiResponse.data) : {};
-  const displayExpandedNodes = {
-    ...initialExpandedNodes,
-    ...expandedNodes,
+  useEffect(() => {
+    setExpandedIds([]);
+    setIsMenuModalOpen(false);
+    setSubModalOpen(false);
+    setEditModalOpen(false);
+    setLanguageModalOpen(false);
+    setDeleteConfirmOpen(false);
+    setSelectedParentId(null);
+    setSelectedEditNode(null);
+    setSelectedLanguageNode(null);
+    setSelectedDeleteNode(null);
+    setPermissions(EMPTY_PERMISSIONS);
+    setIsSortingMode(false);
+    setLocalTree(null);
+    setBackupTree(null);
+  }, []);
+
+  useEffect(() => {
+    if (apiResponse?.data) {
+      const initial = buildInitialExpandedNodes(apiResponse.data);
+      setExpandedIds(Object.keys(initial));
+    }
+  }, [apiResponse?.data]);
+
+  useEffect(() => {
+    if (apiResponse?.data) {
+      setLocalTree({
+        id: 'root',
+        value: null,
+        children: mapResourcesToTreeNodes(apiResponse.data),
+      });
+    }
+  }, [apiResponse?.data]);
+
+  const treeValue = React.useMemo<TreeNode<ResourceResponseDto | null>>(() => {
+    if (localTree) return localTree;
+    return {
+      id: 'root',
+      value: null,
+      children: mapResourcesToTreeNodes(resourceTree),
+    };
+  }, [localTree, resourceTree]);
+
+  const canDrop = React.useCallback((move: SortableTreeMove<ResourceResponseDto | null>) => {
+    return move.source.parent?.id === move.parentId;
+  }, []);
+
+  const handleTreeChange = React.useCallback((
+    nextRoot: TreeNode<ResourceResponseDto | null>,
+  ) => {
+    setLocalTree(nextRoot);
+  }, []);
+
+  const handleSaveSort = async () => {
+    if (!localTree || !isOrganizationScope) return;
+
+    const updates = collectSortUpdates(localTree);
+
+    if (updates.length === 0) {
+      toast.success('정렬 순서에 변경 사항이 없습니다.');
+      setIsSortingMode(false);
+      return;
+    }
+
+    setIsSortingSaving(true);
+    try {
+      await updateResourceSort({
+        data: {
+          scope: activeScope,
+          items: updates.map((update) => ({
+            id: update.id,
+            sortOrder: update.sortOrder,
+          })),
+        },
+      });
+
+      const nextResources = mapTreeNodesToResources(localTree.children ?? []);
+      queryClient.setQueryData(
+        getResourceControllerGetResourcesV1QueryKey(resourceParams),
+        (oldData: { data?: ResourceResponseDto[] } | undefined) => {
+          if (!oldData) return oldData;
+          return {
+            ...oldData,
+            data: nextResources,
+          };
+        },
+      );
+
+      toast.success('정렬 순서가 저장되었습니다.');
+      setIsSortingMode(false);
+      void refetch();
+    }
+    catch (err) {
+      console.error('Failed to save resource sort order:', err);
+      toast.error('순서 저장 도중 오류가 발생했습니다.');
+      if (backupTree) {
+        setLocalTree(backupTree);
+      }
+    }
+    finally {
+      setIsSortingSaving(false);
+    }
   };
 
-  const handleAddResource = async (newMenu: { code: string, name: string, path: string, icon: string, type: string }) => {
+  const handleAddResource = async (newMenu: CreateMenuInput) => {
     const response = await createResource({
       data: {
         code: newMenu.code,
         name: newMenu.name,
-        type: toCreateResourceType(newMenu.type as ResourceResponseDto['type']),
+        type: toCreateResourceType(newMenu.type),
         path: newMenu.path,
-        icon: newMenu.icon,
       },
     });
 
-    const newCreatedNode = response.data;
-    if (!newCreatedNode) return;
+    if (!response.data) return;
+
+    const newCreatedNode: ResourceResponseDto = {
+      id: response.data.id,
+      code: newMenu.code,
+      name: newMenu.name,
+      type: newMenu.type,
+      scope: activeScope,
+      path: newMenu.path,
+      icon: undefined,
+      actions: [],
+      children: [],
+    };
 
     queryClient.setQueryData(
-      getResourceControllerGetResourcesV1QueryKey(),
+      getResourceControllerGetResourcesV1QueryKey(resourceParams),
       (oldData: { data?: ResourceResponseDto[] } | undefined) => {
         if (!oldData || !oldData.data) return oldData;
         return {
@@ -654,27 +581,36 @@ export function ResourceTreeTab({ locales }: ResourceTreeTabProps) {
     setSubModalOpen(true);
   };
 
-  const handleAddSubResource = async (newResource: { code: string, name: string, type: string, actions: string[] }) => {
+  const handleAddSubResource = async (newResource: CreateSubResourceInput) => {
     if (!selectedParentId) return;
 
     const response = await createResource({
       data: {
         code: newResource.code,
         name: newResource.name,
-        type: toCreateResourceType(newResource.type as ResourceResponseDto['type']),
+        type: toCreateResourceType(newResource.type),
         parentId: selectedParentId,
       },
     });
 
-    const newCreatedNode = response.data;
-    if (!newCreatedNode) return;
+    if (!response.data) return;
+
+    const newCreatedNode: ResourceResponseDto = {
+      id: response.data.id,
+      code: newResource.code,
+      name: newResource.name,
+      type: newResource.type,
+      scope: activeScope,
+      actions: [],
+      children: [],
+    };
 
     const appendNodeToTree = (nodes: ResourceResponseDto[]): ResourceResponseDto[] => {
       return nodes.map((node) => {
         if (node.id === selectedParentId) {
           return {
             ...node,
-            children: [...(node.children || []), newCreatedNode],
+            children: [...node.children, newCreatedNode],
           };
         }
         if (node.children && node.children.length > 0) {
@@ -688,7 +624,7 @@ export function ResourceTreeTab({ locales }: ResourceTreeTabProps) {
     };
 
     queryClient.setQueryData(
-      getResourceControllerGetResourcesV1QueryKey(),
+      getResourceControllerGetResourcesV1QueryKey(resourceParams),
       (oldData: { data?: ResourceResponseDto[] } | undefined) => {
         if (!oldData || !oldData.data) return oldData;
         return {
@@ -711,16 +647,20 @@ export function ResourceTreeTab({ locales }: ResourceTreeTabProps) {
     setLanguageModalOpen(true);
   };
 
-  const handleSaveEdit = async (updated: { code: string, name: string, path?: string, icon?: string }) => {
+  const handleSaveEdit = async (updated: { code?: string, name?: string, path?: string, icon?: string }) => {
     if (!selectedEditNode) {
       return;
     }
 
+    const nextCode = updated.code !== undefined ? updated.code : selectedEditNode.code;
+    const nextName = updated.name !== undefined ? updated.name : selectedEditNode.name;
+    const nextPath = updated.path !== undefined ? updated.path : selectedEditNode.path;
+    const nextIcon = updated.icon !== undefined ? updated.icon : selectedEditNode.icon;
     const changed = (
-      selectedEditNode.code !== updated.code
-      || selectedEditNode.name !== updated.name
-      || selectedEditNode.path !== (selectedEditNode.type === 'MENU' ? updated.path : undefined)
-      || selectedEditNode.icon !== (selectedEditNode.type === 'MENU' ? updated.icon : undefined)
+      selectedEditNode.code !== nextCode
+      || selectedEditNode.name !== nextName
+      || selectedEditNode.path !== nextPath
+      || selectedEditNode.icon !== nextIcon
     );
 
     if (!changed) {
@@ -731,10 +671,11 @@ export function ResourceTreeTab({ locales }: ResourceTreeTabProps) {
     await updateResource({
       data: {
         id: selectedEditNode.id,
-        code: updated.code,
-        name: updated.name,
-        path: selectedEditNode.type === 'MENU' ? updated.path : undefined,
-        icon: selectedEditNode.type === 'MENU' ? updated.icon : undefined,
+        scope: activeScope,
+        code: nextCode,
+        name: nextName,
+        path: nextPath,
+        icon: nextIcon,
       },
     });
 
@@ -743,10 +684,10 @@ export function ResourceTreeTab({ locales }: ResourceTreeTabProps) {
         if (node.id === selectedEditNode.id) {
           return {
             ...node,
-            code: updated.code,
-            name: updated.name,
-            path: selectedEditNode.type === 'MENU' ? updated.path : undefined,
-            icon: selectedEditNode.type === 'MENU' ? updated.icon : undefined,
+            code: nextCode,
+            name: nextName,
+            path: nextPath,
+            icon: nextIcon,
           };
         }
         if (node.children && node.children.length > 0) {
@@ -760,7 +701,7 @@ export function ResourceTreeTab({ locales }: ResourceTreeTabProps) {
     };
 
     queryClient.setQueryData(
-      getResourceControllerGetResourcesV1QueryKey(),
+      getResourceControllerGetResourcesV1QueryKey(resourceParams),
       (oldData: { data?: ResourceResponseDto[] } | undefined) => {
         if (!oldData || !oldData.data) return oldData;
         return {
@@ -802,7 +743,7 @@ export function ResourceTreeTab({ locales }: ResourceTreeTabProps) {
     };
 
     queryClient.setQueryData(
-      getResourceControllerGetResourcesV1QueryKey(),
+      getResourceControllerGetResourcesV1QueryKey(resourceParams),
       (oldData: { data?: ResourceResponseDto[] } | undefined) => {
         if (!oldData || !oldData.data) return oldData;
         return {
@@ -830,72 +771,52 @@ export function ResourceTreeTab({ locales }: ResourceTreeTabProps) {
   };
 
   const handleChangePermission = async (node: ResourceResponseDto, value: ResourcePermissionValue) => {
-    const nextValue = node.type === 'MENU'
-      ? (Array.isArray(value) ? value : [])
-      : (typeof value === 'string' && value !== '' ? value : null);
+    if (!isOrganizationScope) {
+      return;
+    }
+
+    let nextValue: string[] | string | null = null;
+    let actions: string[] = [];
+    let constraint: string = '';
+
+    if (node.type === 'MENU') {
+      nextValue = Array.isArray(value) ? value : [];
+      actions = nextValue;
+    }
+    else {
+      nextValue = typeof value === 'string' && value !== '' ? value : null;
+      if (typeof nextValue === 'string' && nextValue !== '') {
+        actions = [nextValue];
+        constraint = nextValue;
+      }
+    }
 
     setPermissions((prev) => ({
       ...prev,
       [node.id]: nextValue,
     }));
 
-    if (node.type === 'MENU') {
-      await updateResourcePermissions({
-        data: {
-          id: node.id,
-          actions: Array.isArray(nextValue) ? nextValue : [],
-        },
-      });
-    }
-    else {
-      await updateResourcePermissions({
-        data: {
-          id: node.id,
-          actions: typeof nextValue === 'string' && nextValue !== '' ? [nextValue] : [],
-          constraint: typeof nextValue === 'string' && nextValue !== '' ? nextValue : '',
-        },
-      });
-    }
-
-    const updatePermissionsInTree = (nodes: ResourceResponseDto[]): ResourceResponseDto[] => {
-      return nodes.map((item) => {
-        if (item.id === node.id) {
-          return {
-            ...item,
-            actions: node.type === 'MENU'
-              ? (Array.isArray(nextValue) ? nextValue : [])
-              : (typeof nextValue === 'string' && nextValue !== '' ? [nextValue] : []),
-            constraint: node.type === 'MENU'
-              ? undefined
-              : (typeof nextValue === 'string' && nextValue !== '' ? nextValue : null),
-          };
-        }
-        if (item.children && item.children.length > 0) {
-          return {
-            ...item,
-            children: updatePermissionsInTree(item.children),
-          };
-        }
-        return item;
-      });
-    };
+    await updateResourcePermissions({
+      data: {
+        id: node.id,
+        scope: activeScope,
+        actions,
+        constraint: node.type === 'MENU' ? undefined : constraint,
+      },
+    });
 
     queryClient.setQueryData(
-      getResourceControllerGetResourcesV1QueryKey(),
+      getResourceControllerGetResourcesV1QueryKey(resourceParams),
       (oldData: { data?: ResourceResponseDto[] } | undefined) => {
         if (!oldData || !oldData.data) return oldData;
         return {
           ...oldData,
-          data: updatePermissionsInTree(oldData.data),
+          data: updatePermissionsInTree(oldData.data, node.id, node.type, nextValue),
         };
       },
     );
 
     toast.success('권한 정보가 변경되었습니다.');
-  };
-
-  const toggleExpand = (id: string) => {
-    setExpandedNodes((prev) => ({ ...prev, [id]: !prev[id] }));
   };
 
   const getParentName = (parentId: string | null): string => findParentName(resourceTree, parentId);
@@ -922,17 +843,131 @@ export function ResourceTreeTab({ locales }: ResourceTreeTabProps) {
   }
   else {
     content = (
-      <ResourceTreeList
-        nodes={resourceTree}
-        permissions={displayPermissions}
-        expandedNodes={displayExpandedNodes}
-        onToggleExpand={toggleExpand}
-        onOpenSubModal={handleOpenSubModal}
-        onOpenEditModal={handleOpenEditModal}
-        onOpenLanguageModal={handleOpenLanguageModal}
-        onDeleteNode={handleDeleteNode}
-        onChangePermission={handleChangePermission}
-      />
+      <div className="border rounded-xl bg-card shadow-sm overflow-hidden divide-y divide-border">
+        <SortableTree<ResourceResponseDto | null>
+          value={treeValue}
+          onChange={handleTreeChange}
+          canDrop={canDrop}
+          expandedIds={expandedIds}
+          onExpandedIdsChange={setExpandedIds}
+          disabled={!isSortingMode}
+          renderNode={({ node }) => {
+            const res = node.value;
+            if (!res) return null;
+            const isComponent = res.type === 'COMPONENT';
+            const currentValue = displayPermissions[res.id];
+            let currentActions: string[] = [];
+            if (Array.isArray(currentValue)) {
+              currentActions = currentValue;
+            }
+            else if (typeof currentValue === 'string' && currentValue !== '') {
+              currentActions = [currentValue];
+            }
+            const nextParentActions = res.type === 'MENU' ? currentActions : ['CREATE', 'READ', 'UPDATE', 'DELETE'];
+
+            return (
+              <div className="flex flex-row flex-wrap items-center justify-between group/tree-item-content transition-all duration-200 gap-y-2.5 gap-x-4 py-1.5 flex-1 min-w-0">
+                <div className="flex items-center gap-3.5 md:gap-4 flex-1 min-w-[280px]">
+                  <div className={`flex items-center justify-center shrink-0 ${isComponent ? 'hidden' : 'w-8 h-8 rounded-md bg-slate-100 text-slate-500'}`}>
+                    {renderNodeIcon(res)}
+                  </div>
+
+                  <div className="flex flex-col gap-1 min-w-0 w-full">
+                    <div className="flex items-center gap-1.5 md:gap-2.5 flex-wrap">
+                      <span className={`font-semibold truncate ${isComponent ? 'text-slate-800 text-[13px] md:text-[14px] font-medium' : 'text-slate-900 text-[13px] md:text-[14px] font-medium'}`}>
+                        {res.name}
+                      </span>
+                      <Badge
+                        variant={isComponent ? 'outline' : 'default'}
+                        className={`rounded-md font-mono shadow-sm ${isComponent ? 'text-[9px] px-1.5 py-0.5 border-slate-200 text-slate-600 bg-slate-100' : 'text-[9px] md:text-[10px] px-1.5 py-0.5 border-slate-200 text-slate-600 bg-slate-100'}`}
+                      >
+                        {res.type}
+                      </Badge>
+
+                      <Badge
+                        variant="outline"
+                        className="rounded-md font-mono text-[9px] md:text-[10px] px-1.5 py-0.5 border-slate-200 text-slate-500 bg-white"
+                      >
+                        {res.scope}
+                      </Badge>
+
+                      {!isSortingMode && (
+                        <div className="ml-1.5 flex items-center gap-1 opacity-100 md:opacity-0 md:group-hover/tree-item-content:opacity-100 transition-opacity shrink-0">
+                          {res.type === 'MENU' && !isOrganizationScope && (
+                            <ResourceNodeMenuButton nodeId={res.id} onOpenSubModal={handleOpenSubModal} />
+                          )}
+                          <ResourceNodeEditButton
+                            node={res}
+                            onOpenEditModal={handleOpenEditModal}
+                            title="아이콘 수정"
+                          />
+                          <ResourceNodeLanguageButton node={res} onOpenLanguageModal={handleOpenLanguageModal} />
+                          {!isOrganizationScope && (
+                            <ResourceNodeDeleteButton node={res} onDeleteNode={handleDeleteNode} />
+                          )}
+                        </div>
+                      )}
+
+                      {res.type === 'COMPONENT' && isOrganizationScope && !isSortingMode && (
+                        <ResourceNodeComponentToggle node={res} currentValue={currentValue} onChange={(node, val) => { void handleChangePermission(node, val); }} />
+                      )}
+                    </div>
+
+                    <div className="flex items-center justify-between gap-4 flex-wrap">
+                      <div className="flex items-center gap-1.5 md:gap-2 text-[11px] md:text-[12px] text-slate-500 font-mono flex-wrap">
+                        <div className="flex items-center gap-1">
+                          <span className="text-slate-400">Code:</span>
+                          <span className="text-slate-700 font-medium">{res.code}</span>
+                        </div>
+                        <span className="text-slate-300">•</span>
+                        <div className="flex items-center gap-1">
+                          <span className="text-slate-400">Order:</span>
+                          <span className="text-slate-700 font-medium">{res.sortOrder ?? '-'}</span>
+                        </div>
+                        {res.path && !isOrganizationScope && (
+                          <>
+                            <span className="text-slate-300">•</span>
+                            <div className="flex items-center gap-1">
+                              <span className="text-slate-400">Path:</span>
+                              <span className="px-1.5 py-0.2 rounded-md font-medium text-indigo-600 bg-indigo-50/70">
+                                {res.path}
+                              </span>
+                            </div>
+                          </>
+                        )}
+                      </div>
+
+                      {isOrganizationScope && res.type === 'MENU' && !isSortingMode && (
+                        <div className="flex items-center gap-2 shrink-0">
+                          <ResourceNodeActions
+                            node={res}
+                            currentValue={currentValue}
+                            onChange={(node, val) => { void handleChangePermission(node, val); }}
+                            parentActions={nextParentActions}
+                            permissions={permissions}
+                          />
+                        </div>
+                      )}
+
+                      {isOrganizationScope && res.type === 'COMPONENT' && !isSortingMode && (
+                        <div className="flex items-center gap-2 shrink-0">
+                          <ResourceNodeActions
+                            node={res}
+                            currentValue={currentValue}
+                            onChange={(node, val) => { void handleChangePermission(node, val); }}
+                            parentActions={nextParentActions}
+                            permissions={permissions}
+                          />
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            );
+          }}
+        />
+      </div>
     );
   }
 
@@ -940,44 +975,99 @@ export function ResourceTreeTab({ locales }: ResourceTreeTabProps) {
     <>
       <ResourcePanel
         icon={<ListTree className="h-5 w-5" />}
-        title="리소스 구조"
-        description="메뉴 자원과 하위 컴포넌트의 권한을 계층 구조로 관리합니다."
+        title="조직 리소스"
+        description="아이콘, 정렬 순서, 액션, 제약 조건만 수정합니다."
         actions={(
-          <>
-            <Button
-              variant="outline"
-              size="icon"
-              type="button"
-              onClick={() => { void refetch(); }}
-              title="새로고침"
-              disabled={isLoading || isSaving}
-            >
-              <RefreshCw className={`w-4 h-4 ${isLoading || isSaving ? 'animate-spin' : ''}`} />
-            </Button>
-            <ResourceControl code="ROLE_RESOURCE_CREATE_BUTTON">
-              <Button
-                type="button"
-                className="gap-2"
-                onClick={() => setIsMenuModalOpen(true)}
-                disabled={isSaving}
-              >
-                <Plus className="w-4 h-4" />
-                {t('ROLE_RESOURCE_CREATE_BUTTON', { ns: 'resource', defaultValue: '메뉴 추가' })}
-              </Button>
-            </ResourceControl>
-          </>
+          <div className="flex flex-col items-end gap-3">
+            <div className="flex flex-wrap items-center gap-2 justify-end">
+              {isSortingMode
+                ? (
+                  <>
+                    <Badge variant="outline" className="border-amber-200 bg-amber-50 text-amber-700 animate-pulse font-medium px-2.5 py-1">
+                      정렬 모드 활성화 중
+                    </Badge>
+                    <Button
+                      variant="outline"
+                      type="button"
+                      onClick={() => {
+                        if (backupTree) {
+                          setLocalTree(backupTree);
+                        }
+                        setIsSortingMode(false);
+                      }}
+                      disabled={isSortingSaving}
+                    >
+                      취소
+                    </Button>
+                    <Button
+                      type="button"
+                      className="gap-2 bg-indigo-600 hover:bg-indigo-700 text-white"
+                      onClick={() => { void handleSaveSort(); }}
+                      disabled={isSortingSaving}
+                    >
+                      {isSortingSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <LucideIcons.Check className="w-4 h-4" />}
+                      저장
+                    </Button>
+                  </>
+                )
+                : (
+                  <>
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      type="button"
+                      onClick={() => { void refetch(); }}
+                      title="새로고침"
+                      disabled={isLoading || isSaving}
+                    >
+                      <RefreshCw className={`w-4 h-4 ${isLoading || isSaving ? 'animate-spin' : ''}`} />
+                    </Button>
+                    {isOrganizationScope && (
+                      <Button
+                        variant="outline"
+                        type="button"
+                        className="gap-2 border-slate-200 text-slate-700 hover:bg-slate-50"
+                        onClick={() => {
+                          setBackupTree(treeValue);
+                          setIsSortingMode(true);
+                        }}
+                        disabled={isLoading || isSaving || resourceTree.length === 0}
+                      >
+                        <LucideIcons.ArrowUpDown className="w-4 h-4" />
+                        정렬
+                      </Button>
+                    )}
+                    {!isOrganizationScope && (
+                      <ResourceControl code="ROLE_RESOURCE_CREATE_BUTTON">
+                        <Button
+                          type="button"
+                          className="gap-2"
+                          onClick={() => setIsMenuModalOpen(true)}
+                          disabled={isSaving}
+                        >
+                          <Plus className="w-4 h-4" />
+                          {t('ROLE_RESOURCE_CREATE_BUTTON', { ns: 'resource', defaultValue: '메뉴 추가' })}
+                        </Button>
+                      </ResourceControl>
+                    )}
+                  </>
+                )}
+            </div>
+          </div>
         )}
       >
         {content}
       </ResourcePanel>
 
       <MenuRegistrationModal
+        key={`menu-${isMenuModalOpen ? 'open' : 'closed'}`}
         open={isMenuModalOpen}
         onOpenChange={setIsMenuModalOpen}
         onSave={(menu) => { void handleAddResource(menu); }}
       />
 
       <SubResourceRegistrationModal
+        key={`sub-${subModalOpen ? 'open' : 'closed'}-${selectedParentId ?? 'none'}`}
         open={subModalOpen}
         onOpenChange={setSubModalOpen}
         onSave={(resource) => { void handleAddSubResource(resource); }}
@@ -985,7 +1075,7 @@ export function ResourceTreeTab({ locales }: ResourceTreeTabProps) {
       />
 
       <ResourceEditModal
-        key={`edit-${selectedEditNode?.id ?? 'none'}-${editModalOpen ? 'open' : 'closed'}`}
+        key={`edit-${selectedEditNode?.id ?? 'none'}-${selectedEditNode?.scope ?? 'none'}-${editModalOpen ? 'open' : 'closed'}`}
         open={editModalOpen}
         onOpenChange={(open) => {
           setEditModalOpen(open);
@@ -1023,11 +1113,11 @@ export function ResourceTreeTab({ locales }: ResourceTreeTabProps) {
           </DialogHeader>
           <div className="py-4">
             <p className="text-sm font-medium text-slate-800">
-              '
+              &apos;
               <span className="font-bold text-red-600">
                 {selectedDeleteNode?.name}
               </span>
-              ' 리소스를 정말로 삭제하시겠습니까?
+              &apos; 리소스를 정말로 삭제하시겠습니까?
             </p>
           </div>
           <DialogFooter className="gap-2">
@@ -1053,4 +1143,44 @@ export function ResourceTreeTab({ locales }: ResourceTreeTabProps) {
       </Dialog>
     </>
   );
+}
+
+function updatePermissionsInTree(
+  nodes: ResourceResponseDto[],
+  nodeId: string,
+  nodeType: string,
+  nextValue: string[] | string | null,
+): ResourceResponseDto[] {
+  let actions: string[];
+  if (nodeType === 'MENU') {
+    actions = Array.isArray(nextValue) ? nextValue : [];
+  }
+  else {
+    actions = typeof nextValue === 'string' && nextValue !== '' ? [nextValue] : [];
+  }
+
+  let constraint: string | undefined;
+  if (nodeType === 'MENU') {
+    constraint = undefined;
+  }
+  else {
+    constraint = typeof nextValue === 'string' && nextValue !== '' ? nextValue : undefined;
+  }
+
+  return nodes.map((item) => {
+    if (item.id === nodeId) {
+      return {
+        ...item,
+        actions,
+        constraint,
+      };
+    }
+    if (item.children && item.children.length > 0) {
+      return {
+        ...item,
+        children: updatePermissionsInTree(item.children, nodeId, nodeType, nextValue),
+      };
+    }
+    return item;
+  });
 }

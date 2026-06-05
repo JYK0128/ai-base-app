@@ -1,37 +1,40 @@
-import { Button, Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, Input, Label, toast } from '@pkg/ui';
-import { useState } from 'react';
+import { Button, Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, useAppForm } from '@pkg/ui';
+import { z } from 'zod';
 
-import { COMMON_ICONS } from './commonIcons';
+import type { ResourceResponseDto } from '../../../../api/model';
+
+export type CreateMenuInput = Pick<ResourceResponseDto, 'code' | 'name' | 'path' | 'type'>;
 
 interface MenuRegistrationModalProps {
   readonly open: boolean
   readonly onOpenChange: (open: boolean) => void
-  readonly onSave: (menu: { code: string, name: string, path: string, icon: string, type: string }) => void
+  readonly onSave: (menu: CreateMenuInput) => void
 }
 
 export function MenuRegistrationModal({ open, onOpenChange, onSave }: MenuRegistrationModalProps) {
-  const [menuForm, setMenuForm] = useState({
-    code: '',
-    name: '',
-    path: '',
-    icon: '',
+  const form = useAppForm({
+    defaultValues: {
+      code: '',
+      name: '',
+      path: '',
+    },
+    validators: {
+      onSubmit: z.object({
+        code: z.string().trim().min(1, '리소스 코드를 입력해주세요.'),
+        name: z.string().trim().min(1, '리소스 이름을 입력해주세요.'),
+        path: z.string().trim().min(1, '라우트 경로를 입력해주세요.'),
+      }),
+    },
+    onSubmit: async ({ value }) => {
+      onSave({
+        code: value.code,
+        name: value.name,
+        path: value.path,
+        type: 'MENU',
+      });
+      onOpenChange(false);
+    },
   });
-
-  const handleSaveMenu = (e: React.SubmitEvent) => {
-    e.preventDefault();
-    if (!menuForm.code || !menuForm.name || !menuForm.path) {
-      toast.error('리소스 코드, 이름, 라우트 경로를 모두 입력해주세요.');
-      return;
-    }
-
-    // Save to parent (mock state)
-    onSave({
-      ...menuForm,
-      type: 'MENU',
-    });
-    onOpenChange(false);
-    setMenuForm({ code: '', name: '', path: '', icon: '' });
-  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -42,73 +45,57 @@ export function MenuRegistrationModal({ open, onOpenChange, onSave }: MenuRegist
             프론트엔드 네비게이션에 표시될 메뉴 리소스를 등록합니다.
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSaveMenu} className="space-y-4">
-          <div className="space-y-1.5">
-            <Label htmlFor="menu-code">리소스 코드 (영문)</Label>
-            <Input
-              id="menu-code"
-              placeholder="예: SYSTEM_MANAGEMENT"
-              value={menuForm.code}
-              onChange={(e) => setMenuForm({ ...menuForm, code: e.target.value })}
-              className="font-mono"
-            />
-          </div>
-          <div className="space-y-1.5">
-            <Label htmlFor="menu-name">리소스 표시 이름</Label>
-            <Input
-              id="menu-name"
-              placeholder="예: 시스템 관리"
-              value={menuForm.name}
-              onChange={(e) => setMenuForm({ ...menuForm, name: e.target.value })}
-            />
-          </div>
-          <div className="space-y-1.5">
-            <Label htmlFor="menu-path">라우트 경로 (Path)</Label>
-            <Input
-              id="menu-path"
-              placeholder="예: /system"
-              value={menuForm.path}
-              onChange={(e) => setMenuForm({ ...menuForm, path: e.target.value })}
-              className="font-mono"
-            />
-          </div>
 
-          <div className="space-y-2">
-            <Label>아이콘 선택 - 선택사항</Label>
-            <div className="grid grid-cols-5 gap-2 border border-slate-200 rounded-md p-2 max-h-40 overflow-y-auto bg-slate-50">
-              {COMMON_ICONS.map(({ name, icon: IconComponent }) => (
-                <button
-                  key={name}
-                  type="button"
-                  title={name}
-                  className={`p-2 rounded flex items-center justify-center transition-colors ${
-                    menuForm.icon === name
-                      ? 'bg-blue-100 text-blue-600 border border-blue-300'
-                      : 'text-slate-600 bg-white border border-slate-200 hover:bg-slate-100'
-                  }`}
-                  onClick={() => setMenuForm({ ...menuForm, icon: menuForm.icon === name ? '' : name })}
-                >
-                  <IconComponent className="w-5 h-5" />
-                </button>
-              ))}
-            </div>
-            {menuForm.icon && (
-              <p className="text-xs text-blue-600 font-medium">
-                선택된 아이콘:
-                {menuForm.icon}
-              </p>
-            )}
-          </div>
+        <form.AppForm>
+          <form.Layout className="space-y-4" onSubmit={(event) => void form.handleSubmit(event)}>
+            <form.AppField name="code">
+              {(field) => (
+                <field.Input
+                  label="리소스 코드 (영문)"
+                  placeholder="예: SYSTEM_MANAGEMENT"
+                  required
+                  orientation="vertical"
+                  labelWidth="auto"
+                  className="font-mono"
+                />
+              )}
+            </form.AppField>
 
-          <DialogFooter className="mt-4">
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-              취소
-            </Button>
-            <Button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white">
-              등록하기
-            </Button>
-          </DialogFooter>
-        </form>
+            <form.AppField name="name">
+              {(field) => (
+                <field.Input
+                  label="리소스 표시 이름"
+                  placeholder="예: 시스템 관리"
+                  required
+                  orientation="vertical"
+                  labelWidth="auto"
+                />
+              )}
+            </form.AppField>
+
+            <form.AppField name="path">
+              {(field) => (
+                <field.Input
+                  label="라우트 경로 (Path)"
+                  placeholder="예: /system"
+                  required
+                  orientation="vertical"
+                  labelWidth="auto"
+                  className="font-mono"
+                />
+              )}
+            </form.AppField>
+
+            <DialogFooter className="mt-4">
+              <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+                취소
+              </Button>
+              <form.Submit>
+                등록하기
+              </form.Submit>
+            </DialogFooter>
+          </form.Layout>
+        </form.AppForm>
       </DialogContent>
     </Dialog>
   );

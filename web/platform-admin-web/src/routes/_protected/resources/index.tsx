@@ -1,6 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router';
 
-import type { LocaleDto } from '../../../api/model';
 import { ResourceTreeTab } from './-tabs/ResourceTreeTab';
 
 export const Route = createFileRoute('/_protected/resources/')({
@@ -8,18 +7,18 @@ export const Route = createFileRoute('/_protected/resources/')({
 });
 
 function ResourceManagementPage() {
-  const { locales } = Route.useRouteContext() as { locales: LocaleDto[] };
+  const { locales } = Route.useRouteContext();
 
   return (
-    <div className="p-6 max-w-[1200px] mx-auto space-y-6 flex flex-col">
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between border-b pb-4 border-slate-200">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-900">리소스 관리</h1>
-          <p className="text-slate-500 mt-1 text-sm">메뉴와 컴포넌트 자원의 권한을 관리합니다.</p>
-        </div>
-      </div>
+    <div className="size-full mx-auto flex max-w-300 flex-col gap-6 p-6">
+      <header className="space-y-2 border-b border-slate-200 pb-4">
+        <h1 className="text-2xl font-bold tracking-tight text-slate-950">리소스 관리</h1>
+        <p className="max-w-3xl text-sm text-slate-500">
+          플랫폼 메뉴로 노출되는 리소스의 아이콘과 다국어 메시지를 관리합니다.
+        </p>
+      </header>
 
-      <div className="flex-1">
+      <div className="flex-1 min-h-0 flex flex-col">
         <ResourceTreeTab locales={locales} />
       </div>
     </div>

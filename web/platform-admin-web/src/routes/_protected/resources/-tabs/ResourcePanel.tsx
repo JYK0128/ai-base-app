@@ -10,7 +10,7 @@ interface ResourcePanelProps {
 
 export function ResourcePanel({ actions, children, description, icon, title }: ResourcePanelProps) {
   return (
-    <section className="overflow-hidden rounded-xl border border-slate-200 bg-white">
+    <section className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border border-slate-200 bg-white">
       <header className="flex flex-col gap-3 border-b border-slate-200 px-4 py-4 lg:flex-row lg:items-center lg:justify-between">
         <div className="flex items-start gap-2.5">
           <div className="mt-0.5 text-slate-500">
@@ -25,7 +25,7 @@ export function ResourcePanel({ actions, children, description, icon, title }: R
         {actions && <div className="flex flex-wrap items-center gap-2">{actions}</div>}
       </header>
 
-      <div className="px-4 py-4">{children}</div>
+      <div className="min-h-0 flex-1 overflow-auto px-4 py-4">{children}</div>
     </section>
   );
 }
