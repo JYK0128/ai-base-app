@@ -1,4 +1,5 @@
-import { BaseEntity, type EntityData, EntityRepositoryType, type FilterQuery, type FindOptions, type FromEntityType, type Loaded, OptionalProps, type Primary, RequestContext, type RequiredEntityData } from '@mikro-orm/core';
+import type { EntityData, EntityName, FilterQuery, FindOptions, FromEntityType, Loaded, Primary, RequiredEntityData } from '@mikro-orm/core';
+import { BaseEntity, EntityRepositoryType, OptionalProps, RequestContext } from '@mikro-orm/core';
 import { PrimaryKey, Property } from '@mikro-orm/decorators/legacy';
 import { uuidv7 } from 'uuidv7';
 
@@ -20,8 +21,8 @@ export abstract class CoreEntity<
   @Property({ nullable: true })
   createdBy?: string;
 
-  @Property({ onUpdate: () => new Date() })
-  updatedAt: Date = new Date();
+  @Property({ nullable: true })
+  updatedAt?: Date;
 
   @Property({ nullable: true })
   updatedBy?: string;
@@ -35,6 +36,9 @@ export abstract class CoreEntity<
   @Property({ type: 'json', nullable: true })
   metadata?: Record<string, unknown>;
 
+  /**
+   * 새로운 엔티티를 생성하고 영속화합니다.
+   */
   static create<T extends BaseEntity>(
     this: new () => T,
     data: RequiredEntityData<T>,
@@ -46,7 +50,10 @@ export abstract class CoreEntity<
     return entity;
   }
 
-  static read<T extends BaseEntity>(
+  /**
+   * 실제 데이터베이스 조회 없이 ID만으로 엔티티를 참조할 수 있습니다.
+   */
+  static getReference<T extends BaseEntity>(
     this: new () => T,
     id: Primary<T>,
   ) {
@@ -56,6 +63,9 @@ export abstract class CoreEntity<
     return entity;
   }
 
+  /**
+   * 조건에 맞는 엔티티를 조회합니다.
+   */
   static async find<
     T extends BaseEntity,
     Hint extends string = never,
@@ -71,21 +81,33 @@ export abstract class CoreEntity<
     return em.find<T, Hint, Fields, Excludes>(this, where, options);
   }
 
+  /**
+   * 엔티티를 업데이트합니다.
+   */
   update(data: EntityData<FromEntityType<this>>) {
     this.assign(data);
     return this;
   }
 
-  delete(hard: boolean = false) {
-    if (hard) {
-      const em = RequestContext.getEntityManager();
-      if (!em) throw new Error('EntityManager not found in RequestContext.');
-      em.remove(this);
-    }
-    else {
-      this.deletedAt = new Date();
-    }
-    return this;
+  /**
+   * 엔티티에 대한 삭제 요청을 등록합니다.
+   * 실제 반영 방식은 onFlush subscriber가 결정합니다.
+   */
+  remove() {
+    const em = RequestContext.getEntityManager();
+    if (!em) throw new Error('EntityManager not found in RequestContext.');
+    em.remove(this);
+  }
+
+  /**
+   * 엔티티를 데이터베이스에서 즉시 물리 삭제합니다.
+   */
+  async nativeDelete(): Promise<number> {
+    const em = RequestContext.getEntityManager();
+    if (!em) throw new Error('EntityManager not found in RequestContext.');
+
+    const entityName = this.constructor as EntityName<this>;
+    return em.nativeDelete(entityName, { id: this.id } as FilterQuery<this>);
   }
 
   /**

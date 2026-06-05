@@ -2,7 +2,7 @@ import type { Opt, Rel } from '@mikro-orm/core';
 import { Entity, Enum, ManyToOne, Property } from '@mikro-orm/decorators/legacy';
 
 import { CoreEntity } from '../../core/core.entity';
-import { Manager } from '../manager/manager.entity';
+import { Member } from '../member/member.entity';
 import { Organization } from '../organization/organization.entity';
 import { SupportTicketRepository } from './support-ticket.repository';
 
@@ -34,11 +34,11 @@ export class SupportTicket extends CoreEntity<SupportTicket> {
   @Enum(() => TicketPriority)
   priority: Opt<TicketPriority> = TicketPriority.MEDIUM;
 
-  @ManyToOne(() => Manager)
-  author!: Rel<Manager>;
+  @ManyToOne(() => Member)
+  author!: Rel<Member>;
 
-  @ManyToOne(() => Manager, { nullable: true })
-  assignedTo?: Rel<Manager>;
+  @ManyToOne(() => Member, { nullable: true })
+  assignedTo?: Rel<Member>;
 
   @ManyToOne(() => Organization)
   organization!: Rel<Organization>;

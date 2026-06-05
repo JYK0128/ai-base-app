@@ -1,12 +1,12 @@
-import { Collection } from '@mikro-orm/core';
+import { Collection, type Opt } from '@mikro-orm/core';
 import { Entity, Enum, OneToMany, Property } from '@mikro-orm/decorators/legacy';
 
 import { CoreEntity } from '../../core/core.entity';
-import type { Manager } from '../manager/manager.entity';
-import { ManagerInvite } from '../manager/manager.invite.entity';
-import { ManagerTermsConsent } from '../terms/manager.terms.consent.entity';
+import type { Member } from '../member/member.entity';
+import { MemberInvite } from '../member/member.invite.entity';
 import { TermsDocument } from '../terms/terms.document.entity';
 import { OrganizationRepository } from './organization.repository';
+import { OrganizationRole } from './organization.role.entity';
 
 export enum OrganizationStatus {
   PENDING = 'PENDING',
@@ -31,18 +31,18 @@ export class Organization
   status: OrganizationStatus = OrganizationStatus.ACTIVE;
 
   @OneToMany({ mappedBy: 'organization' })
-  managers = new Collection<Manager>(this);
+  members = new Collection<Member>(this);
 
-  @OneToMany(() => ManagerInvite, (invite) => invite.organization)
-  managerInvites = new Collection<ManagerInvite>(this);
+  @OneToMany(() => MemberInvite, (invite) => invite.organization)
+  memberInvites = new Collection<MemberInvite>(this);
+
+  @OneToMany(() => OrganizationRole, (role) => role.organization)
+  organizationRoles = new Collection<OrganizationRole>(this);
 
   @OneToMany(() => TermsDocument, (doc) => doc.organization)
   termsDocuments = new Collection<TermsDocument>(this);
 
-  @OneToMany(() => ManagerTermsConsent, (consent) => consent.organization)
-  termsConsents = new Collection<ManagerTermsConsent>(this);
-
-  isActive(): boolean {
+  get isActive(): Opt<boolean> {
     return this.status === OrganizationStatus.ACTIVE;
   }
 }

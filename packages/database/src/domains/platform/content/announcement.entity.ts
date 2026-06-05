@@ -2,7 +2,7 @@ import type { Rel } from '@mikro-orm/core';
 import { Entity, ManyToOne, Property } from '@mikro-orm/decorators/legacy';
 
 import { CoreEntity } from '../../core/core.entity';
-import { Manager } from '../manager/manager.entity';
+import { Member } from '../member/member.entity';
 import { AnnouncementRepository } from './announcement.repository';
 
 @Entity({ schema: 'platform', repository: () => AnnouncementRepository })
@@ -17,6 +17,6 @@ export class Announcement
   @Property()
   isPublished: boolean = false;
 
-  @ManyToOne(() => Manager)
-  author!: Rel<Manager>;
+  @ManyToOne(() => Member)
+  author!: Rel<Member>;
 }

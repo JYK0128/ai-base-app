@@ -9,7 +9,10 @@ import { SeedManager } from '@mikro-orm/seeder';
 import { SqlHighlighter } from '@mikro-orm/sql-highlighter';
 
 import * as entities from './domains';
-import metadata from './metadata.json' with { type: 'json' };
+import metadataJson from './metadata.json' with { type: 'json' };
+import { AuditSubscriber } from './subscribers';
+
+const metadata = metadataJson as Record<string, unknown>;
 
 export default defineConfig({
   entities: Object.values(entities).filter((e) => typeof e === 'function'),
@@ -33,6 +36,7 @@ export default defineConfig({
       default: true,
     },
   },
+  subscribers: [AuditSubscriber],
   extensions: [SeedManager, EntityGenerator, Migrator],
   migrations: {
     path: './src/migrations',

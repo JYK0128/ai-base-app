@@ -17,13 +17,7 @@ const sharedOptions = {
   sourcemap: true,
   platform: 'node',
   target: 'es2022',
-  external: [
-    '@mikro-orm/*',
-    '@pkg/*',
-    'reflect-metadata',
-    'uuidv7',
-    'bcrypt',
-  ],
+  packages: 'external',
   plugins: [
     swcPlugin({
       jsc: {

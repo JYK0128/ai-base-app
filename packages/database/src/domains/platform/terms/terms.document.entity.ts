@@ -1,4 +1,4 @@
-import type { Rel } from '@mikro-orm/core';
+import type { Opt, Rel } from '@mikro-orm/core';
 import { Collection } from '@mikro-orm/core';
 import { Entity, Enum, ManyToOne, OneToMany, Property } from '@mikro-orm/decorators/legacy';
 
@@ -10,7 +10,6 @@ import { TermsVersion } from './terms.version.entity';
 export enum TermsDocumentStatus {
   DRAFT = 'DRAFT',
   PUBLISHED = 'PUBLISHED',
-  DEPRECATED = 'DEPRECATED',
 }
 
 @Entity({ schema: 'platform', repository: () => TermsDocumentRepository })
@@ -28,6 +27,9 @@ export class TermsDocument
   @Enum(() => TermsDocumentStatus)
   status: TermsDocumentStatus = TermsDocumentStatus.DRAFT;
 
+  @Property({ nullable: true })
+  deprecatedAt?: Date;
+
   @ManyToOne(() => Organization, { nullable: true })
   organization?: Rel<Organization>;
 
@@ -36,4 +38,20 @@ export class TermsDocument
 
   @OneToMany(() => TermsVersion, (version) => version.termsDocument)
   versions = new Collection<TermsVersion>(this);
+
+  get isDraft(): Opt<boolean> {
+    return this.status === TermsDocumentStatus.DRAFT;
+  }
+
+  get isPublished(): Opt<boolean> {
+    return this.status === TermsDocumentStatus.PUBLISHED;
+  }
+
+  get isDeprecated(): Opt<boolean> {
+    return !!this.deprecatedAt && this.deprecatedAt.getTime() <= Date.now();
+  }
+
+  get isScheduledForDeprecation(): Opt<boolean> {
+    return !!this.deprecatedAt && this.deprecatedAt.getTime() > Date.now();
+  }
 }

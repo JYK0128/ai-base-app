@@ -21,7 +21,11 @@ export abstract class CoreRepository<
     return entity;
   }
 
-  async delete(id: Primary<T>): Promise<void> {
+  /**
+   * ID 기준으로 엔티티 삭제 요청을 등록합니다.
+   * 실제 soft delete / audit 처리는 onFlush subscriber가 담당합니다.
+   */
+  async remove(id: Primary<T>): Promise<void> {
     const entity = this.em.getReference(this.entityName, id);
     this.em.remove(entity);
   }

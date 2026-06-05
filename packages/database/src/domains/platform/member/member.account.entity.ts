@@ -1,19 +1,19 @@
-import type { Rel } from '@mikro-orm/core';
+import type { Opt, Rel } from '@mikro-orm/core';
 import { Entity, Enum, ManyToOne, Property } from '@mikro-orm/decorators/legacy';
 import bcrypt from 'bcrypt';
 
 import { CoreEntity } from '../../core/core.entity';
-import { ManagerAccountRepository } from './manager.account.repository';
-import { Manager } from './manager.entity';
+import { MemberAccountRepository } from './member.account.repository';
+import { Member } from './member.entity';
 
 export enum AccountStatus {
   ACTIVE = 'ACTIVE',
   INACTIVE = 'INACTIVE',
 }
 
-@Entity({ schema: 'platform', repository: () => ManagerAccountRepository })
-export class ManagerAccount
-  extends CoreEntity<ManagerAccount, 'status'> {
+@Entity({ schema: 'platform', repository: () => MemberAccountRepository })
+export class MemberAccount
+  extends CoreEntity<MemberAccount, 'status'> {
   @Property({ unique: true })
   email!: string;
 
@@ -35,34 +35,34 @@ export class ManagerAccount
   @Property({ nullable: true })
   lockUntil?: Date;
 
-  @ManyToOne(() => Manager)
-  manager!: Rel<Manager>;
+  @ManyToOne(() => Member)
+  member!: Rel<Member>;
 
   /**
    * 비밀번호 만료 여부 확인
    */
-  isPasswordExpired(): boolean {
+  get isPasswordExpired(): Opt<boolean> {
     return !this.passwordExpiresAt || this.passwordExpiresAt.getTime() < Date.now();
   }
 
   /**
    * 계정 잠금 여부 확인 (DB 기반)
    */
-  isLocked(): boolean {
+  get isLocked(): Opt<boolean> {
     return !!this.lockUntil && this.lockUntil.getTime() > Date.now();
   }
 
   /**
    * 계정 활성화 여부 확인
    */
-  isActive(): boolean {
+  get isActive(): Opt<boolean> {
     return this.status === AccountStatus.ACTIVE;
   }
 
   /**
    * 휴면 계정 여부 확인 (90일 미접속)
    */
-  isDormant(): boolean {
+  get isDormant(): Opt<boolean> {
     if (!this.lastLoginAt) return false;
     const dormancyPeriodMs = 90 * 24 * 60 * 60 * 1000;
     return Date.now() - this.lastLoginAt.getTime() > dormancyPeriodMs;
