@@ -3,7 +3,7 @@
   "references": [
     { "path": "packages/config" },
     { "path": "packages/database" },
-    { "path": "packages/utils" },
+    { "path": "packages/shared" },
     { "path": "apps/platform-auth-service" },
     { "path": "apps/platform-core-service" },
     { "path": "apps/platform-gateway" },

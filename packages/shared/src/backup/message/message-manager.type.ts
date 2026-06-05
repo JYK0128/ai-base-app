@@ -1,8 +1,8 @@
+import type { TreeStructure } from '../../common/utils';
+
 /**
  * 다국어 메시지 관련 인터페이스 및 타입 정의
  */
-
-import { TreeStructure } from '../core/tree-helper';
 
 /**
  * 계층형 메시지를 담는 트리 구조 (재귀적 정의)

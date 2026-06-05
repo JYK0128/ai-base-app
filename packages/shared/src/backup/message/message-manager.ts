@@ -1,7 +1,7 @@
-import { CollectionHelper } from '../core/collection-helper';
-import { KeyHelper } from '../core/key-helper';
-import { TreeHelper } from '../core/tree-helper';
-import type { MessageEntry, MessageSource, MessageStore, MessageTree } from './message-manager.types';
+import { groupBy } from 'lodash-es';
+
+import { KeyUtil, TreeUtil } from '../../common/utils';
+import type { MessageEntry, MessageSource, MessageStore, MessageTree } from './message-manager.type';
 
 /**
  * 인메모리 메시지 레지스트리 및 번역 엔진
@@ -19,7 +19,7 @@ export class MessageRegistry {
 
     this.locales.set(locale, {
       ...prevLocale,
-      [namespace]: TreeHelper.merge(prevMessages, messages),
+      [namespace]: TreeUtil.merge(prevMessages, messages),
     });
   }
 
@@ -37,7 +37,7 @@ export class MessageRegistry {
    */
   getLocaleMessages(locale: string): MessageEntry {
     const entry = this.locales.get(locale);
-    return TreeHelper.clone(entry) ?? {};
+    return TreeUtil.clone(entry) ?? {};
   }
 
   /**
@@ -86,13 +86,13 @@ export class MessageRegistry {
     }
 
     if (namespace) {
-      return TreeHelper.get<string>(entries[namespace], key) ?? undefined;
+      return TreeUtil.get<string>(entries[namespace], key) ?? undefined;
     }
 
     for (const ns of Object.keys(entries)) {
       const tree = entries[ns];
       if (tree) {
-        const value = TreeHelper.get<string>(tree, key);
+        const value = TreeUtil.get<string>(tree, key);
         if (value !== null && value !== undefined) {
           return value;
         }
@@ -116,14 +116,14 @@ export class MessageService extends MessageRegistry {
    */
   async syncFromDatabase(params?: { locale?: string, namespace?: string }): Promise<void> {
     const records = await this.store.findMany(params);
-    const grouped = CollectionHelper.groupBy(records, (r) => KeyHelper.join(r.locale, r.namespace));
+    const grouped = groupBy(records, (r) => KeyUtil.join(r.locale, r.namespace));
 
-    for (const [groupKey, groupRecords] of grouped.entries()) {
-      const [locale, namespace] = KeyHelper.split(groupKey);
+    for (const [groupKey, groupRecords] of Object.entries(grouped)) {
+      const [locale, namespace] = KeyUtil.split(groupKey);
       this.register({
         locale: locale,
         namespace: namespace,
-        messages: TreeHelper.unflatten<string>(
+        messages: TreeUtil.unflatten<string>(
           groupRecords.map((r) => ({ key: r.key, value: r.message })),
         ) as MessageTree,
       });
@@ -135,7 +135,7 @@ export class MessageService extends MessageRegistry {
    */
   async registerAndPersist(source: MessageSource): Promise<void> {
     this.register(source);
-    const records = TreeHelper.flatten<string>(source.messages).map((r) => ({
+    const records = TreeUtil.flatten<string>(source.messages).map((r) => ({
       locale: source.locale,
       namespace: source.namespace,
       key: r.key,
@@ -150,7 +150,7 @@ export class MessageService extends MessageRegistry {
   async registerManyAndPersist(sources: MessageSource[]): Promise<void> {
     this.registerMany(sources);
     const records = sources.flatMap((source) => (
-      TreeHelper.flatten<string>(source.messages).map((r) => ({
+      TreeUtil.flatten<string>(source.messages).map((r) => ({
         locale: source.locale,
         namespace: source.namespace,
         key: r.key,

@@ -8,7 +8,7 @@ export type TreeStructure<V> = {
 /**
  * 계층형 객체(Tree) 구조를 다루기 위한 유틸리티 클래스
  */
-export class TreeHelper {
+export class TreeUtil {
   /**
    * 객체를 깊은 복사합니다.
    */

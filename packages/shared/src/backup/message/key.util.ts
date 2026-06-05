@@ -1,7 +1,7 @@
 /**
  * 식별자 키 생성을 위한 유틸리티 클래스
  */
-export class KeyHelper {
+export class KeyUtil {
   private static readonly DEFAULT_DELIMITER = '::';
   private static readonly PERMISSION_DELIMITER = ':';
 

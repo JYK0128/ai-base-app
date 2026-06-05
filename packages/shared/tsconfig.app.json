@@ -1,8 +1,7 @@
 {
   "extends": "@pkg/config/typescript/bundler",
   "compilerOptions": {
-    "baseUrl": "./",
-    "outDir": "dist"
+    "baseUrl": "./"
   },
   "include": ["src"]
 }
