@@ -14,10 +14,8 @@ export interface CreateTermsVersionDto {
   label: string;
   /** 약관 본문 */
   content: string;
-  /** 효력 시작일 */
-  effectiveFrom?: string;
-  /** 효력 종료일 */
-  effectiveTo?: string;
+  /** 효력 시각 */
+  effectiveAt?: string;
   /** 버전 상태 */
   status?: CreateTermsVersionDtoStatus;
 }

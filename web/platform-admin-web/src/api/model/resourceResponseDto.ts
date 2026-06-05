@@ -5,6 +5,7 @@
  * The AI Base App Gateway API documentation
  * OpenAPI spec version: 1.0
  */
+import type { ResourceResponseDtoScope } from './resourceResponseDtoScope';
 import type { ResourceResponseDtoType } from './resourceResponseDtoType';
 
 export interface ResourceResponseDto {
@@ -16,6 +17,8 @@ export interface ResourceResponseDto {
   name: string;
   /** 리소스 유형 */
   type: ResourceResponseDtoType;
+  /** 리소스 범위 */
+  scope: ResourceResponseDtoScope;
   /** 경로 */
   path?: string;
   /** 아이콘 이름 */

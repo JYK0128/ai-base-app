@@ -15,5 +15,4 @@ export type CreateTermsVersionDtoStatus = typeof CreateTermsVersionDtoStatus[key
 export const CreateTermsVersionDtoStatus = {
   DRAFT: 'DRAFT',
   PUBLISHED: 'PUBLISHED',
-  DEPRECATED: 'DEPRECATED',
 } as const;

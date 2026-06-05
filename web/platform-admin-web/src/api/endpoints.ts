@@ -26,28 +26,25 @@ import type {
 
 import type {
   AgreeTermsDto,
+  AnnouncementsControllerCreateAnnouncementV1200,
+  AnnouncementsControllerGetAnnouncementsV1200,
+  AnnouncementsControllerGetAnnouncementsV1Params,
   ApiResponse,
   AuthControllerGetMeV1200,
   AuthControllerLoginV1200,
   AuthControllerRefreshV1200,
+  CancelDeprecationTermsDocumentDto,
+  CancelInviteDto,
   ChangePasswordDto,
-  CoreControllerAgreeTermsV1200,
-  CoreControllerCreateAnnouncementV1200,
-  CoreControllerCreateTermsDocumentV1200,
-  CoreControllerCreateTermsVersionV1200,
-  CoreControllerGetActiveTermsV1200,
-  CoreControllerGetActiveTermsV1Params,
-  CoreControllerGetAnnouncementsV1200,
-  CoreControllerGetAnnouncementsV1Params,
-  CoreControllerGetOrganizationsV1200,
-  CoreControllerGetOrganizationsV1Params,
-  CoreControllerGetTicketsV1200,
-  CoreControllerGetTicketsV1Params,
   CreateAnnouncementDto,
+  CreateInviteDto,
+  CreatePermissionSetDto,
   CreateResourceDto,
   CreateTermsDocumentDto,
   CreateTermsVersionDto,
   DeleteResourceBodyDto,
+  DeleteTermsDocumentDto,
+  DeprecateTermsDocumentDto,
   HealthControllerLive200,
   HealthControllerLive503,
   HealthControllerReady200,
@@ -62,21 +59,59 @@ import type {
   I18nControllerGetTranslationsV1Params,
   I18nControllerUpdateTranslationV1200,
   LoginDto,
+  MembersControllerCancelInviteV1200,
+  MembersControllerCreateInviteV1200,
+  MembersControllerGetInvitesV1200,
+  MembersControllerGetInvitesV1Params,
+  MembersControllerGetMemberV1200,
+  MembersControllerGetMembersV1200,
+  MembersControllerGetMembersV1Params,
+  MembersControllerResendInviteV1200,
+  MembersControllerReviveInviteV1200,
+  MembersControllerToggleMemberStatusV1200,
+  MembersControllerUpdateMemberRoleV1200,
+  OrganizationActionDto,
+  OrganizationsControllerGetOrganizationsV1200,
+  OrganizationsControllerGetOrganizationsV1Params,
+  ResendInviteDto,
+  ResourceControllerCreatePermissionSetV1200,
   ResourceControllerCreateResourceV1200,
   ResourceControllerDeleteResourceV1200,
   ResourceControllerGetMyResourcesV1200,
+  ResourceControllerGetPermissionSetsV1200,
   ResourceControllerGetResourceV1200,
   ResourceControllerGetResourcesV1200,
+  ResourceControllerGetResourcesV1Params,
+  ResourceControllerUpdatePermissionSetPermissionsV1200,
   ResourceControllerUpdateResourcePermissionsV1200,
   ResourceControllerUpdateResourceSortV1200,
   ResourceControllerUpdateResourceV1200,
+  ReviveInviteDto,
+  SupportControllerGetTicketsV1200,
+  SupportControllerGetTicketsV1Params,
+  TermsControllerAgreeTermsV1200,
+  TermsControllerCancelDeprecationTermsDocumentV1200,
+  TermsControllerCreateTermsDocumentV1200,
+  TermsControllerCreateTermsVersionV1200,
+  TermsControllerDeprecateTermsDocumentV1200,
+  TermsControllerGetActiveTermsV1200,
+  TermsControllerGetTermsDocumentV1200,
+  TermsControllerGetTermsDocumentVersionsV1200,
+  TermsControllerGetTermsDocumentVersionsV1Params,
+  TermsControllerGetTermsDocumentsV1200,
+  TermsControllerGetTermsDocumentsV1Params,
+  TermsControllerUpdateTermsVersionV1200,
+  ToggleMemberStatusDto,
   TranslationBulkDto,
   TranslationCreateDto,
   TranslationDeleteDto,
   TranslationUpdateDto,
+  UpdateMemberRoleDto,
+  UpdatePermissionSetPermissionsDto,
   UpdateResourceDetailBodyDto,
   UpdateResourcePermissionsDto,
-  UpdateResourceSortDto
+  UpdateResourceSortDto,
+  UpdateTermsVersionDto
 } from './model';
 
 import authControllerLoginV1Mutator from '../lib/axios';
@@ -91,26 +126,10 @@ import authControllerDeferPasswordChangeV1Mutator from '../lib/axios';
 import type { ErrorType as AuthControllerDeferPasswordChangeV1ErrorType } from '../lib/axios';
 import authControllerChangePasswordV1Mutator from '../lib/axios';
 import type { ErrorType as AuthControllerChangePasswordV1ErrorType } from '../lib/axios';
-import coreControllerGetOrganizationsV1Mutator from '../lib/axios';
-import type { ErrorType as CoreControllerGetOrganizationsV1ErrorType } from '../lib/axios';
-import coreControllerApproveOrganizationV1Mutator from '../lib/axios';
-import type { ErrorType as CoreControllerApproveOrganizationV1ErrorType } from '../lib/axios';
-import coreControllerRejectOrganizationV1Mutator from '../lib/axios';
-import type { ErrorType as CoreControllerRejectOrganizationV1ErrorType } from '../lib/axios';
-import coreControllerGetAnnouncementsV1Mutator from '../lib/axios';
-import type { ErrorType as CoreControllerGetAnnouncementsV1ErrorType } from '../lib/axios';
-import coreControllerCreateAnnouncementV1Mutator from '../lib/axios';
-import type { ErrorType as CoreControllerCreateAnnouncementV1ErrorType } from '../lib/axios';
-import coreControllerGetTicketsV1Mutator from '../lib/axios';
-import type { ErrorType as CoreControllerGetTicketsV1ErrorType } from '../lib/axios';
-import coreControllerGetActiveTermsV1Mutator from '../lib/axios';
-import type { ErrorType as CoreControllerGetActiveTermsV1ErrorType } from '../lib/axios';
-import coreControllerCreateTermsDocumentV1Mutator from '../lib/axios';
-import type { ErrorType as CoreControllerCreateTermsDocumentV1ErrorType } from '../lib/axios';
-import coreControllerCreateTermsVersionV1Mutator from '../lib/axios';
-import type { ErrorType as CoreControllerCreateTermsVersionV1ErrorType } from '../lib/axios';
-import coreControllerAgreeTermsV1Mutator from '../lib/axios';
-import type { ErrorType as CoreControllerAgreeTermsV1ErrorType } from '../lib/axios';
+import announcementsControllerGetAnnouncementsV1Mutator from '../lib/axios';
+import type { ErrorType as AnnouncementsControllerGetAnnouncementsV1ErrorType } from '../lib/axios';
+import announcementsControllerCreateAnnouncementV1Mutator from '../lib/axios';
+import type { ErrorType as AnnouncementsControllerCreateAnnouncementV1ErrorType } from '../lib/axios';
 import i18nControllerGetLocalesV1Mutator from '../lib/axios';
 import type { ErrorType as I18nControllerGetLocalesV1ErrorType } from '../lib/axios';
 import i18nControllerGetTranslationV1Mutator from '../lib/axios';
@@ -129,12 +148,40 @@ import healthControllerLiveMutator from '../lib/axios';
 import type { ErrorType as HealthControllerLiveErrorType } from '../lib/axios';
 import healthControllerReadyMutator from '../lib/axios';
 import type { ErrorType as HealthControllerReadyErrorType } from '../lib/axios';
+import membersControllerGetInvitesV1Mutator from '../lib/axios';
+import type { ErrorType as MembersControllerGetInvitesV1ErrorType } from '../lib/axios';
+import membersControllerCreateInviteV1Mutator from '../lib/axios';
+import type { ErrorType as MembersControllerCreateInviteV1ErrorType } from '../lib/axios';
+import membersControllerGetMembersV1Mutator from '../lib/axios';
+import type { ErrorType as MembersControllerGetMembersV1ErrorType } from '../lib/axios';
+import membersControllerGetMemberV1Mutator from '../lib/axios';
+import type { ErrorType as MembersControllerGetMemberV1ErrorType } from '../lib/axios';
+import membersControllerUpdateMemberRoleV1Mutator from '../lib/axios';
+import type { ErrorType as MembersControllerUpdateMemberRoleV1ErrorType } from '../lib/axios';
+import membersControllerToggleMemberStatusV1Mutator from '../lib/axios';
+import type { ErrorType as MembersControllerToggleMemberStatusV1ErrorType } from '../lib/axios';
+import membersControllerResendInviteV1Mutator from '../lib/axios';
+import type { ErrorType as MembersControllerResendInviteV1ErrorType } from '../lib/axios';
+import membersControllerCancelInviteV1Mutator from '../lib/axios';
+import type { ErrorType as MembersControllerCancelInviteV1ErrorType } from '../lib/axios';
+import membersControllerReviveInviteV1Mutator from '../lib/axios';
+import type { ErrorType as MembersControllerReviveInviteV1ErrorType } from '../lib/axios';
+import organizationsControllerGetOrganizationsV1Mutator from '../lib/axios';
+import type { ErrorType as OrganizationsControllerGetOrganizationsV1ErrorType } from '../lib/axios';
+import organizationsControllerApproveOrganizationV1Mutator from '../lib/axios';
+import type { ErrorType as OrganizationsControllerApproveOrganizationV1ErrorType } from '../lib/axios';
+import organizationsControllerRejectOrganizationV1Mutator from '../lib/axios';
+import type { ErrorType as OrganizationsControllerRejectOrganizationV1ErrorType } from '../lib/axios';
 import resourceControllerGetResourcesV1Mutator from '../lib/axios';
 import type { ErrorType as ResourceControllerGetResourcesV1ErrorType } from '../lib/axios';
-import resourceControllerGetResourceV1Mutator from '../lib/axios';
-import type { ErrorType as ResourceControllerGetResourceV1ErrorType } from '../lib/axios';
 import resourceControllerGetMyResourcesV1Mutator from '../lib/axios';
 import type { ErrorType as ResourceControllerGetMyResourcesV1ErrorType } from '../lib/axios';
+import resourceControllerGetPermissionSetsV1Mutator from '../lib/axios';
+import type { ErrorType as ResourceControllerGetPermissionSetsV1ErrorType } from '../lib/axios';
+import resourceControllerCreatePermissionSetV1Mutator from '../lib/axios';
+import type { ErrorType as ResourceControllerCreatePermissionSetV1ErrorType } from '../lib/axios';
+import resourceControllerGetResourceV1Mutator from '../lib/axios';
+import type { ErrorType as ResourceControllerGetResourceV1ErrorType } from '../lib/axios';
 import resourceControllerCreateResourceV1Mutator from '../lib/axios';
 import type { ErrorType as ResourceControllerCreateResourceV1ErrorType } from '../lib/axios';
 import resourceControllerUpdateResourceV1Mutator from '../lib/axios';
@@ -143,8 +190,34 @@ import resourceControllerUpdateResourcePermissionsV1Mutator from '../lib/axios';
 import type { ErrorType as ResourceControllerUpdateResourcePermissionsV1ErrorType } from '../lib/axios';
 import resourceControllerUpdateResourceSortV1Mutator from '../lib/axios';
 import type { ErrorType as ResourceControllerUpdateResourceSortV1ErrorType } from '../lib/axios';
+import resourceControllerUpdatePermissionSetPermissionsV1Mutator from '../lib/axios';
+import type { ErrorType as ResourceControllerUpdatePermissionSetPermissionsV1ErrorType } from '../lib/axios';
 import resourceControllerDeleteResourceV1Mutator from '../lib/axios';
 import type { ErrorType as ResourceControllerDeleteResourceV1ErrorType } from '../lib/axios';
+import supportControllerGetTicketsV1Mutator from '../lib/axios';
+import type { ErrorType as SupportControllerGetTicketsV1ErrorType } from '../lib/axios';
+import termsControllerGetActiveTermsV1Mutator from '../lib/axios';
+import type { ErrorType as TermsControllerGetActiveTermsV1ErrorType } from '../lib/axios';
+import termsControllerGetTermsDocumentsV1Mutator from '../lib/axios';
+import type { ErrorType as TermsControllerGetTermsDocumentsV1ErrorType } from '../lib/axios';
+import termsControllerCreateTermsDocumentV1Mutator from '../lib/axios';
+import type { ErrorType as TermsControllerCreateTermsDocumentV1ErrorType } from '../lib/axios';
+import termsControllerGetTermsDocumentV1Mutator from '../lib/axios';
+import type { ErrorType as TermsControllerGetTermsDocumentV1ErrorType } from '../lib/axios';
+import termsControllerGetTermsDocumentVersionsV1Mutator from '../lib/axios';
+import type { ErrorType as TermsControllerGetTermsDocumentVersionsV1ErrorType } from '../lib/axios';
+import termsControllerDeprecateTermsDocumentV1Mutator from '../lib/axios';
+import type { ErrorType as TermsControllerDeprecateTermsDocumentV1ErrorType } from '../lib/axios';
+import termsControllerCancelDeprecationTermsDocumentV1Mutator from '../lib/axios';
+import type { ErrorType as TermsControllerCancelDeprecationTermsDocumentV1ErrorType } from '../lib/axios';
+import termsControllerDeleteTermsDocumentV1Mutator from '../lib/axios';
+import type { ErrorType as TermsControllerDeleteTermsDocumentV1ErrorType } from '../lib/axios';
+import termsControllerCreateTermsVersionV1Mutator from '../lib/axios';
+import type { ErrorType as TermsControllerCreateTermsVersionV1ErrorType } from '../lib/axios';
+import termsControllerUpdateTermsVersionV1Mutator from '../lib/axios';
+import type { ErrorType as TermsControllerUpdateTermsVersionV1ErrorType } from '../lib/axios';
+import termsControllerAgreeTermsV1Mutator from '../lib/axios';
+import type { ErrorType as TermsControllerAgreeTermsV1ErrorType } from '../lib/axios';
 
 
 
@@ -563,237 +636,16 @@ export const useAuthControllerChangePasswordV1 = <TError = AuthControllerChangeP
     }
 
 /**
- * 조직 목록을 조회합니다.
- * @summary 조직 목록 조회
- */
-export const coreControllerGetOrganizationsV1 = (
-    params?: CoreControllerGetOrganizationsV1Params,
- signal?: AbortSignal
-) => {
-
-
-      return coreControllerGetOrganizationsV1Mutator<CoreControllerGetOrganizationsV1200>(
-      {url: `/api/v1/organizations`, method: 'GET',
-        params, signal
-    },
-      );
-    }
-
-
-
-
-export const getCoreControllerGetOrganizationsV1QueryKey = (params?: CoreControllerGetOrganizationsV1Params,) => {
-    return [
-    `/api/v1/organizations`, ...(params ? [params] : [])
-    ] as const;
-    }
-
-
-export const getCoreControllerGetOrganizationsV1QueryOptions = <TData = Awaited<ReturnType<typeof coreControllerGetOrganizationsV1>>, TError = CoreControllerGetOrganizationsV1ErrorType<unknown>>(params?: CoreControllerGetOrganizationsV1Params, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof coreControllerGetOrganizationsV1>>, TError, TData>>, }
-) => {
-
-const {query: queryOptions} = options ?? {};
-
-  const queryKey =  queryOptions?.queryKey ?? getCoreControllerGetOrganizationsV1QueryKey(params);
-
-
-
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof coreControllerGetOrganizationsV1>>> = ({ signal }) => coreControllerGetOrganizationsV1(params, signal);
-
-
-
-
-
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof coreControllerGetOrganizationsV1>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
-}
-
-export type CoreControllerGetOrganizationsV1QueryResult = NonNullable<Awaited<ReturnType<typeof coreControllerGetOrganizationsV1>>>
-export type CoreControllerGetOrganizationsV1QueryError = CoreControllerGetOrganizationsV1ErrorType<unknown>
-
-
-export function useCoreControllerGetOrganizationsV1<TData = Awaited<ReturnType<typeof coreControllerGetOrganizationsV1>>, TError = CoreControllerGetOrganizationsV1ErrorType<unknown>>(
- params: undefined |  CoreControllerGetOrganizationsV1Params, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof coreControllerGetOrganizationsV1>>, TError, TData>> & Pick<
-        DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof coreControllerGetOrganizationsV1>>,
-          TError,
-          Awaited<ReturnType<typeof coreControllerGetOrganizationsV1>>
-        > , 'initialData'
-      >, }
- , queryClient?: QueryClient
-  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useCoreControllerGetOrganizationsV1<TData = Awaited<ReturnType<typeof coreControllerGetOrganizationsV1>>, TError = CoreControllerGetOrganizationsV1ErrorType<unknown>>(
- params?: CoreControllerGetOrganizationsV1Params, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof coreControllerGetOrganizationsV1>>, TError, TData>> & Pick<
-        UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof coreControllerGetOrganizationsV1>>,
-          TError,
-          Awaited<ReturnType<typeof coreControllerGetOrganizationsV1>>
-        > , 'initialData'
-      >, }
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useCoreControllerGetOrganizationsV1<TData = Awaited<ReturnType<typeof coreControllerGetOrganizationsV1>>, TError = CoreControllerGetOrganizationsV1ErrorType<unknown>>(
- params?: CoreControllerGetOrganizationsV1Params, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof coreControllerGetOrganizationsV1>>, TError, TData>>, }
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-/**
- * @summary 조직 목록 조회
- */
-
-export function useCoreControllerGetOrganizationsV1<TData = Awaited<ReturnType<typeof coreControllerGetOrganizationsV1>>, TError = CoreControllerGetOrganizationsV1ErrorType<unknown>>(
- params?: CoreControllerGetOrganizationsV1Params, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof coreControllerGetOrganizationsV1>>, TError, TData>>, }
- , queryClient?: QueryClient
- ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
-
-  const queryOptions = getCoreControllerGetOrganizationsV1QueryOptions(params,options)
-
-  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
-
-  return { ...query, queryKey: queryOptions.queryKey };
-}
-
-
-
-
-
-
-
-/**
- * 조직을 승인합니다.
- * @summary 조직 승인
- */
-export const coreControllerApproveOrganizationV1 = (
-    id: string,
- signal?: AbortSignal
-) => {
-
-
-      return coreControllerApproveOrganizationV1Mutator<ApiResponse>(
-      {url: `/api/v1/organizations/${id}/approve`, method: 'PATCH', signal
-    },
-      );
-    }
-
-
-
-export const getCoreControllerApproveOrganizationV1MutationOptions = <TError = CoreControllerApproveOrganizationV1ErrorType<unknown>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof coreControllerApproveOrganizationV1>>, TError,{id: string}, TContext>, }
-): UseMutationOptions<Awaited<ReturnType<typeof coreControllerApproveOrganizationV1>>, TError,{id: string}, TContext> => {
-
-const mutationKey = ['coreControllerApproveOrganizationV1'];
-const {mutation: mutationOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }};
-
-
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof coreControllerApproveOrganizationV1>>, {id: string}> = (props) => {
-          const {id} = props ?? {};
-
-          return  coreControllerApproveOrganizationV1(id,)
-        }
-
-
-
-
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type CoreControllerApproveOrganizationV1MutationResult = NonNullable<Awaited<ReturnType<typeof coreControllerApproveOrganizationV1>>>
-
-    export type CoreControllerApproveOrganizationV1MutationError = CoreControllerApproveOrganizationV1ErrorType<unknown>
-
-    /**
- * @summary 조직 승인
- */
-export const useCoreControllerApproveOrganizationV1 = <TError = CoreControllerApproveOrganizationV1ErrorType<unknown>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof coreControllerApproveOrganizationV1>>, TError,{id: string}, TContext>, }
- , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof coreControllerApproveOrganizationV1>>,
-        TError,
-        {id: string},
-        TContext
-      > => {
-      return useMutation(getCoreControllerApproveOrganizationV1MutationOptions(options), queryClient);
-    }
-
-/**
- * 조직을 거절합니다.
- * @summary 조직 거절
- */
-export const coreControllerRejectOrganizationV1 = (
-    id: string,
- signal?: AbortSignal
-) => {
-
-
-      return coreControllerRejectOrganizationV1Mutator<ApiResponse>(
-      {url: `/api/v1/organizations/${id}/reject`, method: 'PATCH', signal
-    },
-      );
-    }
-
-
-
-export const getCoreControllerRejectOrganizationV1MutationOptions = <TError = CoreControllerRejectOrganizationV1ErrorType<unknown>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof coreControllerRejectOrganizationV1>>, TError,{id: string}, TContext>, }
-): UseMutationOptions<Awaited<ReturnType<typeof coreControllerRejectOrganizationV1>>, TError,{id: string}, TContext> => {
-
-const mutationKey = ['coreControllerRejectOrganizationV1'];
-const {mutation: mutationOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }};
-
-
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof coreControllerRejectOrganizationV1>>, {id: string}> = (props) => {
-          const {id} = props ?? {};
-
-          return  coreControllerRejectOrganizationV1(id,)
-        }
-
-
-
-
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type CoreControllerRejectOrganizationV1MutationResult = NonNullable<Awaited<ReturnType<typeof coreControllerRejectOrganizationV1>>>
-
-    export type CoreControllerRejectOrganizationV1MutationError = CoreControllerRejectOrganizationV1ErrorType<unknown>
-
-    /**
- * @summary 조직 거절
- */
-export const useCoreControllerRejectOrganizationV1 = <TError = CoreControllerRejectOrganizationV1ErrorType<unknown>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof coreControllerRejectOrganizationV1>>, TError,{id: string}, TContext>, }
- , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof coreControllerRejectOrganizationV1>>,
-        TError,
-        {id: string},
-        TContext
-      > => {
-      return useMutation(getCoreControllerRejectOrganizationV1MutationOptions(options), queryClient);
-    }
-
-/**
  * 공지사항 목록을 조회합니다.
  * @summary 공지사항 조회
  */
-export const coreControllerGetAnnouncementsV1 = (
-    params?: CoreControllerGetAnnouncementsV1Params,
+export const announcementsControllerGetAnnouncementsV1 = (
+    params?: AnnouncementsControllerGetAnnouncementsV1Params,
  signal?: AbortSignal
 ) => {
 
 
-      return coreControllerGetAnnouncementsV1Mutator<CoreControllerGetAnnouncementsV1200>(
+      return announcementsControllerGetAnnouncementsV1Mutator<AnnouncementsControllerGetAnnouncementsV1200>(
       {url: `/api/v1/announcements`, method: 'GET',
         params, signal
     },
@@ -803,69 +655,69 @@ export const coreControllerGetAnnouncementsV1 = (
 
 
 
-export const getCoreControllerGetAnnouncementsV1QueryKey = (params?: CoreControllerGetAnnouncementsV1Params,) => {
+export const getAnnouncementsControllerGetAnnouncementsV1QueryKey = (params?: AnnouncementsControllerGetAnnouncementsV1Params,) => {
     return [
     `/api/v1/announcements`, ...(params ? [params] : [])
     ] as const;
     }
 
 
-export const getCoreControllerGetAnnouncementsV1QueryOptions = <TData = Awaited<ReturnType<typeof coreControllerGetAnnouncementsV1>>, TError = CoreControllerGetAnnouncementsV1ErrorType<unknown>>(params?: CoreControllerGetAnnouncementsV1Params, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof coreControllerGetAnnouncementsV1>>, TError, TData>>, }
+export const getAnnouncementsControllerGetAnnouncementsV1QueryOptions = <TData = Awaited<ReturnType<typeof announcementsControllerGetAnnouncementsV1>>, TError = AnnouncementsControllerGetAnnouncementsV1ErrorType<unknown>>(params?: AnnouncementsControllerGetAnnouncementsV1Params, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof announcementsControllerGetAnnouncementsV1>>, TError, TData>>, }
 ) => {
 
 const {query: queryOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getCoreControllerGetAnnouncementsV1QueryKey(params);
+  const queryKey =  queryOptions?.queryKey ?? getAnnouncementsControllerGetAnnouncementsV1QueryKey(params);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof coreControllerGetAnnouncementsV1>>> = ({ signal }) => coreControllerGetAnnouncementsV1(params, signal);
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof announcementsControllerGetAnnouncementsV1>>> = ({ signal }) => announcementsControllerGetAnnouncementsV1(params, signal);
 
 
 
 
 
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof coreControllerGetAnnouncementsV1>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof announcementsControllerGetAnnouncementsV1>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
 
-export type CoreControllerGetAnnouncementsV1QueryResult = NonNullable<Awaited<ReturnType<typeof coreControllerGetAnnouncementsV1>>>
-export type CoreControllerGetAnnouncementsV1QueryError = CoreControllerGetAnnouncementsV1ErrorType<unknown>
+export type AnnouncementsControllerGetAnnouncementsV1QueryResult = NonNullable<Awaited<ReturnType<typeof announcementsControllerGetAnnouncementsV1>>>
+export type AnnouncementsControllerGetAnnouncementsV1QueryError = AnnouncementsControllerGetAnnouncementsV1ErrorType<unknown>
 
 
-export function useCoreControllerGetAnnouncementsV1<TData = Awaited<ReturnType<typeof coreControllerGetAnnouncementsV1>>, TError = CoreControllerGetAnnouncementsV1ErrorType<unknown>>(
- params: undefined |  CoreControllerGetAnnouncementsV1Params, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof coreControllerGetAnnouncementsV1>>, TError, TData>> & Pick<
+export function useAnnouncementsControllerGetAnnouncementsV1<TData = Awaited<ReturnType<typeof announcementsControllerGetAnnouncementsV1>>, TError = AnnouncementsControllerGetAnnouncementsV1ErrorType<unknown>>(
+ params: undefined |  AnnouncementsControllerGetAnnouncementsV1Params, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof announcementsControllerGetAnnouncementsV1>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof coreControllerGetAnnouncementsV1>>,
+          Awaited<ReturnType<typeof announcementsControllerGetAnnouncementsV1>>,
           TError,
-          Awaited<ReturnType<typeof coreControllerGetAnnouncementsV1>>
+          Awaited<ReturnType<typeof announcementsControllerGetAnnouncementsV1>>
         > , 'initialData'
       >, }
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useCoreControllerGetAnnouncementsV1<TData = Awaited<ReturnType<typeof coreControllerGetAnnouncementsV1>>, TError = CoreControllerGetAnnouncementsV1ErrorType<unknown>>(
- params?: CoreControllerGetAnnouncementsV1Params, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof coreControllerGetAnnouncementsV1>>, TError, TData>> & Pick<
+export function useAnnouncementsControllerGetAnnouncementsV1<TData = Awaited<ReturnType<typeof announcementsControllerGetAnnouncementsV1>>, TError = AnnouncementsControllerGetAnnouncementsV1ErrorType<unknown>>(
+ params?: AnnouncementsControllerGetAnnouncementsV1Params, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof announcementsControllerGetAnnouncementsV1>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof coreControllerGetAnnouncementsV1>>,
+          Awaited<ReturnType<typeof announcementsControllerGetAnnouncementsV1>>,
           TError,
-          Awaited<ReturnType<typeof coreControllerGetAnnouncementsV1>>
+          Awaited<ReturnType<typeof announcementsControllerGetAnnouncementsV1>>
         > , 'initialData'
       >, }
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useCoreControllerGetAnnouncementsV1<TData = Awaited<ReturnType<typeof coreControllerGetAnnouncementsV1>>, TError = CoreControllerGetAnnouncementsV1ErrorType<unknown>>(
- params?: CoreControllerGetAnnouncementsV1Params, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof coreControllerGetAnnouncementsV1>>, TError, TData>>, }
+export function useAnnouncementsControllerGetAnnouncementsV1<TData = Awaited<ReturnType<typeof announcementsControllerGetAnnouncementsV1>>, TError = AnnouncementsControllerGetAnnouncementsV1ErrorType<unknown>>(
+ params?: AnnouncementsControllerGetAnnouncementsV1Params, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof announcementsControllerGetAnnouncementsV1>>, TError, TData>>, }
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
  * @summary 공지사항 조회
  */
 
-export function useCoreControllerGetAnnouncementsV1<TData = Awaited<ReturnType<typeof coreControllerGetAnnouncementsV1>>, TError = CoreControllerGetAnnouncementsV1ErrorType<unknown>>(
- params?: CoreControllerGetAnnouncementsV1Params, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof coreControllerGetAnnouncementsV1>>, TError, TData>>, }
+export function useAnnouncementsControllerGetAnnouncementsV1<TData = Awaited<ReturnType<typeof announcementsControllerGetAnnouncementsV1>>, TError = AnnouncementsControllerGetAnnouncementsV1ErrorType<unknown>>(
+ params?: AnnouncementsControllerGetAnnouncementsV1Params, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof announcementsControllerGetAnnouncementsV1>>, TError, TData>>, }
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const queryOptions = getCoreControllerGetAnnouncementsV1QueryOptions(params,options)
+  const queryOptions = getAnnouncementsControllerGetAnnouncementsV1QueryOptions(params,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
@@ -882,13 +734,13 @@ export function useCoreControllerGetAnnouncementsV1<TData = Awaited<ReturnType<t
  * 공지사항을 작성합니다.
  * @summary 공지사항 작성
  */
-export const coreControllerCreateAnnouncementV1 = (
+export const announcementsControllerCreateAnnouncementV1 = (
     createAnnouncementDto: CreateAnnouncementDto,
  signal?: AbortSignal
 ) => {
 
 
-      return coreControllerCreateAnnouncementV1Mutator<CoreControllerCreateAnnouncementV1200>(
+      return announcementsControllerCreateAnnouncementV1Mutator<AnnouncementsControllerCreateAnnouncementV1200>(
       {url: `/api/v1/announcements`, method: 'POST',
       headers: {'Content-Type': 'application/json', },
       data: createAnnouncementDto, signal
@@ -898,11 +750,11 @@ export const coreControllerCreateAnnouncementV1 = (
 
 
 
-export const getCoreControllerCreateAnnouncementV1MutationOptions = <TError = CoreControllerCreateAnnouncementV1ErrorType<unknown>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof coreControllerCreateAnnouncementV1>>, TError,{data: CreateAnnouncementDto}, TContext>, }
-): UseMutationOptions<Awaited<ReturnType<typeof coreControllerCreateAnnouncementV1>>, TError,{data: CreateAnnouncementDto}, TContext> => {
+export const getAnnouncementsControllerCreateAnnouncementV1MutationOptions = <TError = AnnouncementsControllerCreateAnnouncementV1ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof announcementsControllerCreateAnnouncementV1>>, TError,{data: CreateAnnouncementDto}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof announcementsControllerCreateAnnouncementV1>>, TError,{data: CreateAnnouncementDto}, TContext> => {
 
-const mutationKey = ['coreControllerCreateAnnouncementV1'];
+const mutationKey = ['announcementsControllerCreateAnnouncementV1'];
 const {mutation: mutationOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
@@ -912,10 +764,10 @@ const {mutation: mutationOptions} = options ?
 
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof coreControllerCreateAnnouncementV1>>, {data: CreateAnnouncementDto}> = (props) => {
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof announcementsControllerCreateAnnouncementV1>>, {data: CreateAnnouncementDto}> = (props) => {
           const {data} = props ?? {};
 
-          return  coreControllerCreateAnnouncementV1(data,)
+          return  announcementsControllerCreateAnnouncementV1(data,)
         }
 
 
@@ -925,407 +777,22 @@ const {mutation: mutationOptions} = options ?
 
   return  { mutationFn, ...mutationOptions }}
 
-    export type CoreControllerCreateAnnouncementV1MutationResult = NonNullable<Awaited<ReturnType<typeof coreControllerCreateAnnouncementV1>>>
-    export type CoreControllerCreateAnnouncementV1MutationBody = CreateAnnouncementDto
-    export type CoreControllerCreateAnnouncementV1MutationError = CoreControllerCreateAnnouncementV1ErrorType<unknown>
+    export type AnnouncementsControllerCreateAnnouncementV1MutationResult = NonNullable<Awaited<ReturnType<typeof announcementsControllerCreateAnnouncementV1>>>
+    export type AnnouncementsControllerCreateAnnouncementV1MutationBody = CreateAnnouncementDto
+    export type AnnouncementsControllerCreateAnnouncementV1MutationError = AnnouncementsControllerCreateAnnouncementV1ErrorType<unknown>
 
     /**
  * @summary 공지사항 작성
  */
-export const useCoreControllerCreateAnnouncementV1 = <TError = CoreControllerCreateAnnouncementV1ErrorType<unknown>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof coreControllerCreateAnnouncementV1>>, TError,{data: CreateAnnouncementDto}, TContext>, }
+export const useAnnouncementsControllerCreateAnnouncementV1 = <TError = AnnouncementsControllerCreateAnnouncementV1ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof announcementsControllerCreateAnnouncementV1>>, TError,{data: CreateAnnouncementDto}, TContext>, }
  , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof coreControllerCreateAnnouncementV1>>,
+        Awaited<ReturnType<typeof announcementsControllerCreateAnnouncementV1>>,
         TError,
         {data: CreateAnnouncementDto},
         TContext
       > => {
-      return useMutation(getCoreControllerCreateAnnouncementV1MutationOptions(options), queryClient);
-    }
-
-/**
- * 티켓 목록을 조회합니다.
- * @summary 티켓 조회
- */
-export const coreControllerGetTicketsV1 = (
-    params?: CoreControllerGetTicketsV1Params,
- signal?: AbortSignal
-) => {
-
-
-      return coreControllerGetTicketsV1Mutator<CoreControllerGetTicketsV1200>(
-      {url: `/api/v1/support/tickets`, method: 'GET',
-        params, signal
-    },
-      );
-    }
-
-
-
-
-export const getCoreControllerGetTicketsV1QueryKey = (params?: CoreControllerGetTicketsV1Params,) => {
-    return [
-    `/api/v1/support/tickets`, ...(params ? [params] : [])
-    ] as const;
-    }
-
-
-export const getCoreControllerGetTicketsV1QueryOptions = <TData = Awaited<ReturnType<typeof coreControllerGetTicketsV1>>, TError = CoreControllerGetTicketsV1ErrorType<unknown>>(params?: CoreControllerGetTicketsV1Params, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof coreControllerGetTicketsV1>>, TError, TData>>, }
-) => {
-
-const {query: queryOptions} = options ?? {};
-
-  const queryKey =  queryOptions?.queryKey ?? getCoreControllerGetTicketsV1QueryKey(params);
-
-
-
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof coreControllerGetTicketsV1>>> = ({ signal }) => coreControllerGetTicketsV1(params, signal);
-
-
-
-
-
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof coreControllerGetTicketsV1>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
-}
-
-export type CoreControllerGetTicketsV1QueryResult = NonNullable<Awaited<ReturnType<typeof coreControllerGetTicketsV1>>>
-export type CoreControllerGetTicketsV1QueryError = CoreControllerGetTicketsV1ErrorType<unknown>
-
-
-export function useCoreControllerGetTicketsV1<TData = Awaited<ReturnType<typeof coreControllerGetTicketsV1>>, TError = CoreControllerGetTicketsV1ErrorType<unknown>>(
- params: undefined |  CoreControllerGetTicketsV1Params, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof coreControllerGetTicketsV1>>, TError, TData>> & Pick<
-        DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof coreControllerGetTicketsV1>>,
-          TError,
-          Awaited<ReturnType<typeof coreControllerGetTicketsV1>>
-        > , 'initialData'
-      >, }
- , queryClient?: QueryClient
-  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useCoreControllerGetTicketsV1<TData = Awaited<ReturnType<typeof coreControllerGetTicketsV1>>, TError = CoreControllerGetTicketsV1ErrorType<unknown>>(
- params?: CoreControllerGetTicketsV1Params, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof coreControllerGetTicketsV1>>, TError, TData>> & Pick<
-        UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof coreControllerGetTicketsV1>>,
-          TError,
-          Awaited<ReturnType<typeof coreControllerGetTicketsV1>>
-        > , 'initialData'
-      >, }
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useCoreControllerGetTicketsV1<TData = Awaited<ReturnType<typeof coreControllerGetTicketsV1>>, TError = CoreControllerGetTicketsV1ErrorType<unknown>>(
- params?: CoreControllerGetTicketsV1Params, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof coreControllerGetTicketsV1>>, TError, TData>>, }
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-/**
- * @summary 티켓 조회
- */
-
-export function useCoreControllerGetTicketsV1<TData = Awaited<ReturnType<typeof coreControllerGetTicketsV1>>, TError = CoreControllerGetTicketsV1ErrorType<unknown>>(
- params?: CoreControllerGetTicketsV1Params, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof coreControllerGetTicketsV1>>, TError, TData>>, }
- , queryClient?: QueryClient
- ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
-
-  const queryOptions = getCoreControllerGetTicketsV1QueryOptions(params,options)
-
-  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
-
-  return { ...query, queryKey: queryOptions.queryKey };
-}
-
-
-
-
-
-
-
-/**
- * 약관 목록을 조회합니다.
- * @summary 약관 목록 조회
- */
-export const coreControllerGetActiveTermsV1 = (
-    params?: CoreControllerGetActiveTermsV1Params,
- signal?: AbortSignal
-) => {
-
-
-      return coreControllerGetActiveTermsV1Mutator<CoreControllerGetActiveTermsV1200>(
-      {url: `/api/v1/terms`, method: 'GET',
-        params, signal
-    },
-      );
-    }
-
-
-
-
-export const getCoreControllerGetActiveTermsV1QueryKey = (params?: CoreControllerGetActiveTermsV1Params,) => {
-    return [
-    `/api/v1/terms`, ...(params ? [params] : [])
-    ] as const;
-    }
-
-
-export const getCoreControllerGetActiveTermsV1QueryOptions = <TData = Awaited<ReturnType<typeof coreControllerGetActiveTermsV1>>, TError = CoreControllerGetActiveTermsV1ErrorType<unknown>>(params?: CoreControllerGetActiveTermsV1Params, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof coreControllerGetActiveTermsV1>>, TError, TData>>, }
-) => {
-
-const {query: queryOptions} = options ?? {};
-
-  const queryKey =  queryOptions?.queryKey ?? getCoreControllerGetActiveTermsV1QueryKey(params);
-
-
-
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof coreControllerGetActiveTermsV1>>> = ({ signal }) => coreControllerGetActiveTermsV1(params, signal);
-
-
-
-
-
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof coreControllerGetActiveTermsV1>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
-}
-
-export type CoreControllerGetActiveTermsV1QueryResult = NonNullable<Awaited<ReturnType<typeof coreControllerGetActiveTermsV1>>>
-export type CoreControllerGetActiveTermsV1QueryError = CoreControllerGetActiveTermsV1ErrorType<unknown>
-
-
-export function useCoreControllerGetActiveTermsV1<TData = Awaited<ReturnType<typeof coreControllerGetActiveTermsV1>>, TError = CoreControllerGetActiveTermsV1ErrorType<unknown>>(
- params: undefined |  CoreControllerGetActiveTermsV1Params, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof coreControllerGetActiveTermsV1>>, TError, TData>> & Pick<
-        DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof coreControllerGetActiveTermsV1>>,
-          TError,
-          Awaited<ReturnType<typeof coreControllerGetActiveTermsV1>>
-        > , 'initialData'
-      >, }
- , queryClient?: QueryClient
-  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useCoreControllerGetActiveTermsV1<TData = Awaited<ReturnType<typeof coreControllerGetActiveTermsV1>>, TError = CoreControllerGetActiveTermsV1ErrorType<unknown>>(
- params?: CoreControllerGetActiveTermsV1Params, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof coreControllerGetActiveTermsV1>>, TError, TData>> & Pick<
-        UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof coreControllerGetActiveTermsV1>>,
-          TError,
-          Awaited<ReturnType<typeof coreControllerGetActiveTermsV1>>
-        > , 'initialData'
-      >, }
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useCoreControllerGetActiveTermsV1<TData = Awaited<ReturnType<typeof coreControllerGetActiveTermsV1>>, TError = CoreControllerGetActiveTermsV1ErrorType<unknown>>(
- params?: CoreControllerGetActiveTermsV1Params, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof coreControllerGetActiveTermsV1>>, TError, TData>>, }
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-/**
- * @summary 약관 목록 조회
- */
-
-export function useCoreControllerGetActiveTermsV1<TData = Awaited<ReturnType<typeof coreControllerGetActiveTermsV1>>, TError = CoreControllerGetActiveTermsV1ErrorType<unknown>>(
- params?: CoreControllerGetActiveTermsV1Params, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof coreControllerGetActiveTermsV1>>, TError, TData>>, }
- , queryClient?: QueryClient
- ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
-
-  const queryOptions = getCoreControllerGetActiveTermsV1QueryOptions(params,options)
-
-  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
-
-  return { ...query, queryKey: queryOptions.queryKey };
-}
-
-
-
-
-
-
-
-/**
- * 약관 문서를 생성합니다.
- * @summary 약관 문서 생성
- */
-export const coreControllerCreateTermsDocumentV1 = (
-    createTermsDocumentDto: CreateTermsDocumentDto,
- signal?: AbortSignal
-) => {
-
-
-      return coreControllerCreateTermsDocumentV1Mutator<CoreControllerCreateTermsDocumentV1200>(
-      {url: `/api/v1/terms/documents`, method: 'POST',
-      headers: {'Content-Type': 'application/json', },
-      data: createTermsDocumentDto, signal
-    },
-      );
-    }
-
-
-
-export const getCoreControllerCreateTermsDocumentV1MutationOptions = <TError = CoreControllerCreateTermsDocumentV1ErrorType<unknown>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof coreControllerCreateTermsDocumentV1>>, TError,{data: CreateTermsDocumentDto}, TContext>, }
-): UseMutationOptions<Awaited<ReturnType<typeof coreControllerCreateTermsDocumentV1>>, TError,{data: CreateTermsDocumentDto}, TContext> => {
-
-const mutationKey = ['coreControllerCreateTermsDocumentV1'];
-const {mutation: mutationOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }};
-
-
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof coreControllerCreateTermsDocumentV1>>, {data: CreateTermsDocumentDto}> = (props) => {
-          const {data} = props ?? {};
-
-          return  coreControllerCreateTermsDocumentV1(data,)
-        }
-
-
-
-
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type CoreControllerCreateTermsDocumentV1MutationResult = NonNullable<Awaited<ReturnType<typeof coreControllerCreateTermsDocumentV1>>>
-    export type CoreControllerCreateTermsDocumentV1MutationBody = CreateTermsDocumentDto
-    export type CoreControllerCreateTermsDocumentV1MutationError = CoreControllerCreateTermsDocumentV1ErrorType<unknown>
-
-    /**
- * @summary 약관 문서 생성
- */
-export const useCoreControllerCreateTermsDocumentV1 = <TError = CoreControllerCreateTermsDocumentV1ErrorType<unknown>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof coreControllerCreateTermsDocumentV1>>, TError,{data: CreateTermsDocumentDto}, TContext>, }
- , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof coreControllerCreateTermsDocumentV1>>,
-        TError,
-        {data: CreateTermsDocumentDto},
-        TContext
-      > => {
-      return useMutation(getCoreControllerCreateTermsDocumentV1MutationOptions(options), queryClient);
-    }
-
-/**
- * 약관 버전을 생성합니다.
- * @summary 약관 버전 생성
- */
-export const coreControllerCreateTermsVersionV1 = (
-    createTermsVersionDto: CreateTermsVersionDto,
- signal?: AbortSignal
-) => {
-
-
-      return coreControllerCreateTermsVersionV1Mutator<CoreControllerCreateTermsVersionV1200>(
-      {url: `/api/v1/terms/versions`, method: 'POST',
-      headers: {'Content-Type': 'application/json', },
-      data: createTermsVersionDto, signal
-    },
-      );
-    }
-
-
-
-export const getCoreControllerCreateTermsVersionV1MutationOptions = <TError = CoreControllerCreateTermsVersionV1ErrorType<unknown>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof coreControllerCreateTermsVersionV1>>, TError,{data: CreateTermsVersionDto}, TContext>, }
-): UseMutationOptions<Awaited<ReturnType<typeof coreControllerCreateTermsVersionV1>>, TError,{data: CreateTermsVersionDto}, TContext> => {
-
-const mutationKey = ['coreControllerCreateTermsVersionV1'];
-const {mutation: mutationOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }};
-
-
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof coreControllerCreateTermsVersionV1>>, {data: CreateTermsVersionDto}> = (props) => {
-          const {data} = props ?? {};
-
-          return  coreControllerCreateTermsVersionV1(data,)
-        }
-
-
-
-
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type CoreControllerCreateTermsVersionV1MutationResult = NonNullable<Awaited<ReturnType<typeof coreControllerCreateTermsVersionV1>>>
-    export type CoreControllerCreateTermsVersionV1MutationBody = CreateTermsVersionDto
-    export type CoreControllerCreateTermsVersionV1MutationError = CoreControllerCreateTermsVersionV1ErrorType<unknown>
-
-    /**
- * @summary 약관 버전 생성
- */
-export const useCoreControllerCreateTermsVersionV1 = <TError = CoreControllerCreateTermsVersionV1ErrorType<unknown>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof coreControllerCreateTermsVersionV1>>, TError,{data: CreateTermsVersionDto}, TContext>, }
- , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof coreControllerCreateTermsVersionV1>>,
-        TError,
-        {data: CreateTermsVersionDto},
-        TContext
-      > => {
-      return useMutation(getCoreControllerCreateTermsVersionV1MutationOptions(options), queryClient);
-    }
-
-/**
- * 약관 동의 이력을 저장합니다.
- * @summary 약관 동의 저장
- */
-export const coreControllerAgreeTermsV1 = (
-    agreeTermsDto: AgreeTermsDto,
- signal?: AbortSignal
-) => {
-
-
-      return coreControllerAgreeTermsV1Mutator<CoreControllerAgreeTermsV1200>(
-      {url: `/api/v1/terms/agreements`, method: 'POST',
-      headers: {'Content-Type': 'application/json', },
-      data: agreeTermsDto, signal
-    },
-      );
-    }
-
-
-
-export const getCoreControllerAgreeTermsV1MutationOptions = <TError = CoreControllerAgreeTermsV1ErrorType<unknown>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof coreControllerAgreeTermsV1>>, TError,{data: AgreeTermsDto}, TContext>, }
-): UseMutationOptions<Awaited<ReturnType<typeof coreControllerAgreeTermsV1>>, TError,{data: AgreeTermsDto}, TContext> => {
-
-const mutationKey = ['coreControllerAgreeTermsV1'];
-const {mutation: mutationOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }};
-
-
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof coreControllerAgreeTermsV1>>, {data: AgreeTermsDto}> = (props) => {
-          const {data} = props ?? {};
-
-          return  coreControllerAgreeTermsV1(data,)
-        }
-
-
-
-
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type CoreControllerAgreeTermsV1MutationResult = NonNullable<Awaited<ReturnType<typeof coreControllerAgreeTermsV1>>>
-    export type CoreControllerAgreeTermsV1MutationBody = AgreeTermsDto
-    export type CoreControllerAgreeTermsV1MutationError = CoreControllerAgreeTermsV1ErrorType<unknown>
-
-    /**
- * @summary 약관 동의 저장
- */
-export const useCoreControllerAgreeTermsV1 = <TError = CoreControllerAgreeTermsV1ErrorType<unknown>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof coreControllerAgreeTermsV1>>, TError,{data: AgreeTermsDto}, TContext>, }
- , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof coreControllerAgreeTermsV1>>,
-        TError,
-        {data: AgreeTermsDto},
-        TContext
-      > => {
-      return useMutation(getCoreControllerAgreeTermsV1MutationOptions(options), queryClient);
+      return useMutation(getAnnouncementsControllerCreateAnnouncementV1MutationOptions(options), queryClient);
     }
 
 /**
@@ -2061,17 +1528,18 @@ export function useHealthControllerReady<TData = Awaited<ReturnType<typeof healt
 
 
 /**
- * 자원 트리를 조회합니다.
- * @summary 자원 목록 조회
+ * 멤버 초대 목록을 조회합니다.
+ * @summary 초대 목록 조회
  */
-export const resourceControllerGetResourcesV1 = (
-
+export const membersControllerGetInvitesV1 = (
+    params?: MembersControllerGetInvitesV1Params,
  signal?: AbortSignal
 ) => {
 
 
-      return resourceControllerGetResourcesV1Mutator<ResourceControllerGetResourcesV1200>(
-      {url: `/api/v1/resources`, method: 'GET', signal
+      return membersControllerGetInvitesV1Mutator<MembersControllerGetInvitesV1200>(
+      {url: `/api/v1/members/invites`, method: 'GET',
+        params, signal
     },
       );
     }
@@ -2079,23 +1547,922 @@ export const resourceControllerGetResourcesV1 = (
 
 
 
-export const getResourceControllerGetResourcesV1QueryKey = () => {
+export const getMembersControllerGetInvitesV1QueryKey = (params?: MembersControllerGetInvitesV1Params,) => {
     return [
-    `/api/v1/resources`
+    `/api/v1/members/invites`, ...(params ? [params] : [])
     ] as const;
     }
 
 
-export const getResourceControllerGetResourcesV1QueryOptions = <TData = Awaited<ReturnType<typeof resourceControllerGetResourcesV1>>, TError = ResourceControllerGetResourcesV1ErrorType<unknown>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof resourceControllerGetResourcesV1>>, TError, TData>>, }
+export const getMembersControllerGetInvitesV1QueryOptions = <TData = Awaited<ReturnType<typeof membersControllerGetInvitesV1>>, TError = MembersControllerGetInvitesV1ErrorType<unknown>>(params?: MembersControllerGetInvitesV1Params, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof membersControllerGetInvitesV1>>, TError, TData>>, }
 ) => {
 
 const {query: queryOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getResourceControllerGetResourcesV1QueryKey();
+  const queryKey =  queryOptions?.queryKey ?? getMembersControllerGetInvitesV1QueryKey(params);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof resourceControllerGetResourcesV1>>> = ({ signal }) => resourceControllerGetResourcesV1(signal);
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof membersControllerGetInvitesV1>>> = ({ signal }) => membersControllerGetInvitesV1(params, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof membersControllerGetInvitesV1>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type MembersControllerGetInvitesV1QueryResult = NonNullable<Awaited<ReturnType<typeof membersControllerGetInvitesV1>>>
+export type MembersControllerGetInvitesV1QueryError = MembersControllerGetInvitesV1ErrorType<unknown>
+
+
+export function useMembersControllerGetInvitesV1<TData = Awaited<ReturnType<typeof membersControllerGetInvitesV1>>, TError = MembersControllerGetInvitesV1ErrorType<unknown>>(
+ params: undefined |  MembersControllerGetInvitesV1Params, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof membersControllerGetInvitesV1>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof membersControllerGetInvitesV1>>,
+          TError,
+          Awaited<ReturnType<typeof membersControllerGetInvitesV1>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useMembersControllerGetInvitesV1<TData = Awaited<ReturnType<typeof membersControllerGetInvitesV1>>, TError = MembersControllerGetInvitesV1ErrorType<unknown>>(
+ params?: MembersControllerGetInvitesV1Params, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof membersControllerGetInvitesV1>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof membersControllerGetInvitesV1>>,
+          TError,
+          Awaited<ReturnType<typeof membersControllerGetInvitesV1>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useMembersControllerGetInvitesV1<TData = Awaited<ReturnType<typeof membersControllerGetInvitesV1>>, TError = MembersControllerGetInvitesV1ErrorType<unknown>>(
+ params?: MembersControllerGetInvitesV1Params, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof membersControllerGetInvitesV1>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary 초대 목록 조회
+ */
+
+export function useMembersControllerGetInvitesV1<TData = Awaited<ReturnType<typeof membersControllerGetInvitesV1>>, TError = MembersControllerGetInvitesV1ErrorType<unknown>>(
+ params?: MembersControllerGetInvitesV1Params, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof membersControllerGetInvitesV1>>, TError, TData>>, }
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getMembersControllerGetInvitesV1QueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+/**
+ * 새 멤버 초대를 생성합니다.
+ * @summary 멤버 초대 생성
+ */
+export const membersControllerCreateInviteV1 = (
+    createInviteDto: CreateInviteDto,
+ signal?: AbortSignal
+) => {
+
+
+      return membersControllerCreateInviteV1Mutator<MembersControllerCreateInviteV1200>(
+      {url: `/api/v1/members/invites`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: createInviteDto, signal
+    },
+      );
+    }
+
+
+
+export const getMembersControllerCreateInviteV1MutationOptions = <TError = MembersControllerCreateInviteV1ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof membersControllerCreateInviteV1>>, TError,{data: CreateInviteDto}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof membersControllerCreateInviteV1>>, TError,{data: CreateInviteDto}, TContext> => {
+
+const mutationKey = ['membersControllerCreateInviteV1'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof membersControllerCreateInviteV1>>, {data: CreateInviteDto}> = (props) => {
+          const {data} = props ?? {};
+
+          return  membersControllerCreateInviteV1(data,)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type MembersControllerCreateInviteV1MutationResult = NonNullable<Awaited<ReturnType<typeof membersControllerCreateInviteV1>>>
+    export type MembersControllerCreateInviteV1MutationBody = CreateInviteDto
+    export type MembersControllerCreateInviteV1MutationError = MembersControllerCreateInviteV1ErrorType<unknown>
+
+    /**
+ * @summary 멤버 초대 생성
+ */
+export const useMembersControllerCreateInviteV1 = <TError = MembersControllerCreateInviteV1ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof membersControllerCreateInviteV1>>, TError,{data: CreateInviteDto}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof membersControllerCreateInviteV1>>,
+        TError,
+        {data: CreateInviteDto},
+        TContext
+      > => {
+      return useMutation(getMembersControllerCreateInviteV1MutationOptions(options), queryClient);
+    }
+
+/**
+ * 멤버 목록을 조회합니다.
+ * @summary 멤버 목록 조회
+ */
+export const membersControllerGetMembersV1 = (
+    params?: MembersControllerGetMembersV1Params,
+ signal?: AbortSignal
+) => {
+
+
+      return membersControllerGetMembersV1Mutator<MembersControllerGetMembersV1200>(
+      {url: `/api/v1/members`, method: 'GET',
+        params, signal
+    },
+      );
+    }
+
+
+
+
+export const getMembersControllerGetMembersV1QueryKey = (params?: MembersControllerGetMembersV1Params,) => {
+    return [
+    `/api/v1/members`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getMembersControllerGetMembersV1QueryOptions = <TData = Awaited<ReturnType<typeof membersControllerGetMembersV1>>, TError = MembersControllerGetMembersV1ErrorType<unknown>>(params?: MembersControllerGetMembersV1Params, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof membersControllerGetMembersV1>>, TError, TData>>, }
+) => {
+
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getMembersControllerGetMembersV1QueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof membersControllerGetMembersV1>>> = ({ signal }) => membersControllerGetMembersV1(params, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof membersControllerGetMembersV1>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type MembersControllerGetMembersV1QueryResult = NonNullable<Awaited<ReturnType<typeof membersControllerGetMembersV1>>>
+export type MembersControllerGetMembersV1QueryError = MembersControllerGetMembersV1ErrorType<unknown>
+
+
+export function useMembersControllerGetMembersV1<TData = Awaited<ReturnType<typeof membersControllerGetMembersV1>>, TError = MembersControllerGetMembersV1ErrorType<unknown>>(
+ params: undefined |  MembersControllerGetMembersV1Params, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof membersControllerGetMembersV1>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof membersControllerGetMembersV1>>,
+          TError,
+          Awaited<ReturnType<typeof membersControllerGetMembersV1>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useMembersControllerGetMembersV1<TData = Awaited<ReturnType<typeof membersControllerGetMembersV1>>, TError = MembersControllerGetMembersV1ErrorType<unknown>>(
+ params?: MembersControllerGetMembersV1Params, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof membersControllerGetMembersV1>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof membersControllerGetMembersV1>>,
+          TError,
+          Awaited<ReturnType<typeof membersControllerGetMembersV1>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useMembersControllerGetMembersV1<TData = Awaited<ReturnType<typeof membersControllerGetMembersV1>>, TError = MembersControllerGetMembersV1ErrorType<unknown>>(
+ params?: MembersControllerGetMembersV1Params, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof membersControllerGetMembersV1>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary 멤버 목록 조회
+ */
+
+export function useMembersControllerGetMembersV1<TData = Awaited<ReturnType<typeof membersControllerGetMembersV1>>, TError = MembersControllerGetMembersV1ErrorType<unknown>>(
+ params?: MembersControllerGetMembersV1Params, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof membersControllerGetMembersV1>>, TError, TData>>, }
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getMembersControllerGetMembersV1QueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+/**
+ * 멤버 상세 정보를 조회합니다.
+ * @summary 멤버 상세 조회
+ */
+export const membersControllerGetMemberV1 = (
+    id: string,
+ signal?: AbortSignal
+) => {
+
+
+      return membersControllerGetMemberV1Mutator<MembersControllerGetMemberV1200>(
+      {url: `/api/v1/members/${id}`, method: 'GET', signal
+    },
+      );
+    }
+
+
+
+
+export const getMembersControllerGetMemberV1QueryKey = (id: string,) => {
+    return [
+    `/api/v1/members/${id}`
+    ] as const;
+    }
+
+
+export const getMembersControllerGetMemberV1QueryOptions = <TData = Awaited<ReturnType<typeof membersControllerGetMemberV1>>, TError = MembersControllerGetMemberV1ErrorType<unknown>>(id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof membersControllerGetMemberV1>>, TError, TData>>, }
+) => {
+
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getMembersControllerGetMemberV1QueryKey(id);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof membersControllerGetMemberV1>>> = ({ signal }) => membersControllerGetMemberV1(id, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: !!(id), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof membersControllerGetMemberV1>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type MembersControllerGetMemberV1QueryResult = NonNullable<Awaited<ReturnType<typeof membersControllerGetMemberV1>>>
+export type MembersControllerGetMemberV1QueryError = MembersControllerGetMemberV1ErrorType<unknown>
+
+
+export function useMembersControllerGetMemberV1<TData = Awaited<ReturnType<typeof membersControllerGetMemberV1>>, TError = MembersControllerGetMemberV1ErrorType<unknown>>(
+ id: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof membersControllerGetMemberV1>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof membersControllerGetMemberV1>>,
+          TError,
+          Awaited<ReturnType<typeof membersControllerGetMemberV1>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useMembersControllerGetMemberV1<TData = Awaited<ReturnType<typeof membersControllerGetMemberV1>>, TError = MembersControllerGetMemberV1ErrorType<unknown>>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof membersControllerGetMemberV1>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof membersControllerGetMemberV1>>,
+          TError,
+          Awaited<ReturnType<typeof membersControllerGetMemberV1>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useMembersControllerGetMemberV1<TData = Awaited<ReturnType<typeof membersControllerGetMemberV1>>, TError = MembersControllerGetMemberV1ErrorType<unknown>>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof membersControllerGetMemberV1>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary 멤버 상세 조회
+ */
+
+export function useMembersControllerGetMemberV1<TData = Awaited<ReturnType<typeof membersControllerGetMemberV1>>, TError = MembersControllerGetMemberV1ErrorType<unknown>>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof membersControllerGetMemberV1>>, TError, TData>>, }
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getMembersControllerGetMemberV1QueryOptions(id,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+/**
+ * 멤버의 권한을 변경합니다.
+ * @summary 멤버 권한 변경
+ */
+export const membersControllerUpdateMemberRoleV1 = (
+    updateMemberRoleDto: UpdateMemberRoleDto,
+ signal?: AbortSignal
+) => {
+
+
+      return membersControllerUpdateMemberRoleV1Mutator<MembersControllerUpdateMemberRoleV1200>(
+      {url: `/api/v1/members/role`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: updateMemberRoleDto, signal
+    },
+      );
+    }
+
+
+
+export const getMembersControllerUpdateMemberRoleV1MutationOptions = <TError = MembersControllerUpdateMemberRoleV1ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof membersControllerUpdateMemberRoleV1>>, TError,{data: UpdateMemberRoleDto}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof membersControllerUpdateMemberRoleV1>>, TError,{data: UpdateMemberRoleDto}, TContext> => {
+
+const mutationKey = ['membersControllerUpdateMemberRoleV1'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof membersControllerUpdateMemberRoleV1>>, {data: UpdateMemberRoleDto}> = (props) => {
+          const {data} = props ?? {};
+
+          return  membersControllerUpdateMemberRoleV1(data,)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type MembersControllerUpdateMemberRoleV1MutationResult = NonNullable<Awaited<ReturnType<typeof membersControllerUpdateMemberRoleV1>>>
+    export type MembersControllerUpdateMemberRoleV1MutationBody = UpdateMemberRoleDto
+    export type MembersControllerUpdateMemberRoleV1MutationError = MembersControllerUpdateMemberRoleV1ErrorType<unknown>
+
+    /**
+ * @summary 멤버 권한 변경
+ */
+export const useMembersControllerUpdateMemberRoleV1 = <TError = MembersControllerUpdateMemberRoleV1ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof membersControllerUpdateMemberRoleV1>>, TError,{data: UpdateMemberRoleDto}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof membersControllerUpdateMemberRoleV1>>,
+        TError,
+        {data: UpdateMemberRoleDto},
+        TContext
+      > => {
+      return useMutation(getMembersControllerUpdateMemberRoleV1MutationOptions(options), queryClient);
+    }
+
+/**
+ * 멤버의 활성 상태를 변경합니다.
+ * @summary 멤버 상태 변경
+ */
+export const membersControllerToggleMemberStatusV1 = (
+    toggleMemberStatusDto: ToggleMemberStatusDto,
+ signal?: AbortSignal
+) => {
+
+
+      return membersControllerToggleMemberStatusV1Mutator<MembersControllerToggleMemberStatusV1200>(
+      {url: `/api/v1/members/status`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: toggleMemberStatusDto, signal
+    },
+      );
+    }
+
+
+
+export const getMembersControllerToggleMemberStatusV1MutationOptions = <TError = MembersControllerToggleMemberStatusV1ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof membersControllerToggleMemberStatusV1>>, TError,{data: ToggleMemberStatusDto}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof membersControllerToggleMemberStatusV1>>, TError,{data: ToggleMemberStatusDto}, TContext> => {
+
+const mutationKey = ['membersControllerToggleMemberStatusV1'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof membersControllerToggleMemberStatusV1>>, {data: ToggleMemberStatusDto}> = (props) => {
+          const {data} = props ?? {};
+
+          return  membersControllerToggleMemberStatusV1(data,)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type MembersControllerToggleMemberStatusV1MutationResult = NonNullable<Awaited<ReturnType<typeof membersControllerToggleMemberStatusV1>>>
+    export type MembersControllerToggleMemberStatusV1MutationBody = ToggleMemberStatusDto
+    export type MembersControllerToggleMemberStatusV1MutationError = MembersControllerToggleMemberStatusV1ErrorType<unknown>
+
+    /**
+ * @summary 멤버 상태 변경
+ */
+export const useMembersControllerToggleMemberStatusV1 = <TError = MembersControllerToggleMemberStatusV1ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof membersControllerToggleMemberStatusV1>>, TError,{data: ToggleMemberStatusDto}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof membersControllerToggleMemberStatusV1>>,
+        TError,
+        {data: ToggleMemberStatusDto},
+        TContext
+      > => {
+      return useMutation(getMembersControllerToggleMemberStatusV1MutationOptions(options), queryClient);
+    }
+
+/**
+ * 멤버 초대를 재전송합니다.
+ * @summary 초대 재전송
+ */
+export const membersControllerResendInviteV1 = (
+    resendInviteDto: ResendInviteDto,
+ signal?: AbortSignal
+) => {
+
+
+      return membersControllerResendInviteV1Mutator<MembersControllerResendInviteV1200>(
+      {url: `/api/v1/members/invites/resend`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: resendInviteDto, signal
+    },
+      );
+    }
+
+
+
+export const getMembersControllerResendInviteV1MutationOptions = <TError = MembersControllerResendInviteV1ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof membersControllerResendInviteV1>>, TError,{data: ResendInviteDto}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof membersControllerResendInviteV1>>, TError,{data: ResendInviteDto}, TContext> => {
+
+const mutationKey = ['membersControllerResendInviteV1'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof membersControllerResendInviteV1>>, {data: ResendInviteDto}> = (props) => {
+          const {data} = props ?? {};
+
+          return  membersControllerResendInviteV1(data,)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type MembersControllerResendInviteV1MutationResult = NonNullable<Awaited<ReturnType<typeof membersControllerResendInviteV1>>>
+    export type MembersControllerResendInviteV1MutationBody = ResendInviteDto
+    export type MembersControllerResendInviteV1MutationError = MembersControllerResendInviteV1ErrorType<unknown>
+
+    /**
+ * @summary 초대 재전송
+ */
+export const useMembersControllerResendInviteV1 = <TError = MembersControllerResendInviteV1ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof membersControllerResendInviteV1>>, TError,{data: ResendInviteDto}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof membersControllerResendInviteV1>>,
+        TError,
+        {data: ResendInviteDto},
+        TContext
+      > => {
+      return useMutation(getMembersControllerResendInviteV1MutationOptions(options), queryClient);
+    }
+
+/**
+ * 멤버 초대를 취소합니다.
+ * @summary 초대 취소
+ */
+export const membersControllerCancelInviteV1 = (
+    cancelInviteDto: CancelInviteDto,
+ signal?: AbortSignal
+) => {
+
+
+      return membersControllerCancelInviteV1Mutator<MembersControllerCancelInviteV1200>(
+      {url: `/api/v1/members/invites/cancel`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: cancelInviteDto, signal
+    },
+      );
+    }
+
+
+
+export const getMembersControllerCancelInviteV1MutationOptions = <TError = MembersControllerCancelInviteV1ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof membersControllerCancelInviteV1>>, TError,{data: CancelInviteDto}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof membersControllerCancelInviteV1>>, TError,{data: CancelInviteDto}, TContext> => {
+
+const mutationKey = ['membersControllerCancelInviteV1'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof membersControllerCancelInviteV1>>, {data: CancelInviteDto}> = (props) => {
+          const {data} = props ?? {};
+
+          return  membersControllerCancelInviteV1(data,)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type MembersControllerCancelInviteV1MutationResult = NonNullable<Awaited<ReturnType<typeof membersControllerCancelInviteV1>>>
+    export type MembersControllerCancelInviteV1MutationBody = CancelInviteDto
+    export type MembersControllerCancelInviteV1MutationError = MembersControllerCancelInviteV1ErrorType<unknown>
+
+    /**
+ * @summary 초대 취소
+ */
+export const useMembersControllerCancelInviteV1 = <TError = MembersControllerCancelInviteV1ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof membersControllerCancelInviteV1>>, TError,{data: CancelInviteDto}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof membersControllerCancelInviteV1>>,
+        TError,
+        {data: CancelInviteDto},
+        TContext
+      > => {
+      return useMutation(getMembersControllerCancelInviteV1MutationOptions(options), queryClient);
+    }
+
+/**
+ * 취소된 멤버 초대를 복구합니다.
+ * @summary 초대 복구
+ */
+export const membersControllerReviveInviteV1 = (
+    reviveInviteDto: ReviveInviteDto,
+ signal?: AbortSignal
+) => {
+
+
+      return membersControllerReviveInviteV1Mutator<MembersControllerReviveInviteV1200>(
+      {url: `/api/v1/members/invites/revive`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: reviveInviteDto, signal
+    },
+      );
+    }
+
+
+
+export const getMembersControllerReviveInviteV1MutationOptions = <TError = MembersControllerReviveInviteV1ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof membersControllerReviveInviteV1>>, TError,{data: ReviveInviteDto}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof membersControllerReviveInviteV1>>, TError,{data: ReviveInviteDto}, TContext> => {
+
+const mutationKey = ['membersControllerReviveInviteV1'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof membersControllerReviveInviteV1>>, {data: ReviveInviteDto}> = (props) => {
+          const {data} = props ?? {};
+
+          return  membersControllerReviveInviteV1(data,)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type MembersControllerReviveInviteV1MutationResult = NonNullable<Awaited<ReturnType<typeof membersControllerReviveInviteV1>>>
+    export type MembersControllerReviveInviteV1MutationBody = ReviveInviteDto
+    export type MembersControllerReviveInviteV1MutationError = MembersControllerReviveInviteV1ErrorType<unknown>
+
+    /**
+ * @summary 초대 복구
+ */
+export const useMembersControllerReviveInviteV1 = <TError = MembersControllerReviveInviteV1ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof membersControllerReviveInviteV1>>, TError,{data: ReviveInviteDto}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof membersControllerReviveInviteV1>>,
+        TError,
+        {data: ReviveInviteDto},
+        TContext
+      > => {
+      return useMutation(getMembersControllerReviveInviteV1MutationOptions(options), queryClient);
+    }
+
+/**
+ * 조직 목록을 조회합니다.
+ * @summary 조직 목록 조회
+ */
+export const organizationsControllerGetOrganizationsV1 = (
+    params?: OrganizationsControllerGetOrganizationsV1Params,
+ signal?: AbortSignal
+) => {
+
+
+      return organizationsControllerGetOrganizationsV1Mutator<OrganizationsControllerGetOrganizationsV1200>(
+      {url: `/api/v1/organizations`, method: 'GET',
+        params, signal
+    },
+      );
+    }
+
+
+
+
+export const getOrganizationsControllerGetOrganizationsV1QueryKey = (params?: OrganizationsControllerGetOrganizationsV1Params,) => {
+    return [
+    `/api/v1/organizations`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getOrganizationsControllerGetOrganizationsV1QueryOptions = <TData = Awaited<ReturnType<typeof organizationsControllerGetOrganizationsV1>>, TError = OrganizationsControllerGetOrganizationsV1ErrorType<unknown>>(params?: OrganizationsControllerGetOrganizationsV1Params, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof organizationsControllerGetOrganizationsV1>>, TError, TData>>, }
+) => {
+
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getOrganizationsControllerGetOrganizationsV1QueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof organizationsControllerGetOrganizationsV1>>> = ({ signal }) => organizationsControllerGetOrganizationsV1(params, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof organizationsControllerGetOrganizationsV1>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type OrganizationsControllerGetOrganizationsV1QueryResult = NonNullable<Awaited<ReturnType<typeof organizationsControllerGetOrganizationsV1>>>
+export type OrganizationsControllerGetOrganizationsV1QueryError = OrganizationsControllerGetOrganizationsV1ErrorType<unknown>
+
+
+export function useOrganizationsControllerGetOrganizationsV1<TData = Awaited<ReturnType<typeof organizationsControllerGetOrganizationsV1>>, TError = OrganizationsControllerGetOrganizationsV1ErrorType<unknown>>(
+ params: undefined |  OrganizationsControllerGetOrganizationsV1Params, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof organizationsControllerGetOrganizationsV1>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof organizationsControllerGetOrganizationsV1>>,
+          TError,
+          Awaited<ReturnType<typeof organizationsControllerGetOrganizationsV1>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useOrganizationsControllerGetOrganizationsV1<TData = Awaited<ReturnType<typeof organizationsControllerGetOrganizationsV1>>, TError = OrganizationsControllerGetOrganizationsV1ErrorType<unknown>>(
+ params?: OrganizationsControllerGetOrganizationsV1Params, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof organizationsControllerGetOrganizationsV1>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof organizationsControllerGetOrganizationsV1>>,
+          TError,
+          Awaited<ReturnType<typeof organizationsControllerGetOrganizationsV1>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useOrganizationsControllerGetOrganizationsV1<TData = Awaited<ReturnType<typeof organizationsControllerGetOrganizationsV1>>, TError = OrganizationsControllerGetOrganizationsV1ErrorType<unknown>>(
+ params?: OrganizationsControllerGetOrganizationsV1Params, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof organizationsControllerGetOrganizationsV1>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary 조직 목록 조회
+ */
+
+export function useOrganizationsControllerGetOrganizationsV1<TData = Awaited<ReturnType<typeof organizationsControllerGetOrganizationsV1>>, TError = OrganizationsControllerGetOrganizationsV1ErrorType<unknown>>(
+ params?: OrganizationsControllerGetOrganizationsV1Params, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof organizationsControllerGetOrganizationsV1>>, TError, TData>>, }
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getOrganizationsControllerGetOrganizationsV1QueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+/**
+ * 조직을 승인합니다.
+ * @summary 조직 승인
+ */
+export const organizationsControllerApproveOrganizationV1 = (
+    organizationActionDto: OrganizationActionDto,
+ signal?: AbortSignal
+) => {
+
+
+      return organizationsControllerApproveOrganizationV1Mutator<ApiResponse>(
+      {url: `/api/v1/organizations/approve`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: organizationActionDto, signal
+    },
+      );
+    }
+
+
+
+export const getOrganizationsControllerApproveOrganizationV1MutationOptions = <TError = OrganizationsControllerApproveOrganizationV1ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof organizationsControllerApproveOrganizationV1>>, TError,{data: OrganizationActionDto}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof organizationsControllerApproveOrganizationV1>>, TError,{data: OrganizationActionDto}, TContext> => {
+
+const mutationKey = ['organizationsControllerApproveOrganizationV1'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof organizationsControllerApproveOrganizationV1>>, {data: OrganizationActionDto}> = (props) => {
+          const {data} = props ?? {};
+
+          return  organizationsControllerApproveOrganizationV1(data,)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type OrganizationsControllerApproveOrganizationV1MutationResult = NonNullable<Awaited<ReturnType<typeof organizationsControllerApproveOrganizationV1>>>
+    export type OrganizationsControllerApproveOrganizationV1MutationBody = OrganizationActionDto
+    export type OrganizationsControllerApproveOrganizationV1MutationError = OrganizationsControllerApproveOrganizationV1ErrorType<unknown>
+
+    /**
+ * @summary 조직 승인
+ */
+export const useOrganizationsControllerApproveOrganizationV1 = <TError = OrganizationsControllerApproveOrganizationV1ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof organizationsControllerApproveOrganizationV1>>, TError,{data: OrganizationActionDto}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof organizationsControllerApproveOrganizationV1>>,
+        TError,
+        {data: OrganizationActionDto},
+        TContext
+      > => {
+      return useMutation(getOrganizationsControllerApproveOrganizationV1MutationOptions(options), queryClient);
+    }
+
+/**
+ * 조직을 거절합니다.
+ * @summary 조직 거절
+ */
+export const organizationsControllerRejectOrganizationV1 = (
+    organizationActionDto: OrganizationActionDto,
+ signal?: AbortSignal
+) => {
+
+
+      return organizationsControllerRejectOrganizationV1Mutator<ApiResponse>(
+      {url: `/api/v1/organizations/reject`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: organizationActionDto, signal
+    },
+      );
+    }
+
+
+
+export const getOrganizationsControllerRejectOrganizationV1MutationOptions = <TError = OrganizationsControllerRejectOrganizationV1ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof organizationsControllerRejectOrganizationV1>>, TError,{data: OrganizationActionDto}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof organizationsControllerRejectOrganizationV1>>, TError,{data: OrganizationActionDto}, TContext> => {
+
+const mutationKey = ['organizationsControllerRejectOrganizationV1'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof organizationsControllerRejectOrganizationV1>>, {data: OrganizationActionDto}> = (props) => {
+          const {data} = props ?? {};
+
+          return  organizationsControllerRejectOrganizationV1(data,)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type OrganizationsControllerRejectOrganizationV1MutationResult = NonNullable<Awaited<ReturnType<typeof organizationsControllerRejectOrganizationV1>>>
+    export type OrganizationsControllerRejectOrganizationV1MutationBody = OrganizationActionDto
+    export type OrganizationsControllerRejectOrganizationV1MutationError = OrganizationsControllerRejectOrganizationV1ErrorType<unknown>
+
+    /**
+ * @summary 조직 거절
+ */
+export const useOrganizationsControllerRejectOrganizationV1 = <TError = OrganizationsControllerRejectOrganizationV1ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof organizationsControllerRejectOrganizationV1>>, TError,{data: OrganizationActionDto}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof organizationsControllerRejectOrganizationV1>>,
+        TError,
+        {data: OrganizationActionDto},
+        TContext
+      > => {
+      return useMutation(getOrganizationsControllerRejectOrganizationV1MutationOptions(options), queryClient);
+    }
+
+/**
+ * 플랫폼 리소스 트리를 조회합니다.
+ * @summary 리소스 목록 조회
+ */
+export const resourceControllerGetResourcesV1 = (
+    params: ResourceControllerGetResourcesV1Params,
+ signal?: AbortSignal
+) => {
+
+
+      return resourceControllerGetResourcesV1Mutator<ResourceControllerGetResourcesV1200>(
+      {url: `/api/v1/resources`, method: 'GET',
+        params, signal
+    },
+      );
+    }
+
+
+
+
+export const getResourceControllerGetResourcesV1QueryKey = (params?: ResourceControllerGetResourcesV1Params,) => {
+    return [
+    `/api/v1/resources`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getResourceControllerGetResourcesV1QueryOptions = <TData = Awaited<ReturnType<typeof resourceControllerGetResourcesV1>>, TError = ResourceControllerGetResourcesV1ErrorType<unknown>>(params: ResourceControllerGetResourcesV1Params, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof resourceControllerGetResourcesV1>>, TError, TData>>, }
+) => {
+
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getResourceControllerGetResourcesV1QueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof resourceControllerGetResourcesV1>>> = ({ signal }) => resourceControllerGetResourcesV1(params, signal);
 
 
 
@@ -2109,7 +2476,7 @@ export type ResourceControllerGetResourcesV1QueryError = ResourceControllerGetRe
 
 
 export function useResourceControllerGetResourcesV1<TData = Awaited<ReturnType<typeof resourceControllerGetResourcesV1>>, TError = ResourceControllerGetResourcesV1ErrorType<unknown>>(
-  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof resourceControllerGetResourcesV1>>, TError, TData>> & Pick<
+ params: ResourceControllerGetResourcesV1Params, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof resourceControllerGetResourcesV1>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof resourceControllerGetResourcesV1>>,
           TError,
@@ -2119,7 +2486,7 @@ export function useResourceControllerGetResourcesV1<TData = Awaited<ReturnType<t
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useResourceControllerGetResourcesV1<TData = Awaited<ReturnType<typeof resourceControllerGetResourcesV1>>, TError = ResourceControllerGetResourcesV1ErrorType<unknown>>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof resourceControllerGetResourcesV1>>, TError, TData>> & Pick<
+ params: ResourceControllerGetResourcesV1Params, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof resourceControllerGetResourcesV1>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof resourceControllerGetResourcesV1>>,
           TError,
@@ -2129,19 +2496,19 @@ export function useResourceControllerGetResourcesV1<TData = Awaited<ReturnType<t
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useResourceControllerGetResourcesV1<TData = Awaited<ReturnType<typeof resourceControllerGetResourcesV1>>, TError = ResourceControllerGetResourcesV1ErrorType<unknown>>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof resourceControllerGetResourcesV1>>, TError, TData>>, }
+ params: ResourceControllerGetResourcesV1Params, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof resourceControllerGetResourcesV1>>, TError, TData>>, }
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
- * @summary 자원 목록 조회
+ * @summary 리소스 목록 조회
  */
 
 export function useResourceControllerGetResourcesV1<TData = Awaited<ReturnType<typeof resourceControllerGetResourcesV1>>, TError = ResourceControllerGetResourcesV1ErrorType<unknown>>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof resourceControllerGetResourcesV1>>, TError, TData>>, }
+ params: ResourceControllerGetResourcesV1Params, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof resourceControllerGetResourcesV1>>, TError, TData>>, }
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const queryOptions = getResourceControllerGetResourcesV1QueryOptions(options)
+  const queryOptions = getResourceControllerGetResourcesV1QueryOptions(params,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
@@ -2155,102 +2522,8 @@ export function useResourceControllerGetResourcesV1<TData = Awaited<ReturnType<t
 
 
 /**
- * 자원 상세를 조회합니다.
- * @summary 자원 조회
- */
-export const resourceControllerGetResourceV1 = (
-    id: string,
- signal?: AbortSignal
-) => {
-
-
-      return resourceControllerGetResourceV1Mutator<ResourceControllerGetResourceV1200>(
-      {url: `/api/v1/resources/${id}`, method: 'GET', signal
-    },
-      );
-    }
-
-
-
-
-export const getResourceControllerGetResourceV1QueryKey = (id: string,) => {
-    return [
-    `/api/v1/resources/${id}`
-    ] as const;
-    }
-
-
-export const getResourceControllerGetResourceV1QueryOptions = <TData = Awaited<ReturnType<typeof resourceControllerGetResourceV1>>, TError = ResourceControllerGetResourceV1ErrorType<unknown>>(id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof resourceControllerGetResourceV1>>, TError, TData>>, }
-) => {
-
-const {query: queryOptions} = options ?? {};
-
-  const queryKey =  queryOptions?.queryKey ?? getResourceControllerGetResourceV1QueryKey(id);
-
-
-
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof resourceControllerGetResourceV1>>> = ({ signal }) => resourceControllerGetResourceV1(id, signal);
-
-
-
-
-
-   return  { queryKey, queryFn, enabled: !!(id), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof resourceControllerGetResourceV1>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
-}
-
-export type ResourceControllerGetResourceV1QueryResult = NonNullable<Awaited<ReturnType<typeof resourceControllerGetResourceV1>>>
-export type ResourceControllerGetResourceV1QueryError = ResourceControllerGetResourceV1ErrorType<unknown>
-
-
-export function useResourceControllerGetResourceV1<TData = Awaited<ReturnType<typeof resourceControllerGetResourceV1>>, TError = ResourceControllerGetResourceV1ErrorType<unknown>>(
- id: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof resourceControllerGetResourceV1>>, TError, TData>> & Pick<
-        DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof resourceControllerGetResourceV1>>,
-          TError,
-          Awaited<ReturnType<typeof resourceControllerGetResourceV1>>
-        > , 'initialData'
-      >, }
- , queryClient?: QueryClient
-  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useResourceControllerGetResourceV1<TData = Awaited<ReturnType<typeof resourceControllerGetResourceV1>>, TError = ResourceControllerGetResourceV1ErrorType<unknown>>(
- id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof resourceControllerGetResourceV1>>, TError, TData>> & Pick<
-        UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof resourceControllerGetResourceV1>>,
-          TError,
-          Awaited<ReturnType<typeof resourceControllerGetResourceV1>>
-        > , 'initialData'
-      >, }
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useResourceControllerGetResourceV1<TData = Awaited<ReturnType<typeof resourceControllerGetResourceV1>>, TError = ResourceControllerGetResourceV1ErrorType<unknown>>(
- id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof resourceControllerGetResourceV1>>, TError, TData>>, }
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-/**
- * @summary 자원 조회
- */
-
-export function useResourceControllerGetResourceV1<TData = Awaited<ReturnType<typeof resourceControllerGetResourceV1>>, TError = ResourceControllerGetResourceV1ErrorType<unknown>>(
- id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof resourceControllerGetResourceV1>>, TError, TData>>, }
- , queryClient?: QueryClient
- ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
-
-  const queryOptions = getResourceControllerGetResourceV1QueryOptions(id,options)
-
-  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
-
-  return { ...query, queryKey: queryOptions.queryKey };
-}
-
-
-
-
-
-
-
-/**
- * 내 허용 자원을 조회합니다.
- * @summary 내 자원 목록 조회
+ * 내 허용 리소스를 조회합니다.
+ * @summary 내 리소스 목록 조회
  */
 export const resourceControllerGetMyResourcesV1 = (
 
@@ -2321,7 +2594,7 @@ export function useResourceControllerGetMyResourcesV1<TData = Awaited<ReturnType
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
- * @summary 내 자원 목록 조회
+ * @summary 내 리소스 목록 조회
  */
 
 export function useResourceControllerGetMyResourcesV1<TData = Awaited<ReturnType<typeof resourceControllerGetMyResourcesV1>>, TError = ResourceControllerGetMyResourcesV1ErrorType<unknown>>(
@@ -2330,6 +2603,259 @@ export function useResourceControllerGetMyResourcesV1<TData = Awaited<ReturnType
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getResourceControllerGetMyResourcesV1QueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+/**
+ * 조직의 권한 세트 목록을 조회합니다.
+ * @summary 권한 세트 목록 조회
+ */
+export const resourceControllerGetPermissionSetsV1 = (
+
+ signal?: AbortSignal
+) => {
+
+
+      return resourceControllerGetPermissionSetsV1Mutator<ResourceControllerGetPermissionSetsV1200>(
+      {url: `/api/v1/resources/permission-sets`, method: 'GET', signal
+    },
+      );
+    }
+
+
+
+
+export const getResourceControllerGetPermissionSetsV1QueryKey = () => {
+    return [
+    `/api/v1/resources/permission-sets`
+    ] as const;
+    }
+
+
+export const getResourceControllerGetPermissionSetsV1QueryOptions = <TData = Awaited<ReturnType<typeof resourceControllerGetPermissionSetsV1>>, TError = ResourceControllerGetPermissionSetsV1ErrorType<unknown>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof resourceControllerGetPermissionSetsV1>>, TError, TData>>, }
+) => {
+
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getResourceControllerGetPermissionSetsV1QueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof resourceControllerGetPermissionSetsV1>>> = ({ signal }) => resourceControllerGetPermissionSetsV1(signal);
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof resourceControllerGetPermissionSetsV1>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type ResourceControllerGetPermissionSetsV1QueryResult = NonNullable<Awaited<ReturnType<typeof resourceControllerGetPermissionSetsV1>>>
+export type ResourceControllerGetPermissionSetsV1QueryError = ResourceControllerGetPermissionSetsV1ErrorType<unknown>
+
+
+export function useResourceControllerGetPermissionSetsV1<TData = Awaited<ReturnType<typeof resourceControllerGetPermissionSetsV1>>, TError = ResourceControllerGetPermissionSetsV1ErrorType<unknown>>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof resourceControllerGetPermissionSetsV1>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof resourceControllerGetPermissionSetsV1>>,
+          TError,
+          Awaited<ReturnType<typeof resourceControllerGetPermissionSetsV1>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useResourceControllerGetPermissionSetsV1<TData = Awaited<ReturnType<typeof resourceControllerGetPermissionSetsV1>>, TError = ResourceControllerGetPermissionSetsV1ErrorType<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof resourceControllerGetPermissionSetsV1>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof resourceControllerGetPermissionSetsV1>>,
+          TError,
+          Awaited<ReturnType<typeof resourceControllerGetPermissionSetsV1>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useResourceControllerGetPermissionSetsV1<TData = Awaited<ReturnType<typeof resourceControllerGetPermissionSetsV1>>, TError = ResourceControllerGetPermissionSetsV1ErrorType<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof resourceControllerGetPermissionSetsV1>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary 권한 세트 목록 조회
+ */
+
+export function useResourceControllerGetPermissionSetsV1<TData = Awaited<ReturnType<typeof resourceControllerGetPermissionSetsV1>>, TError = ResourceControllerGetPermissionSetsV1ErrorType<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof resourceControllerGetPermissionSetsV1>>, TError, TData>>, }
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getResourceControllerGetPermissionSetsV1QueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+/**
+ * 조직의 권한 세트를 생성합니다.
+ * @summary 권한 세트 생성
+ */
+export const resourceControllerCreatePermissionSetV1 = (
+    createPermissionSetDto: CreatePermissionSetDto,
+ signal?: AbortSignal
+) => {
+
+
+      return resourceControllerCreatePermissionSetV1Mutator<ResourceControllerCreatePermissionSetV1200>(
+      {url: `/api/v1/resources/permission-sets`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: createPermissionSetDto, signal
+    },
+      );
+    }
+
+
+
+export const getResourceControllerCreatePermissionSetV1MutationOptions = <TError = ResourceControllerCreatePermissionSetV1ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof resourceControllerCreatePermissionSetV1>>, TError,{data: CreatePermissionSetDto}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof resourceControllerCreatePermissionSetV1>>, TError,{data: CreatePermissionSetDto}, TContext> => {
+
+const mutationKey = ['resourceControllerCreatePermissionSetV1'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof resourceControllerCreatePermissionSetV1>>, {data: CreatePermissionSetDto}> = (props) => {
+          const {data} = props ?? {};
+
+          return  resourceControllerCreatePermissionSetV1(data,)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ResourceControllerCreatePermissionSetV1MutationResult = NonNullable<Awaited<ReturnType<typeof resourceControllerCreatePermissionSetV1>>>
+    export type ResourceControllerCreatePermissionSetV1MutationBody = CreatePermissionSetDto
+    export type ResourceControllerCreatePermissionSetV1MutationError = ResourceControllerCreatePermissionSetV1ErrorType<unknown>
+
+    /**
+ * @summary 권한 세트 생성
+ */
+export const useResourceControllerCreatePermissionSetV1 = <TError = ResourceControllerCreatePermissionSetV1ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof resourceControllerCreatePermissionSetV1>>, TError,{data: CreatePermissionSetDto}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof resourceControllerCreatePermissionSetV1>>,
+        TError,
+        {data: CreatePermissionSetDto},
+        TContext
+      > => {
+      return useMutation(getResourceControllerCreatePermissionSetV1MutationOptions(options), queryClient);
+    }
+
+/**
+ * 리소스 상세를 조회합니다.
+ * @summary 리소스 조회
+ */
+export const resourceControllerGetResourceV1 = (
+    id: string,
+ signal?: AbortSignal
+) => {
+
+
+      return resourceControllerGetResourceV1Mutator<ResourceControllerGetResourceV1200>(
+      {url: `/api/v1/resources/${id}`, method: 'GET', signal
+    },
+      );
+    }
+
+
+
+
+export const getResourceControllerGetResourceV1QueryKey = (id: string,) => {
+    return [
+    `/api/v1/resources/${id}`
+    ] as const;
+    }
+
+
+export const getResourceControllerGetResourceV1QueryOptions = <TData = Awaited<ReturnType<typeof resourceControllerGetResourceV1>>, TError = ResourceControllerGetResourceV1ErrorType<unknown>>(id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof resourceControllerGetResourceV1>>, TError, TData>>, }
+) => {
+
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getResourceControllerGetResourceV1QueryKey(id);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof resourceControllerGetResourceV1>>> = ({ signal }) => resourceControllerGetResourceV1(id, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: !!(id), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof resourceControllerGetResourceV1>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type ResourceControllerGetResourceV1QueryResult = NonNullable<Awaited<ReturnType<typeof resourceControllerGetResourceV1>>>
+export type ResourceControllerGetResourceV1QueryError = ResourceControllerGetResourceV1ErrorType<unknown>
+
+
+export function useResourceControllerGetResourceV1<TData = Awaited<ReturnType<typeof resourceControllerGetResourceV1>>, TError = ResourceControllerGetResourceV1ErrorType<unknown>>(
+ id: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof resourceControllerGetResourceV1>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof resourceControllerGetResourceV1>>,
+          TError,
+          Awaited<ReturnType<typeof resourceControllerGetResourceV1>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useResourceControllerGetResourceV1<TData = Awaited<ReturnType<typeof resourceControllerGetResourceV1>>, TError = ResourceControllerGetResourceV1ErrorType<unknown>>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof resourceControllerGetResourceV1>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof resourceControllerGetResourceV1>>,
+          TError,
+          Awaited<ReturnType<typeof resourceControllerGetResourceV1>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useResourceControllerGetResourceV1<TData = Awaited<ReturnType<typeof resourceControllerGetResourceV1>>, TError = ResourceControllerGetResourceV1ErrorType<unknown>>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof resourceControllerGetResourceV1>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary 리소스 조회
+ */
+
+export function useResourceControllerGetResourceV1<TData = Awaited<ReturnType<typeof resourceControllerGetResourceV1>>, TError = ResourceControllerGetResourceV1ErrorType<unknown>>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof resourceControllerGetResourceV1>>, TError, TData>>, }
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getResourceControllerGetResourceV1QueryOptions(id,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
@@ -2603,6 +3129,71 @@ export const useResourceControllerUpdateResourceSortV1 = <TError = ResourceContr
     }
 
 /**
+ * 권한 세트의 퍼미션을 수정합니다.
+ * @summary 권한 세트 퍼미션 수정
+ */
+export const resourceControllerUpdatePermissionSetPermissionsV1 = (
+    updatePermissionSetPermissionsDto: UpdatePermissionSetPermissionsDto,
+ signal?: AbortSignal
+) => {
+
+
+      return resourceControllerUpdatePermissionSetPermissionsV1Mutator<ResourceControllerUpdatePermissionSetPermissionsV1200>(
+      {url: `/api/v1/resources/permission-sets/update-permissions`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: updatePermissionSetPermissionsDto, signal
+    },
+      );
+    }
+
+
+
+export const getResourceControllerUpdatePermissionSetPermissionsV1MutationOptions = <TError = ResourceControllerUpdatePermissionSetPermissionsV1ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof resourceControllerUpdatePermissionSetPermissionsV1>>, TError,{data: UpdatePermissionSetPermissionsDto}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof resourceControllerUpdatePermissionSetPermissionsV1>>, TError,{data: UpdatePermissionSetPermissionsDto}, TContext> => {
+
+const mutationKey = ['resourceControllerUpdatePermissionSetPermissionsV1'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof resourceControllerUpdatePermissionSetPermissionsV1>>, {data: UpdatePermissionSetPermissionsDto}> = (props) => {
+          const {data} = props ?? {};
+
+          return  resourceControllerUpdatePermissionSetPermissionsV1(data,)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ResourceControllerUpdatePermissionSetPermissionsV1MutationResult = NonNullable<Awaited<ReturnType<typeof resourceControllerUpdatePermissionSetPermissionsV1>>>
+    export type ResourceControllerUpdatePermissionSetPermissionsV1MutationBody = UpdatePermissionSetPermissionsDto
+    export type ResourceControllerUpdatePermissionSetPermissionsV1MutationError = ResourceControllerUpdatePermissionSetPermissionsV1ErrorType<unknown>
+
+    /**
+ * @summary 권한 세트 퍼미션 수정
+ */
+export const useResourceControllerUpdatePermissionSetPermissionsV1 = <TError = ResourceControllerUpdatePermissionSetPermissionsV1ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof resourceControllerUpdatePermissionSetPermissionsV1>>, TError,{data: UpdatePermissionSetPermissionsDto}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof resourceControllerUpdatePermissionSetPermissionsV1>>,
+        TError,
+        {data: UpdatePermissionSetPermissionsDto},
+        TContext
+      > => {
+      return useMutation(getResourceControllerUpdatePermissionSetPermissionsV1MutationOptions(options), queryClient);
+    }
+
+/**
  * 리소스를 삭제합니다.
  * @summary 리소스 삭제
  */
@@ -2665,5 +3256,940 @@ export const useResourceControllerDeleteResourceV1 = <TError = ResourceControlle
         TContext
       > => {
       return useMutation(getResourceControllerDeleteResourceV1MutationOptions(options), queryClient);
+    }
+
+/**
+ * 티켓 목록을 조회합니다.
+ * @summary 티켓 조회
+ */
+export const supportControllerGetTicketsV1 = (
+    params?: SupportControllerGetTicketsV1Params,
+ signal?: AbortSignal
+) => {
+
+
+      return supportControllerGetTicketsV1Mutator<SupportControllerGetTicketsV1200>(
+      {url: `/api/v1/support/tickets`, method: 'GET',
+        params, signal
+    },
+      );
+    }
+
+
+
+
+export const getSupportControllerGetTicketsV1QueryKey = (params?: SupportControllerGetTicketsV1Params,) => {
+    return [
+    `/api/v1/support/tickets`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getSupportControllerGetTicketsV1QueryOptions = <TData = Awaited<ReturnType<typeof supportControllerGetTicketsV1>>, TError = SupportControllerGetTicketsV1ErrorType<unknown>>(params?: SupportControllerGetTicketsV1Params, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof supportControllerGetTicketsV1>>, TError, TData>>, }
+) => {
+
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getSupportControllerGetTicketsV1QueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof supportControllerGetTicketsV1>>> = ({ signal }) => supportControllerGetTicketsV1(params, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof supportControllerGetTicketsV1>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type SupportControllerGetTicketsV1QueryResult = NonNullable<Awaited<ReturnType<typeof supportControllerGetTicketsV1>>>
+export type SupportControllerGetTicketsV1QueryError = SupportControllerGetTicketsV1ErrorType<unknown>
+
+
+export function useSupportControllerGetTicketsV1<TData = Awaited<ReturnType<typeof supportControllerGetTicketsV1>>, TError = SupportControllerGetTicketsV1ErrorType<unknown>>(
+ params: undefined |  SupportControllerGetTicketsV1Params, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof supportControllerGetTicketsV1>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof supportControllerGetTicketsV1>>,
+          TError,
+          Awaited<ReturnType<typeof supportControllerGetTicketsV1>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useSupportControllerGetTicketsV1<TData = Awaited<ReturnType<typeof supportControllerGetTicketsV1>>, TError = SupportControllerGetTicketsV1ErrorType<unknown>>(
+ params?: SupportControllerGetTicketsV1Params, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof supportControllerGetTicketsV1>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof supportControllerGetTicketsV1>>,
+          TError,
+          Awaited<ReturnType<typeof supportControllerGetTicketsV1>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useSupportControllerGetTicketsV1<TData = Awaited<ReturnType<typeof supportControllerGetTicketsV1>>, TError = SupportControllerGetTicketsV1ErrorType<unknown>>(
+ params?: SupportControllerGetTicketsV1Params, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof supportControllerGetTicketsV1>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary 티켓 조회
+ */
+
+export function useSupportControllerGetTicketsV1<TData = Awaited<ReturnType<typeof supportControllerGetTicketsV1>>, TError = SupportControllerGetTicketsV1ErrorType<unknown>>(
+ params?: SupportControllerGetTicketsV1Params, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof supportControllerGetTicketsV1>>, TError, TData>>, }
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getSupportControllerGetTicketsV1QueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+/**
+ * 약관 목록을 조회합니다.
+ * @summary 약관 목록 조회
+ */
+export const termsControllerGetActiveTermsV1 = (
+
+ signal?: AbortSignal
+) => {
+
+
+      return termsControllerGetActiveTermsV1Mutator<TermsControllerGetActiveTermsV1200>(
+      {url: `/api/v1/terms`, method: 'GET', signal
+    },
+      );
+    }
+
+
+
+
+export const getTermsControllerGetActiveTermsV1QueryKey = () => {
+    return [
+    `/api/v1/terms`
+    ] as const;
+    }
+
+
+export const getTermsControllerGetActiveTermsV1QueryOptions = <TData = Awaited<ReturnType<typeof termsControllerGetActiveTermsV1>>, TError = TermsControllerGetActiveTermsV1ErrorType<unknown>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof termsControllerGetActiveTermsV1>>, TError, TData>>, }
+) => {
+
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getTermsControllerGetActiveTermsV1QueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof termsControllerGetActiveTermsV1>>> = ({ signal }) => termsControllerGetActiveTermsV1(signal);
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof termsControllerGetActiveTermsV1>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type TermsControllerGetActiveTermsV1QueryResult = NonNullable<Awaited<ReturnType<typeof termsControllerGetActiveTermsV1>>>
+export type TermsControllerGetActiveTermsV1QueryError = TermsControllerGetActiveTermsV1ErrorType<unknown>
+
+
+export function useTermsControllerGetActiveTermsV1<TData = Awaited<ReturnType<typeof termsControllerGetActiveTermsV1>>, TError = TermsControllerGetActiveTermsV1ErrorType<unknown>>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof termsControllerGetActiveTermsV1>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof termsControllerGetActiveTermsV1>>,
+          TError,
+          Awaited<ReturnType<typeof termsControllerGetActiveTermsV1>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useTermsControllerGetActiveTermsV1<TData = Awaited<ReturnType<typeof termsControllerGetActiveTermsV1>>, TError = TermsControllerGetActiveTermsV1ErrorType<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof termsControllerGetActiveTermsV1>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof termsControllerGetActiveTermsV1>>,
+          TError,
+          Awaited<ReturnType<typeof termsControllerGetActiveTermsV1>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useTermsControllerGetActiveTermsV1<TData = Awaited<ReturnType<typeof termsControllerGetActiveTermsV1>>, TError = TermsControllerGetActiveTermsV1ErrorType<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof termsControllerGetActiveTermsV1>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary 약관 목록 조회
+ */
+
+export function useTermsControllerGetActiveTermsV1<TData = Awaited<ReturnType<typeof termsControllerGetActiveTermsV1>>, TError = TermsControllerGetActiveTermsV1ErrorType<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof termsControllerGetActiveTermsV1>>, TError, TData>>, }
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getTermsControllerGetActiveTermsV1QueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+/**
+ * 관리자용 약관 문서 목록을 조회합니다.
+ * @summary 약관 문서 목록 조회
+ */
+export const termsControllerGetTermsDocumentsV1 = (
+    params?: TermsControllerGetTermsDocumentsV1Params,
+ signal?: AbortSignal
+) => {
+
+
+      return termsControllerGetTermsDocumentsV1Mutator<TermsControllerGetTermsDocumentsV1200>(
+      {url: `/api/v1/terms/documents`, method: 'GET',
+        params, signal
+    },
+      );
+    }
+
+
+
+
+export const getTermsControllerGetTermsDocumentsV1QueryKey = (params?: TermsControllerGetTermsDocumentsV1Params,) => {
+    return [
+    `/api/v1/terms/documents`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getTermsControllerGetTermsDocumentsV1QueryOptions = <TData = Awaited<ReturnType<typeof termsControllerGetTermsDocumentsV1>>, TError = TermsControllerGetTermsDocumentsV1ErrorType<unknown>>(params?: TermsControllerGetTermsDocumentsV1Params, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof termsControllerGetTermsDocumentsV1>>, TError, TData>>, }
+) => {
+
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getTermsControllerGetTermsDocumentsV1QueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof termsControllerGetTermsDocumentsV1>>> = ({ signal }) => termsControllerGetTermsDocumentsV1(params, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof termsControllerGetTermsDocumentsV1>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type TermsControllerGetTermsDocumentsV1QueryResult = NonNullable<Awaited<ReturnType<typeof termsControllerGetTermsDocumentsV1>>>
+export type TermsControllerGetTermsDocumentsV1QueryError = TermsControllerGetTermsDocumentsV1ErrorType<unknown>
+
+
+export function useTermsControllerGetTermsDocumentsV1<TData = Awaited<ReturnType<typeof termsControllerGetTermsDocumentsV1>>, TError = TermsControllerGetTermsDocumentsV1ErrorType<unknown>>(
+ params: undefined |  TermsControllerGetTermsDocumentsV1Params, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof termsControllerGetTermsDocumentsV1>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof termsControllerGetTermsDocumentsV1>>,
+          TError,
+          Awaited<ReturnType<typeof termsControllerGetTermsDocumentsV1>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useTermsControllerGetTermsDocumentsV1<TData = Awaited<ReturnType<typeof termsControllerGetTermsDocumentsV1>>, TError = TermsControllerGetTermsDocumentsV1ErrorType<unknown>>(
+ params?: TermsControllerGetTermsDocumentsV1Params, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof termsControllerGetTermsDocumentsV1>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof termsControllerGetTermsDocumentsV1>>,
+          TError,
+          Awaited<ReturnType<typeof termsControllerGetTermsDocumentsV1>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useTermsControllerGetTermsDocumentsV1<TData = Awaited<ReturnType<typeof termsControllerGetTermsDocumentsV1>>, TError = TermsControllerGetTermsDocumentsV1ErrorType<unknown>>(
+ params?: TermsControllerGetTermsDocumentsV1Params, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof termsControllerGetTermsDocumentsV1>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary 약관 문서 목록 조회
+ */
+
+export function useTermsControllerGetTermsDocumentsV1<TData = Awaited<ReturnType<typeof termsControllerGetTermsDocumentsV1>>, TError = TermsControllerGetTermsDocumentsV1ErrorType<unknown>>(
+ params?: TermsControllerGetTermsDocumentsV1Params, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof termsControllerGetTermsDocumentsV1>>, TError, TData>>, }
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getTermsControllerGetTermsDocumentsV1QueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+/**
+ * 약관 문서를 생성합니다.
+ * @summary 약관 문서 생성
+ */
+export const termsControllerCreateTermsDocumentV1 = (
+    createTermsDocumentDto: CreateTermsDocumentDto,
+ signal?: AbortSignal
+) => {
+
+
+      return termsControllerCreateTermsDocumentV1Mutator<TermsControllerCreateTermsDocumentV1200>(
+      {url: `/api/v1/terms/documents`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: createTermsDocumentDto, signal
+    },
+      );
+    }
+
+
+
+export const getTermsControllerCreateTermsDocumentV1MutationOptions = <TError = TermsControllerCreateTermsDocumentV1ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof termsControllerCreateTermsDocumentV1>>, TError,{data: CreateTermsDocumentDto}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof termsControllerCreateTermsDocumentV1>>, TError,{data: CreateTermsDocumentDto}, TContext> => {
+
+const mutationKey = ['termsControllerCreateTermsDocumentV1'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof termsControllerCreateTermsDocumentV1>>, {data: CreateTermsDocumentDto}> = (props) => {
+          const {data} = props ?? {};
+
+          return  termsControllerCreateTermsDocumentV1(data,)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type TermsControllerCreateTermsDocumentV1MutationResult = NonNullable<Awaited<ReturnType<typeof termsControllerCreateTermsDocumentV1>>>
+    export type TermsControllerCreateTermsDocumentV1MutationBody = CreateTermsDocumentDto
+    export type TermsControllerCreateTermsDocumentV1MutationError = TermsControllerCreateTermsDocumentV1ErrorType<unknown>
+
+    /**
+ * @summary 약관 문서 생성
+ */
+export const useTermsControllerCreateTermsDocumentV1 = <TError = TermsControllerCreateTermsDocumentV1ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof termsControllerCreateTermsDocumentV1>>, TError,{data: CreateTermsDocumentDto}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof termsControllerCreateTermsDocumentV1>>,
+        TError,
+        {data: CreateTermsDocumentDto},
+        TContext
+      > => {
+      return useMutation(getTermsControllerCreateTermsDocumentV1MutationOptions(options), queryClient);
+    }
+
+/**
+ * 약관 문서 상세를 조회합니다.
+ * @summary 약관 문서 상세 조회
+ */
+export const termsControllerGetTermsDocumentV1 = (
+    id: string,
+ signal?: AbortSignal
+) => {
+
+
+      return termsControllerGetTermsDocumentV1Mutator<TermsControllerGetTermsDocumentV1200>(
+      {url: `/api/v1/terms/documents/${id}`, method: 'GET', signal
+    },
+      );
+    }
+
+
+
+
+export const getTermsControllerGetTermsDocumentV1QueryKey = (id: string,) => {
+    return [
+    `/api/v1/terms/documents/${id}`
+    ] as const;
+    }
+
+
+export const getTermsControllerGetTermsDocumentV1QueryOptions = <TData = Awaited<ReturnType<typeof termsControllerGetTermsDocumentV1>>, TError = TermsControllerGetTermsDocumentV1ErrorType<unknown>>(id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof termsControllerGetTermsDocumentV1>>, TError, TData>>, }
+) => {
+
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getTermsControllerGetTermsDocumentV1QueryKey(id);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof termsControllerGetTermsDocumentV1>>> = ({ signal }) => termsControllerGetTermsDocumentV1(id, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: !!(id), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof termsControllerGetTermsDocumentV1>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type TermsControllerGetTermsDocumentV1QueryResult = NonNullable<Awaited<ReturnType<typeof termsControllerGetTermsDocumentV1>>>
+export type TermsControllerGetTermsDocumentV1QueryError = TermsControllerGetTermsDocumentV1ErrorType<unknown>
+
+
+export function useTermsControllerGetTermsDocumentV1<TData = Awaited<ReturnType<typeof termsControllerGetTermsDocumentV1>>, TError = TermsControllerGetTermsDocumentV1ErrorType<unknown>>(
+ id: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof termsControllerGetTermsDocumentV1>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof termsControllerGetTermsDocumentV1>>,
+          TError,
+          Awaited<ReturnType<typeof termsControllerGetTermsDocumentV1>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useTermsControllerGetTermsDocumentV1<TData = Awaited<ReturnType<typeof termsControllerGetTermsDocumentV1>>, TError = TermsControllerGetTermsDocumentV1ErrorType<unknown>>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof termsControllerGetTermsDocumentV1>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof termsControllerGetTermsDocumentV1>>,
+          TError,
+          Awaited<ReturnType<typeof termsControllerGetTermsDocumentV1>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useTermsControllerGetTermsDocumentV1<TData = Awaited<ReturnType<typeof termsControllerGetTermsDocumentV1>>, TError = TermsControllerGetTermsDocumentV1ErrorType<unknown>>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof termsControllerGetTermsDocumentV1>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary 약관 문서 상세 조회
+ */
+
+export function useTermsControllerGetTermsDocumentV1<TData = Awaited<ReturnType<typeof termsControllerGetTermsDocumentV1>>, TError = TermsControllerGetTermsDocumentV1ErrorType<unknown>>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof termsControllerGetTermsDocumentV1>>, TError, TData>>, }
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getTermsControllerGetTermsDocumentV1QueryOptions(id,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+/**
+ * 약관 문서의 버전 목록을 조회합니다.
+ * @summary 약관 버전 목록 조회
+ */
+export const termsControllerGetTermsDocumentVersionsV1 = (
+    id: string,
+    params?: TermsControllerGetTermsDocumentVersionsV1Params,
+ signal?: AbortSignal
+) => {
+
+
+      return termsControllerGetTermsDocumentVersionsV1Mutator<TermsControllerGetTermsDocumentVersionsV1200>(
+      {url: `/api/v1/terms/documents/${id}/versions`, method: 'GET',
+        params, signal
+    },
+      );
+    }
+
+
+
+
+export const getTermsControllerGetTermsDocumentVersionsV1QueryKey = (id: string,
+    params?: TermsControllerGetTermsDocumentVersionsV1Params,) => {
+    return [
+    `/api/v1/terms/documents/${id}/versions`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getTermsControllerGetTermsDocumentVersionsV1QueryOptions = <TData = Awaited<ReturnType<typeof termsControllerGetTermsDocumentVersionsV1>>, TError = TermsControllerGetTermsDocumentVersionsV1ErrorType<unknown>>(id: string,
+    params?: TermsControllerGetTermsDocumentVersionsV1Params, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof termsControllerGetTermsDocumentVersionsV1>>, TError, TData>>, }
+) => {
+
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getTermsControllerGetTermsDocumentVersionsV1QueryKey(id,params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof termsControllerGetTermsDocumentVersionsV1>>> = ({ signal }) => termsControllerGetTermsDocumentVersionsV1(id,params, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: !!(id), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof termsControllerGetTermsDocumentVersionsV1>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type TermsControllerGetTermsDocumentVersionsV1QueryResult = NonNullable<Awaited<ReturnType<typeof termsControllerGetTermsDocumentVersionsV1>>>
+export type TermsControllerGetTermsDocumentVersionsV1QueryError = TermsControllerGetTermsDocumentVersionsV1ErrorType<unknown>
+
+
+export function useTermsControllerGetTermsDocumentVersionsV1<TData = Awaited<ReturnType<typeof termsControllerGetTermsDocumentVersionsV1>>, TError = TermsControllerGetTermsDocumentVersionsV1ErrorType<unknown>>(
+ id: string,
+    params: undefined |  TermsControllerGetTermsDocumentVersionsV1Params, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof termsControllerGetTermsDocumentVersionsV1>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof termsControllerGetTermsDocumentVersionsV1>>,
+          TError,
+          Awaited<ReturnType<typeof termsControllerGetTermsDocumentVersionsV1>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useTermsControllerGetTermsDocumentVersionsV1<TData = Awaited<ReturnType<typeof termsControllerGetTermsDocumentVersionsV1>>, TError = TermsControllerGetTermsDocumentVersionsV1ErrorType<unknown>>(
+ id: string,
+    params?: TermsControllerGetTermsDocumentVersionsV1Params, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof termsControllerGetTermsDocumentVersionsV1>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof termsControllerGetTermsDocumentVersionsV1>>,
+          TError,
+          Awaited<ReturnType<typeof termsControllerGetTermsDocumentVersionsV1>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useTermsControllerGetTermsDocumentVersionsV1<TData = Awaited<ReturnType<typeof termsControllerGetTermsDocumentVersionsV1>>, TError = TermsControllerGetTermsDocumentVersionsV1ErrorType<unknown>>(
+ id: string,
+    params?: TermsControllerGetTermsDocumentVersionsV1Params, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof termsControllerGetTermsDocumentVersionsV1>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary 약관 버전 목록 조회
+ */
+
+export function useTermsControllerGetTermsDocumentVersionsV1<TData = Awaited<ReturnType<typeof termsControllerGetTermsDocumentVersionsV1>>, TError = TermsControllerGetTermsDocumentVersionsV1ErrorType<unknown>>(
+ id: string,
+    params?: TermsControllerGetTermsDocumentVersionsV1Params, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof termsControllerGetTermsDocumentVersionsV1>>, TError, TData>>, }
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getTermsControllerGetTermsDocumentVersionsV1QueryOptions(id,params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+/**
+ * 약관 문서를 폐기하거나 예약 폐기합니다.
+ * @summary 약관 문서 폐기
+ */
+export const termsControllerDeprecateTermsDocumentV1 = (
+    deprecateTermsDocumentDto: DeprecateTermsDocumentDto,
+ signal?: AbortSignal
+) => {
+
+
+      return termsControllerDeprecateTermsDocumentV1Mutator<TermsControllerDeprecateTermsDocumentV1200>(
+      {url: `/api/v1/terms/documents/deprecate`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: deprecateTermsDocumentDto, signal
+    },
+      );
+    }
+
+
+
+export const getTermsControllerDeprecateTermsDocumentV1MutationOptions = <TError = TermsControllerDeprecateTermsDocumentV1ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof termsControllerDeprecateTermsDocumentV1>>, TError,{data: DeprecateTermsDocumentDto}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof termsControllerDeprecateTermsDocumentV1>>, TError,{data: DeprecateTermsDocumentDto}, TContext> => {
+
+const mutationKey = ['termsControllerDeprecateTermsDocumentV1'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof termsControllerDeprecateTermsDocumentV1>>, {data: DeprecateTermsDocumentDto}> = (props) => {
+          const {data} = props ?? {};
+
+          return  termsControllerDeprecateTermsDocumentV1(data,)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type TermsControllerDeprecateTermsDocumentV1MutationResult = NonNullable<Awaited<ReturnType<typeof termsControllerDeprecateTermsDocumentV1>>>
+    export type TermsControllerDeprecateTermsDocumentV1MutationBody = DeprecateTermsDocumentDto
+    export type TermsControllerDeprecateTermsDocumentV1MutationError = TermsControllerDeprecateTermsDocumentV1ErrorType<unknown>
+
+    /**
+ * @summary 약관 문서 폐기
+ */
+export const useTermsControllerDeprecateTermsDocumentV1 = <TError = TermsControllerDeprecateTermsDocumentV1ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof termsControllerDeprecateTermsDocumentV1>>, TError,{data: DeprecateTermsDocumentDto}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof termsControllerDeprecateTermsDocumentV1>>,
+        TError,
+        {data: DeprecateTermsDocumentDto},
+        TContext
+      > => {
+      return useMutation(getTermsControllerDeprecateTermsDocumentV1MutationOptions(options), queryClient);
+    }
+
+/**
+ * 약관 문서의 폐기 예약을 취소합니다.
+ * @summary 폐기 예약 취소
+ */
+export const termsControllerCancelDeprecationTermsDocumentV1 = (
+    cancelDeprecationTermsDocumentDto: CancelDeprecationTermsDocumentDto,
+ signal?: AbortSignal
+) => {
+
+
+      return termsControllerCancelDeprecationTermsDocumentV1Mutator<TermsControllerCancelDeprecationTermsDocumentV1200>(
+      {url: `/api/v1/terms/documents/cancel-deprecation`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: cancelDeprecationTermsDocumentDto, signal
+    },
+      );
+    }
+
+
+
+export const getTermsControllerCancelDeprecationTermsDocumentV1MutationOptions = <TError = TermsControllerCancelDeprecationTermsDocumentV1ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof termsControllerCancelDeprecationTermsDocumentV1>>, TError,{data: CancelDeprecationTermsDocumentDto}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof termsControllerCancelDeprecationTermsDocumentV1>>, TError,{data: CancelDeprecationTermsDocumentDto}, TContext> => {
+
+const mutationKey = ['termsControllerCancelDeprecationTermsDocumentV1'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof termsControllerCancelDeprecationTermsDocumentV1>>, {data: CancelDeprecationTermsDocumentDto}> = (props) => {
+          const {data} = props ?? {};
+
+          return  termsControllerCancelDeprecationTermsDocumentV1(data,)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type TermsControllerCancelDeprecationTermsDocumentV1MutationResult = NonNullable<Awaited<ReturnType<typeof termsControllerCancelDeprecationTermsDocumentV1>>>
+    export type TermsControllerCancelDeprecationTermsDocumentV1MutationBody = CancelDeprecationTermsDocumentDto
+    export type TermsControllerCancelDeprecationTermsDocumentV1MutationError = TermsControllerCancelDeprecationTermsDocumentV1ErrorType<unknown>
+
+    /**
+ * @summary 폐기 예약 취소
+ */
+export const useTermsControllerCancelDeprecationTermsDocumentV1 = <TError = TermsControllerCancelDeprecationTermsDocumentV1ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof termsControllerCancelDeprecationTermsDocumentV1>>, TError,{data: CancelDeprecationTermsDocumentDto}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof termsControllerCancelDeprecationTermsDocumentV1>>,
+        TError,
+        {data: CancelDeprecationTermsDocumentDto},
+        TContext
+      > => {
+      return useMutation(getTermsControllerCancelDeprecationTermsDocumentV1MutationOptions(options), queryClient);
+    }
+
+/**
+ * 현재 효력 중인 버전이 없을 때 약관 문서를 물리 삭제합니다.
+ * @summary 약관 문서 물리 삭제
+ */
+export const termsControllerDeleteTermsDocumentV1 = (
+    deleteTermsDocumentDto: DeleteTermsDocumentDto,
+ signal?: AbortSignal
+) => {
+
+
+      return termsControllerDeleteTermsDocumentV1Mutator<ApiResponse>(
+      {url: `/api/v1/terms/documents/delete`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: deleteTermsDocumentDto, signal
+    },
+      );
+    }
+
+
+
+export const getTermsControllerDeleteTermsDocumentV1MutationOptions = <TError = TermsControllerDeleteTermsDocumentV1ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof termsControllerDeleteTermsDocumentV1>>, TError,{data: DeleteTermsDocumentDto}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof termsControllerDeleteTermsDocumentV1>>, TError,{data: DeleteTermsDocumentDto}, TContext> => {
+
+const mutationKey = ['termsControllerDeleteTermsDocumentV1'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof termsControllerDeleteTermsDocumentV1>>, {data: DeleteTermsDocumentDto}> = (props) => {
+          const {data} = props ?? {};
+
+          return  termsControllerDeleteTermsDocumentV1(data,)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type TermsControllerDeleteTermsDocumentV1MutationResult = NonNullable<Awaited<ReturnType<typeof termsControllerDeleteTermsDocumentV1>>>
+    export type TermsControllerDeleteTermsDocumentV1MutationBody = DeleteTermsDocumentDto
+    export type TermsControllerDeleteTermsDocumentV1MutationError = TermsControllerDeleteTermsDocumentV1ErrorType<unknown>
+
+    /**
+ * @summary 약관 문서 물리 삭제
+ */
+export const useTermsControllerDeleteTermsDocumentV1 = <TError = TermsControllerDeleteTermsDocumentV1ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof termsControllerDeleteTermsDocumentV1>>, TError,{data: DeleteTermsDocumentDto}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof termsControllerDeleteTermsDocumentV1>>,
+        TError,
+        {data: DeleteTermsDocumentDto},
+        TContext
+      > => {
+      return useMutation(getTermsControllerDeleteTermsDocumentV1MutationOptions(options), queryClient);
+    }
+
+/**
+ * 약관 버전을 생성합니다.
+ * @summary 약관 버전 생성
+ */
+export const termsControllerCreateTermsVersionV1 = (
+    createTermsVersionDto: CreateTermsVersionDto,
+ signal?: AbortSignal
+) => {
+
+
+      return termsControllerCreateTermsVersionV1Mutator<TermsControllerCreateTermsVersionV1200>(
+      {url: `/api/v1/terms/versions`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: createTermsVersionDto, signal
+    },
+      );
+    }
+
+
+
+export const getTermsControllerCreateTermsVersionV1MutationOptions = <TError = TermsControllerCreateTermsVersionV1ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof termsControllerCreateTermsVersionV1>>, TError,{data: CreateTermsVersionDto}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof termsControllerCreateTermsVersionV1>>, TError,{data: CreateTermsVersionDto}, TContext> => {
+
+const mutationKey = ['termsControllerCreateTermsVersionV1'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof termsControllerCreateTermsVersionV1>>, {data: CreateTermsVersionDto}> = (props) => {
+          const {data} = props ?? {};
+
+          return  termsControllerCreateTermsVersionV1(data,)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type TermsControllerCreateTermsVersionV1MutationResult = NonNullable<Awaited<ReturnType<typeof termsControllerCreateTermsVersionV1>>>
+    export type TermsControllerCreateTermsVersionV1MutationBody = CreateTermsVersionDto
+    export type TermsControllerCreateTermsVersionV1MutationError = TermsControllerCreateTermsVersionV1ErrorType<unknown>
+
+    /**
+ * @summary 약관 버전 생성
+ */
+export const useTermsControllerCreateTermsVersionV1 = <TError = TermsControllerCreateTermsVersionV1ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof termsControllerCreateTermsVersionV1>>, TError,{data: CreateTermsVersionDto}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof termsControllerCreateTermsVersionV1>>,
+        TError,
+        {data: CreateTermsVersionDto},
+        TContext
+      > => {
+      return useMutation(getTermsControllerCreateTermsVersionV1MutationOptions(options), queryClient);
+    }
+
+/**
+ * 약관 버전을 수정합니다.
+ * @summary 약관 버전 수정
+ */
+export const termsControllerUpdateTermsVersionV1 = (
+    updateTermsVersionDto: UpdateTermsVersionDto,
+ signal?: AbortSignal
+) => {
+
+
+      return termsControllerUpdateTermsVersionV1Mutator<TermsControllerUpdateTermsVersionV1200>(
+      {url: `/api/v1/terms/versions/update`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: updateTermsVersionDto, signal
+    },
+      );
+    }
+
+
+
+export const getTermsControllerUpdateTermsVersionV1MutationOptions = <TError = TermsControllerUpdateTermsVersionV1ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof termsControllerUpdateTermsVersionV1>>, TError,{data: UpdateTermsVersionDto}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof termsControllerUpdateTermsVersionV1>>, TError,{data: UpdateTermsVersionDto}, TContext> => {
+
+const mutationKey = ['termsControllerUpdateTermsVersionV1'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof termsControllerUpdateTermsVersionV1>>, {data: UpdateTermsVersionDto}> = (props) => {
+          const {data} = props ?? {};
+
+          return  termsControllerUpdateTermsVersionV1(data,)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type TermsControllerUpdateTermsVersionV1MutationResult = NonNullable<Awaited<ReturnType<typeof termsControllerUpdateTermsVersionV1>>>
+    export type TermsControllerUpdateTermsVersionV1MutationBody = UpdateTermsVersionDto
+    export type TermsControllerUpdateTermsVersionV1MutationError = TermsControllerUpdateTermsVersionV1ErrorType<unknown>
+
+    /**
+ * @summary 약관 버전 수정
+ */
+export const useTermsControllerUpdateTermsVersionV1 = <TError = TermsControllerUpdateTermsVersionV1ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof termsControllerUpdateTermsVersionV1>>, TError,{data: UpdateTermsVersionDto}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof termsControllerUpdateTermsVersionV1>>,
+        TError,
+        {data: UpdateTermsVersionDto},
+        TContext
+      > => {
+      return useMutation(getTermsControllerUpdateTermsVersionV1MutationOptions(options), queryClient);
+    }
+
+/**
+ * 약관 동의 이력을 저장합니다.
+ * @summary 약관 동의 저장
+ */
+export const termsControllerAgreeTermsV1 = (
+    agreeTermsDto: AgreeTermsDto,
+ signal?: AbortSignal
+) => {
+
+
+      return termsControllerAgreeTermsV1Mutator<TermsControllerAgreeTermsV1200>(
+      {url: `/api/v1/terms/agreements`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: agreeTermsDto, signal
+    },
+      );
+    }
+
+
+
+export const getTermsControllerAgreeTermsV1MutationOptions = <TError = TermsControllerAgreeTermsV1ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof termsControllerAgreeTermsV1>>, TError,{data: AgreeTermsDto}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof termsControllerAgreeTermsV1>>, TError,{data: AgreeTermsDto}, TContext> => {
+
+const mutationKey = ['termsControllerAgreeTermsV1'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof termsControllerAgreeTermsV1>>, {data: AgreeTermsDto}> = (props) => {
+          const {data} = props ?? {};
+
+          return  termsControllerAgreeTermsV1(data,)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type TermsControllerAgreeTermsV1MutationResult = NonNullable<Awaited<ReturnType<typeof termsControllerAgreeTermsV1>>>
+    export type TermsControllerAgreeTermsV1MutationBody = AgreeTermsDto
+    export type TermsControllerAgreeTermsV1MutationError = TermsControllerAgreeTermsV1ErrorType<unknown>
+
+    /**
+ * @summary 약관 동의 저장
+ */
+export const useTermsControllerAgreeTermsV1 = <TError = TermsControllerAgreeTermsV1ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof termsControllerAgreeTermsV1>>, TError,{data: AgreeTermsDto}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof termsControllerAgreeTermsV1>>,
+        TError,
+        {data: AgreeTermsDto},
+        TContext
+      > => {
+      return useMutation(getTermsControllerAgreeTermsV1MutationOptions(options), queryClient);
     }
 

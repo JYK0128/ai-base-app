@@ -16,8 +16,6 @@ export interface CreateResourceDto {
   type: CreateResourceDtoType;
   /** 리소스 경로 */
   path?: string;
-  /** 아이콘 이름 */
-  icon?: string;
   /** 부모 리소스 식별자 */
   parentId?: string;
 }

@@ -5,8 +5,11 @@
  * The AI Base App Gateway API documentation
  * OpenAPI spec version: 1.0
  */
+import type { UpdateResourcePermissionsDtoScope } from './updateResourcePermissionsDtoScope';
 
 export interface UpdateResourcePermissionsDto {
+  /** 리소스 관리 범위 */
+  scope: UpdateResourcePermissionsDtoScope;
   /** 리소스 식별자 */
   id: string;
   /** 리소스 액션 목록 */

@@ -5,10 +5,12 @@
  * The AI Base App Gateway API documentation
  * OpenAPI spec version: 1.0
  */
+import type { UpdateResourceSortDtoScope } from './updateResourceSortDtoScope';
+import type { UpdateResourceSortItemDto } from './updateResourceSortItemDto';
 
 export interface UpdateResourceSortDto {
-  /** 리소스 식별자 */
-  id: string;
-  /** 정렬 순서 */
-  sortOrder: number;
+  /** 리소스 관리 범위 */
+  scope: UpdateResourceSortDtoScope;
+  /** 정렬 대상 목록 */
+  items: UpdateResourceSortItemDto[];
 }

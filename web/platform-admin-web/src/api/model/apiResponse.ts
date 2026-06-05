@@ -11,14 +11,17 @@ import type { ErrorInfo } from './errorInfo';
 export interface ApiResponse {
   /** 성공 여부 */
   success: boolean;
-  /** 응답 데이터 */
-  data: ApiResponseData;
+  /**
+     * 응답 데이터
+     * @nullable
+     */
+  data?: ApiResponseData;
   /** 에러 상세 정보 */
   error?: ErrorInfo;
   /** 응답 메시지 */
   message?: string;
   /** 추적 ID */
-  traceId: string;
+  traceId?: string;
   /** 요청 ID */
-  requestId: string;
+  requestId?: string;
 }

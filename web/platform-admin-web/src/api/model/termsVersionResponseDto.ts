@@ -14,6 +14,10 @@ export interface TermsVersionResponseDto {
   versionLabel: string;
   /** 약관 본문 */
   content: string;
+  /** 체크섬 */
+  checksum: string;
   /** 버전 상태 */
   status: TermsVersionResponseDtoStatus;
+  /** 효력 시각 */
+  effectiveAt: string;
 }

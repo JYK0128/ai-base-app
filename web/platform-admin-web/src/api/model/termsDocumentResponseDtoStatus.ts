@@ -15,5 +15,4 @@ export type TermsDocumentResponseDtoStatus = typeof TermsDocumentResponseDtoStat
 export const TermsDocumentResponseDtoStatus = {
   DRAFT: 'DRAFT',
   PUBLISHED: 'PUBLISHED',
-  DEPRECATED: 'DEPRECATED',
 } as const;

@@ -5,9 +5,9 @@
  * The AI Base App Gateway API documentation
  * OpenAPI spec version: 1.0
  */
-import type { AuthUserInfoDto } from './authUserInfoDto';
+import type { AuthMeUserDto } from './authMeUserDto';
 
 export interface AuthMeResponseDto {
   /** 사용자 정보 */
-  user: AuthUserInfoDto;
+  user: AuthMeUserDto;
 }

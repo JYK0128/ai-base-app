@@ -5,7 +5,6 @@
  * The AI Base App Gateway API documentation
  * OpenAPI spec version: 1.0
  */
-import type { TermsDocumentResponseDtoOrganizationId } from './termsDocumentResponseDtoOrganizationId';
 import type { TermsDocumentResponseDtoStatus } from './termsDocumentResponseDtoStatus';
 
 export interface TermsDocumentResponseDto {
@@ -15,13 +14,18 @@ export interface TermsDocumentResponseDto {
      * 조직 식별자
      * @nullable
      */
-  organizationId: TermsDocumentResponseDtoOrganizationId;
+  organizationId?: string | null;
   /** 약관 문서 코드 */
   code: string;
   /** 약관 제목 */
   title: string;
   /** 필수 약관 여부 */
   required: boolean;
+  /**
+     * 폐기 시점
+     * @nullable
+     */
+  deprecatedAt?: string | null;
   /** 문서 상태 */
   status: TermsDocumentResponseDtoStatus;
 }

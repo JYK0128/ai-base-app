@@ -8,5 +8,6 @@
 
 /**
  * 응답 데이터
+ * @nullable
  */
-export type ApiResponseData = { [key: string]: unknown };
+export type ApiResponseData = { [key: string]: unknown } | null;

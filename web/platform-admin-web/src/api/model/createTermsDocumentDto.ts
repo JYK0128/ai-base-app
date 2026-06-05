@@ -5,6 +5,7 @@
  * The AI Base App Gateway API documentation
  * OpenAPI spec version: 1.0
  */
+import type { CreateTermsDocumentDtoScope } from './createTermsDocumentDtoScope';
 
 export interface CreateTermsDocumentDto {
   /** 약관 문서 코드 */
@@ -13,6 +14,6 @@ export interface CreateTermsDocumentDto {
   title: string;
   /** 필수 약관 여부 */
   required?: boolean;
-  /** 조직 식별자 */
-  organizationId?: string;
+  /** 생성 scope */
+  scope: CreateTermsDocumentDtoScope;
 }

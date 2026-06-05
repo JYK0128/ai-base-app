@@ -23,7 +23,7 @@ const ensureError = (error: unknown): Error => {
  * 실제 요청과 인터셉터 처리를 담당합니다.
  */
 export const axios = axiosClient.create({
-  baseURL: import.meta.env.VITE_URL,
+  baseURL: import.meta.env.VITE_URL as string | undefined,
   withCredentials: true,
 });
 

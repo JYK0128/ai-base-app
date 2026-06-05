@@ -5,10 +5,13 @@
  * The AI Base App Gateway API documentation
  * OpenAPI spec version: 1.0
  */
+import type { UpdateResourceDetailBodyDtoScope } from './updateResourceDetailBodyDtoScope';
 
 export interface UpdateResourceDetailBodyDto {
   /** 리소스 식별자 */
   id: string;
+  /** 리소스 관리 범위 */
+  scope: UpdateResourceDetailBodyDtoScope;
   /** 리소스 코드 */
   code: string;
   /** 리소스 이름 */

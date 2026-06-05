@@ -8,15 +8,7 @@
 
 export interface AgreeTermsDto {
   /** 매니저 식별자 */
-  managerId: string;
+  memberId: string;
   /** 동의할 약관 버전 식별자 */
   termsVersionId: string;
-  /** 조직 식별자 */
-  organizationId?: string;
-  /** 동의 소스 */
-  source?: string;
-  /** 클라이언트 접속 주소 */
-  ipAddress?: string;
-  /** 브라우저 정보 */
-  userAgent?: string;
 }

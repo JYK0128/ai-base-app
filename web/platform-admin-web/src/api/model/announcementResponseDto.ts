@@ -5,16 +5,43 @@
  * The AI Base App Gateway API documentation
  * OpenAPI spec version: 1.0
  */
+import type { AnnouncementResponseDtoAudience } from './announcementResponseDtoAudience';
+import type { AnnouncementResponseDtoCategory } from './announcementResponseDtoCategory';
+import type { AnnouncementResponseDtoChannel } from './announcementResponseDtoChannel';
+import type { AnnouncementResponseDtoPriority } from './announcementResponseDtoPriority';
+import type { AnnouncementResponseDtoStatus } from './announcementResponseDtoStatus';
 
 export interface AnnouncementResponseDto {
   /** 공지사항 식별자 */
   id: string;
   /** 공지사항 제목 */
   title: string;
+  /** 공지사항 요약 */
+  summary: string;
   /** 공지사항 내용 */
   content: string;
+  /** 공지 분류 */
+  category: AnnouncementResponseDtoCategory;
+  /** 공지 대상 */
+  audience: AnnouncementResponseDtoAudience;
+  /** 공지 채널 */
+  channel: AnnouncementResponseDtoChannel;
+  /** 공지 우선순위 */
+  priority: AnnouncementResponseDtoPriority;
+  /** 게시 상태 */
+  status: AnnouncementResponseDtoStatus;
   /** 게시 여부 */
   isPublished: boolean;
+  /** 상단 고정 여부 */
+  pinned: boolean;
+  /** 작성자 */
+  author: string;
+  /** 게시 시작일 */
+  startAt: string;
+  /** 게시 종료일 */
+  endAt: string;
   /** 생성 일시 */
   createdAt: string;
+  /** 수정 일시 */
+  updatedAt: string;
 }

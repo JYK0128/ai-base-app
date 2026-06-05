@@ -14,6 +14,5 @@ export type ResourceDetailResponseDtoType = typeof ResourceDetailResponseDtoType
 
 export const ResourceDetailResponseDtoType = {
   MENU: 'MENU',
-  API: 'API',
   COMPONENT: 'COMPONENT',
 } as const;

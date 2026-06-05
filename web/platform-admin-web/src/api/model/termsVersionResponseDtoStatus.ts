@@ -15,5 +15,4 @@ export type TermsVersionResponseDtoStatus = typeof TermsVersionResponseDtoStatus
 export const TermsVersionResponseDtoStatus = {
   DRAFT: 'DRAFT',
   PUBLISHED: 'PUBLISHED',
-  ARCHIVED: 'ARCHIVED',
 } as const;
