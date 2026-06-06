@@ -17,6 +17,7 @@ description: 코드 수정, 버그 수정, 리팩터링, 린트/타입 오류 �
 | 섹션 | 설명 | 참조 파일 |
 | --- | --- | --- |
 | 🔄 코드 변경 표준 프로세스 | 변경 범위 파악, 구현 원칙, 영향 범위 정리, 검증 기준(Type Check, Lint), 산출물 확인, 최종 보고 방식 | `references/01_workflow_steps.md` |
+| 📝 Git 커밋 컨벤션 | 커밋 메시지 기본 구조, 타입 규격, 모노레포 Scope 가이드라인 | `references/02_git_commit_convention.md` |
 
 ---
 
