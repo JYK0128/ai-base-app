@@ -27,7 +27,7 @@
 
 ### 1.2. 폴더 내 파일 규칙 (Flat File Structure)
 
-- **Flat 구조 유지**: `commands/`와 `queries/` 폴더 내부에 하위 폴더 생성 엄격 금지 (1뎁스로 파일 나열)
+- **Flat 구조 유지**: `commands/`와 `queries/` 폴더 내부에는 하위 폴더 없이 단일 깊이(1뎁스)로만 파일을 나열하여 관리함
 - **일관된 네이밍**: 기능 단위 명칭(`[feature-name]`)을 파일명으로 활용하여 Command, Error, Handler를 단일 그룹화
   - *예시*: `create-resource.command.ts`, `create-resource.error.ts`, `create-resource.handler.ts`
 - **배럴 익스포트**: 각 폴더의 `index.ts`에서 폴더 내 모든 구성 요소를 일괄 Export 처리
@@ -48,7 +48,7 @@ export * from './delete-resource.handler';
 
 ### 2.1. `handlers.ts` 구현 표준
 
-- **도입 목적**: 수동으로 모듈 `providers`에 새 핸들러를 등록할 때 발생하는 누락 오류 전면 차단
+- **도입 목적**: 모듈 `providers` 등록 수동 작업 누락 방지 및 자동화 보장
 - **작동 원리**: 파일 이름이 `Handler`로 끝나는 클래스들만 런타임에 자동 검색/필터링하여 배열로 일괄 등록
 
 ```typescript
@@ -101,7 +101,7 @@ export class ResourceModule {}
 
 ### 2.3. 컨트롤러 라우팅 및 버스 위임 (`*.controller.ts`)
 
-- **통신 표준**: 백엔드 내부 통신이므로, HTTP 대신 마이크로서비스 데코레이터 **`@MessagePattern`** 단독 채택
+- **통신 표준**: 백엔드 내부 통신 규격으로 마이크로서비스 데코레이터 **`@MessagePattern`**을 단독으로 채택함
 - **오케스트레이션**: 전달받은 Payload/DTO를 Command 또는 Query 객체로 래핑하여 `CommandBus.execute()`로 전달
 - **참고사항**: CQRS 패턴에서는 데이터의 조회(Query) 및 변경(Command) 모두 `commandBus.execute(commandOrQuery)` 메서드로 단일 처리
 
@@ -153,9 +153,9 @@ export class ResourceController {
 
 ### 2.4. 컨트롤러 메서드 반환 타입 정의 표준 (Controller Return Types & Type Inference)
 
-- **원칙**: 게이트웨이 및 백엔드 컨트롤러 라우팅 메서드의 명시적 리턴 타입 선언(예: `: Promise<ResponseDto>`) 전면 생략
+- **원칙**: 게이트웨이 및 백엔드 컨트롤러 라우팅 메서드는 명시적인 리턴 타입 선언 없이 컴파일러의 자동 타입 추론에 위임함
 - **적용**: 컴파일러의 자동 타입 추론(`Promise<ApiResponse<T>>`)에 완전 위임
 - **핵심 근거**:
-  - **`ApiResponse` 구조 불일치 방지**: 최종 응답은 `ApiResponse.success(result)`로 감싸진 `ApiResponse<T>` 형태임. 수동으로 `Promise<T>` 기재 시 루트의 필수 속성(예: `id`) 누락으로 컴파일 에러(`Property 'id' is missing...`) 발생
-  - **Swagger 중복 정의 배제**: OpenAPI 스펙/타입 스키마는 오직 `@SwaggerResult(Dto)` 데코레이터를 통해서만 파싱됨. 메서드 시그니처 상의 타입 어노테이션은 Swagger 문서에 무영향
+  - **`ApiResponse` 구조 일관성**: 최종 응답은 `ApiResponse.success(result)`로 감싸진 `ApiResponse<T>` 형태이며 컴파일러가 최적의 구조로 자동 추론함
+  - **Swagger 사양 연동**: OpenAPI 스펙 및 타입 스키마는 `@SwaggerResult(Dto)` 데코레이터를 통해 파싱하여 관리함
 - **기대 효과**: 불필요한 보일러플레이트 제거, 컴파일 안전성 확보 및 코드 간결화

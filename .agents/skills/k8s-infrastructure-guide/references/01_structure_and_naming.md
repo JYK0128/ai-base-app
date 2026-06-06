@@ -30,5 +30,5 @@
   - `[방향]-[출발지]-[전치사]-[목적지].yaml` 포맷을 강제함
   - **올바른 예**: `egress-platform-gateway-to-infra.yaml`, `ingress-redis-from-platform-services.yaml`
 - **리소스 이름의 환경명 배제**:
-  - 리소스 이름 자체에 환경 접두사/접미사(`dev-`, `-prod` 등) 포함을 금지함
-  - 개발(dev)과 운영(prod)의 물리적 환경 분리는 네임스페이스(Namespace) 지정을 통해서만 관리함
+  - 리소스 이름 자체는 환경 접두사/접미사(`dev-`, `-prod` 등) 없이 순수 리소스 명칭으로 정의함
+  - 개발(dev)과 운영(prod)의 물리적 환경 분리는 네임스페이스(Namespace) 지정을 통해 관리함

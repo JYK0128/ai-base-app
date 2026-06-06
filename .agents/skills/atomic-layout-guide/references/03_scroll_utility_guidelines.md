@@ -6,7 +6,7 @@
 
 ## 1. 핵심 설계 배경 및 철학
 
-기존 Tailwind CSS의 `overflow-auto` 또는 `overflow-y-auto` 단독 사용 시 발생하는 주요 레이아웃 결함:
+Tailwind CSS의 `overflow-auto` 또는 `overflow-y-auto`를 사용할 때 발생할 수 있는 레이아웃 결함을 커스텀 유틸리티를 통해 해결함:
 
 1. **absolute/sticky 탈출**: 스크롤 컨테이너 내 `absolute` 자식 요소 및 `sticky` 헤더가 컨테이너 경계를 이탈함
 2. **flex 아이템 축소 실패**: 중첩 flexbox 내 `min-h-0` / `min-w-0` 미지정으로 인해 컨테이너 크기가 부모 범위를 초과함
@@ -69,11 +69,11 @@
 
 ## 3. 사용 가이드 및 규칙
 
-### 3.1. `overflow-[auto|y-auto|x-auto]` 클래스 직접 사용 금지
+### 3.1. 커스텀 스크롤 유틸리티 적용
 
-- 신규 및 리팩토링 대상 `.tsx` 파일 내에서 Tailwind 내장 `overflow-*` 대신 커스텀 유틸리티 사용 필수
-  - 🚫 **잘못된 예**: `className="flex-1 overflow-y-auto"`
-  - **올바른 예**: `className="flex-1 scroll-y"`
+- 모든 스크롤 컨테이너는 커스텀 스크롤 유틸리티(`scroll`, `scroll-y`, `scroll-x`)를 사용하여 일관된 스크롤바 및 레이아웃을 구현함
+- **작성 형태**:
+  - `className="flex-1 scroll-y"`
 
 ### 3.2. 스크롤 발생 조건 보장
 
@@ -84,6 +84,6 @@
 
 ## 4. 리팩토링 규칙
 
-- 기존 코드에서 `overflow-y-auto`, `overflow-auto`, `overflow-x-auto` 패턴을 정기적으로 탐색하여 적절한 `scroll-*` 클래스로 교체함
+- 기존 코드에서 발견되는 `overflow-y-auto`, `overflow-auto`, `overflow-x-auto` 패턴을 `scroll-*` 클래스로 교체하여 통일성 있게 관리함
 - 중복 정의된 `relative`, `min-h-0` 등은 제거하여 단순화함
   - **교체 예시**: `relative min-h-0 overflow-y-auto pr-0.5` ➡️ `scroll-y pr-0.5`

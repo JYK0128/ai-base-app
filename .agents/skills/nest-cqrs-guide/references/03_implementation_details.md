@@ -3,7 +3,7 @@
 ## 1. Command & Query 클래스 (`*.command.ts` / `*.query.ts`)
 
 - **역할**: 오직 데이터를 전달하기만 하는 순수 구조 객체
-- **제약**: 모든 필드는 변경 불가능하도록 `readonly`로 제어
+- **구조**: 모든 필드는 변경 불가능하도록 `readonly`로 제어
 
 ```typescript
 export class CreateResourceCommand {
@@ -54,11 +54,10 @@ export const CreateResourceAsserter = ExceptionGuard.setMessages(ERROR_MESSAGES)
 ### 3.1. 단언자(Asserter)의 명확한 역할 정의 및 사용 표준
 
 - **1. `assert<V>(promiseOrValue, errorCode, options?)`**
-  - **동작**: 주어진 Promise 또는 값이 falsy(`null`, `undefined` 등)이면 매핑된 예외 즉시 발생, 유효할 시 타입 캐스팅이 확보된 원래 객체 반환
+  - **동작**: 주어진 Promise 또는 값이 유효할 시 타입 캐스팅이 확보된 원래 객체 반환, 없을 시 매핑된 예외 즉시 발생
   - **용도**: 엔티티 식별(identify) 연산 시 영속 객체의 존재 여부를 검증하고 Non-Nullable 타입 개체를 즉시 안전하게 확보
-  - **이중 await 금지 (No Double Wrapping)**: DB 비동기 Promise를 직접 `assert()`에 인계하여 한 번에 가로채고 가드 가동
-    - *권장*: `await this.Asserter.assert(this.repo.findOne(id), 'NOT_FOUND')`
-    - *지양*: `const raw = await this.repo.findOne(id); await this.Asserter.assert(raw, 'NOT_FOUND')`
+  - **단일 호출 구조 (Single Await Structure)**: DB 비동기 Promise를 `assert()`에 직접 인계하여 한 번에 가로채고 가드를 가동함
+    - **권장 형태**: `await this.Asserter.assert(this.repo.findOne(id), 'NOT_FOUND')`
 
 - **2. `throwIf(condition, errorCode, options?)`**
   - **동작**: 평가된 `condition`이 `true`이면 예외 발생, `false`이면 무사 통과
@@ -70,35 +69,34 @@ export const CreateResourceAsserter = ExceptionGuard.setMessages(ERROR_MESSAGES)
 ### 3.2. 프라이빗 메서드 작성 및 호출 규칙 (Naming & Orchestration)
 
 - **1. 구체적인 자원명 명시 (Specific Naming)**
-  - **규칙**: 프라이빗 메서드 네이밍 시 `identify`, `validate` 같은 단순 동사 사용 금지, 대상 도메인 자원을 구체적으로 결합하여 작명
-  - *올바른 예*: `identifyParentResource(id)`, `validateNoDuplicateCode(code)`, `processResourceCreation(...)`
-  - *나쁜 예*: `identify()`, `validate()`, `process()`
+  - **규칙**: 프라이빗 메서드 네이밍 시 대상 도메인 자원을 구체적으로 결합하여 작명함
+  - **권장 예시**: `identifyParentResource(id)`, `validateNoDuplicateCode(code)`, `processResourceCreation(...)`
 
 - **2. 단일 오케스트레이션 유지 (Orchestration at a Glance)**
   - **시인성 확보**: 전체 제어 흐름 및 단계를 `execute()` 진입점 레벨에서 즉각 파악 가능하도록 구현
-  - **비선형적 체이닝 금지**: 프라이빗 핵심 메서드가 타 핵심 단계를 직접 내포하거나 중첩 호출하는 행위 엄격 금지 (비즈니스 흐름 은폐 방지)
+  - **선형적 흐름 유지**: 프라이빗 핵심 메서드 호출은 단계별로 분리하고 `execute()` 내에서 차례대로 호출하여 비즈니스 흐름의 가시성을 확보함
   - **Flat 구조화**: 식별, 검증, 실행 등 개별 논리 단위를 `execute()` 최상위 레벨에서 수평적(Flat)으로 나열하여 호출
   - **유연한 흐름 결합**: 요건에 따라 `식별 -> 검증 -> 추가 식별 -> 최종 실행` 등 유연하고 자연스러운 순서 조합 지원
 
 - **3. 원자성과 일관성 보장 (Atomicity & Consistency)**
   - **원자성 (Atomicity)**:
     - **단일 책임**: 검증, 식별, 실행 등 각 프라이빗 함수는 단 하나의 명확한 논리적 책임만 수행
-    - **완전 성공/실패**: 불완전한 상태 변화나 부작용(Side-effect)을 철저히 배제하고 전체 성공 혹은 예외 처리로 종결
+    - **완전 성공/실패**: 전체 성공 혹은 예외 처리로 종결되도록 구성하여 데이터 상태 변화를 안정적으로 제어
   - **일관성 (Consistency)**:
     - **결정론적 출력**: 동일 입력값 및 전제 조건에서 언제나 일관된 결과 혹은 동일한 예외를 보장
     - **무결성 수호**: 도메인 불변식(Invariant)을 철저히 수호하여 데이터 및 전체 시스템 상태 무결성 확보
 
 - **4. 생략 규칙 (Omission Rule)**:
-  - **검증 단단계 생략**: 별도의 도메인 검증이 불필요한 경우, 검증 단계를 생략하고 바로 식별이나 실행을 진행하여 흐름을 유연하게 유지
+  - **검증 단계 생략**: 별도의 도메인 검증이 불필요한 경우, 검증 단계를 생략하고 바로 식별이나 실행을 진행하여 흐름을 유연하게 유지
 
 - **5. 프라이빗 메서드 타입 추론 권장 (Private Method Type Inference)**:
-  - **원칙**: 핸들러 클래스 내부의 `private` 헬퍼 메서드(식별/검증/실행 등) 또한 명시적 리턴 타입 선언(`: Promise<void>` 또는 `: Promise<T>`)을 생략하고 자동 타입 추론에 위임할 것을 권장
+  - **원칙**: 핸들러 클래스 내부의 `private` 헬퍼 메서드(식별/검증/실행 등) 또한 명시적 리턴 타입 선언을 생략하고 자동 타입 추론에 위임할 것을 권장
   - **효과**: 프라이빗 영역 내의 내부 헬퍼들이므로 시그니처 관리 비용을 줄이고, 검증 로직 변경 시 유연한 코드 변경 지원
 
 - **6. 트랜잭션 및 동기화 관리 (`@Transactional()`)**:
   - **CUD 적용**: 상태 변경(CUD)이 발생하는 Command 핸들러의 `execute()` 메서드 상단에 `@Transactional()` 필수 적용
-  - **조회 배제**: 단순 데이터를 조회(R)하는 Query 핸들러에는 불필요한 트랜잭션 적용 지양
-  - **수동 호출 금지**: `@Transactional()` 내에서 변경 사항은 자동 동기화(Auto-Flush/Commit)되므로 `em.flush()` 및 `em.persist()` 사용 금지
+  - **조회 격리**: 단순 데이터를 조회(R)하는 Query 핸들러는 트랜잭션 없이 경량 쿼리로 처리함
+  - **자동 동기화 위임 (Auto-Flush)**: `@Transactional()` 내에서 변경 사항은 자동 동기화(Auto-Flush/Commit)되도록 설정하여 처리함
   - **ACID 규칙 준수**: 트랜잭션 내 모든 상태 변경 연산은 원자성(A), 일관성(C), 격리성(I), 지속성(D)을 엄격히 만족
 
 ```typescript

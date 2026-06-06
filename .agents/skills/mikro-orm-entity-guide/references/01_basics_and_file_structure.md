@@ -4,7 +4,6 @@
 
 - 모든 엔티티는 `CoreEntity<Entity>`를 상속받음
 - 생성 시 생략 가능한 기본값 필드는 해당 필드 타입에 직접 `Opt<T>`를 지정함
-- `CoreEntity<Entity, 'status'>` 등의 optional prop 제네릭을 기본값 필드 처리 용도로 남용하지 않음
 - 데코레이터는 `@mikro-orm/decorators/legacy` 패키지에서 임포트함
 - 관계 타입 선언 시 `Rel<T>`를 활용하며 type-only import 적용을 우선함
 - 엔티티 수정 후 `@pkg/database build` 명령어로 `metadata.json` 및 `dist/index.d.ts` 파일을 갱신함

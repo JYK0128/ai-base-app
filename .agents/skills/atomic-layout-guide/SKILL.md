@@ -28,8 +28,8 @@ description: React/Tailwind CSS 기반 반응형 블록 UI 구축 스킬. 레이
    - 구현 대상 UI가 레이아웃(배치 및 구조)인지 포지셔닝(위치 제어)인지, 혹은 내부 스크롤 영역인지 분류함
 2. **구조 설계 및 규칙 준수**:
    - 세로는 `grid`, 가로는 `flex`를 기본으로 설정함
-   - `fixed` 사용을 지양하고 헤더/푸터 등은 `sticky`나 `grid` 구조를 우선시함
-   - 스크롤 영역에는 기존 Tailwind 내장 `overflow-*` 대신 `scroll`, `scroll-y`, `scroll-x`를 사용함
+   - 헤더/푸터 등은 `sticky`나 `grid` 구조를 우선시하여 고정 위치를 구현함
+   - 스크롤 영역에는 커스텀 스크롤 유틸리티인 `scroll`, `scroll-y`, `scroll-x`를 사용하여 스타일을 일관되게 관리함
 3. **코드 구현**:
    - `references/01_layout_guidelines.md`, `references/02_positioning_and_precautions.md`, `references/03_scroll_utility_guidelines.md`에서 세부 마크업 형태를 확인하여 구현함
 4. **검증**:

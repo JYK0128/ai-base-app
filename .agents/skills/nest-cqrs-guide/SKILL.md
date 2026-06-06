@@ -29,7 +29,7 @@ description: NestJS CQRS 핸들러 및 에러/어서터 구조 작성 가이드.
 1. **대상 파악**:
    - 구현/수정 대상 NestJS CQRS 요소가 Command인지 Query인지 분류함
 2. **구현 상세 참조**:
-   - 상기 참조 파일에서 핵심 규칙(예: Asserter 이중 await 금지, Flat 구조화 등)을 확인함
+   - 상기 참조 파일에서 핵심 규칙(예: Asserter 단일 호출 구조, Flat 구조화 등)을 확인함
 3. **코드 작성**:
    - 삼중 파일 분리 규칙(`*.command.ts` / `*.query.ts`, `*.error.ts`, `*.handler.ts`)을 엄격 적용하여 구현함
 4. **검증**:

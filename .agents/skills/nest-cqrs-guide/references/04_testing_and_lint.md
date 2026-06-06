@@ -85,4 +85,4 @@ describe('GetResourceHandler', () => {
 ## 2. 기타 주의사항 및 린트 가이드
 
 - **Import 규칙**: 모듈 외부의 전역 유틸리티/공용 컴포넌트는 상대 경로(Relative Path)를 사용하고, 도메인 데이터베이스 및 패키지 구조는 `@pkg/database`와 같은 전역 단축 오라클 임포트 명칭 활용
-- **Transactional 제어**: `execute()` 내의 전체 로직 흐름이 원자적(Atomic) 트랜잭션 단위로 묶여야만 할 경우에 국한하여 부여하며, 단순 조회를 수행하는 Query 핸들러에는 전면 적용 지양
+- **Transactional 제어**: 상태 변경(CUD) 작업을 포함하여 원자적(Atomic) 트랜잭션 단위로 묶어야 하는 경우에 한하여 `@Transactional()`을 부여하며, 단순 조회(Query) 작업은 트랜잭션 없이 처리함
