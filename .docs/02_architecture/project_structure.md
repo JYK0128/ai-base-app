@@ -3,17 +3,21 @@
 ## 1. 모노레포 관리 전략
 
 * **방식**: Turborepo 기반 Monorepo로 `apps/*`, `web/*`, `packages/*` 워크스페이스를 통합 관리함.
-* **공유**: UI/Utils/Database/Config 패키지를 분리해 앱 간 중복 구현을 최소화함.
+* **공유**: UI/Shared/Database/Config 패키지를 분리해 앱 간 중복 구현을 최소화함.
 
 ## 2. 현재 기준 주요 디렉토리 구조
 
-* **apps/**: 실행 가능한 백엔드 애플리케이션(현재 `platform-auth-service`, `service-gateway`)을 관리함.
-* **web/**: 실행 가능한 프론트엔드 애플리케이션(현재 `platform-admin-web`)을 관리함.
+* **apps/**: 실행 가능한 백엔드 애플리케이션 및 마이크로서비스
+  * `platform-gateway`: API 게이트웨이 및 클라이언트 요청 진입점
+  * `platform-core-service`: 코어 비즈니스 로직 처리 마이크로서비스
+  * `platform-auth-service`: 사용자 인증 및 토큰 발급 마이크로서비스
+* **web/**: 실행 가능한 프론트엔드 애플리케이션
+  * `platform-admin-web`: 통합 어드민 포탈 웹앱
 * **packages/**: 공통 라이브러리
   * `config/`: ESLint·TypeScript·Stylelint 등 공통 빌드/정적분석 설정 (ESM 지원을 위해 .mjs 사용)
   * `database/`: MikroORM 기반 도메인 엔티티/리포지토리/시더
-  * `ui/`: 재사용 UI 컴포넌트 및 Storybook
-  * `utils/`: 프레임워크 비의존 유틸/도메인 서비스
+  * `shared/`: 프레임워크 비의존 공통 유틸/타입/헬퍼
+  * `ui/`: 재사용 UI 컴포넌트 및 Tailwind 설정
 * **mobile/**: 모바일 앱 워크스페이스 예약 경로(현재 활성 패키지 없음).
 * **.docs/**: 제안·아키텍처·명세·운영/개발 가이드·레퍼런스 문서
 * **.k8s/**: Kubernetes 배포 리소스
