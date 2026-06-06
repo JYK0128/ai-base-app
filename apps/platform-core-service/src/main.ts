@@ -19,11 +19,27 @@ async function bootstrap() {
     },
   }, { inheritAppConfig: true });
 
+  // Enable microservice (RabbitMQ Queue Consumer)
+  app.connectMicroservice<MicroserviceOptions>({
+    transport: Transport.RMQ,
+    options: {
+      urls: [ENV.RABBITMQ_URL],
+      queue: 'mail_queue',
+      queueOptions: {
+        durable: true,
+      },
+      socketOptions: {
+        frameMax: 8192,
+      },
+    },
+  }, { inheritAppConfig: true });
+
   await app.startAllMicroservices();
   await app.listen(ENV.PORT);
 
   console.log(`🚀 Platform Core Service is running on: http://localhost:${ENV.PORT}`);
   console.log(`📡 TCP Microservice listening on port: ${ENV.TCP_PORT}`);
+  console.log(`📡 RabbitMQ Microservice listening on: ${ENV.RABBITMQ_URL}`);
 }
 
 bootstrap().catch((err) => {

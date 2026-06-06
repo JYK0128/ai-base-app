@@ -12,6 +12,7 @@ import { ENV } from './env';
 import { AnnouncementModule } from './modules/announcement/announcement.module';
 import { HealthModule } from './modules/health/health.module';
 import { I18nModule } from './modules/i18n/i18n.module';
+import { MailModule } from './modules/mail/mail.module';
 import { MembersModule } from './modules/members/members.module';
 import { OrganizationModule } from './modules/organization/organization.module';
 import { RedisModule } from './modules/redis/redis.module';
@@ -50,6 +51,7 @@ import { TermsModule } from './modules/terms/terms.module';
     AnnouncementModule,
     SupportModule,
     TermsModule,
+    MailModule,
     MembersModule,
     ResourceModule,
   ],

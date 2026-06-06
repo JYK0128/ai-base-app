@@ -17,3 +17,5 @@ spec:
       port: 5432 # postgres
     - protocol: TCP
       port: 6379 # redis
+    - protocol: TCP
+      port: 5672 # rabbitmq

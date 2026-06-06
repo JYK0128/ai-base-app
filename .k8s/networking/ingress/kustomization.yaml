@@ -7,3 +7,4 @@ resources:
   - ingress-gateway-from-istio-ingress.yaml
   - ingress-postgres-from-services.yaml
   - ingress-redis-from-services.yaml
+  - ingress-rabbitmq-from-services.yaml
