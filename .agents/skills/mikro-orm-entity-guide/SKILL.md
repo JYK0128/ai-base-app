@@ -1,77 +1,36 @@
 ---
 name: mikro-orm-entity-guide
-description: MikroORM 엔티티를 작성하거나 수정할 때 사용하는 가이드입니다. CoreEntity 상속, Repository 패턴, 파일 네이밍 규칙, 스키마 정의 등을 강제합니다. 사용자가 "엔티티 생성", "DB 테이블 추가", "Entity 작성" 등을 요청할 때 이 스킬을 사용하세요.
+description: MikroORM 엔티티 작성 및 수정 가이드. CoreEntity 상속, Repository 패턴, Opt 기반 optional create payload 처리, typed metadata/embeddable 구조, Date/Enum 필드 규칙 및 metadata 재생성 강제. 엔티티/테이블/데코레이터 관련 변경 요청 시 필수 사용.
 ---
 
-# MikroORM Entity Creation Guide
+# MikroORM Entity Guide
 
-이 스킬은 프로젝트의 데이터베이스 엔티티를 일관된 포맷으로 작성하기 위한 지침을 제공합니다.
+- `packages/database` 내 MikroORM 엔티티를 일관성 있게 생성 및 수정하기 위한 개발 규칙 정의
+- 엔티티 수정 시 downstream service, gateway DTO, web generated model에 영향을 주므로 소스 코드, ORM metadata, dist 타입, 타입체크를 함께 검증함
 
-## 1. 파일 네이밍 규칙
+---
 
-- 엔티티 파일: `[domain].[name].entity.ts` (예: `terms.version.entity.ts`, `manager.terms.consent.entity.ts`)
-- 리포지토리 파일: `[domain].[name].repository.ts` (예: `terms.version.repository.ts`)
-- 위치: `packages/database/src/domains/[schema]/[sub-domain]/`
+## 📋 상세 가이드 목차 (Table of Contents)
 
-## 2. 엔티티 구조 및 데코레이터
+세부 규칙 및 구현 코드: 아래 참조 파일을 `view_file`로 열어 확인
 
-### 기본 필수 사항
+| 섹션 | 설명 | 참조 파일 |
+| --- | --- | --- |
+| 🏛️ 1. 기본 원칙 & 파일 구조 | CoreEntity 상속, 파일명 규칙, 폴더 구조 및 Imports | `references/01_basics_and_file_structure.md` |
+| 🗂️ 2. 필드 선언 규칙 | scalar 타입 및 Enum 선언 규칙, CoreEntity 필드 관리, Date 필드 정의 규칙 | `references/02_field_declarations.md` |
+| 🛠️ 3. 메타데이터 & 관계 및 워크플로우 | Typed Embeddable, Getter/Setter 제한, Relations 정의, Repository 설정 및 전체 작업 절차 | `references/03_metadata_and_relations.md` |
 
-- 모든 엔티티는 `CoreEntity`를 상속받아야 합니다.
-- `@mikro-orm/decorators/legacy` 패키지의 데코레이터를 사용합니다.
-- `@Entity` 데코레이터에 `schema`와 `repository`를 명시합니다.
+---
 
-### Imports 가이드
+## 🔄 워크플로우
 
-```typescript
-import { Collection, type Rel } from '@mikro-orm/core';
-import { Entity, Enum, ManyToOne, OneToMany, Property } from '@mikro-orm/decorators/legacy';
-import { CoreEntity } from '../../core/core.entity';
-// ... 필요한 레포지토리 및 관계 엔티티 임포트
-```
-
-### 클래스 정의 예시
-
-```typescript
-@Entity({ schema: 'platform', repository: () => MyEntityRepository })
-export class MyEntity extends CoreEntity<MyEntity, 'optionalProp'> {
-  @Property()
-  name!: string;
-
-  @Property({ nullable: true })
-  description?: string;
-
-  @Enum(() => MyStatus)
-  status: MyStatus = MyStatus.DRAFT;
-
-  @ManyToOne(() => OtherEntity)
-  otherEntity!: Rel<OtherEntity>;
-
-  @OneToMany(() => ChildEntity, (child) => child.parent)
-  children = new Collection<ChildEntity>(this);
-}
-```
-
-## 3. 관계 정의 (Relationships)
-
-- **ManyToOne**: `Rel<T>` 타입을 사용하고 `!` (non-null assertion) 또는 `?` (optional)를 적절히 사용합니다.
-- **OneToMany**: `Collection<T>` 타입을 사용하고 클래스 멤버 변수에서 `new Collection<T>(this)`로 초기화합니다.
-- **Enum**: `@Enum(() => EnumType)` 데코레이터를 사용합니다.
-
-## 4. Repository 작성
-
-엔티티와 동일한 디렉토리에 리포지토리 파일을 생성합니다.
-
-```typescript
-import { EntityRepository } from '@mikro-orm/postgresql';
-import { MyEntity } from './my.entity';
-
-export class MyEntityRepository extends EntityRepository<MyEntity> {}
-```
-
-## 5. 작성 시 주의사항
-
-1. **ID 및 공통 필드**: `id`, `createdAt`, `updatedAt`, `deletedAt` 등은 `CoreEntity`에 이미 정의되어 있으므로 중복 정의하지 마세요.
-2. **Schema**: 폴더 구조에 따라 `platform`, `core` 등의 적절한 스키마를 지정하세요.
-3. **Legacy Decorators**: 반드시 `@mikro-orm/decorators/legacy`에서 데코레이터를 가져오세요.
-4. **Circular Dependencies**: 관계 설정 시 필요하다면 `type Rel`을 사용하여 순환 참조 문제를 방지하세요.
+1. **변경 대상 정의**:
+   - 수정/추가 대상 테이블 및 엔티티 필드 스펙을 사전 분석함
+2. **참조 파일 조회**:
+   - 필드 타입에 맞는 규칙(`Opt<T>` 사용 여부, `Date` 필드 기준 등)을 상기 참조 문서에서 확인함
+3. **코드 작성**:
+   - 엔티티(`*.entity.ts`) 및 리포지토리(`*.repository.ts`) 코드를 작성함
+4. **산출물 및 타입 빌드**:
+   - `packages/database` 디렉토리에서 `@pkg/database build`를 실행하여 `metadata.json` 및 `dist/index.d.ts`를 최신으로 갱신함
+5. **검증**:
+   - `coding-change-workflow` 스킬을 활용하여 영향 범위 내 의존성 타입체크 및 린트 오류를 해결함
