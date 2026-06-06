@@ -6,6 +6,17 @@ import { TermsVersionStatus } from '@pkg/database';
 import { AgreeTermsCommand, CancelDeprecationTermsDocumentCommand, CreateTermsDocumentCommand, CreateTermsVersionCommand, DeleteTermsDocumentCommand, DeprecateTermsDocumentCommand, UpdateTermsVersionCommand } from './commands';
 import { GetActiveTermsQuery, GetTermsDocumentQuery, GetTermsDocumentsQuery, GetTermsDocumentVersionsQuery } from './queries';
 import { TERMS_SERVICE_PATTERNS } from './terms.constants';
+import type { AgreeTermsInput,
+              CancelDeprecationTermsDocumentInput,
+              CreateTermsDocumentInput,
+              CreateTermsVersionInput,
+              DeleteTermsDocumentInput,
+              DeprecateTermsDocumentInput,
+              GetActiveTermsInput,
+              GetTermsDocumentInput,
+              GetTermsDocumentsInput,
+              GetTermsDocumentVersionsInput,
+              UpdateTermsVersionInput } from './terms.types';
 
 @Controller()
 export class TermsController {
@@ -15,12 +26,12 @@ export class TermsController {
   ) {}
 
   @MessagePattern(TERMS_SERVICE_PATTERNS.TERM.ACTIVE)
-  async getActiveTerms(@Payload() data: { organizationId?: string }) {
+  async getActiveTerms(@Payload() data: GetActiveTermsInput) {
     return this.queryBus.execute(new GetActiveTermsQuery(data.organizationId));
   }
 
   @MessagePattern(TERMS_SERVICE_PATTERNS.TERM.LIST_DOCUMENTS)
-  async getTermsDocuments(@Payload() data: { organizationId?: string, scope?: 'platform' | 'organization', status?: string, keyword?: string }) {
+  async getTermsDocuments(@Payload() data: GetTermsDocumentsInput) {
     return this.queryBus.execute(new GetTermsDocumentsQuery(
       data.organizationId,
       data.scope,
@@ -30,17 +41,19 @@ export class TermsController {
   }
 
   @MessagePattern(TERMS_SERVICE_PATTERNS.TERM.GET_DOCUMENT)
-  async getTermsDocument(@Payload() data: { id: string }) {
+  async getTermsDocument(@Payload() data: GetTermsDocumentInput) {
     return this.queryBus.execute(new GetTermsDocumentQuery(data.id));
   }
 
   @MessagePattern(TERMS_SERVICE_PATTERNS.TERM.GET_DOCUMENT_VERSIONS)
-  async getTermsDocumentVersions(@Payload() data: { id: string, keyword?: string }) {
+  async getTermsDocumentVersions(@Payload() data: GetTermsDocumentVersionsInput) {
     return this.queryBus.execute(new GetTermsDocumentVersionsQuery(data.id, data.keyword));
   }
 
   @MessagePattern(TERMS_SERVICE_PATTERNS.TERM.CREATE_DOCUMENT)
-  async createDocument(@Payload() data: { code: string, title: string, required?: boolean, organizationId?: string | null }) {
+  async createDocument(
+    @Payload() data: CreateTermsDocumentInput,
+  ) {
     return this.commandBus.execute(new CreateTermsDocumentCommand(
       data.code,
       data.title,
@@ -50,7 +63,7 @@ export class TermsController {
   }
 
   @MessagePattern(TERMS_SERVICE_PATTERNS.TERM.DEPRECATE_DOCUMENT)
-  async deprecateDocument(@Payload() data: { id: string, deprecatedAt: string | Date }) {
+  async deprecateDocument(@Payload() data: DeprecateTermsDocumentInput) {
     return this.commandBus.execute(new DeprecateTermsDocumentCommand(
       data.id,
       new Date(data.deprecatedAt),
@@ -58,23 +71,19 @@ export class TermsController {
   }
 
   @MessagePattern(TERMS_SERVICE_PATTERNS.TERM.CANCEL_DEPRECATION_DOCUMENT)
-  async cancelDeprecationDocument(@Payload() data: { id: string }) {
+  async cancelDeprecationDocument(@Payload() data: CancelDeprecationTermsDocumentInput) {
     return this.commandBus.execute(new CancelDeprecationTermsDocumentCommand(data.id));
   }
 
   @MessagePattern(TERMS_SERVICE_PATTERNS.TERM.DELETE_DOCUMENT)
-  async deleteDocument(@Payload() data: { id: string }) {
+  async deleteDocument(@Payload() data: DeleteTermsDocumentInput) {
     return this.commandBus.execute(new DeleteTermsDocumentCommand(data.id));
   }
 
   @MessagePattern(TERMS_SERVICE_PATTERNS.TERM.CREATE_VERSION)
-  async createVersion(@Payload() data: {
-    termsDocumentId: string
-    label: string
-    content: string
-    effectiveAt?: Date | string
-    status?: TermsVersionStatus
-  }) {
+  async createVersion(
+    @Payload() data: CreateTermsVersionInput,
+  ) {
     return this.commandBus.execute(new CreateTermsVersionCommand(
       data.termsDocumentId,
       data.label,
@@ -85,13 +94,9 @@ export class TermsController {
   }
 
   @MessagePattern(TERMS_SERVICE_PATTERNS.TERM.UPDATE_VERSION)
-  async updateVersion(@Payload() data: {
-    id: string
-    label: string
-    content: string
-    effectiveAt: Date | string
-    status: TermsVersionStatus
-  }) {
+  async updateVersion(
+    @Payload() data: UpdateTermsVersionInput,
+  ) {
     return this.commandBus.execute(new UpdateTermsVersionCommand(
       data.id,
       data.label,
@@ -102,7 +107,7 @@ export class TermsController {
   }
 
   @MessagePattern(TERMS_SERVICE_PATTERNS.TERM.AGREE)
-  async agreeTerms(@Payload() data: { memberId: string, termsVersionId: string, organizationId?: string }) {
+  async agreeTerms(@Payload() data: AgreeTermsInput) {
     return this.commandBus.execute(new AgreeTermsCommand(
       data.memberId,
       data.termsVersionId,

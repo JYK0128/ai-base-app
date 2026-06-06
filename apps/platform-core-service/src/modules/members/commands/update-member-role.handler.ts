@@ -6,7 +6,7 @@ import { Member, MemberRepository, MemberStatus, Organization, OrganizationRepos
 import { ClsService } from 'nestjs-cls';
 
 import { resolveMemberRoleCode } from '../members.mapper';
-import type { MemberMutationResult } from '../members.types';
+import type { MemberMutationResult, MemberRole } from '../members.types';
 import { UpdateMemberRoleCommand } from './update-member-role.command';
 import { UpdateMemberRoleAsserter } from './update-member-role.error';
 
@@ -30,10 +30,10 @@ export class UpdateMemberRoleHandler implements ICommandHandler<UpdateMemberRole
   @Transactional()
   async execute(command: UpdateMemberRoleCommand): Promise<MemberMutationResult> {
     const organization = await this.identifyOrganization();
-    const member = await this.identifyMember(organization, command.id);
+    const member = await this.identifyMember(organization, command.payload.id);
     const requestedById = await this.identifyRequestUserId();
     await this.validateSelfMutation(member, requestedById);
-    const role = await this.identifyRole(organization, command.role);
+    const role = await this.identifyRole(organization, command.payload.role);
     await this.validateLastOwner(member, organization, role);
     await this.processRoleUpdate(member, organization, role);
 
@@ -100,7 +100,7 @@ export class UpdateMemberRoleHandler implements ICommandHandler<UpdateMemberRole
     }
   }
 
-  private async identifyRole(organization: Organization, role: UpdateMemberRoleCommand['role']): Promise<OrganizationRole> {
+  private async identifyRole(organization: Organization, role: MemberRole): Promise<OrganizationRole> {
     const roleCode = resolveMemberRoleCode(role);
 
     return await this.Asserter.assert(

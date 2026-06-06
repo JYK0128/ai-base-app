@@ -23,6 +23,7 @@ export class GetInvitesHandler implements IQueryHandler<GetInvitesQuery> {
   ) {}
 
   async execute(query: GetInvitesQuery): Promise<InviteRecord[]> {
+    const { search, inviteStatus, role } = query.payload;
     const organization = await this.identifyOrganization();
     const requestedById = await this.identifyRequestUserId();
     const invites = await this.loadInvites(organization);
@@ -39,9 +40,9 @@ export class GetInvitesHandler implements IQueryHandler<GetInvitesQuery> {
 
     return sortByRecentDate(
       filterInviteRecords(records, {
-        search: query.search,
-        inviteStatus: query.inviteStatus,
-        role: query.role,
+        search,
+        inviteStatus,
+        role,
       }),
     );
   }

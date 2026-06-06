@@ -1,3 +1,5 @@
+import type { ToggleMemberStatusInput } from '../members.types';
+
 export class ToggleMemberStatusCommand {
-  constructor(readonly id: string) {}
+  constructor(readonly payload: ToggleMemberStatusInput) {}
 }

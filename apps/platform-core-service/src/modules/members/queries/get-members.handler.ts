@@ -23,6 +23,7 @@ export class GetMembersHandler implements IQueryHandler<GetMembersQuery> {
   ) {}
 
   async execute(query: GetMembersQuery): Promise<MemberRecord[]> {
+    const { search, status, role } = query.payload;
     const organization = await this.identifyOrganization();
     const requestedById = await this.identifyRequestUserId();
     const loadedMembers = await this.loadMembers(organization);
@@ -43,9 +44,9 @@ export class GetMembersHandler implements IQueryHandler<GetMembersQuery> {
 
     return sortByRecentDate(
       filterMemberRecords(memberRecords, {
-        search: query.search,
-        status: query.status,
-        role: query.role,
+        search,
+        status,
+        role,
       }),
     );
   }

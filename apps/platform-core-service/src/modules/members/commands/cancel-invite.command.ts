@@ -1,3 +1,5 @@
+import type { CancelInviteInput } from '../members.types';
+
 export class CancelInviteCommand {
-  constructor(readonly id: string) {}
+  constructor(readonly payload: CancelInviteInput) {}
 }

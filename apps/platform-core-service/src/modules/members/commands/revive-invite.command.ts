@@ -1,3 +1,5 @@
+import type { ReviveInviteInput } from '../members.types';
+
 export class ReviveInviteCommand {
-  constructor(readonly id: string) {}
+  constructor(readonly payload: ReviveInviteInput) {}
 }

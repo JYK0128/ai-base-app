@@ -27,7 +27,7 @@ export class ReviveInviteHandler implements ICommandHandler<ReviveInviteCommand>
   @Transactional()
   async execute(command: ReviveInviteCommand): Promise<MemberMutationResult> {
     const organization = await this.identifyOrganization();
-    const invite = await this.identifyInvite(organization, command.id);
+    const invite = await this.identifyInvite(organization, command.payload.id);
     await this.validateInviteState(invite);
 
     this.processRevive(invite);

@@ -18,7 +18,7 @@ import { ClsService } from 'nestjs-cls';
 
 import { MailProducerService } from '../../mail/mail-producer.service';
 import { resolveMemberRoleCode } from '../members.mapper';
-import type { MemberMutationResult } from '../members.types';
+import type { MemberMutationResult, MemberRole } from '../members.types';
 import { CreateInviteCommand } from './create-invite.command';
 import { CreateInviteAsserter } from './create-invite.error';
 
@@ -44,15 +44,18 @@ export class CreateInviteHandler implements ICommandHandler<CreateInviteCommand>
   ) {}
 
   async execute(command: CreateInviteCommand): Promise<MemberMutationResult> {
+    const { name, email, role, note } = command.payload;
     const organization = await this.identifyOrganization();
     const inviter = await this.identifyInviter();
-    const role = await this.identifyRole(organization, command.role);
+    const roleEntity = await this.identifyRole(organization, role);
     const invite = await this.em.transactional(async (em) => this.processCreation(
       em,
       organization,
       inviter,
-      role,
-      command,
+      roleEntity,
+      name,
+      email,
+      note,
     ));
     const attemptId = invite.metadata.mailDelivery?.attemptId;
 
@@ -110,7 +113,7 @@ export class CreateInviteHandler implements ICommandHandler<CreateInviteCommand>
     );
   }
 
-  private async identifyRole(organization: Organization, role: CreateInviteCommand['role']): Promise<OrganizationRole> {
+  private async identifyRole(organization: Organization, role: MemberRole): Promise<OrganizationRole> {
     const roleCode = resolveMemberRoleCode(role);
 
     return await this.Asserter.assert(
@@ -124,18 +127,20 @@ export class CreateInviteHandler implements ICommandHandler<CreateInviteCommand>
     organization: Organization,
     inviter: MemberAccount,
     role: OrganizationRole,
-    command: CreateInviteCommand,
+    name: string,
+    email: string,
+    note?: string,
   ): Promise<MemberInvite> {
     const now = new Date();
-    const normalizedEmail = command.email.trim().toLowerCase();
-    const normalizedName = command.name.trim();
-    const note = command.note?.trim();
+    const normalizedEmail = email.trim().toLowerCase();
+    const normalizedName = name.trim();
+    const trimmedNote = note?.trim();
 
     await this.Asserter.throwIf(normalizedEmail.length === 0, 'INVITE_EMAIL_REQUIRED');
     await this.Asserter.throwIf(normalizedName.length === 0, 'INVITE_NAME_REQUIRED');
 
     const metadata = new MemberInviteMetadata();
-    metadata.info.note = note;
+    metadata.info.note = trimmedNote;
 
     const invite = this.inviteRepo.create({
       name: normalizedName,

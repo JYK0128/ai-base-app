@@ -1,3 +1,5 @@
+import type { ResendInviteInput } from '../members.types';
+
 export class ResendInviteCommand {
-  constructor(readonly id: string) {}
+  constructor(readonly payload: ResendInviteInput) {}
 }

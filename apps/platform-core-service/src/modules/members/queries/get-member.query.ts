@@ -1,3 +1,5 @@
+import type { GetMemberInput } from '../members.types';
+
 export class GetMemberQuery {
-  constructor(readonly id: string) {}
+  constructor(readonly payload: GetMemberInput) {}
 }

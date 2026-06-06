@@ -24,7 +24,7 @@ export class GetMemberHandler implements IQueryHandler<GetMemberQuery> {
 
   async execute(query: GetMemberQuery): Promise<MemberRecord> {
     const organization = await this.identifyOrganization();
-    const member = await this.identifyMember(organization, query.id);
+    const member = await this.identifyMember(organization, query.payload.id);
     const members = await this.loadMembers(organization);
     const invites = await this.loadInvites(organization);
     const createdByEmailLookup = buildCreatedByEmailLookup(members);

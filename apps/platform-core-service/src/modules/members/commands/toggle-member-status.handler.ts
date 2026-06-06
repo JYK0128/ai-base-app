@@ -27,7 +27,7 @@ export class ToggleMemberStatusHandler implements ICommandHandler<ToggleMemberSt
   @Transactional()
   async execute(command: ToggleMemberStatusCommand): Promise<MemberMutationResult> {
     const organization = await this.identifyOrganization();
-    const member = await this.identifyMember(organization, command.id);
+    const member = await this.identifyMember(organization, command.payload.id);
     const requestedById = await this.identifyRequestUserId();
     await this.validateSelfMutation(member, requestedById);
     await this.validateLastOwner(member, organization);

@@ -1,7 +1,6 @@
 import { Controller } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { MessagePattern, Payload } from '@nestjs/microservices';
-import type { ResourceScope, ResourceType } from '@pkg/database';
 
 import { CreatePermissionSetCommand,
          CreateResourceCommand,
@@ -13,6 +12,15 @@ import { CreatePermissionSetCommand,
 import { GetPermissionSetsQuery, GetResourceQuery, GetResourcesQuery } from './queries';
 import type { ResourceTreeNode } from './queries/get-resources.handler';
 import { RESOURCE_SERVICE_PATTERNS } from './resource.constants';
+import type { CreatePermissionSetInput,
+              CreateResourceInput,
+              DeleteResourceInput,
+              GetResourceInput,
+              GetResourcesInput,
+              UpdatePermissionSetPermissionsInput,
+              UpdateResourceDetailInput,
+              UpdateResourcePermissionsInput,
+              UpdateResourceSortInput } from './resource.types';
 
 @Controller()
 export class ResourceController {
@@ -30,18 +38,14 @@ export class ResourceController {
 
   @MessagePattern(RESOURCE_SERVICE_PATTERNS.RESOURCE.GET)
   async getResource(
-    @Payload() data: { id: string },
+    @Payload() data: GetResourceInput,
   ): Promise<unknown> {
     return this.queryBus.execute(new GetResourceQuery(data.id));
   }
 
   @MessagePattern(RESOURCE_SERVICE_PATTERNS.RESOURCE.LIST)
   async getResources(
-    @Payload() data: {
-      permissions: string[]
-      scope: ResourceScope
-      filterByPermissions: boolean
-    },
+    @Payload() data: GetResourcesInput,
   ): Promise<ResourceTreeNode[]> {
     return this.queryBus.execute(new GetResourcesQuery(
       data.permissions,
@@ -52,13 +56,7 @@ export class ResourceController {
 
   @MessagePattern(RESOURCE_SERVICE_PATTERNS.RESOURCE.CREATE)
   async createResource(
-    @Payload() data: {
-      code: string
-      name: string
-      type: ResourceType
-      path?: string
-      parentId?: string
-    },
+    @Payload() data: CreateResourceInput,
   ): Promise<unknown> {
     return this.commandBus.execute(new CreateResourceCommand(
       data.code,
@@ -71,12 +69,7 @@ export class ResourceController {
 
   @MessagePattern(RESOURCE_SERVICE_PATTERNS.PERMISSION_SET.CREATE)
   async createPermissionSet(
-    @Payload() data: {
-      code: string
-      name: string
-      description?: string
-      copyFromId?: string
-    },
+    @Payload() data: CreatePermissionSetInput,
   ) {
     return this.commandBus.execute(new CreatePermissionSetCommand(
       data.code,
@@ -88,14 +81,7 @@ export class ResourceController {
 
   @MessagePattern(RESOURCE_SERVICE_PATTERNS.RESOURCE.UPDATE_DETAIL)
   async updateResource(
-    @Payload() data: {
-      id: string
-      code: string
-      name: string
-      scope: ResourceScope
-      path?: string
-      icon?: string
-    },
+    @Payload() data: UpdateResourceDetailInput,
   ): Promise<unknown> {
     return this.commandBus.execute(new UpdateResourceDetailCommand(
       data.id,
@@ -109,12 +95,7 @@ export class ResourceController {
 
   @MessagePattern(RESOURCE_SERVICE_PATTERNS.RESOURCE.UPDATE_PERMISSIONS)
   async updateResourcePermissions(
-    @Payload() data: {
-      id: string
-      scope: ResourceScope
-      actions: string[]
-      constraint?: string
-    },
+    @Payload() data: UpdateResourcePermissionsInput,
   ): Promise<unknown> {
     return this.commandBus.execute(new UpdateResourcePermissionsCommand(
       data.id,
@@ -126,10 +107,7 @@ export class ResourceController {
 
   @MessagePattern(RESOURCE_SERVICE_PATTERNS.PERMISSION_SET.UPDATE_PERMISSIONS)
   async updatePermissionSetPermissions(
-    @Payload() data: {
-      id: string
-      permissionCodes: string[]
-    },
+    @Payload() data: UpdatePermissionSetPermissionsInput,
   ) {
     return this.commandBus.execute(new UpdatePermissionSetPermissionsCommand(
       data.id,
@@ -139,13 +117,7 @@ export class ResourceController {
 
   @MessagePattern(RESOURCE_SERVICE_PATTERNS.RESOURCE.UPDATE_SORT)
   async updateResourceSort(
-    @Payload() data: {
-      scope: ResourceScope
-      items: Array<{
-        id: string
-        sortOrder: number
-      }>
-    },
+    @Payload() data: UpdateResourceSortInput,
   ): Promise<{ success: boolean }> {
     return this.commandBus.execute(new UpdateResourceSortCommand(
       data.scope,
@@ -155,7 +127,7 @@ export class ResourceController {
 
   @MessagePattern(RESOURCE_SERVICE_PATTERNS.RESOURCE.DELETE)
   async deleteResource(
-    @Payload() data: { id: string },
+    @Payload() data: DeleteResourceInput,
   ): Promise<unknown> {
     return this.commandBus.execute(new DeleteResourceCommand(data.id));
   }

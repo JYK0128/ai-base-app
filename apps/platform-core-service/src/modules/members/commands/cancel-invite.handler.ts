@@ -23,7 +23,7 @@ export class CancelInviteHandler implements ICommandHandler<CancelInviteCommand>
   @Transactional()
   async execute(command: CancelInviteCommand): Promise<MemberMutationResult> {
     const organization = await this.identifyOrganization();
-    const invite = await this.identifyInvite(organization, command.id);
+    const invite = await this.identifyInvite(organization, command.payload.id);
     await this.validateInviteState(invite);
     this.processCancellation(invite);
 

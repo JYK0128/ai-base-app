@@ -1,8 +1,5 @@
-import type { MemberRole } from '../members.types';
+import type { UpdateMemberRoleInput } from '../members.types';
 
 export class UpdateMemberRoleCommand {
-  constructor(
-    readonly id: string,
-    readonly role: MemberRole,
-  ) {}
+  constructor(readonly payload: UpdateMemberRoleInput) {}
 }

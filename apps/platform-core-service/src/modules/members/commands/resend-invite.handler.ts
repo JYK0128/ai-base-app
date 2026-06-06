@@ -33,7 +33,7 @@ export class ResendInviteHandler implements ICommandHandler<ResendInviteCommand>
 
   async execute(command: ResendInviteCommand): Promise<MemberMutationResult> {
     const organization = await this.identifyOrganization();
-    const invite = await this.identifyInvite(organization, command.id);
+    const invite = await this.identifyInvite(organization, command.payload.id);
     await this.validateInviteState(invite);
     const inviter = await this.identifyInviter();
     await this.em.transactional(async (em) => this.processResend(em, invite));
