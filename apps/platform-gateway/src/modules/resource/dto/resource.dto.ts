@@ -183,9 +183,6 @@ export class PermissionSetResponseDto {
   @ApiProperty({ example: 3, description: '배정된 관리자 수' })
   assignmentCount!: number;
 
-  @ApiProperty({ example: true, description: '활성 여부' })
-  isActive!: boolean;
-
   @ApiProperty({ type: [String], example: ['DASHBOARD:READ', 'RESOURCE:READ'], description: '권한 코드 목록' })
   permissionCodes!: string[];
 }

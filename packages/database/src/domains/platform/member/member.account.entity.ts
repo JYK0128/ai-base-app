@@ -12,27 +12,26 @@ export enum AccountStatus {
 }
 
 @Entity({ schema: 'platform', repository: () => MemberAccountRepository })
-export class MemberAccount
-  extends CoreEntity<MemberAccount, 'status'> {
-  @Property({ unique: true })
+export class MemberAccount extends CoreEntity<MemberAccount> {
+  @Property({ type: 'string', unique: true })
   email!: string;
 
-  @Property({ hidden: true })
+  @Property({ type: 'string', hidden: true })
   password!: string;
 
-  @Property()
+  @Property({ type: Date })
   passwordExpiresAt!: Date;
 
-  @Property({ nullable: true })
+  @Property({ type: Date, nullable: true })
   lastLoginAt?: Date;
 
-  @Property({ nullable: true })
+  @Property({ type: 'string', nullable: true })
   lastLoginIp?: string;
 
   @Enum(() => AccountStatus)
-  status: AccountStatus = AccountStatus.ACTIVE;
+  status: Opt<AccountStatus> = AccountStatus.ACTIVE;
 
-  @Property({ nullable: true })
+  @Property({ type: Date, nullable: true })
   lockUntil?: Date;
 
   @ManyToOne(() => Member)

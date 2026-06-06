@@ -1,3 +1,5 @@
+import type { MailDeliveryStatus } from '../mail/mail-delivery';
+
 export type MemberRole = 'OWNER' | 'MANAGER' | 'VIEWER';
 
 export type MemberStatus = 'ACTIVE' | 'INACTIVE';
@@ -12,9 +14,13 @@ export interface MemberRecord {
   status: MemberStatus
   lastLoginAt: string | null
   invitedAt: string
-  invitedBy: string
+  createdBy?: string
   note?: string
   isMe?: boolean
+  mailDeliveryStatus?: MailDeliveryStatus
+  mailDeliveryQueuedAt?: string
+  mailDeliverySentAt?: string
+  mailDeliveryFailedAt?: string
 }
 
 export interface InviteRecord extends MemberRecord {

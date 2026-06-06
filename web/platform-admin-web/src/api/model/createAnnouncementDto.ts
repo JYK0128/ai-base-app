@@ -9,7 +9,6 @@ import type { CreateAnnouncementDtoAudience } from './createAnnouncementDtoAudie
 import type { CreateAnnouncementDtoCategory } from './createAnnouncementDtoCategory';
 import type { CreateAnnouncementDtoChannel } from './createAnnouncementDtoChannel';
 import type { CreateAnnouncementDtoPriority } from './createAnnouncementDtoPriority';
-import type { CreateAnnouncementDtoStatus } from './createAnnouncementDtoStatus';
 
 export interface CreateAnnouncementDto {
   /** 공지사항 식별자 */
@@ -26,10 +25,10 @@ export interface CreateAnnouncementDto {
   channel?: CreateAnnouncementDtoChannel;
   /** 공지 우선순위 */
   priority?: CreateAnnouncementDtoPriority;
-  /** 게시 상태 */
-  status?: CreateAnnouncementDtoStatus;
   /** 상단 고정 여부 */
   pinned?: boolean;
+  /** 게시 확정 일시 */
+  publishedAt?: string;
   /** 게시 시작일 */
   startAt?: string;
   /** 게시 종료일 */

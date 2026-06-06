@@ -1,12 +1,14 @@
 import { randomUUID } from 'node:crypto';
 
-import { Transactional } from '@mikro-orm/decorators/legacy';
 import { InjectRepository } from '@mikro-orm/nestjs';
 import { EntityManager } from '@mikro-orm/postgresql';
+import { Logger } from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { MemberAccount,
          MemberAccountRepository,
          MemberInvite,
+         MemberInviteMailDeliveryMetadata,
+         MemberInviteMetadata,
          MemberInviteRepository,
          Organization,
          OrganizationRepository,
@@ -14,6 +16,7 @@ import { MemberAccount,
          OrganizationRoleRepository } from '@pkg/database';
 import { ClsService } from 'nestjs-cls';
 
+import { MailProducerService } from '../../mail/mail-producer.service';
 import { resolveMemberRoleCode } from '../members.mapper';
 import type { MemberMutationResult } from '../members.types';
 import { CreateInviteCommand } from './create-invite.command';
@@ -24,6 +27,7 @@ const INVITE_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 @CommandHandler(CreateInviteCommand)
 export class CreateInviteHandler implements ICommandHandler<CreateInviteCommand> {
   private readonly Asserter = CreateInviteAsserter;
+  private readonly logger = new Logger(CreateInviteHandler.name);
 
   constructor(
     @InjectRepository(Organization)
@@ -36,15 +40,43 @@ export class CreateInviteHandler implements ICommandHandler<CreateInviteCommand>
     private readonly roleRepo: OrganizationRoleRepository,
     private readonly em: EntityManager,
     private readonly cls: ClsService,
+    private readonly mailProducer: MailProducerService,
   ) {}
 
-  @Transactional()
   async execute(command: CreateInviteCommand): Promise<MemberMutationResult> {
     const organization = await this.identifyOrganization();
     const inviter = await this.identifyInviter();
     const role = await this.identifyRole(organization, command.role);
+    const invite = await this.em.transactional(async (em) => this.processCreation(
+      em,
+      organization,
+      inviter,
+      role,
+      command,
+    ));
+    const attemptId = invite.metadata.mailDelivery?.attemptId;
 
-    return await this.processCreation(organization, inviter, role, command);
+    if (!attemptId) {
+      throw new Error('MAIL_DELIVERY_ATTEMPT_ID_NOT_FOUND');
+    }
+
+    try {
+      await this.mailProducer.sendInviteEmail({
+        inviteId: invite.id,
+        attemptId,
+        email: invite.email,
+        organizationName: organization.name,
+        inviterName: inviter.member.name,
+        token: invite.token,
+      });
+    }
+    catch (error) {
+      this.logger.warn(`Failed to publish invite email event for invite ${invite.id} attempt ${attemptId}: ${error instanceof Error ? error.message : String(error)}`);
+    }
+
+    return {
+      id: invite.id,
+    };
   }
 
   private async identifyOrganization(): Promise<Organization> {
@@ -61,7 +93,7 @@ export class CreateInviteHandler implements ICommandHandler<CreateInviteCommand>
   }
 
   private async identifyInviter(): Promise<MemberAccount> {
-    const requestedById = this.cls.get('memberId');
+    const requestedById = this.cls.get('accountId');
 
     if (!requestedById) {
       return this.Asserter.throw('REQUEST_CONTEXT_NOT_FOUND');
@@ -88,11 +120,12 @@ export class CreateInviteHandler implements ICommandHandler<CreateInviteCommand>
   }
 
   private async processCreation(
+    em: EntityManager,
     organization: Organization,
     inviter: MemberAccount,
     role: OrganizationRole,
     command: CreateInviteCommand,
-  ): Promise<MemberMutationResult> {
+  ): Promise<MemberInvite> {
     const now = new Date();
     const normalizedEmail = command.email.trim().toLowerCase();
     const normalizedName = command.name.trim();
@@ -101,24 +134,22 @@ export class CreateInviteHandler implements ICommandHandler<CreateInviteCommand>
     await this.Asserter.throwIf(normalizedEmail.length === 0, 'INVITE_EMAIL_REQUIRED');
     await this.Asserter.throwIf(normalizedName.length === 0, 'INVITE_NAME_REQUIRED');
 
+    const metadata = new MemberInviteMetadata();
+    metadata.info.note = note;
+
     const invite = this.inviteRepo.create({
       name: normalizedName,
       email: normalizedEmail,
       role,
       organization,
       token: randomUUID(),
-      invitedBy: inviter.member,
-      invitedAt: now,
       expiresAt: new Date(now.getTime() + INVITE_TTL_MS),
-      metadata: {
-        note,
-      },
+      metadata,
     });
 
-    this.em.persist(invite);
+    invite.metadata.mailDelivery = new MemberInviteMailDeliveryMetadata({ queuedAt: now });
+    em.persist(invite);
 
-    return {
-      id: invite.id,
-    };
+    return invite;
   }
 }

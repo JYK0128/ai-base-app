@@ -15,22 +15,22 @@ export abstract class CoreEntity<
   @PrimaryKey()
   id: string = uuidv7();
 
-  @Property()
+  @Property({ type: Date })
   createdAt: Date = new Date();
 
-  @Property({ nullable: true })
+  @Property({ type: 'string', nullable: true })
   createdBy?: string;
 
-  @Property({ nullable: true })
+  @Property({ type: Date, nullable: true })
   updatedAt?: Date;
 
-  @Property({ nullable: true })
+  @Property({ type: 'string', nullable: true })
   updatedBy?: string;
 
-  @Property({ nullable: true })
+  @Property({ type: Date, nullable: true })
   deletedAt?: Date;
 
-  @Property({ nullable: true })
+  @Property({ type: 'string', nullable: true })
   deletedBy?: string;
 
   @Property({ type: 'json', nullable: true })

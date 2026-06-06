@@ -3,7 +3,7 @@ import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
 import { Member, MemberInvite, MemberInviteRepository, MemberRepository, Organization, OrganizationRepository } from '@pkg/database';
 import { ClsService } from 'nestjs-cls';
 
-import { buildInviteRecord, filterInviteRecords, getLinkedMember, sortByRecentDate } from '../members.mapper';
+import { buildCreatedByEmailLookup, buildInviteRecord, filterInviteRecords, getLinkedMember, sortByRecentDate } from '../members.mapper';
 import type { InviteRecord } from '../members.types';
 import { GetInvitesAsserter } from './get-invites.error';
 import { GetInvitesQuery } from './get-invites.query';
@@ -27,11 +27,13 @@ export class GetInvitesHandler implements IQueryHandler<GetInvitesQuery> {
     const requestedById = await this.identifyRequestUserId();
     const invites = await this.loadInvites(organization);
     const members = await this.loadMembers(organization);
+    const createdByEmailLookup = buildCreatedByEmailLookup(members);
 
     const records = invites.map((invite) => buildInviteRecord(
       invite,
       organization,
       requestedById,
+      createdByEmailLookup,
       getLinkedMember(members, invite),
     ));
 
@@ -58,7 +60,7 @@ export class GetInvitesHandler implements IQueryHandler<GetInvitesQuery> {
   }
 
   private async identifyRequestUserId(): Promise<string> {
-    const requestedById = this.cls.get('memberId');
+    const requestedById = this.cls.get('accountId');
 
     if (!requestedById) {
       return this.Asserter.throw('REQUEST_CONTEXT_NOT_FOUND');
@@ -85,7 +87,7 @@ export class GetInvitesHandler implements IQueryHandler<GetInvitesQuery> {
       this.inviteRepo.find(
         { organization },
         {
-          populate: ['role', 'invitedBy', 'invitedBy.accounts'],
+          populate: ['role'],
           orderBy: { createdAt: 'DESC' },
         },
       ),

@@ -232,9 +232,10 @@ export const AnnouncementsControllerGetAnnouncementsV1Response = zod.object({
   "channel": zod.enum(['IN_APP', 'EMAIL', 'PUSH']).describe('공지 채널'),
   "priority": zod.enum(['LOW', 'NORMAL', 'HIGH']).describe('공지 우선순위'),
   "status": zod.enum(['DRAFT', 'PUBLISHED']).describe('게시 상태'),
-  "isPublished": zod.boolean().describe('게시 여부'),
+  "isPublished": zod.boolean().describe('게시 확정 여부'),
   "pinned": zod.boolean().describe('상단 고정 여부'),
   "author": zod.string().describe('작성자'),
+  "publishedAt": zod.string().describe('게시 확정 일시'),
   "startAt": zod.string().describe('게시 시작일'),
   "endAt": zod.string().describe('게시 종료일'),
   "createdAt": zod.string().describe('생성 일시'),
@@ -255,8 +256,8 @@ export const AnnouncementsControllerCreateAnnouncementV1Body = zod.object({
   "audience": zod.enum(['ALL', 'PLATFORM', 'ORGANIZATION']).optional().describe('공지 대상'),
   "channel": zod.enum(['IN_APP', 'EMAIL', 'PUSH']).optional().describe('공지 채널'),
   "priority": zod.enum(['LOW', 'NORMAL', 'HIGH']).optional().describe('공지 우선순위'),
-  "status": zod.enum(['DRAFT', 'PUBLISHED']).optional().describe('게시 상태'),
   "pinned": zod.boolean().optional().describe('상단 고정 여부'),
+  "publishedAt": zod.string().optional().describe('게시 확정 일시'),
   "startAt": zod.string().optional().describe('게시 시작일'),
   "endAt": zod.string().optional().describe('게시 종료일')
 })
@@ -288,9 +289,10 @@ export const AnnouncementsControllerCreateAnnouncementV1Response = zod.object({
   "channel": zod.enum(['IN_APP', 'EMAIL', 'PUSH']).describe('공지 채널'),
   "priority": zod.enum(['LOW', 'NORMAL', 'HIGH']).describe('공지 우선순위'),
   "status": zod.enum(['DRAFT', 'PUBLISHED']).describe('게시 상태'),
-  "isPublished": zod.boolean().describe('게시 여부'),
+  "isPublished": zod.boolean().describe('게시 확정 여부'),
   "pinned": zod.boolean().describe('상단 고정 여부'),
   "author": zod.string().describe('작성자'),
+  "publishedAt": zod.string().describe('게시 확정 일시'),
   "startAt": zod.string().describe('게시 시작일'),
   "endAt": zod.string().describe('게시 종료일'),
   "createdAt": zod.string().describe('생성 일시'),
@@ -600,9 +602,13 @@ export const MembersControllerGetInvitesV1Response = zod.object({
   "lastLoginAt": zod.looseObject({
 
 }).nullable().describe('최근 로그인'),
-  "invitedAt": zod.string().describe('초대 일시'),
-  "invitedBy": zod.string().describe('초대한 사람'),
+  "invitedAt": zod.string().describe('초대 일시 (생성 시각 기준)'),
+  "createdBy": zod.string().optional().describe('초대한 사람'),
   "note": zod.string().optional().describe('메모'),
+  "mailDeliveryStatus": zod.enum(['QUEUED', 'SENT', 'FAILED']).optional().describe('메일 전송 상태'),
+  "mailDeliveryQueuedAt": zod.string().optional().describe('메일 큐 적재 시각'),
+  "mailDeliverySentAt": zod.string().optional().describe('메일 전송 성공 시각'),
+  "mailDeliveryFailedAt": zod.string().optional().describe('메일 전송 실패 시각'),
   "isMe": zod.boolean().describe('현재 사용자 여부'),
   "expiresAt": zod.string().describe('만료 일시'),
   "inviteStatus": zod.enum(['PENDING', 'CANCELED', 'ACCEPTED', 'REJECTED']).describe('초대 상태')
@@ -680,9 +686,13 @@ export const MembersControllerGetMembersV1Response = zod.object({
   "lastLoginAt": zod.looseObject({
 
 }).nullable().describe('최근 로그인'),
-  "invitedAt": zod.string().describe('초대 일시'),
-  "invitedBy": zod.string().describe('초대한 사람'),
+  "invitedAt": zod.string().describe('초대 일시 (생성 시각 기준)'),
+  "createdBy": zod.string().optional().describe('초대한 사람'),
   "note": zod.string().optional().describe('메모'),
+  "mailDeliveryStatus": zod.enum(['QUEUED', 'SENT', 'FAILED']).optional().describe('메일 전송 상태'),
+  "mailDeliveryQueuedAt": zod.string().optional().describe('메일 큐 적재 시각'),
+  "mailDeliverySentAt": zod.string().optional().describe('메일 전송 성공 시각'),
+  "mailDeliveryFailedAt": zod.string().optional().describe('메일 전송 실패 시각'),
   "isMe": zod.boolean().describe('현재 사용자 여부')
 })).optional()
 }))
@@ -722,9 +732,13 @@ export const MembersControllerGetMemberV1Response = zod.object({
   "lastLoginAt": zod.looseObject({
 
 }).nullable().describe('최근 로그인'),
-  "invitedAt": zod.string().describe('초대 일시'),
-  "invitedBy": zod.string().describe('초대한 사람'),
+  "invitedAt": zod.string().describe('초대 일시 (생성 시각 기준)'),
+  "createdBy": zod.string().optional().describe('초대한 사람'),
   "note": zod.string().optional().describe('메모'),
+  "mailDeliveryStatus": zod.enum(['QUEUED', 'SENT', 'FAILED']).optional().describe('메일 전송 상태'),
+  "mailDeliveryQueuedAt": zod.string().optional().describe('메일 큐 적재 시각'),
+  "mailDeliverySentAt": zod.string().optional().describe('메일 전송 성공 시각'),
+  "mailDeliveryFailedAt": zod.string().optional().describe('메일 전송 실패 시각'),
   "isMe": zod.boolean().describe('현재 사용자 여부')
 }).optional()
 }))
@@ -1080,7 +1094,6 @@ export const ResourceControllerGetPermissionSetsV1Response = zod.object({
   "name": zod.string().describe('권한 세트 이름'),
   "description": zod.string().optional().describe('권한 세트 설명'),
   "assignmentCount": zod.number().describe('배정된 관리자 수'),
-  "isActive": zod.boolean().describe('활성 여부'),
   "permissionCodes": zod.array(zod.string()).describe('권한 코드 목록')
 })).optional()
 }))
@@ -1120,7 +1133,6 @@ export const ResourceControllerCreatePermissionSetV1Response = zod.object({
   "name": zod.string().describe('권한 세트 이름'),
   "description": zod.string().optional().describe('권한 세트 설명'),
   "assignmentCount": zod.number().describe('배정된 관리자 수'),
-  "isActive": zod.boolean().describe('활성 여부'),
   "permissionCodes": zod.array(zod.string()).describe('권한 코드 목록')
 }).optional()
 }))
@@ -1339,7 +1351,6 @@ export const ResourceControllerUpdatePermissionSetPermissionsV1Response = zod.ob
   "name": zod.string().describe('권한 세트 이름'),
   "description": zod.string().optional().describe('권한 세트 설명'),
   "assignmentCount": zod.number().describe('배정된 관리자 수'),
-  "isActive": zod.boolean().describe('활성 여부'),
   "permissionCodes": zod.array(zod.string()).describe('권한 코드 목록')
 }).optional()
 }))

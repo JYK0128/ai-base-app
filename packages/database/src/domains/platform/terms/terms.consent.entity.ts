@@ -7,8 +7,7 @@ import { TermsConsentRepository } from './terms.consent.repository';
 import { TermsVersion } from './terms.version.entity';
 
 @Entity({ schema: 'platform', repository: () => TermsConsentRepository })
-export class TermsConsent
-  extends CoreEntity<TermsConsent> {
+export class TermsConsent extends CoreEntity<TermsConsent> {
   @ManyToOne(() => Member)
   member!: Rel<Member>;
 

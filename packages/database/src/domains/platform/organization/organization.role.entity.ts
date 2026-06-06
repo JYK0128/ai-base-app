@@ -12,13 +12,13 @@ export class OrganizationRole extends CoreEntity<OrganizationRole> {
   @ManyToOne(() => Organization)
   organization!: Rel<Organization>;
 
-  @Property()
+  @Property({ type: 'string' })
   code!: string;
 
-  @Property()
+  @Property({ type: 'string' })
   name!: string;
 
-  @Property({ nullable: true })
+  @Property({ type: 'string', nullable: true })
   description?: string;
 
   @OneToMany(() => OrganizationPermission, (permission) => permission.role)

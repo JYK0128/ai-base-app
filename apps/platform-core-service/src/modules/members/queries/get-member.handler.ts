@@ -3,7 +3,7 @@ import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
 import { Member, MemberInvite, MemberInviteRepository, MemberRepository, Organization, OrganizationRepository } from '@pkg/database';
 import { ClsService } from 'nestjs-cls';
 
-import { buildMemberRecord, getLinkedInvite } from '../members.mapper';
+import { buildCreatedByEmailLookup, buildMemberRecord, getLinkedInvite } from '../members.mapper';
 import type { MemberRecord } from '../members.types';
 import { GetMemberAsserter } from './get-member.error';
 import { GetMemberQuery } from './get-member.query';
@@ -25,7 +25,9 @@ export class GetMemberHandler implements IQueryHandler<GetMemberQuery> {
   async execute(query: GetMemberQuery): Promise<MemberRecord> {
     const organization = await this.identifyOrganization();
     const member = await this.identifyMember(organization, query.id);
+    const members = await this.loadMembers(organization);
     const invites = await this.loadInvites(organization);
+    const createdByEmailLookup = buildCreatedByEmailLookup(members);
     const linkedInvite = getLinkedInvite(invites, member);
     const requestedById = await this.identifyRequestUserId();
 
@@ -33,6 +35,7 @@ export class GetMemberHandler implements IQueryHandler<GetMemberQuery> {
       member,
       organization,
       requestedById,
+      createdByEmailLookup,
       linkedInvite,
     );
   }
@@ -51,7 +54,7 @@ export class GetMemberHandler implements IQueryHandler<GetMemberQuery> {
   }
 
   private async identifyRequestUserId(): Promise<string> {
-    const requestedById = this.cls.get('memberId');
+    const requestedById = this.cls.get('accountId');
 
     if (!requestedById) {
       return this.Asserter.throw('REQUEST_CONTEXT_NOT_FOUND');
@@ -72,12 +75,25 @@ export class GetMemberHandler implements IQueryHandler<GetMemberQuery> {
     );
   }
 
+  private async loadMembers(organization: Organization) {
+    return await this.Asserter.assert(
+      this.memberRepo.find(
+        { organization },
+        {
+          populate: ['accounts', 'organizationRoles.role', 'organizationRoles.organization'],
+          orderBy: { createdAt: 'DESC' },
+        },
+      ),
+      'LOAD_FAILED',
+    );
+  }
+
   private async loadInvites(organization: Organization) {
     return await this.Asserter.assert(
       this.inviteRepo.find(
         { organization },
         {
-          populate: ['role', 'invitedBy', 'invitedBy.accounts'],
+          populate: ['role'],
         },
       ),
       'LOAD_FAILED',

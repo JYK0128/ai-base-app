@@ -1,12 +1,8 @@
+import type { AnnouncementAudience, AnnouncementCategory, AnnouncementChannel, AnnouncementPriority } from '@pkg/database';
+
+export type { AnnouncementAudience, AnnouncementCategory, AnnouncementChannel, AnnouncementPriority } from '@pkg/database';
+
 export type AnnouncementStatus = 'DRAFT' | 'PUBLISHED';
-
-export type AnnouncementCategory = 'NOTICE' | 'MAINTENANCE' | 'SECURITY' | 'EVENT';
-
-export type AnnouncementAudience = 'ALL' | 'PLATFORM' | 'ORGANIZATION';
-
-export type AnnouncementChannel = 'IN_APP' | 'EMAIL' | 'PUSH';
-
-export type AnnouncementPriority = 'LOW' | 'NORMAL' | 'HIGH';
 
 export interface AnnouncementInput {
   id?: string
@@ -16,19 +12,19 @@ export interface AnnouncementInput {
   audience?: AnnouncementAudience
   channel?: AnnouncementChannel
   priority?: AnnouncementPriority
-  status?: AnnouncementStatus
-  isPublished?: boolean
   pinned?: boolean
+  publishedAt?: string
   startAt?: string
   endAt?: string
 }
 
-export interface AnnouncementMetadata {
+export interface AnnouncementRecordMetadata {
   category: AnnouncementCategory
   audience: AnnouncementAudience
   channel: AnnouncementChannel
   priority: AnnouncementPriority
   pinned: boolean
+  publishedAt: string
   startAt: string
   endAt: string
 }
@@ -46,6 +42,7 @@ export interface AnnouncementRecord {
   isPublished: boolean
   pinned: boolean
   author: string
+  publishedAt: string
   startAt: string
   endAt: string
   createdAt: string

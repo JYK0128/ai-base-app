@@ -20,13 +20,15 @@ export class GetAnnouncementsHandler implements IQueryHandler<GetAnnouncementsQu
   ) {}
 
   async execute(query: GetAnnouncementsQuery): Promise<AnnouncementRecord[]> {
-    const filter = query.isPublishedOnly ? { isPublished: true } : {};
-
-    const announcements = await this.announcementRepo.find(filter, {
+    const announcements = await this.announcementRepo.find({}, {
       populate: ['author.accounts'],
       orderBy: { createdAt: 'DESC' },
     });
 
-    return announcements.map((announcement) => buildAnnouncementRecord(announcement));
+    const filteredAnnouncements = query.isPublishedOnly
+      ? announcements.filter((announcement) => announcement.isPublished)
+      : announcements;
+
+    return filteredAnnouncements.map((announcement) => buildAnnouncementRecord(announcement));
   }
 }

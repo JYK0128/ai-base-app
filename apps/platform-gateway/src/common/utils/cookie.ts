@@ -1,6 +1,6 @@
 import type { CookieOptions } from 'express';
 
-// TODO: csrf 토큰
+// csrf 토큰
 // origin, referrer 검사
 
 /**

@@ -35,17 +35,17 @@ export class CreateAnnouncementDto {
   @IsIn(['LOW', 'NORMAL', 'HIGH'])
   priority?: string;
 
-  @ApiPropertyOptional({ example: 'PUBLISHED', enum: ['DRAFT', 'PUBLISHED'], description: '게시 상태' })
-  @IsOptional()
-  @IsIn(['DRAFT', 'PUBLISHED'])
-  status?: string;
-
   @ApiPropertyOptional({ example: false, description: '상단 고정 여부' })
   @IsOptional()
   @IsBoolean()
   pinned?: boolean;
 
-  @ApiPropertyOptional({ example: '2026-06-01T09:00:00.000Z', description: '게시 시작일' })
+  @ApiPropertyOptional({ example: '2026-06-01T09:00:00.000Z', description: '게시 확정 일시' })
+  @IsOptional()
+  @IsDateString()
+  publishedAt?: string;
+
+  @ApiPropertyOptional({ example: '2026-06-03T09:00:00.000Z', description: '게시 시작일' })
   @IsOptional()
   @IsDateString()
   startAt?: string;
@@ -57,7 +57,7 @@ export class CreateAnnouncementDto {
 }
 
 export class GetAnnouncementsQueryDto {
-  @ApiPropertyOptional({ example: false, description: '게시된 공지사항만 조회 여부' })
+  @ApiPropertyOptional({ example: false, description: '게시 확정된 공지사항만 조회 여부' })
   @IsOptional()
   @IsBoolean()
   isPublishedOnly?: boolean;

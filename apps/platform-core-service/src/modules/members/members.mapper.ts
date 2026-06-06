@@ -1,12 +1,8 @@
 import type { Loaded } from '@mikro-orm/core';
 import { type Member, type MemberInvite, MemberStatus as DbMemberStatus, type Organization, type OrganizationRoleAssignment } from '@pkg/database';
 
+import { resolveMailDeliveryView } from '../mail/mail-delivery';
 import type { InviteRecord, MemberRecord, MemberRole, MemberStatus } from './members.types';
-
-function getMetadataString(metadata: Record<string, unknown> | undefined, key: string): string | undefined {
-  const value = metadata?.[key];
-  return typeof value === 'string' ? value : undefined;
-}
 
 function normalizeEmail(value: string | undefined): string | undefined {
   const normalized = value?.trim().toLowerCase();
@@ -67,16 +63,13 @@ function getMemberEmail(member: Member): string {
 }
 
 function getMemberEmailCandidates(member: Member): string[] {
-  return [
-    normalizeEmail(getPrimaryAccount(member).email),
-    normalizeEmail(getMetadataString(member.metadata, 'email')),
-  ].filter((value): value is string => !!value);
+  return [normalizeEmail(getPrimaryAccount(member).email)].filter((value): value is string => !!value);
 }
 
 function getInviteEmailCandidates(invite: MemberInvite): string[] {
   return [
     normalizeEmail(invite.email),
-    normalizeEmail(getMetadataString(invite.metadata, 'email')),
+    normalizeEmail(invite.metadata.info.email),
   ].filter((value): value is string => !!value);
 }
 
@@ -85,11 +78,19 @@ function hasSharedEmail(left: string[], right: string[]): boolean {
   return right.some((email) => emailSet.has(email));
 }
 
-function getInvitedAt(member?: Member, invite?: MemberInvite): string {
-  if (invite?.invitedAt) {
-    return invite.invitedAt.toISOString();
+export function buildCreatedByEmailLookup(members: Member[]): Map<string, string> {
+  const lookup = new Map<string, string>();
+
+  for (const member of members) {
+    for (const account of member.accounts.getItems()) {
+      lookup.set(account.id, account.email);
+    }
   }
 
+  return lookup;
+}
+
+function getInvitedAt(member?: Member, invite?: MemberInvite): string {
   if (invite) {
     return invite.createdAt.toISOString();
   }
@@ -101,25 +102,27 @@ function getInvitedAt(member?: Member, invite?: MemberInvite): string {
   throw new Error('Invited at timestamp is required');
 }
 
-function getInvitedBy(member?: Member, invite?: MemberInvite): string {
-  const inviterEmail = invite?.invitedBy.accounts.getItems()[0]?.email
-    ?? member?.organization.email
-    ?? invite?.organization.email;
+function getCreatedBy(
+  member: Member | undefined,
+  invite: MemberInvite | undefined,
+  createdByEmailLookup: ReadonlyMap<string, string>,
+): string | undefined {
+  const creatorAccountId = invite?.createdBy ?? member?.createdBy;
 
-  if (inviterEmail) {
-    return inviterEmail;
+  if (!creatorAccountId) {
+    return undefined;
   }
 
-  throw new Error('Invited by email is required');
+  return createdByEmailLookup.get(creatorAccountId);
 }
 
 function getNote(member?: Member, invite?: MemberInvite): string | undefined {
-  const inviteNote = getMetadataString(invite?.metadata, 'note');
+  const inviteNote = invite?.metadata.info.note;
   if (inviteNote) {
     return inviteNote;
   }
 
-  return getMetadataString(member?.metadata, 'note');
+  return undefined;
 }
 
 function getMemberStatus(member: Member): MemberStatus {
@@ -164,9 +167,12 @@ export function buildMemberRecord(
   member: Member,
   organization: Organization,
   requestedById: string,
+  createdByEmailLookup: ReadonlyMap<string, string>,
   invite?: MemberInvite,
 ): MemberRecord {
   const roleCode = getRoleCode(member, organization.id, invite);
+  const createdBy = getCreatedBy(member, invite, createdByEmailLookup);
+  const mailDelivery = resolveMailDeliveryView(invite);
 
   return {
     id: member.id,
@@ -176,8 +182,9 @@ export function buildMemberRecord(
     status: getMemberStatus(member),
     lastLoginAt: getLatestLoginAt(member),
     invitedAt: getInvitedAt(member, invite),
-    invitedBy: getInvitedBy(member, invite),
+    ...(createdBy !== undefined ? { createdBy } : {}),
     note: getNote(member, invite),
+    ...(mailDelivery ?? {}),
     isMe: member.accounts.getItems().some((account) => account.id === requestedById),
   };
 }
@@ -186,6 +193,7 @@ export function buildInviteRecord(
   invite: MemberInvite,
   organization: Organization,
   requestedById: string,
+  createdByEmailLookup: ReadonlyMap<string, string>,
   member?: Member,
 ): InviteRecord {
   const linkedMember = member && hasSharedEmail(getMemberEmailCandidates(member), getInviteEmailCandidates(invite))
@@ -194,6 +202,8 @@ export function buildInviteRecord(
   const roleCode = linkedMember
     ? getRoleCode(linkedMember, organization.id, invite)
     : invite.role.code;
+  const createdBy = getCreatedBy(linkedMember, invite, createdByEmailLookup);
+  const mailDelivery = resolveMailDeliveryView(invite);
 
   let status: MemberStatus = 'INACTIVE';
 
@@ -211,8 +221,9 @@ export function buildInviteRecord(
     expiresAt: invite.expiresAt.toISOString(),
     lastLoginAt: linkedMember ? getLatestLoginAt(linkedMember) : null,
     invitedAt: getInvitedAt(linkedMember, invite),
-    invitedBy: getInvitedBy(linkedMember, invite),
+    ...(createdBy !== undefined ? { createdBy } : {}),
     note: getNote(linkedMember, invite),
+    ...(mailDelivery ?? {}),
     isMe: !!linkedMember && linkedMember.accounts.getItems().some((account) => account.id === requestedById),
   };
 }
@@ -239,7 +250,7 @@ export function filterMemberRecords(
       record.status,
       record.lastLoginAt ?? '',
       record.invitedAt,
-      record.invitedBy,
+      record.createdBy ?? '',
       record.note ?? '',
     ]
       .join(' ')
@@ -272,7 +283,7 @@ export function filterInviteRecords(
       record.inviteStatus,
       record.lastLoginAt ?? '',
       record.invitedAt,
-      record.invitedBy,
+      record.createdBy ?? '',
       record.note ?? '',
     ]
       .join(' ')

@@ -3,7 +3,7 @@ import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
 import { Member, MemberInvite, MemberInviteRepository, MemberRepository, Organization, OrganizationRepository } from '@pkg/database';
 import { ClsService } from 'nestjs-cls';
 
-import { buildMemberRecord, filterMemberRecords, getLinkedInvite, sortByRecentDate } from '../members.mapper';
+import { buildCreatedByEmailLookup, buildMemberRecord, filterMemberRecords, getLinkedInvite, sortByRecentDate } from '../members.mapper';
 import type { MemberRecord } from '../members.types';
 import { GetMembersAsserter } from './get-members.error';
 import { GetMembersQuery } from './get-members.query';
@@ -27,6 +27,7 @@ export class GetMembersHandler implements IQueryHandler<GetMembersQuery> {
     const requestedById = await this.identifyRequestUserId();
     const loadedMembers = await this.loadMembers(organization);
     const invites = await this.loadInvites(organization);
+    const createdByEmailLookup = buildCreatedByEmailLookup(loadedMembers);
 
     const memberRecords = loadedMembers.map((member) => {
       const linkedInvite = getLinkedInvite(invites, member);
@@ -35,6 +36,7 @@ export class GetMembersHandler implements IQueryHandler<GetMembersQuery> {
         member,
         organization,
         requestedById,
+        createdByEmailLookup,
         linkedInvite,
       );
     });
@@ -62,7 +64,7 @@ export class GetMembersHandler implements IQueryHandler<GetMembersQuery> {
   }
 
   private async identifyRequestUserId(): Promise<string> {
-    const requestedById = this.cls.get('memberId');
+    const requestedById = this.cls.get('accountId');
 
     if (!requestedById) {
       return this.Asserter.throw('REQUEST_CONTEXT_NOT_FOUND');
@@ -89,7 +91,7 @@ export class GetMembersHandler implements IQueryHandler<GetMembersQuery> {
       this.inviteRepo.find(
         { organization },
         {
-          populate: ['role', 'invitedBy', 'invitedBy.accounts'],
+          populate: ['role'],
           orderBy: { createdAt: 'DESC' },
         },
       ),

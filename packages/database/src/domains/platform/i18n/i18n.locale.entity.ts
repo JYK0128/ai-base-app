@@ -1,3 +1,4 @@
+import type { Opt } from '@mikro-orm/core';
 import { Entity, Enum, Property } from '@mikro-orm/decorators/legacy';
 
 import { CoreEntity } from '../../core/core.entity';
@@ -9,7 +10,7 @@ export enum I18nLocaleDirection {
 }
 
 @Entity({ schema: 'platform', repository: () => I18nLocaleRepository })
-export class I18nLocale extends CoreEntity<I18nLocale, 'direction' | 'isActive' | 'isDefault' | 'sortOrder'> {
+export class I18nLocale extends CoreEntity<I18nLocale> {
   @Property({ type: 'string', unique: true })
   code!: string;
 
@@ -20,13 +21,13 @@ export class I18nLocale extends CoreEntity<I18nLocale, 'direction' | 'isActive' 
   regionCode?: string;
 
   @Enum(() => I18nLocaleDirection)
-  direction: I18nLocaleDirection = I18nLocaleDirection.LTR;
+  direction: Opt<I18nLocaleDirection> = I18nLocaleDirection.LTR;
 
   @Property({ type: 'boolean' })
-  isActive = true;
+  isActive: Opt<boolean> = true;
 
   @Property({ type: 'boolean' })
-  isDefault = false;
+  isDefault: Opt<boolean> = false;
 
   @Property({ type: 'number', nullable: true })
   sortOrder?: number;

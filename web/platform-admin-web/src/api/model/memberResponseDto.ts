@@ -25,12 +25,20 @@ export interface MemberResponseDto {
      * @nullable
      */
   lastLoginAt: MemberResponseDtoLastLoginAt;
-  /** 초대 일시 */
+  /** 초대 일시 (생성 시각 기준) */
   invitedAt: string;
   /** 초대한 사람 */
-  invitedBy: string;
+  createdBy?: string;
   /** 메모 */
   note?: string;
+  /** 메일 전송 상태 */
+  mailDeliveryStatus?: 'QUEUED' | 'SENT' | 'FAILED';
+  /** 메일 큐 적재 시각 */
+  mailDeliveryQueuedAt?: string;
+  /** 메일 전송 성공 시각 */
+  mailDeliverySentAt?: string;
+  /** 메일 전송 실패 시각 */
+  mailDeliveryFailedAt?: string;
   /** 현재 사용자 여부 */
   isMe: boolean;
 }

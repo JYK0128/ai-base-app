@@ -1,11 +1,13 @@
 import { randomUUID } from 'node:crypto';
 
-import { Transactional } from '@mikro-orm/decorators/legacy';
 import { InjectRepository } from '@mikro-orm/nestjs';
+import { EntityManager } from '@mikro-orm/postgresql';
+import { Logger } from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { MemberInvite, MemberInviteRepository, MemberInviteStatus, Organization, OrganizationRepository } from '@pkg/database';
+import { MemberAccount, MemberAccountRepository, MemberInvite, MemberInviteMailDeliveryMetadata, MemberInviteMetadata, MemberInviteRepository, MemberInviteStatus, Organization, OrganizationRepository } from '@pkg/database';
 import { ClsService } from 'nestjs-cls';
 
+import { MailProducerService } from '../../mail/mail-producer.service';
 import type { MemberMutationResult } from '../members.types';
 import { ResendInviteCommand } from './resend-invite.command';
 import { ResendInviteAsserter } from './resend-invite.error';
@@ -15,21 +17,45 @@ const INVITE_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 @CommandHandler(ResendInviteCommand)
 export class ResendInviteHandler implements ICommandHandler<ResendInviteCommand> {
   private readonly Asserter = ResendInviteAsserter;
+  private readonly logger = new Logger(ResendInviteHandler.name);
 
   constructor(
     @InjectRepository(Organization)
     private readonly organizationRepo: OrganizationRepository,
+    @InjectRepository(MemberAccount)
+    private readonly memberAccountRepo: MemberAccountRepository,
     @InjectRepository(MemberInvite)
     private readonly inviteRepo: MemberInviteRepository,
+    private readonly em: EntityManager,
     private readonly cls: ClsService,
+    private readonly mailProducer: MailProducerService,
   ) {}
 
-  @Transactional()
   async execute(command: ResendInviteCommand): Promise<MemberMutationResult> {
     const organization = await this.identifyOrganization();
     const invite = await this.identifyInvite(organization, command.id);
     await this.validateInviteState(invite);
-    this.processResend(invite);
+    const inviter = await this.identifyInviter();
+    await this.em.transactional(async (em) => this.processResend(em, invite));
+    const attemptId = invite.metadata.mailDelivery?.attemptId;
+
+    if (!attemptId) {
+      throw new Error('MAIL_DELIVERY_ATTEMPT_ID_NOT_FOUND');
+    }
+
+    try {
+      await this.mailProducer.sendInviteEmail({
+        inviteId: invite.id,
+        attemptId,
+        email: invite.email,
+        organizationName: organization.name,
+        inviterName: inviter.member.name,
+        token: invite.token,
+      });
+    }
+    catch (error) {
+      this.logger.warn(`Failed to publish invite email event for invite ${invite.id} attempt ${attemptId}: ${error instanceof Error ? error.message : String(error)}`);
+    }
 
     return {
       id: invite.id,
@@ -56,23 +82,42 @@ export class ResendInviteHandler implements ICommandHandler<ResendInviteCommand>
     );
   }
 
+  private async identifyInviter(): Promise<MemberAccount> {
+    const requestedById = this.cls.get('accountId');
+
+    if (!requestedById) {
+      return this.Asserter.throw('REQUEST_CONTEXT_NOT_FOUND');
+    }
+
+    return await this.Asserter.assert(
+      this.memberAccountRepo.findOne(
+        { id: requestedById },
+        { populate: ['member'] },
+      ),
+      'INVITER_NOT_FOUND',
+    );
+  }
+
   private async validateInviteState(invite: MemberInvite): Promise<void> {
     if (!invite.isPending) {
       await this.Asserter.throw('INVITE_NOT_RESENDABLE');
     }
   }
 
-  private processResend(invite: MemberInvite): void {
+  private processResend(
+    em: EntityManager,
+    invite: MemberInvite,
+  ): void {
     const now = new Date();
-    const invitedAt = now.toISOString();
+    const metadata = new MemberInviteMetadata(invite.metadata);
 
     invite.status = MemberInviteStatus.PENDING;
     invite.token = randomUUID();
-    invite.invitedAt = now;
     invite.expiresAt = new Date(now.getTime() + INVITE_TTL_MS);
-    invite.metadata = {
-      ...invite.metadata,
-      resentAt: invitedAt,
-    };
+    metadata.timeline.resentAt = now;
+    metadata.mailDelivery = new MemberInviteMailDeliveryMetadata({ queuedAt: now });
+    invite.metadata = metadata;
+
+    em.persist(invite);
   }
 }

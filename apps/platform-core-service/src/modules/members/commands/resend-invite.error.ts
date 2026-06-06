@@ -1,4 +1,4 @@
-import { BadRequestException, NotFoundException } from '@nestjs/common';
+import { BadRequestException, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { defineErrors, ExceptionGuard } from '@pkg/shared/server';
 
 const ERROR_MESSAGES = defineErrors({
@@ -22,6 +22,20 @@ const ERROR_MESSAGES = defineErrors({
       en: 'This invite cannot be resent in its current state.',
     },
     exception: BadRequestException,
+  },
+  REQUEST_CONTEXT_NOT_FOUND: {
+    message: {
+      ko: '요청 사용자 정보를 찾을 수 없습니다.',
+      en: 'Request user context not found.',
+    },
+    exception: UnauthorizedException,
+  },
+  INVITER_NOT_FOUND: {
+    message: {
+      ko: '초대를 재전송한 사용자를 찾을 수 없습니다.',
+      en: 'Inviter not found.',
+    },
+    exception: NotFoundException,
   },
   ROLE_NOT_FOUND: {
     message: {

@@ -51,9 +51,6 @@ export class CreatePermissionSetHandler implements ICommandHandler<CreatePermiss
       code: normalizedCode,
       name: normalizedName,
       description: normalizedDescription,
-      metadata: {
-        isActive: true,
-      },
     });
     this.em.persist(role);
 

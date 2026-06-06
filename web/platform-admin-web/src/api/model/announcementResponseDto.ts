@@ -30,12 +30,14 @@ export interface AnnouncementResponseDto {
   priority: AnnouncementResponseDtoPriority;
   /** 게시 상태 */
   status: AnnouncementResponseDtoStatus;
-  /** 게시 여부 */
+  /** 게시 확정 여부 */
   isPublished: boolean;
   /** 상단 고정 여부 */
   pinned: boolean;
   /** 작성자 */
   author: string;
+  /** 게시 확정 일시 */
+  publishedAt: string;
   /** 게시 시작일 */
   startAt: string;
   /** 게시 종료일 */

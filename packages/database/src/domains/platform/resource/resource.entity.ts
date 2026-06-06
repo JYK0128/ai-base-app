@@ -16,17 +16,17 @@ export enum ResourceScope {
 
 @Entity({ schema: 'platform', repository: () => ResourceRepository })
 export class Resource extends CoreEntity<Resource> {
-  @Property()
+  @Property({ type: 'string' })
   code!: string;
 
-  @Property()
+  @Property({ type: 'string' })
   name!: string;
 
   @Enum(() => ResourceType)
   type!: ResourceType;
 
   @Enum(() => ResourceScope)
-  scope: ResourceScope = ResourceScope.PLATFORM;
+  scope: Opt<ResourceScope> = ResourceScope.PLATFORM;
 
   @ManyToOne(() => Resource, { nullable: true })
   parent?: Rel<Resource>;
@@ -34,19 +34,19 @@ export class Resource extends CoreEntity<Resource> {
   @OneToMany(() => Resource, (res) => res.parent)
   children = new Collection<Resource>(this);
 
-  @Property({ nullable: true })
+  @Property({ type: 'string', nullable: true })
   path?: string;
 
-  @Property({ nullable: true })
+  @Property({ type: 'string', nullable: true })
   icon?: string;
 
-  @Property({ nullable: true })
+  @Property({ type: 'number', nullable: true })
   sortOrder?: number;
 
   @Property({ type: 'json' })
-  actions: string[] = [];
+  actions: Opt<string[]> = [];
 
-  @Property({ nullable: true })
+  @Property({ type: 'string', nullable: true })
   constraint?: string;
 
   get isMenu(): Opt<boolean> {

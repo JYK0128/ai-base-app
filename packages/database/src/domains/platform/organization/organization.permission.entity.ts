@@ -14,6 +14,6 @@ export class OrganizationPermission extends CoreEntity<OrganizationPermission> {
   @ManyToOne(() => Resource)
   resource!: Rel<Resource>;
 
-  @Property()
+  @Property({ type: 'string' })
   action!: string;
 }

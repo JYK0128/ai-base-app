@@ -1,7 +1,7 @@
 import { Transactional } from '@mikro-orm/decorators/legacy';
 import { InjectRepository } from '@mikro-orm/nestjs';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { MemberInvite, MemberInviteRepository, MemberInviteStatus, Organization, OrganizationRepository } from '@pkg/database';
+import { MemberInvite, MemberInviteMetadata, MemberInviteRepository, MemberInviteStatus, Organization, OrganizationRepository } from '@pkg/database';
 import { ClsService } from 'nestjs-cls';
 
 import type { MemberMutationResult } from '../members.types';
@@ -60,11 +60,10 @@ export class CancelInviteHandler implements ICommandHandler<CancelInviteCommand>
 
   private processCancellation(invite: MemberInvite): void {
     const now = new Date();
+    const metadata = new MemberInviteMetadata(invite.metadata);
 
     invite.status = MemberInviteStatus.CANCELED;
-    invite.metadata = {
-      ...invite.metadata,
-      canceledAt: now.toISOString(),
-    };
+    metadata.timeline.canceledAt = now;
+    invite.metadata = metadata;
   }
 }

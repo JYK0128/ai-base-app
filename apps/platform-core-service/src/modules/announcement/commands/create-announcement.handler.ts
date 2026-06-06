@@ -62,7 +62,6 @@ export class CreateAnnouncementHandler implements ICommandHandler<CreateAnnounce
       ...(command.data.id ? { id: command.data.id } : {}),
       title,
       content,
-      isPublished: false,
       author,
       metadata: {},
     });

@@ -17,8 +17,6 @@ export interface PermissionSetResponseDto {
   description?: string;
   /** 배정된 관리자 수 */
   assignmentCount: number;
-  /** 활성 여부 */
-  isActive: boolean;
   /** 권한 코드 목록 */
   permissionCodes: string[];
 }

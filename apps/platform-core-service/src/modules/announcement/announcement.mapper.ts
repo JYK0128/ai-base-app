@@ -1,18 +1,12 @@
 import type { Announcement, Member } from '@pkg/database';
+import { AnnouncementAudience, AnnouncementCategory, AnnouncementChannel, AnnouncementMetadata as AnnouncementEntityMetadata, AnnouncementPriority } from '@pkg/database';
 
-import type { AnnouncementAudience,
-              AnnouncementCategory,
-              AnnouncementChannel,
-              AnnouncementInput,
-              AnnouncementMetadata,
-              AnnouncementPriority,
-              AnnouncementRecord,
-              AnnouncementStatus } from './announcement.types';
+import type { AnnouncementInput, AnnouncementRecord, AnnouncementRecordMetadata, AnnouncementStatus } from './announcement.types';
 
-const DEFAULT_CATEGORY: AnnouncementCategory = 'NOTICE';
-const DEFAULT_AUDIENCE: AnnouncementAudience = 'ALL';
-const DEFAULT_CHANNEL: AnnouncementChannel = 'IN_APP';
-const DEFAULT_PRIORITY: AnnouncementPriority = 'NORMAL';
+const DEFAULT_CATEGORY = AnnouncementCategory.NOTICE;
+const DEFAULT_AUDIENCE = AnnouncementAudience.ALL;
+const DEFAULT_CHANNEL = AnnouncementChannel.IN_APP;
+const DEFAULT_PRIORITY = AnnouncementPriority.NORMAL;
 
 function buildSummary(content: string) {
   const firstLine = content
@@ -30,10 +24,10 @@ function buildSummary(content: string) {
 
 function resolveAnnouncementCategory(value: unknown): AnnouncementCategory {
   switch (value) {
-    case 'MAINTENANCE':
-    case 'SECURITY':
-    case 'EVENT':
-    case 'NOTICE':
+    case AnnouncementCategory.NOTICE:
+    case AnnouncementCategory.MAINTENANCE:
+    case AnnouncementCategory.SECURITY:
+    case AnnouncementCategory.EVENT:
       return value;
     default:
       return DEFAULT_CATEGORY;
@@ -42,9 +36,9 @@ function resolveAnnouncementCategory(value: unknown): AnnouncementCategory {
 
 function resolveAnnouncementAudience(value: unknown): AnnouncementAudience {
   switch (value) {
-    case 'PLATFORM':
-    case 'ORGANIZATION':
-    case 'ALL':
+    case AnnouncementAudience.PLATFORM:
+    case AnnouncementAudience.ORGANIZATION:
+    case AnnouncementAudience.ALL:
       return value;
     default:
       return DEFAULT_AUDIENCE;
@@ -53,9 +47,9 @@ function resolveAnnouncementAudience(value: unknown): AnnouncementAudience {
 
 function resolveAnnouncementChannel(value: unknown): AnnouncementChannel {
   switch (value) {
-    case 'EMAIL':
-    case 'PUSH':
-    case 'IN_APP':
+    case AnnouncementChannel.EMAIL:
+    case AnnouncementChannel.PUSH:
+    case AnnouncementChannel.IN_APP:
       return value;
     default:
       return DEFAULT_CHANNEL;
@@ -64,39 +58,59 @@ function resolveAnnouncementChannel(value: unknown): AnnouncementChannel {
 
 function resolveAnnouncementPriority(value: unknown): AnnouncementPriority {
   switch (value) {
-    case 'LOW':
-    case 'HIGH':
-    case 'NORMAL':
+    case AnnouncementPriority.LOW:
+    case AnnouncementPriority.HIGH:
+    case AnnouncementPriority.NORMAL:
       return value;
     default:
       return DEFAULT_PRIORITY;
   }
 }
 
-function resolveAnnouncementStatus(input: AnnouncementInput, isPublished: boolean): AnnouncementStatus {
-  if (input.status === 'DRAFT' || input.status === 'PUBLISHED') {
-    return input.status;
-  }
-
+function resolveAnnouncementStatus(isPublished: boolean): AnnouncementStatus {
   return isPublished ? 'PUBLISHED' : 'DRAFT';
 }
 
-function resolveAnnouncementDate(value: string | undefined): string {
+function parseAnnouncementDate(value: string | Date | undefined): Date | undefined {
   if (!value) {
-    return '';
+    return undefined;
+  }
+
+  if (value instanceof Date) {
+    return Number.isNaN(value.getTime()) ? undefined : value;
   }
 
   const date = new Date(value);
 
   if (Number.isNaN(date.getTime())) {
+    return undefined;
+  }
+
+  return date;
+}
+
+function formatAnnouncementDate(value: Date | string | undefined): string {
+  const date = parseAnnouncementDate(value);
+
+  if (!date) {
     return '';
   }
 
   return date.toISOString();
 }
 
-function getAnnouncementMetadata(announcement: Announcement): AnnouncementMetadata {
-  const metadata = (announcement.metadata ?? {}) as Partial<AnnouncementMetadata>;
+function getEntityMetadata(announcement: Announcement): AnnouncementEntityMetadata {
+  const metadata = announcement.metadata;
+
+  if (metadata instanceof AnnouncementEntityMetadata) {
+    return metadata;
+  }
+
+  return new AnnouncementEntityMetadata(metadata);
+}
+
+function getAnnouncementMetadata(announcement: Announcement): AnnouncementRecordMetadata {
+  const metadata = getEntityMetadata(announcement);
 
   return {
     category: resolveAnnouncementCategory(metadata.category),
@@ -104,8 +118,9 @@ function getAnnouncementMetadata(announcement: Announcement): AnnouncementMetada
     channel: resolveAnnouncementChannel(metadata.channel),
     priority: resolveAnnouncementPriority(metadata.priority),
     pinned: metadata.pinned === true,
-    startAt: resolveAnnouncementDate(metadata.startAt),
-    endAt: resolveAnnouncementDate(metadata.endAt),
+    publishedAt: formatAnnouncementDate(metadata.publishedAt),
+    startAt: formatAnnouncementDate(metadata.startAt),
+    endAt: formatAnnouncementDate(metadata.endAt),
   };
 }
 
@@ -120,7 +135,7 @@ export function buildAnnouncementRecord(
   announcement: Announcement,
 ): AnnouncementRecord {
   const metadata = getAnnouncementMetadata(announcement);
-  const status = announcement.isPublished ? 'PUBLISHED' : 'DRAFT';
+  const status = resolveAnnouncementStatus(announcement.isPublished);
   const updatedAt = announcement.updatedAt ?? announcement.createdAt;
 
   return {
@@ -136,6 +151,7 @@ export function buildAnnouncementRecord(
     isPublished: announcement.isPublished,
     pinned: metadata.pinned,
     author: getAuthorDisplayName(announcement.author),
+    publishedAt: metadata.publishedAt,
     startAt: metadata.startAt,
     endAt: metadata.endAt,
     createdAt: announcement.createdAt.toISOString(),
@@ -143,43 +159,32 @@ export function buildAnnouncementRecord(
   };
 }
 
-function resolveAnnouncementPublished(input: AnnouncementInput): boolean {
-  if (typeof input.isPublished === 'boolean') {
-    return input.isPublished;
-  }
-
-  if (input.status === 'PUBLISHED') {
-    return true;
-  }
-
-  if (input.status === 'DRAFT') {
-    return false;
-  }
-
-  return false;
-}
-
 export function applyAnnouncementInput(
   announcement: Announcement,
   input: AnnouncementInput,
 ) {
-  const metadata = (announcement.metadata ?? {}) as Partial<AnnouncementMetadata>;
+  const metadata = getEntityMetadata(announcement);
 
   announcement.title = input.title.trim();
   announcement.content = input.content.trim();
-  announcement.isPublished = resolveAnnouncementPublished(input);
-  announcement.metadata = {
+  const category = resolveAnnouncementCategory(input.category ?? metadata.category);
+  const audience = resolveAnnouncementAudience(input.audience ?? metadata.audience);
+  const channel = resolveAnnouncementChannel(input.channel ?? metadata.channel);
+  const priority = resolveAnnouncementPriority(input.priority ?? metadata.priority);
+
+  announcement.metadata = new AnnouncementEntityMetadata({
     ...metadata,
-    category: resolveAnnouncementCategory(input.category ?? metadata.category),
-    audience: resolveAnnouncementAudience(input.audience ?? metadata.audience),
-    channel: resolveAnnouncementChannel(input.channel ?? metadata.channel),
-    priority: resolveAnnouncementPriority(input.priority ?? metadata.priority),
+    category,
+    audience,
+    channel,
+    priority,
     pinned: typeof input.pinned === 'boolean' ? input.pinned : metadata.pinned === true,
-    startAt: resolveAnnouncementDate(input.startAt ?? metadata.startAt),
-    endAt: resolveAnnouncementDate(input.endAt ?? metadata.endAt),
-  };
+    publishedAt: input.publishedAt === undefined ? metadata.publishedAt : parseAnnouncementDate(input.publishedAt),
+    startAt: input.startAt === undefined ? metadata.startAt : parseAnnouncementDate(input.startAt),
+    endAt: input.endAt === undefined ? metadata.endAt : parseAnnouncementDate(input.endAt),
+  });
 }
 
-export function getAnnouncementStatus(input: AnnouncementInput): AnnouncementStatus {
-  return resolveAnnouncementStatus(input, resolveAnnouncementPublished(input));
+export function getAnnouncementStatus(announcement: Announcement): AnnouncementStatus {
+  return resolveAnnouncementStatus(announcement.isPublished);
 }

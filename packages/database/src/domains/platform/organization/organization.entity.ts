@@ -16,19 +16,18 @@ export enum OrganizationStatus {
 }
 
 @Entity({ schema: 'platform', repository: () => OrganizationRepository })
-export class Organization
-  extends CoreEntity<Organization, 'status'> {
-  @Property({ unique: true })
+export class Organization extends CoreEntity<Organization> {
+  @Property({ type: 'string', unique: true })
   code!: string;
 
-  @Property()
+  @Property({ type: 'string' })
   name!: string;
 
-  @Property({ unique: true })
+  @Property({ type: 'string', unique: true })
   email!: string;
 
   @Enum(() => OrganizationStatus)
-  status: OrganizationStatus = OrganizationStatus.ACTIVE;
+  status: Opt<OrganizationStatus> = OrganizationStatus.ACTIVE;
 
   @OneToMany({ mappedBy: 'organization' })
   members = new Collection<Member>(this);

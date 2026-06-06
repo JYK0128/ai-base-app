@@ -70,7 +70,7 @@ export class ToggleMemberStatusHandler implements ICommandHandler<ToggleMemberSt
   }
 
   private async identifyRequestUserId(): Promise<string> {
-    const requestedById = this.cls.get('memberId');
+    const requestedById = this.cls.get('accountId');
 
     if (!requestedById) {
       return this.Asserter.throw('REQUEST_CONTEXT_NOT_FOUND');

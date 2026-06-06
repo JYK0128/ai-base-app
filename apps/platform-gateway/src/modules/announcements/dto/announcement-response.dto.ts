@@ -28,7 +28,7 @@ export class AnnouncementResponseDto {
   @ApiProperty({ example: 'PUBLISHED', enum: ['DRAFT', 'PUBLISHED'], description: '게시 상태' })
   status!: string;
 
-  @ApiProperty({ example: true, description: '게시 여부' })
+  @ApiProperty({ example: true, description: '게시 확정 여부' })
   isPublished!: boolean;
 
   @ApiProperty({ example: false, description: '상단 고정 여부' })
@@ -37,7 +37,10 @@ export class AnnouncementResponseDto {
   @ApiProperty({ example: 'admin@platform.com', description: '작성자' })
   author!: string;
 
-  @ApiProperty({ example: '2026-06-01T09:00:00.000Z', description: '게시 시작일' })
+  @ApiProperty({ example: '2026-06-01T09:00:00.000Z', description: '게시 확정 일시' })
+  publishedAt!: string;
+
+  @ApiProperty({ example: '2026-06-03T09:00:00.000Z', description: '게시 시작일' })
   startAt!: string;
 
   @ApiProperty({ example: '2026-06-07T09:00:00.000Z', description: '게시 종료일' })

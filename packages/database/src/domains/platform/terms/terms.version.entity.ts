@@ -12,24 +12,23 @@ export enum TermsVersionStatus {
 }
 
 @Entity({ schema: 'platform', repository: () => TermsVersionRepository })
-export class TermsVersion
-  extends CoreEntity<TermsVersion, 'status'> {
+export class TermsVersion extends CoreEntity<TermsVersion> {
   @ManyToOne(() => TermsDocument)
   termsDocument!: Rel<TermsDocument>;
 
-  @Property()
+  @Property({ type: 'string' })
   label!: string;
 
   @Property({ type: 'text' })
   content!: string;
 
-  @Property()
+  @Property({ type: 'string' })
   checksum!: string;
 
   @Enum(() => TermsVersionStatus)
-  status: TermsVersionStatus = TermsVersionStatus.DRAFT;
+  status: Opt<TermsVersionStatus> = TermsVersionStatus.DRAFT;
 
-  @Property()
+  @Property({ type: Date })
   effectiveAt!: Date;
 
   @OneToMany(() => TermsConsent, (consent) => consent.termsVersion)

@@ -8,12 +8,14 @@ import { Member,
          OrganizationRole,
          OrganizationRoleAssignment } from '@pkg/database';
 
+import { MailModule } from '../mail/mail.module';
 import { MembersHandlers } from './handlers';
 import { MembersController } from './members.controller';
 
 @Module({
   imports: [
     CqrsModule,
+    MailModule,
     MikroOrmModule.forFeature([
       Organization,
       Member,

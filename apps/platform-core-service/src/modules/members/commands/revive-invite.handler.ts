@@ -3,7 +3,7 @@ import { randomUUID } from 'node:crypto';
 import { Transactional } from '@mikro-orm/decorators/legacy';
 import { InjectRepository } from '@mikro-orm/nestjs';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { MemberInvite, MemberInviteRepository, MemberInviteStatus, Organization, OrganizationRepository } from '@pkg/database';
+import { MemberInvite, MemberInviteMetadata, MemberInviteRepository, MemberInviteStatus, Organization, OrganizationRepository } from '@pkg/database';
 import { ClsService } from 'nestjs-cls';
 
 import type { MemberMutationResult } from '../members.types';
@@ -65,15 +65,12 @@ export class ReviveInviteHandler implements ICommandHandler<ReviveInviteCommand>
 
   private processRevive(invite: MemberInvite): void {
     const now = new Date();
-    const invitedAt = now.toISOString();
+    const metadata = new MemberInviteMetadata(invite.metadata);
 
     invite.status = MemberInviteStatus.PENDING;
     invite.token = randomUUID();
-    invite.invitedAt = now;
     invite.expiresAt = new Date(now.getTime() + INVITE_TTL_MS);
-    invite.metadata = {
-      ...invite.metadata,
-      revivedAt: invitedAt,
-    };
+    metadata.timeline.revivedAt = now;
+    invite.metadata = metadata;
   }
 }

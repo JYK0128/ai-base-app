@@ -22,7 +22,7 @@ export enum TicketPriority {
 
 @Entity({ schema: 'platform', repository: () => SupportTicketRepository })
 export class SupportTicket extends CoreEntity<SupportTicket> {
-  @Property()
+  @Property({ type: 'string' })
   title!: string;
 
   @Property({ type: 'text' })

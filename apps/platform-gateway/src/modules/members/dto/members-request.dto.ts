@@ -19,6 +19,9 @@ export enum InviteStatusDto {
   REJECTED = 'REJECTED',
 }
 
+export const MAIL_DELIVERY_STATUS_VALUES = ['QUEUED', 'SENT', 'FAILED'] as const;
+export type MailDeliveryStatusDto = (typeof MAIL_DELIVERY_STATUS_VALUES)[number];
+
 export class IdParamDto {
   @ApiProperty({ example: '019e5236-adae-70d7-a8f7-2dc90bdf7099', description: '식별자' })
   @IsUUID()

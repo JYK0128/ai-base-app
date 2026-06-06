@@ -6,7 +6,6 @@ export interface PermissionSetRecord {
   name: string
   description: string
   assignmentCount: number
-  isActive: boolean
   permissionCodes: string[]
 }
 
@@ -33,7 +32,6 @@ export function buildPermissionSetRecord(role: OrganizationRole): PermissionSetR
     name: role.name,
     description: role.description ?? '',
     assignmentCount: role.assignments.getItems().length,
-    isActive: !role.deletedAt && role.metadata?.isActive !== false,
     permissionCodes,
   };
 }
