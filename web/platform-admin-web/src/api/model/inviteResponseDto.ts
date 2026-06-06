@@ -7,6 +7,7 @@
  */
 import type { InviteResponseDtoInviteStatus } from './inviteResponseDtoInviteStatus';
 import type { InviteResponseDtoLastLoginAt } from './inviteResponseDtoLastLoginAt';
+import type { InviteResponseDtoMailDeliveryStatus } from './inviteResponseDtoMailDeliveryStatus';
 import type { InviteResponseDtoRole } from './inviteResponseDtoRole';
 import type { InviteResponseDtoStatus } from './inviteResponseDtoStatus';
 
@@ -33,7 +34,7 @@ export interface InviteResponseDto {
   /** 메모 */
   note?: string;
   /** 메일 전송 상태 */
-  mailDeliveryStatus?: 'QUEUED' | 'SENT' | 'FAILED';
+  mailDeliveryStatus?: InviteResponseDtoMailDeliveryStatus;
   /** 메일 큐 적재 시각 */
   mailDeliveryQueuedAt?: string;
   /** 메일 전송 성공 시각 */

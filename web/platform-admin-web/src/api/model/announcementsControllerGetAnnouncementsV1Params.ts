@@ -8,7 +8,7 @@
 
 export type AnnouncementsControllerGetAnnouncementsV1Params = {
 /**
- * 게시된 공지사항만 조회 여부
+ * 게시 확정된 공지사항만 조회 여부
  */
 isPublishedOnly?: boolean;
 };

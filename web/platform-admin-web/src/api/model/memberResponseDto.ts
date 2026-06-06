@@ -6,6 +6,7 @@
  * OpenAPI spec version: 1.0
  */
 import type { MemberResponseDtoLastLoginAt } from './memberResponseDtoLastLoginAt';
+import type { MemberResponseDtoMailDeliveryStatus } from './memberResponseDtoMailDeliveryStatus';
 import type { MemberResponseDtoRole } from './memberResponseDtoRole';
 import type { MemberResponseDtoStatus } from './memberResponseDtoStatus';
 
@@ -32,7 +33,7 @@ export interface MemberResponseDto {
   /** 메모 */
   note?: string;
   /** 메일 전송 상태 */
-  mailDeliveryStatus?: 'QUEUED' | 'SENT' | 'FAILED';
+  mailDeliveryStatus?: MemberResponseDtoMailDeliveryStatus;
   /** 메일 큐 적재 시각 */
   mailDeliveryQueuedAt?: string;
   /** 메일 전송 성공 시각 */

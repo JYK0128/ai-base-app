@@ -202,7 +202,7 @@ export const AuthControllerChangePasswordV1Response = zod.object({
  * @summary 공지사항 조회
  */
 export const AnnouncementsControllerGetAnnouncementsV1QueryParams = zod.object({
-  "isPublishedOnly": zod.boolean().optional().describe('게시된 공지사항만 조회 여부')
+  "isPublishedOnly": zod.boolean().optional().describe('게시 확정된 공지사항만 조회 여부')
 })
 
 export const AnnouncementsControllerGetAnnouncementsV1Response = zod.object({
