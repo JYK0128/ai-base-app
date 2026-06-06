@@ -1,18 +1,9 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { OrganizationRole, Resource, ResourceScope, ResourceType } from '@pkg/database';
 import { Type } from 'class-transformer';
 import { IsArray, IsEnum, IsInt, IsOptional, IsString, IsUUID, ValidateNested } from 'class-validator';
 
-export enum ResourceTypeDto {
-  MENU = 'MENU',
-  COMPONENT = 'COMPONENT',
-}
-
-export enum ResourceScopeDto {
-  PLATFORM = 'PLATFORM',
-  ORGANIZATION = 'ORGANIZATION',
-}
-
-export class CreateResourceDto {
+export class CreateResourceDto implements Pick<Resource, 'code' | 'name' | 'type' | 'path'> {
   @ApiProperty({ example: 'DASHBOARD', description: '리소스 코드' })
   @IsString()
   code!: string;
@@ -21,9 +12,9 @@ export class CreateResourceDto {
   @IsString()
   name!: string;
 
-  @ApiProperty({ enum: ResourceTypeDto, example: 'MENU', description: '리소스 유형' })
-  @IsEnum(ResourceTypeDto)
-  type!: ResourceTypeDto;
+  @ApiProperty({ enum: ResourceType, example: 'MENU', description: '리소스 유형' })
+  @IsEnum(ResourceType)
+  type!: ResourceType;
 
   @ApiPropertyOptional({ example: '/dashboard', description: '리소스 경로' })
   @IsOptional()
@@ -41,14 +32,14 @@ export class CreateResourceResponseDto {
   id!: string;
 }
 
-export class UpdateResourceDetailBodyDto {
-  @ApiProperty({ example: '019e5236-adae-70d7-a8f7-2dc90bdf7099', description: '리소스 식별자' })
+export class UpdateResourceDetailBodyDto implements Pick<Resource, 'id' | 'scope' | 'code' | 'name' | 'path' | 'icon'> {
+  @ApiProperty({ example: '019e5236-adae-70d7-a8f7-2dc90bdf7098', description: '리소스 식별자' })
   @IsUUID()
   id!: string;
 
-  @ApiProperty({ enum: ResourceScopeDto, example: ResourceScopeDto.PLATFORM, description: '리소스 관리 범위' })
-  @IsEnum(ResourceScopeDto)
-  scope!: ResourceScopeDto;
+  @ApiProperty({ enum: ResourceScope, example: 'PLATFORM', description: '리소스 관리 범위' })
+  @IsEnum(ResourceScope)
+  scope!: ResourceScope;
 
   @ApiProperty({ example: 'DASHBOARD', description: '리소스 코드' })
   @IsString()
@@ -63,7 +54,7 @@ export class UpdateResourceDetailBodyDto {
   @IsString()
   path?: string;
 
-  @ApiPropertyOptional({ example: 'LayoutDashboard', description: '아이콘 이름' })
+  @ApiPropertyOptional({ example: 'dashboard', description: '아이콘' })
   @IsOptional()
   @IsString()
   icon?: string;
@@ -82,12 +73,12 @@ export class DeleteResourceBodyDto {
 
 export class GetResourcesQueryDto {
   @ApiProperty({
-    enum: ResourceScopeDto,
-    example: ResourceScopeDto.PLATFORM,
+    enum: ResourceScope,
+    example: 'PLATFORM',
     description: '리소스 관리 범위 필터',
   })
-  @IsEnum(ResourceScopeDto)
-  scope!: ResourceScopeDto;
+  @IsEnum(ResourceScope)
+  scope!: ResourceScope;
 }
 
 export class UpdateRolePermissionsDto {
@@ -115,32 +106,32 @@ export class PermissionResponseDto {
   action!: string;
 }
 
-export class ResourceResponseDto {
-  @ApiProperty({ example: '019e5236-adae-70d7-a8f7-2dc90bdf7101', description: '리소스 식별자' })
+export class ResourceResponseDto implements Pick<Resource, 'id' | 'code' | 'name' | 'type' | 'scope' | 'path' | 'icon' | 'sortOrder' | 'actions' | 'constraint'> {
+  @ApiProperty({ example: '019e5236-adae-70d7-a8f7-2dc90bdf7098', description: '리소스 식별자' })
   id!: string;
 
-  @ApiProperty({ example: 'ORGANIZATION', description: '리소스 코드' })
+  @ApiProperty({ example: 'DASHBOARD', description: '리소스 코드' })
   code!: string;
 
-  @ApiProperty({ example: '조직 관리', description: '리소스 이름' })
+  @ApiProperty({ example: '대시보드', description: '리소스 이름' })
   name!: string;
 
-  @ApiProperty({ example: 'MENU', enum: ['MENU', 'COMPONENT'], description: '리소스 유형' })
-  type!: string;
+  @ApiProperty({ enum: ResourceType, example: 'MENU', description: '리소스 유형' })
+  type!: ResourceType;
 
-  @ApiProperty({ example: 'PLATFORM', enum: ResourceScopeDto, description: '리소스 범위' })
-  scope!: ResourceScopeDto;
+  @ApiProperty({ enum: ResourceScope, example: 'PLATFORM', description: '리소스 관리 범위' })
+  scope!: ResourceScope;
 
-  @ApiPropertyOptional({ example: '/organizations', description: '경로' })
+  @ApiPropertyOptional({ example: '/dashboard', description: '리소스 경로' })
   path?: string;
 
-  @ApiPropertyOptional({ example: 'Shield', description: '아이콘 이름' })
+  @ApiPropertyOptional({ example: 'dashboard', description: '아이콘' })
   icon?: string;
 
   @ApiPropertyOptional({ example: 1, description: '정렬 순서' })
   sortOrder?: number;
 
-  @ApiProperty({ type: [String], example: ['CREATE', 'READ'], description: '허용 액션 목록' })
+  @ApiProperty({ type: [String], example: ['CREATE', 'READ'], description: '리소스 액션 목록' })
   actions!: string[];
 
   @ApiPropertyOptional({ example: 'READ', description: '제약 조건' })
@@ -150,21 +141,21 @@ export class ResourceResponseDto {
   children!: ResourceResponseDto[];
 }
 
-export class RoleResponseDto {
-  @ApiProperty({ example: '019e5236-adae-70d7-a8f7-2dc90bdf7102', description: '역할 식별자' })
+export class RoleResponseDto implements Pick<OrganizationRole, 'id' | 'code' | 'name' | 'description'> {
+  @ApiProperty({ example: '019e5236-adae-70d7-a8f7-2dc90bdf7099', description: '역할 식별자' })
   id!: string;
 
-  @ApiProperty({ example: 'ORGANIZATION.ADMIN', description: '역할 코드' })
+  @ApiProperty({ example: 'ADMIN', description: '역할 코드' })
   code!: string;
 
-  @ApiProperty({ example: '조직 관리자', description: '역할 이름' })
+  @ApiProperty({ example: '관리자', description: '역할 이름' })
   name!: string;
+
+  @ApiPropertyOptional({ example: '관리자 역할 설명', description: '역할 설명' })
+  description?: string;
 
   @ApiProperty({ example: 'ORGANIZATION', enum: ['PLATFORM', 'ORGANIZATION'], description: '역할 범위' })
   scope!: string;
-
-  @ApiPropertyOptional({ example: '조직 내 모든 리소스 권한 관리자', description: '역할 설명' })
-  description?: string;
 }
 
 export class PermissionSetResponseDto {
@@ -219,9 +210,9 @@ export class UpdatePermissionSetPermissionsDto {
 }
 
 export class UpdateResourcePermissionsDto {
-  @ApiProperty({ enum: ResourceScopeDto, example: ResourceScopeDto.ORGANIZATION, description: '리소스 관리 범위' })
-  @IsEnum(ResourceScopeDto)
-  scope!: ResourceScopeDto;
+  @ApiProperty({ enum: ResourceScope, example: 'ORGANIZATION', description: '리소스 관리 범위' })
+  @IsEnum(ResourceScope)
+  scope!: ResourceScope;
 
   @ApiProperty({ example: '019e5236-adae-70d7-a8f7-2dc90bdf7099', description: '리소스 식별자' })
   @IsUUID()
@@ -249,9 +240,9 @@ export class UpdateResourceSortItemDto {
 }
 
 export class UpdateResourceSortDto {
-  @ApiProperty({ enum: ResourceScopeDto, example: ResourceScopeDto.ORGANIZATION, description: '리소스 관리 범위' })
-  @IsEnum(ResourceScopeDto)
-  scope!: ResourceScopeDto;
+  @ApiProperty({ enum: ResourceScope, example: 'ORGANIZATION', description: '리소스 관리 범위' })
+  @IsEnum(ResourceScope)
+  scope!: ResourceScope;
 
   @ApiProperty({ type: [UpdateResourceSortItemDto], description: '정렬 대상 목록' })
   @IsArray()
@@ -260,32 +251,32 @@ export class UpdateResourceSortDto {
   items!: UpdateResourceSortItemDto[];
 }
 
-export class ResourceDetailResponseDto {
-  @ApiProperty({ example: '019e5236-adae-70d7-a8f7-2dc90bdf7101', description: '리소스 식별자' })
+export class ResourceDetailResponseDto implements Pick<Resource, 'id' | 'code' | 'name' | 'type' | 'scope' | 'path' | 'icon' | 'sortOrder' | 'actions' | 'constraint'> {
+  @ApiProperty({ example: '019e5236-adae-70d7-a8f7-2dc90bdf7098', description: '리소스 식별자' })
   id!: string;
 
-  @ApiProperty({ example: 'ORGANIZATION', description: '리소스 코드' })
+  @ApiProperty({ example: 'DASHBOARD', description: '리소스 코드' })
   code!: string;
 
-  @ApiProperty({ example: '조직 관리', description: '리소스 이름' })
+  @ApiProperty({ example: '대시보드', description: '리소스 이름' })
   name!: string;
 
-  @ApiProperty({ example: 'MENU', enum: ['MENU', 'COMPONENT'], description: '리소스 유형' })
-  type!: string;
+  @ApiProperty({ enum: ResourceType, example: 'MENU', description: '리소스 유형' })
+  type!: ResourceType;
 
-  @ApiProperty({ example: 'PLATFORM', enum: ResourceScopeDto, description: '리소스 범위' })
-  scope!: ResourceScopeDto;
+  @ApiProperty({ enum: ResourceScope, example: 'PLATFORM', description: '리소스 관리 범위' })
+  scope!: ResourceScope;
 
-  @ApiPropertyOptional({ example: '/organizations', description: '경로' })
+  @ApiPropertyOptional({ example: '/dashboard', description: '리소스 경로' })
   path?: string;
 
-  @ApiPropertyOptional({ example: 'Shield', description: '아이콘 이름' })
+  @ApiPropertyOptional({ example: 'dashboard', description: '아이콘' })
   icon?: string;
 
   @ApiPropertyOptional({ example: 1, description: '정렬 순서' })
   sortOrder?: number;
 
-  @ApiProperty({ type: [String], example: ['CREATE', 'READ'], description: '허용 액션 목록' })
+  @ApiProperty({ type: [String], example: ['CREATE', 'READ'], description: '리소스 액션 목록' })
   actions!: string[];
 
   @ApiPropertyOptional({ example: 'READ', description: '제약 조건' })

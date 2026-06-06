@@ -1,10 +1,11 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
+import { ResourceScope } from '@pkg/database';
 import { ClsService } from 'nestjs-cls';
 
 import { CoreClient } from '@/common/clients/core.client';
 
-import { type ResourceResponseDto, ResourceScopeDto, UpdatePermissionSetPermissionsDto } from './dto/resource.dto';
+import { type ResourceResponseDto, UpdatePermissionSetPermissionsDto } from './dto/resource.dto';
 import { RESOURCE_SERVICE, RESOURCE_SERVICE_PATTERNS } from './resource.constants';
 
 @Injectable()
@@ -16,7 +17,7 @@ export class ResourceClient extends CoreClient {
     super(client, cls);
   }
 
-  async getResources(scope: ResourceScopeDto): Promise<ResourceResponseDto[]> {
+  async getResources(scope: ResourceScope): Promise<ResourceResponseDto[]> {
     return this.send<ResourceResponseDto[]>(RESOURCE_SERVICE_PATTERNS.RESOURCE.LIST, {
       scope,
       permissions: [],
@@ -31,7 +32,7 @@ export class ResourceClient extends CoreClient {
 
   async getMyResources(permissions: string[]): Promise<ResourceResponseDto[]> {
     return this.send<ResourceResponseDto[]>(RESOURCE_SERVICE_PATTERNS.RESOURCE.LIST, {
-      scope: ResourceScopeDto.ORGANIZATION,
+      scope: ResourceScope.ORGANIZATION,
       permissions,
       filterByPermissions: true,
       organizationId: this.cls.get('organizationId'),
@@ -56,7 +57,7 @@ export class ResourceClient extends CoreClient {
 
   async updateResourceDetail(data: {
     id: string
-    scope: ResourceScopeDto
+    scope: ResourceScope
     code: string
     name: string
     path?: string
@@ -71,7 +72,7 @@ export class ResourceClient extends CoreClient {
 
   async updateResourcePermissions(data: {
     id: string
-    scope: ResourceScopeDto
+    scope: ResourceScope
     actions: string[]
     constraint?: string
   }) {
@@ -79,7 +80,7 @@ export class ResourceClient extends CoreClient {
   }
 
   async updateResourceSort(data: {
-    scope: ResourceScopeDto
+    scope: ResourceScope
     items: Array<{ id: string, sortOrder: number }>
   }) {
     return this.send<{ success: boolean }>(RESOURCE_SERVICE_PATTERNS.RESOURCE.UPDATE_SORT, data);

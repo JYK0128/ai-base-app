@@ -1,11 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { MemberAccount } from '@pkg/database';
 import { Transform } from 'class-transformer';
 import { IsEmail, IsNotEmpty, IsString, MinLength } from 'class-validator';
 
 import { Match } from '@/common/decorators/match.decorator';
 
-export class LoginDto {
-  @ApiProperty({ example: 'admin@example.co.kr', description: '관리자 이메일' })
+export class LoginDto implements Pick<MemberAccount, 'email'> {
+  @ApiProperty({ example: 'dev@example.com', description: '이메일 주소' })
   @Transform(({ value }) =>
     typeof value === 'string'
       ? value?.trim().toLowerCase()

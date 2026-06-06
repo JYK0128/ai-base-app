@@ -1,22 +1,13 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { MemberInvite, MemberInviteInfoMetadata, MemberInviteStatus as InviteStatusDto, MemberStatus as MemberStatusDto } from '@pkg/database';
 import { IsEmail, IsEnum, IsOptional, IsString, IsUUID } from 'class-validator';
+
+export { InviteStatusDto, MemberStatusDto };
 
 export enum MemberRoleDto {
   OWNER = 'OWNER',
   MANAGER = 'MANAGER',
   VIEWER = 'VIEWER',
-}
-
-export enum MemberStatusDto {
-  ACTIVE = 'ACTIVE',
-  INACTIVE = 'INACTIVE',
-}
-
-export enum InviteStatusDto {
-  PENDING = 'PENDING',
-  CANCELED = 'CANCELED',
-  ACCEPTED = 'ACCEPTED',
-  REJECTED = 'REJECTED',
 }
 
 export const MAIL_DELIVERY_STATUS_VALUES = ['QUEUED', 'SENT', 'FAILED'] as const;
@@ -62,12 +53,12 @@ export class GetInvitesQueryDto {
   role?: MemberRoleDto;
 }
 
-export class CreateInviteDto {
-  @ApiProperty({ example: 'Hana Lee', description: '이름' })
+export class CreateInviteDto implements Pick<MemberInvite, 'name' | 'email'>, Pick<MemberInviteInfoMetadata, 'note'> {
+  @ApiProperty({ example: '김개발', description: '초대할 사람 이름' })
   @IsString()
   name!: string;
 
-  @ApiProperty({ example: 'hana.lee@example.com', description: '이메일' })
+  @ApiProperty({ example: 'dev@example.com', description: '초대할 사람 이메일' })
   @IsEmail()
   email!: string;
 
@@ -75,7 +66,7 @@ export class CreateInviteDto {
   @IsEnum(MemberRoleDto)
   role!: MemberRoleDto;
 
-  @ApiPropertyOptional({ example: '디자인팀 합류 예정', description: '메모' })
+  @ApiPropertyOptional({ example: '프로젝트 초대', description: '메모/메모사항' })
   @IsOptional()
   @IsString()
   note?: string;

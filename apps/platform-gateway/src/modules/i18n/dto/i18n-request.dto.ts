@@ -1,4 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { I18nTranslation } from '@pkg/database';
 import { Type } from 'class-transformer';
 import { ArrayNotEmpty, IsArray, IsIn, IsOptional, IsString, ValidateNested } from 'class-validator';
 
@@ -36,12 +37,12 @@ export class TranslationParamDto {
   key!: string;
 }
 
-export class TranslationCreateDto {
+export class TranslationCreateDto implements Pick<I18nTranslation, 'namespace' | 'key' | 'value'> {
   @ApiProperty({ example: 'resource', description: '번역 네임스페이스' })
   @IsString()
   namespace!: string;
 
-  @ApiProperty({ example: 'ROLE_RESOURCE_CREATE_BUTTON', description: '번역 키' })
+  @ApiProperty({ example: 'DASHBOARD', description: '번역 키' })
   @IsString()
   key!: string;
 
@@ -49,17 +50,17 @@ export class TranslationCreateDto {
   @IsString()
   locale!: string;
 
-  @ApiProperty({ example: '메뉴 추가', description: '번역 값' })
+  @ApiProperty({ example: '대시보드', description: '번역 값' })
   @IsString()
   value!: string;
 }
 
-export class TranslationUpdateDto {
+export class TranslationUpdateDto implements Pick<I18nTranslation, 'namespace' | 'key' | 'value'> {
   @ApiProperty({ example: 'resource', description: '번역 네임스페이스' })
   @IsString()
   namespace!: string;
 
-  @ApiProperty({ example: 'ROLE_RESOURCE_CREATE_BUTTON', description: '번역 키' })
+  @ApiProperty({ example: 'DASHBOARD', description: '번역 키' })
   @IsString()
   key!: string;
 
@@ -67,17 +68,17 @@ export class TranslationUpdateDto {
   @IsString()
   locale!: string;
 
-  @ApiProperty({ example: '메뉴 추가', description: '번역 값' })
+  @ApiProperty({ example: '대시보드', description: '번역 값' })
   @IsString()
   value!: string;
 }
 
-export class TranslationDeleteDto {
+export class TranslationDeleteDto implements Pick<I18nTranslation, 'namespace' | 'key'> {
   @ApiProperty({ example: 'resource', description: '번역 네임스페이스' })
   @IsString()
   namespace!: string;
 
-  @ApiProperty({ example: 'ROLE_RESOURCE_CREATE_BUTTON', description: '번역 키' })
+  @ApiProperty({ example: 'DASHBOARD', description: '번역 키' })
   @IsString()
   key!: string;
 
@@ -86,7 +87,7 @@ export class TranslationDeleteDto {
   locale!: string;
 }
 
-export class TranslationBulkOperationDto {
+export class TranslationBulkOperationDto implements Pick<I18nTranslation, 'namespace' | 'key'> {
   @ApiProperty({ enum: ['CREATE', 'UPDATE', 'DELETE'], example: 'UPDATE', description: '처리 유형' })
   @IsString()
   @IsIn(['CREATE', 'UPDATE', 'DELETE'])
@@ -96,7 +97,7 @@ export class TranslationBulkOperationDto {
   @IsString()
   namespace!: string;
 
-  @ApiProperty({ example: 'ROLE_RESOURCE_CREATE_BUTTON', description: '번역 키' })
+  @ApiProperty({ example: 'DASHBOARD', description: '번역 키' })
   @IsString()
   key!: string;
 

@@ -3,8 +3,8 @@ import { Embeddable, Embedded, Entity, Enum, ManyToOne, Property } from '@mikro-
 import { randomUUID } from 'crypto';
 
 import { CoreEntity } from '../../core/core.entity';
-import type { Organization } from '../organization/organization.entity';
-import type { OrganizationRole } from '../organization/organization.role.entity';
+import { Organization } from '../organization/organization.entity';
+import { OrganizationRole } from '../organization/organization.role.entity';
 import { MemberInviteRepository } from './member.invite.repository';
 
 export enum MemberInviteStatus {

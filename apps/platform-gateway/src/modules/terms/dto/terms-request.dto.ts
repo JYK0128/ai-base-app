@@ -1,4 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { TermsDocument, TermsVersion } from '@pkg/database';
 import { Type } from 'class-transformer';
 import { IsBoolean, IsDate, IsDateString, IsIn, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
@@ -32,18 +33,18 @@ export class TermsDocumentParamDto {
   id!: string;
 }
 
-export class CreateTermsDocumentDto {
-  @ApiProperty({ example: 'SERVICE_TOS', description: '약관 문서 코드' })
+export class CreateTermsDocumentDto implements Pick<TermsDocument, 'code' | 'title'>, Partial<Pick<TermsDocument, 'required'>> {
+  @ApiProperty({ example: 'privacy', description: '약관 코드' })
   @IsString()
   @IsNotEmpty()
   code!: string;
 
-  @ApiProperty({ example: '서비스 이용약관', description: '약관 문서 제목' })
+  @ApiProperty({ example: '개인정보 처리방침', description: '약관 제목' })
   @IsString()
   @IsNotEmpty()
   title!: string;
 
-  @ApiPropertyOptional({ example: true, description: '필수 약관 여부' })
+  @ApiPropertyOptional({ example: true, description: '필수 동의 여부' })
   @IsOptional()
   @IsBoolean()
   required?: boolean;
@@ -75,7 +76,7 @@ export class DeleteTermsDocumentDto {
   id!: string;
 }
 
-export class CreateTermsVersionDto {
+export class CreateTermsVersionDto implements Pick<TermsVersion, 'label' | 'content'>, Partial<Pick<TermsVersion, 'effectiveAt'>> {
   @ApiProperty({ example: '019e5236-adae-70d7-a8f7-2dc90bdf7089', description: '약관 문서 식별자' })
   @IsString()
   @IsNotEmpty()
@@ -86,12 +87,12 @@ export class CreateTermsVersionDto {
   @IsNotEmpty()
   label!: string;
 
-  @ApiProperty({ example: '약관 본문 내용(마크다운 등)...', description: '약관 본문' })
+  @ApiProperty({ example: '약관 본문 내용...', description: '약관 버전 본문' })
   @IsString()
   @IsNotEmpty()
   content!: string;
 
-  @ApiPropertyOptional({ example: '2024-01-01T00:00:00Z', description: '효력 시각' })
+  @ApiPropertyOptional({ example: '2026-06-01T00:00:00.000Z', description: '발효 시점' })
   @IsOptional()
   @Type(() => Date)
   @IsDate()
@@ -103,20 +104,20 @@ export class CreateTermsVersionDto {
   status?: string;
 }
 
-export class UpdateTermsVersionDto {
-  @ApiProperty({ example: '019e5236-adae-70d7-a8f7-2dc90bdf7095', description: '약관 버전 식별자' })
+export class UpdateTermsVersionDto implements Pick<TermsVersion, 'id' | 'label' | 'content' | 'effectiveAt'> {
+  @ApiProperty({ example: '019e5236-adae-70d7-a8f7-2dc90bdf7089', description: '약관 버전 식별자' })
   @IsString()
   id!: string;
 
-  @ApiProperty({ example: 'v1.0.1', description: '약관 버전 라벨' })
+  @ApiProperty({ example: 'v1.1.0', description: '약관 버전 라벨' })
   @IsString()
   label!: string;
 
-  @ApiProperty({ example: '약관 본문 내용(마크다운 등)...', description: '약관 본문' })
+  @ApiProperty({ example: '약관 본문 내용...', description: '약관 버전 본문' })
   @IsString()
   content!: string;
 
-  @ApiProperty({ example: '2024-01-01T00:00:00Z', description: '효력 시각' })
+  @ApiProperty({ example: '2026-06-15T00:00:00.000Z', description: '발효 시점' })
   @Type(() => Date)
   @IsDate()
   effectiveAt!: Date;

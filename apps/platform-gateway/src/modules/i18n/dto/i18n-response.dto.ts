@@ -1,25 +1,26 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { I18nLocale, I18nLocaleDirection } from '@pkg/database';
 
 import { SwaggerSchema } from '@/common/decorators/swagger-schema.decorator';
 
-export class LocaleDto {
+export class LocaleDto implements Pick<I18nLocale, 'code' | 'name' | 'regionCode' | 'direction' | 'isActive' | 'sortOrder'> {
   @ApiProperty({ example: 'ko', description: '로케일 코드' })
   code!: string;
 
   @ApiProperty({ example: '한국어', description: '이름' })
   name!: string;
 
-  @ApiProperty({ example: 'KR', required: false, description: '지역 코드' })
+  @ApiPropertyOptional({ example: 'KR', description: '지역 코드' })
   regionCode?: string;
 
-  @ApiProperty({ example: 'ltr', enum: ['ltr', 'rtl'], description: '문자 방향' })
-  direction!: 'ltr' | 'rtl';
+  @ApiProperty({ enum: I18nLocaleDirection, example: 'ltr', description: '문자 방향' })
+  direction!: I18nLocaleDirection;
 
   @ApiProperty({ example: true, description: '활성화 여부' })
   isActive!: boolean;
 
-  @ApiProperty({ example: 1, required: false, description: '정렬 순서' })
-  sortOrder?: number;
+  @ApiProperty({ example: 1, description: '정렬 순서' })
+  sortOrder!: number;
 }
 
 export class LocalesDataDto {

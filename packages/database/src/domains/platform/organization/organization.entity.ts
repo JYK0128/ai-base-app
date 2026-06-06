@@ -2,7 +2,7 @@ import { Collection, type Opt } from '@mikro-orm/core';
 import { Entity, Enum, OneToMany, Property } from '@mikro-orm/decorators/legacy';
 
 import { CoreEntity } from '../../core/core.entity';
-import type { Member } from '../member/member.entity';
+import { Member } from '../member/member.entity';
 import { MemberInvite } from '../member/member.invite.entity';
 import { TermsDocument } from '../terms/terms.document.entity';
 import { OrganizationRepository } from './organization.repository';

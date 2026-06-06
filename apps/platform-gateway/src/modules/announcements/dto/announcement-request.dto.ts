@@ -1,56 +1,57 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsBoolean, IsDateString, IsIn, IsOptional, IsString } from 'class-validator';
+import { ApiPropertyOptional } from '@nestjs/swagger';
+import { Announcement, AnnouncementAudience, AnnouncementCategory, AnnouncementChannel, AnnouncementPriority } from '@pkg/database';
+import { IsBoolean, IsDateString, IsEnum, IsOptional, IsString } from 'class-validator';
 
-export class CreateAnnouncementDto {
+export class CreateAnnouncementDto implements Pick<Announcement, 'title' | 'content'> {
   @ApiPropertyOptional({ example: 'announcement-001', description: '공지사항 식별자' })
   @IsOptional()
   @IsString()
   id?: string;
 
-  @ApiProperty({ example: '새 기능이 출시되었습니다', description: '공지사항 제목' })
+  @ApiPropertyOptional({ example: '새 기능 출시', description: '공지사항 제목' })
   @IsString()
   title!: string;
 
-  @ApiProperty({ example: '새로운 소식을 안내드립니다...', description: '공지사항 내용' })
+  @ApiPropertyOptional({ example: '새 기능에 대한 설명...', description: '공지사항 본문' })
   @IsString()
   content!: string;
 
-  @ApiPropertyOptional({ example: 'NOTICE', enum: ['NOTICE', 'MAINTENANCE', 'SECURITY', 'EVENT'], description: '공지 분류' })
+  @ApiPropertyOptional({ example: 'NOTICE', enum: AnnouncementCategory, description: '공지 분류' })
   @IsOptional()
-  @IsIn(['NOTICE', 'MAINTENANCE', 'SECURITY', 'EVENT'])
-  category?: string;
+  @IsEnum(AnnouncementCategory)
+  category?: AnnouncementCategory;
 
-  @ApiPropertyOptional({ example: 'ALL', enum: ['ALL', 'PLATFORM', 'ORGANIZATION'], description: '공지 대상' })
+  @ApiPropertyOptional({ example: 'ALL', enum: AnnouncementAudience, description: '공지 대상' })
   @IsOptional()
-  @IsIn(['ALL', 'PLATFORM', 'ORGANIZATION'])
-  audience?: string;
+  @IsEnum(AnnouncementAudience)
+  audience?: AnnouncementAudience;
 
-  @ApiPropertyOptional({ example: 'IN_APP', enum: ['IN_APP', 'EMAIL', 'PUSH'], description: '공지 채널' })
+  @ApiPropertyOptional({ example: 'IN_APP', enum: AnnouncementChannel, description: '공지 채널' })
   @IsOptional()
-  @IsIn(['IN_APP', 'EMAIL', 'PUSH'])
-  channel?: string;
+  @IsEnum(AnnouncementChannel)
+  channel?: AnnouncementChannel;
 
-  @ApiPropertyOptional({ example: 'NORMAL', enum: ['LOW', 'NORMAL', 'HIGH'], description: '공지 우선순위' })
+  @ApiPropertyOptional({ example: 'NORMAL', enum: AnnouncementPriority, description: '공지 우선순위' })
   @IsOptional()
-  @IsIn(['LOW', 'NORMAL', 'HIGH'])
-  priority?: string;
+  @IsEnum(AnnouncementPriority)
+  priority?: AnnouncementPriority;
 
   @ApiPropertyOptional({ example: false, description: '상단 고정 여부' })
   @IsOptional()
   @IsBoolean()
   pinned?: boolean;
 
-  @ApiPropertyOptional({ example: '2026-06-01T09:00:00.000Z', description: '게시 확정 일시' })
+  @ApiPropertyOptional({ example: '2026-06-01T00:00:00.000Z', description: '게시 확정 일시' })
   @IsOptional()
   @IsDateString()
   publishedAt?: string;
 
-  @ApiPropertyOptional({ example: '2026-06-03T09:00:00.000Z', description: '게시 시작일' })
+  @ApiPropertyOptional({ example: '2026-06-01T00:00:00.000Z', description: '게시 시작일' })
   @IsOptional()
   @IsDateString()
   startAt?: string;
 
-  @ApiPropertyOptional({ example: '2026-06-07T09:00:00.000Z', description: '게시 종료일' })
+  @ApiPropertyOptional({ example: '2026-06-10T00:00:00.000Z', description: '게시 종료일' })
   @IsOptional()
   @IsDateString()
   endAt?: string;

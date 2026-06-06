@@ -1,8 +1,24 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { TermsConsent, TermsDocument, TermsDocumentStatus, TermsVersion, TermsVersionStatus } from '@pkg/database';
 
-export class TermsDocumentResponseDto {
-  @ApiProperty({ example: '019e5236-adae-70d7-a8f7-2dc90bdf7094', description: '약관 문서 식별자' })
+export class TermsDocumentResponseDto implements Pick<TermsDocument, 'id' | 'code' | 'title' | 'required' | 'deprecatedAt' | 'status'> {
+  @ApiProperty({ example: '019e5236-adae-70d7-a8f7-2dc90bdf7081', description: '약관 문서 식별자' })
   id!: string;
+
+  @ApiProperty({ example: 'privacy', description: '약관 코드' })
+  code!: string;
+
+  @ApiProperty({ example: '개인정보 처리방침', description: '약관 제목' })
+  title!: string;
+
+  @ApiProperty({ example: true, description: '필수 동의 여부' })
+  required!: boolean;
+
+  @ApiPropertyOptional({ example: '2026-06-06T14:00:00.000Z', description: '폐기 일시' })
+  deprecatedAt?: Date;
+
+  @ApiProperty({ enum: TermsDocumentStatus, example: 'PUBLISHED', description: '약관 상태' })
+  status!: TermsDocumentStatus;
 
   @ApiPropertyOptional({
     type: String,
@@ -11,41 +27,26 @@ export class TermsDocumentResponseDto {
     description: '조직 식별자',
   })
   organizationId?: string | null;
-
-  @ApiProperty({ example: 'SERVICE_TOS', description: '약관 문서 코드' })
-  code!: string;
-
-  @ApiProperty({ example: '서비스 이용약관', description: '약관 제목' })
-  title!: string;
-
-  @ApiProperty({ example: true, description: '필수 약관 여부' })
-  required!: boolean;
-
-  @ApiPropertyOptional({ type: String, example: '2026-06-20T00:00:00.000Z', nullable: true, description: '폐기 시점' })
-  deprecatedAt?: string | null;
-
-  @ApiProperty({ example: 'PUBLISHED', enum: ['DRAFT', 'PUBLISHED'], description: '문서 상태' })
-  status!: string;
 }
 
-export class TermsVersionResponseDto {
-  @ApiProperty({ example: '019e5236-adae-70d7-a8f7-2dc90bdf7095', description: '약관 버전 식별자' })
+export class TermsVersionResponseDto implements Pick<TermsVersion, 'id' | 'content' | 'checksum' | 'status' | 'effectiveAt'> {
+  @ApiProperty({ example: '019e5236-adae-70d7-a8f7-2dc90bdf7082', description: '약관 버전 식별자' })
   id!: string;
+
+  @ApiProperty({ example: '약관 본문 내용입니다...', description: '약관 내용' })
+  content!: string;
+
+  @ApiProperty({ example: 'sha256-checksum...', description: '체크섬' })
+  checksum!: string;
+
+  @ApiProperty({ enum: TermsVersionStatus, example: 'PUBLISHED', description: '버전 상태' })
+  status!: TermsVersionStatus;
+
+  @ApiProperty({ example: '2026-06-06T14:00:00.000Z', description: '효력 일시' })
+  effectiveAt!: Date;
 
   @ApiProperty({ example: 'v1.0.0', description: '버전 라벨' })
   versionLabel!: string;
-
-  @ApiProperty({ example: '약관 본문 내용...', description: '약관 본문' })
-  content!: string;
-
-  @ApiProperty({ example: 'sha256:deadbeef...', description: '체크섬' })
-  checksum!: string;
-
-  @ApiProperty({ example: 'PUBLISHED', enum: ['DRAFT', 'PUBLISHED'], description: '버전 상태' })
-  status!: string;
-
-  @ApiProperty({ example: '2024-01-01T00:00:00Z', description: '효력 시각' })
-  effectiveAt!: string;
 }
 
 export class TermsDocumentDetailResponseDto {
@@ -59,8 +60,8 @@ export class TermsDocumentDetailResponseDto {
   currentVersion?: TermsVersionResponseDto | null;
 }
 
-export class MemberTermsConsentResponseDto {
-  @ApiProperty({ example: '019e5236-adae-70d7-a8f7-2dc90bdf7096', description: '동의 이력 식별자' })
+export class MemberTermsConsentResponseDto implements Pick<TermsConsent, 'id' | 'agreed'> {
+  @ApiProperty({ example: '019e5236-adae-70d7-a8f7-2dc90bdf7083', description: '동의 식별자' })
   id!: string;
 
   @ApiProperty({ example: true, description: '동의 여부' })
