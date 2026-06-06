@@ -105,7 +105,7 @@ export class RefreshTokenHandler implements ICommandHandler<RefreshTokenCommand>
         sub: accountId,
         accountId,
         memberId,
-        ...(organizationId ? { organizationId } : {}),
+        organizationId,
         mustChangePassword: account.isPasswordExpired,
         permissions,
       },

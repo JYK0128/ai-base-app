@@ -120,7 +120,7 @@ export class LoginHandler implements ICommandHandler<LoginCommand> {
         sub: accountId,
         accountId,
         memberId,
-        ...(organizationId ? { organizationId } : {}),
+        organizationId,
         mustChangePassword: isPasswordExpired,
         permissions,
       },

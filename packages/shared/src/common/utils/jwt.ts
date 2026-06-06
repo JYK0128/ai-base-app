@@ -1,4 +1,6 @@
 import { decodeJwt, type JWTHeaderParameters, type JWTPayload, jwtVerify, type JWTVerifyOptions, SignJWT } from 'jose';
+import isNil from 'lodash/isNil';
+import omitBy from 'lodash/omitBy';
 
 type JwtTimeLike = string | number | Date;
 
@@ -67,8 +69,10 @@ export class JwtUtil {
       throw new TypeError('JWT payload requires sub');
     }
 
+    const cleanedPayload = omitBy(payload, isNil);
+
     const [accessToken, refreshToken] = await Promise.all([
-      JwtUtil.issue(payload, options.access.secret, options.access.expires),
+      JwtUtil.issue(cleanedPayload, options.access.secret, options.access.expires),
       JwtUtil.issue({ sub: payload.sub }, options.refresh.secret, options.refresh.expires),
     ]);
 
