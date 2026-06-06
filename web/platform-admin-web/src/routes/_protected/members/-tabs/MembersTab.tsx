@@ -257,7 +257,7 @@ export function MembersTab({ isActive }: MembersTabProps) {
   };
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col">
+    <div className="flex flex-1 flex-col">
       <MembersPanel
         icon={<UserCog className="size-4 text-sky-600" />}
         title="멤버 목록"
@@ -269,7 +269,7 @@ export function MembersTab({ isActive }: MembersTabProps) {
               columns={MEMBER_COLUMNS}
               data={membersView}
               defaultPageSize={10}
-              filterColumns={['name', 'email', 'role', 'status', 'lastLoginAt', 'invitedAt', 'invitedBy']}
+              filterColumns={['name', 'email', 'role', 'status', 'lastLoginAt', 'invitedAt', 'createdBy']}
               filterPlaceholder="이름, 이메일, 권한, 초대한 사람으로 검색"
               meta={metaValue}
             />
@@ -367,7 +367,7 @@ function MemberDetailDrawer({ open, member, onOpenChange, onToggleStatus }: Memb
   return (
     <Drawer open={open} onOpenChange={onOpenChange} direction="right">
       <DrawerContent className="h-full w-120 max-w-[92vw] bg-white p-0">
-        <div className="flex h-full min-h-0 flex-col">
+        <div className="flex h-full flex-col">
           <DrawerHeader className="border-b border-slate-200 px-4 py-4">
             <DrawerTitle className="flex items-center gap-2 text-slate-900">
               <UserCog className="size-4 text-sky-600" />
@@ -380,7 +380,7 @@ function MemberDetailDrawer({ open, member, onOpenChange, onToggleStatus }: Memb
 
           {!member
             ? (
-              <div className="flex min-h-0 flex-1 flex-col items-center justify-center p-6">
+              <div className="flex flex-1 flex-col items-center justify-center p-6">
                 <Empty>
                   <EmptyHeader>
                     <EmptyMedia variant="icon">
@@ -393,7 +393,7 @@ function MemberDetailDrawer({ open, member, onOpenChange, onToggleStatus }: Memb
               </div>
             )
             : (
-              <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-auto p-4">
+              <div className="flex flex-1 flex-col gap-4 scroll p-4">
                 <div className="flex items-start gap-3">
                   <Avatar size="lg">
                     <AvatarFallback>{getInitials(member.name)}</AvatarFallback>

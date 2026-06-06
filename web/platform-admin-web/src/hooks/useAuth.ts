@@ -62,6 +62,7 @@ export const useAuth = () => {
   const organizationId = user?.organization?.id || null;
   const permissions = user?.permissions || [];
   const mustChangePassword = !!user?.mustChangePassword;
+  const accountEmail = user?.account?.email || null;
 
   // 인증 상태 확인이 완료되지 않았거나, 인증되었는데 서버에서 정보를 조회 중인 경우 초기화 중으로 표출
   const isInitializing = !isInitialized || (isAuthenticated && isMeLoading);
@@ -73,6 +74,7 @@ export const useAuth = () => {
     accountId,
     memberId,
     organizationId,
+    accountEmail,
     permissions,
     isInitializing,
     setAccessToken,

@@ -249,7 +249,7 @@ export function DataTable<TData>({
         filterPlaceholder={filterPlaceholder}
       />
 
-      <div className="rounded-md border bg-card overflow-auto relative flex-1 min-h-0">
+      <div className="rounded-md border bg-card scroll flex-1">
         <Table className="w-full table-fixed border-separate border-spacing-0">
           <DataTableHeader
             table={table}

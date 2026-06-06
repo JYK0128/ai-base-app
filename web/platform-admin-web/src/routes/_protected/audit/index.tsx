@@ -150,7 +150,7 @@ function AuditPage() {
   };
 
   return (
-    <div className="size-full mx-auto flex max-w-300 min-h-0 flex-col gap-6 overflow-hidden p-6">
+    <div className="size-full mx-auto flex max-w-300 flex-col gap-6 overflow-hidden p-6">
       <header className="flex items-center justify-between gap-3 border-b border-slate-200 pb-4">
         <div className="space-y-2">
           <h1 className="flex items-center gap-2 text-2xl font-bold tracking-tight text-slate-950">
@@ -217,8 +217,8 @@ function AuditPage() {
         </CardContent>
       </Card>
 
-      <Card className="flex min-h-0 flex-1 flex-col overflow-hidden border-slate-200 bg-white shadow-sm">
-        <CardContent className="min-h-0 flex-1 overflow-auto p-0">
+      <Card className="flex flex-1 flex-col overflow-hidden border-slate-200 bg-white shadow-sm">
+        <CardContent className="flex-1 scroll p-0">
           <Table>
             <TableHeader className="bg-slate-50/50">
               <TableRow>
@@ -315,7 +315,7 @@ function AuditPage() {
 
               <div className="space-y-1.5">
                 <span className="text-slate-400 block text-xs font-semibold">데이터베이스 변경 트랜잭션 페이로드 (Metadata)</span>
-                <pre className="bg-slate-900 text-slate-100 rounded-lg p-3 text-xs font-mono overflow-auto max-h-[220px]">
+                <pre className="bg-slate-900 text-slate-100 rounded-lg p-3 text-xs font-mono scroll max-h-[220px]">
                   <code>{selectedLog.details}</code>
                 </pre>
               </div>

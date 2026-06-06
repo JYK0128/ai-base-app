@@ -7,7 +7,6 @@ import type { CreateAnnouncementDto } from '../../../../api/model';
 import { ANNOUNCEMENT_AUDIENCE_LABELS,
          ANNOUNCEMENT_CATEGORY_LABELS,
          ANNOUNCEMENT_PRIORITY_LABELS,
-         ANNOUNCEMENT_STATUS_LABELS,
          type AnnouncementCategory,
          type AnnouncementEditorSeed,
          type AnnouncementEditorState,
@@ -36,21 +35,16 @@ const PRIORITY_ITEMS = Object.entries(ANNOUNCEMENT_PRIORITY_LABELS).map(([value,
   label,
 })) satisfies Array<{ value: string, label: string }>;
 
-const STATUS_ITEMS = Object.entries(ANNOUNCEMENT_STATUS_LABELS).map(([value, label]) => ({
-  value,
-  label,
-})) satisfies Array<{ value: string, label: string }>;
-
 const ANNOUNCEMENT_EDITOR_SCHEMA = z.object({
   title: z.string().trim().min(1, '제목을 입력해주세요.'),
   category: z.enum(['NOTICE', 'MAINTENANCE', 'SECURITY', 'EVENT']),
   audience: z.enum(['ALL', 'PLATFORM', 'ORGANIZATION']),
   priority: z.enum(['LOW', 'NORMAL', 'HIGH']),
-  status: z.enum(['DRAFT', 'PUBLISHED']),
+  publishedAt: z.string().trim(),
   startAt: z.string().trim().min(1, '시작일을 입력해주세요.'),
   endAt: z.string().trim().min(1, '종료일을 입력해주세요.'),
   content: z.string().trim().min(1, '본문을 입력해주세요.'),
-}).refine((value) => new Date(value.startAt).getTime() <= new Date(value.endAt).getTime(), {
+}).refine((value) => new Date(value.startAt).getTime() < new Date(value.endAt).getTime(), {
   message: '종료일은 시작일보다 이후여야 합니다.',
   path: ['endAt'],
 });
@@ -103,8 +97,8 @@ export function AnnouncementEditorModal({
         </DialogHeader>
 
         <form.AppForm>
-          <form.Layout className="grid min-h-0 h-full grid-rows-[minmax(0,1fr)_auto]" onSubmit={(event) => void form.handleSubmit(event)}>
-            <div className="min-h-0 overflow-auto py-4 pr-1">
+          <form.Layout className="grid h-full grid-rows-[minmax(0,1fr)_auto]" onSubmit={(event) => void form.handleSubmit(event)}>
+            <div className="scroll py-4 pr-1">
               <div className="grid gap-6">
                 <form.FieldSet className="rounded-xl border border-slate-200 bg-slate-50/60 p-4">
                   <form.FieldLegend className="px-1 text-sm font-semibold text-slate-900">
@@ -165,29 +159,28 @@ export function AnnouncementEditorModal({
                           />
                         )}
                       </form.AppField>
-
-                      <form.AppField name="status">
-                        {(field) => (
-                          <field.Select
-                            label="게시 상태"
-                            placeholder="게시 상태를 선택하세요"
-                            required
-                            orientation="vertical"
-                            labelWidth="auto"
-                            items={STATUS_ITEMS}
-                          />
-                        )}
-                      </form.AppField>
                     </div>
                   </form.FieldGroup>
                 </form.FieldSet>
 
                 <form.FieldSet className="rounded-xl border border-slate-200 bg-slate-50/60 p-4">
                   <form.FieldLegend className="px-1 text-sm font-semibold text-slate-900">
-                    게시 기간
+                    게시 설정
                   </form.FieldLegend>
 
-                  <form.FieldGroup className="grid gap-4 lg:grid-cols-2">
+                  <form.FieldGroup className="grid gap-4 lg:grid-cols-3">
+                    <form.AppField name="publishedAt">
+                      {(field) => (
+                        <field.Input
+                          label="게시 확정 일시"
+                          type="datetime-local"
+                          orientation="vertical"
+                          labelWidth="auto"
+                          step={60}
+                        />
+                      )}
+                    </form.AppField>
+
                     <form.AppField name="startAt">
                       {(field) => (
                         <field.Input

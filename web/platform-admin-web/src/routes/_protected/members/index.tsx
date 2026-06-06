@@ -16,7 +16,7 @@ function MembersPage() {
 
   return (
     <TooltipProvider delayDuration={1000}>
-      <div className="size-full mx-auto flex max-w-300 min-h-0 flex-col gap-6 overflow-hidden p-6">
+      <div className="size-full mx-auto flex max-w-300 flex-col gap-6 overflow-hidden p-6">
         <header className="space-y-2 border-b border-slate-200 pb-4">
           <h1 className="text-2xl font-bold tracking-tight text-slate-950">멤버 관리</h1>
           <p className="max-w-3xl text-sm text-slate-500">
@@ -24,7 +24,7 @@ function MembersPage() {
           </p>
         </header>
 
-        <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as MemberTab)} className="flex flex-1 min-h-0 flex-col gap-4 overflow-hidden">
+        <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as MemberTab)} className="flex flex-1 flex-col gap-4 overflow-hidden">
           <TabsList className="w-fit justify-start" variant="line">
             <TabsTrigger value="members" className="flex-none px-4">
               멤버 목록
@@ -34,11 +34,11 @@ function MembersPage() {
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="members" className="mt-0 flex flex-1 min-h-0 flex-col overflow-hidden">
+          <TabsContent value="members" className="mt-0 flex flex-1 flex-col overflow-hidden">
             <MembersTab isActive={activeTab === 'members'} />
           </TabsContent>
 
-          <TabsContent value="invitations" className="mt-0 flex flex-1 min-h-0 flex-col overflow-hidden">
+          <TabsContent value="invitations" className="mt-0 flex flex-1 flex-col overflow-hidden">
             <InvitationsTab isActive={activeTab === 'invitations'} />
           </TabsContent>
         </Tabs>

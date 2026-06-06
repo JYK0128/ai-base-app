@@ -110,7 +110,7 @@ export function ResourceEditModal({ open, onOpenChange, resource, onSave }: Reso
               {(field) => (
                 <div className="space-y-2">
                   <div className="text-sm font-medium text-slate-700">아이콘 선택 - 선택사항</div>
-                  <div className="grid max-h-40 grid-cols-5 gap-2 overflow-y-auto rounded-md border border-slate-200 bg-slate-50 p-2">
+                  <div className="grid max-h-40 grid-cols-5 gap-2 scroll-y rounded-md border border-slate-200 bg-slate-50 p-2">
                     {COMMON_ICONS.map(({ name, icon: IconComponent }) => (
                       <button
                         key={name}

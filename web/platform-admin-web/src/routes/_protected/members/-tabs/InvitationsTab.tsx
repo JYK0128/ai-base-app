@@ -5,6 +5,7 @@ import { z } from 'zod';
 
 import { useMembersControllerCancelInviteV1, useMembersControllerCreateInviteV1, useMembersControllerGetInvitesV1, useMembersControllerResendInviteV1, useMembersControllerReviveInviteV1 } from '../../../../api/endpoints';
 import type { CreateInviteDto, InviteResponseDto as InviteItem, InviteResponseDtoInviteStatus as InviteStatus, MemberResponseDtoRole as MemberRole } from '../../../../api/model';
+import { useAuth } from '../../../../hooks/useAuth';
 import { ROLE_META, ROLE_OPTIONS, upsertById } from '../-members.shared';
 import { MembersPanel } from './MembersPanel';
 
@@ -138,7 +139,7 @@ export const INVITE_COLUMNS: ColumnDef<InviteViewItem>[] = [
       return (
         <div className="space-y-0.5 text-center">
           <p className="whitespace-nowrap font-medium text-slate-800">{invite.invitedAt}</p>
-          <p className="truncate text-[11px] text-slate-400">{invite.invitedBy}</p>
+          <p className="truncate text-[11px] text-slate-400">{invite.createdBy ?? '-'}</p>
         </div>
       );
     },
@@ -204,6 +205,7 @@ export const INVITE_COLUMNS: ColumnDef<InviteViewItem>[] = [
 ];
 
 export function InvitationsTab({ isActive }: InvitationsTabProps) {
+  const { accountEmail } = useAuth();
   const { data: invitesResponse } = useMembersControllerGetInvitesV1(undefined, {
     query: {
       enabled: isActive,
@@ -315,10 +317,10 @@ export function InvitationsTab({ isActive }: InvitationsTabProps) {
           lastLoginAt: null,
           invitedAt,
           expiresAt: getNextInviteExpiresAt(new Date(invitedAt)),
-          invitedBy: 'system',
           note: note || undefined,
           isMe: false,
           inviteStatus: 'PENDING',
+          ...(accountEmail ? { createdBy: accountEmail } : {}),
         };
 
         setCreatedInvites((current) => upsertById(current, nextInvite));
@@ -378,7 +380,7 @@ export function InvitationsTab({ isActive }: InvitationsTabProps) {
   };
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col">
+    <div className="flex flex-1 flex-col">
       <Drawer open={inviteDrawerOpen} onOpenChange={setInviteDrawerOpen} direction="right">
         <MembersPanel
           icon={<Mail className="size-4 text-sky-600" />}
@@ -399,7 +401,7 @@ export function InvitationsTab({ isActive }: InvitationsTabProps) {
                 columns={INVITE_COLUMNS}
                 data={invitesView}
                 defaultPageSize={10}
-                filterColumns={['name', 'email', 'role', 'displayStatus', 'invitedAt', 'invitedBy', 'note']}
+                filterColumns={['name', 'email', 'role', 'displayStatus', 'invitedAt', 'createdBy', 'note']}
                 filterPlaceholder="이름, 이메일, 권한, 초대한 사람으로 검색"
                 meta={metaValue}
               />
@@ -408,7 +410,7 @@ export function InvitationsTab({ isActive }: InvitationsTabProps) {
         </MembersPanel>
 
         <DrawerContent className="h-full w-120 max-w-[92vw] bg-white p-0">
-          <div className="flex h-full min-h-0 flex-col">
+          <div className="flex h-full flex-col">
             <DrawerHeader className="border-b border-slate-200 px-4 py-4">
               <DrawerTitle className="flex items-center gap-2 text-slate-900">
                 <UserPlus className="size-4 text-sky-600" />
@@ -420,7 +422,7 @@ export function InvitationsTab({ isActive }: InvitationsTabProps) {
             </DrawerHeader>
 
             <inviteForm.AppForm>
-              <inviteForm.Layout className="flex min-h-0 flex-1 flex-col gap-4 overflow-auto p-4" onSubmit={(event) => void inviteForm.handleSubmit(event)}>
+              <inviteForm.Layout className="flex flex-1 flex-col gap-4 scroll p-4" onSubmit={(event) => void inviteForm.handleSubmit(event)}>
                 <inviteForm.AppField name="name">
                   {(field) => (
                     <field.Input

@@ -20,7 +20,7 @@ function SupportPage() {
   const tickets: TicketResponseDto[] = data?.data ?? [];
 
   return (
-    <div className="size-full mx-auto flex max-w-300 min-h-0 flex-col gap-6 overflow-hidden p-6">
+    <div className="size-full mx-auto flex max-w-300 flex-col gap-6 overflow-hidden p-6">
       <header className="space-y-2 border-b border-slate-200 pb-4">
         <h1 className="text-2xl font-bold tracking-tight text-slate-950">고객 지원 (티켓)</h1>
         <p className="max-w-3xl text-sm text-slate-500">
@@ -28,8 +28,8 @@ function SupportPage() {
         </p>
       </header>
 
-      <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-lg border border-slate-200 bg-white">
-        <div className="min-h-0 flex-1 overflow-auto">
+      <div className="flex flex-1 flex-col overflow-hidden rounded-lg border border-slate-200 bg-white">
+        <div className="flex-1 scroll">
           <Table>
             <TableHeader>
               <TableRow>

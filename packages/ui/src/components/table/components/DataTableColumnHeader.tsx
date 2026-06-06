@@ -202,7 +202,7 @@ export function DataTableColumnHeader<TData, TValue>({
                   {' '}
                   {header.column.columnDef.header as string}
                 </div>
-                <div className="max-h-50 overflow-y-auto">
+                <div className="max-h-50 scroll-y">
                   {facetedConfig.options.map((option) => {
                     const isSelected = selectedValues.has(option.value);
                     const count = facetedConfig.facetCounts

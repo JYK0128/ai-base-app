@@ -198,12 +198,6 @@ function buildPermissionSetListContent(params: {
                   명
                 </strong>
               </span>
-              {permissionSet.isActive && (
-                <span className="flex items-center gap-1 text-emerald-600">
-                  <span className="h-1 w-1 rounded-full bg-emerald-500" />
-                  활성
-                </span>
-              )}
             </div>
           </button>
         );
@@ -666,9 +660,9 @@ export function PermissionManagementTab() {
     resourceRows,
   });
   return (
-    <div className="flex h-full min-h-0 w-full flex-1 flex-col gap-6 overflow-hidden">
-      <div className="grid flex-1 min-h-0 w-full grid-cols-1 gap-6 lg:grid-cols-12">
-        <aside className="flex min-h-0 flex-col gap-3 overflow-hidden rounded-lg border border-slate-200 bg-white p-3.5 shadow-sm lg:col-span-4 xl:col-span-3">
+    <div className="flex h-full w-full flex-1 flex-col gap-6 overflow-hidden">
+      <div className="grid flex-1 w-full grid-cols-1 gap-6 lg:grid-cols-12">
+        <aside className="flex flex-col gap-3 overflow-hidden rounded-lg border border-slate-200 bg-white p-3.5 shadow-sm lg:col-span-4 xl:col-span-3">
           <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
             <div className="space-y-0.5">
               <h2 className="flex items-center gap-1.5 text-sm font-bold text-slate-900">
@@ -694,12 +688,12 @@ export function PermissionManagementTab() {
             </div>
           )}
 
-          <div className="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto pr-0.5">
+          <div className="flex flex-1 flex-col gap-2 scroll-y pr-0.5">
             {permissionSetListContent}
           </div>
         </aside>
 
-        <main className="flex min-h-0 w-full flex-col overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm lg:col-span-8 xl:col-span-9">
+        <main className="flex w-full flex-col overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm lg:col-span-8 xl:col-span-9">
           <header className="flex flex-col gap-4 border-b border-slate-150 bg-slate-50/30 px-5 py-3.5 sm:flex-row sm:items-center sm:justify-between">
             <div className="space-y-0.5">
               <div className="flex flex-wrap items-center gap-1.5">
@@ -713,11 +707,6 @@ export function PermissionManagementTab() {
                   {selectedPermissionSet?.assignmentCount ?? 0}
                   명 배정됨
                 </Badge>
-                {!selectedPermissionSet?.isActive && selectedPermissionSet && (
-                  <Badge variant="secondary" className="rounded bg-rose-50 px-1.5 py-0 text-[10px] text-rose-600">
-                    비활성
-                  </Badge>
-                )}
               </div>
               <p className="text-[10px] text-slate-400">
                 현재 조직에서 사용할 수 있는 리소스별 허용 액션을 선택하여 권한 세트를 완성합니다.
@@ -759,7 +748,7 @@ export function PermissionManagementTab() {
             </div>
           </header>
 
-          <div className="min-h-0 flex-1 overflow-auto">
+          <div className="flex-1 scroll">
             {resourceAreaContent}
           </div>
 

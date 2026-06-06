@@ -14,8 +14,8 @@ export interface AnnouncementEditorSeed {
   audience: AnnouncementAudience
   channel: AnnouncementChannel
   priority: AnnouncementPriority
-  status: AnnouncementStatus
   pinned: boolean
+  publishedAt: string
   startAt: string
   endAt: string
   content: string
@@ -26,7 +26,7 @@ export interface AnnouncementEditorState {
   category: AnnouncementCategory
   audience: AnnouncementAudience
   priority: AnnouncementPriority
-  status: AnnouncementStatus
+  publishedAt: string
   startAt: string
   endAt: string
   content: string
@@ -110,8 +110,8 @@ export function createBlankAnnouncement(): AnnouncementEditorSeed {
     audience: 'ALL',
     channel: 'IN_APP',
     priority: 'NORMAL',
-    status: 'DRAFT',
     pinned: false,
+    publishedAt: '',
     startAt: now,
     endAt,
     content: '',
@@ -124,7 +124,7 @@ export function toEditorState(announcement: AnnouncementEditorSeed): Announcemen
     category: announcement.category,
     audience: announcement.audience,
     priority: announcement.priority,
-    status: announcement.status,
+    publishedAt: toDateTimeInputValue(announcement.publishedAt),
     startAt: toDateTimeInputValue(announcement.startAt),
     endAt: toDateTimeInputValue(announcement.endAt),
     content: announcement.content,
@@ -145,9 +145,9 @@ export function buildCreateAnnouncementDto(
     audience: state.audience,
     channel: original.channel,
     priority: state.priority,
-    status: state.status,
     pinned: original.pinned,
-    startAt: fromDateTimeInputValue(state.startAt) || original.startAt,
-    endAt: fromDateTimeInputValue(state.endAt) || original.endAt,
+    publishedAt: fromDateTimeInputValue(state.publishedAt) || undefined,
+    startAt: fromDateTimeInputValue(state.startAt) || undefined,
+    endAt: fromDateTimeInputValue(state.endAt) || undefined,
   };
 }

@@ -814,9 +814,9 @@ export function TermsManagementTab() {
   }
 
   return (
-    <div className="flex h-full min-h-0 w-full flex-1 flex-col gap-6 overflow-hidden">
-      <div className="grid flex-1 min-h-0 w-full grid-cols-1 gap-6 lg:grid-cols-12">
-        <aside className="flex min-h-0 flex-col gap-3 overflow-hidden rounded-lg border border-slate-200 bg-white p-3.5 shadow-sm lg:col-span-4 xl:col-span-3">
+    <div className="flex h-full w-full flex-1 flex-col gap-6 overflow-hidden">
+      <div className="grid flex-1 w-full grid-cols-1 gap-6 lg:grid-cols-12">
+        <aside className="flex flex-col gap-3 overflow-hidden rounded-lg border border-slate-200 bg-white p-3.5 shadow-sm lg:col-span-4 xl:col-span-3">
           <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
             <div className="space-y-0.5">
               <h2 className="flex items-center gap-1.5 text-sm font-bold text-slate-900">
@@ -840,7 +840,7 @@ export function TermsManagementTab() {
             </div>
           </div>
 
-          <Tabs value={visibleSelectedDocumentScope} onValueChange={handleDocumentScopeChange} className="flex min-h-0 flex-1 flex-col gap-3">
+          <Tabs value={visibleSelectedDocumentScope} onValueChange={handleDocumentScopeChange} className="flex flex-1 flex-col gap-3">
             <TabsList className="w-fit justify-start" variant="line">
               <TabsTrigger value="platform" className="flex-none gap-2 px-4">
                 <span>플랫폼</span>
@@ -856,8 +856,8 @@ export function TermsManagementTab() {
               </TabsTrigger>
             </TabsList>
 
-            <TabsContent value="platform" className="mt-0 flex min-h-0 flex-1 flex-col overflow-hidden">
-              <div className="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto pr-0.5">
+            <TabsContent value="platform" className="mt-0 flex flex-1 flex-col overflow-hidden">
+              <div className="flex flex-1 flex-col gap-2 scroll-y pr-0.5">
                 {buildTermsDocumentListContent({
                   documents: platformTermsDocuments,
                   isLoading: termsDocumentsQuery.isLoading,
@@ -867,8 +867,8 @@ export function TermsManagementTab() {
               </div>
             </TabsContent>
 
-            <TabsContent value="organization" className="mt-0 flex min-h-0 flex-1 flex-col overflow-hidden">
-              <div className="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto pr-0.5">
+            <TabsContent value="organization" className="mt-0 flex flex-1 flex-col overflow-hidden">
+              <div className="flex flex-1 flex-col gap-2 scroll-y pr-0.5">
                 {buildTermsDocumentListContent({
                   documents: organizationTermsDocuments,
                   isLoading: termsDocumentsQuery.isLoading,
@@ -880,7 +880,7 @@ export function TermsManagementTab() {
           </Tabs>
         </aside>
 
-        <main className="flex min-h-0 w-full flex-col overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm lg:col-span-8 xl:col-span-9">
+        <main className="flex w-full flex-col overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm lg:col-span-8 xl:col-span-9">
           <header className="flex flex-col gap-4 border-b border-slate-150 bg-slate-50/30 px-5 py-3.5 sm:flex-row sm:items-center sm:justify-between">
             <div className="space-y-0.5">
               <div className="flex items-baseline gap-2">
@@ -965,7 +965,7 @@ export function TermsManagementTab() {
             </div>
           </header>
 
-          <div className="min-h-0 flex-1 flex flex-col p-5">
+          <div className="flex-1 flex flex-col p-5">
             {documentMainContent}
           </div>
         </main>
@@ -1070,8 +1070,8 @@ export function TermsManagementTab() {
           </DialogHeader>
 
           <createVersionForm.AppForm>
-            <createVersionForm.Layout className="grid min-h-0 h-full grid-rows-[minmax(0,1fr)_auto]" onSubmit={(event) => void createVersionForm.handleSubmit(event)}>
-              <div className="min-h-0 overflow-auto py-4 pr-1">
+            <createVersionForm.Layout className="grid h-full grid-rows-[minmax(0,1fr)_auto]" onSubmit={(event) => void createVersionForm.handleSubmit(event)}>
+              <div className="scroll py-4 pr-1">
                 <div className="grid gap-6">
                   {selectedTermsDocument && (
                     <div className="rounded-xl border border-slate-200 bg-slate-50/70 p-3.5 text-xs leading-5 text-slate-500">
@@ -1290,7 +1290,7 @@ export function TermsManagementTab() {
             </DialogDescription>
           </DialogHeader>
 
-          <div className="min-h-0 overflow-auto py-4 pr-1">
+          <div className="scroll py-4 pr-1">
             {selectedVersionToUpdateResolved && selectedTermsDocument
               ? (
                 <div className="grid gap-4">
@@ -1454,8 +1454,8 @@ export function TermsManagementTab() {
           </DialogHeader>
 
           <updateVersionForm.AppForm>
-            <updateVersionForm.Layout className="grid min-h-0 h-full grid-rows-[minmax(0,1fr)_auto]" onSubmit={(event) => void updateVersionForm.handleSubmit(event)}>
-              <div className="min-h-0 overflow-auto py-4 pr-1">
+            <updateVersionForm.Layout className="grid h-full grid-rows-[minmax(0,1fr)_auto]" onSubmit={(event) => void updateVersionForm.handleSubmit(event)}>
+              <div className="scroll py-4 pr-1">
                 <div className="grid gap-6">
                   {selectedTermsDocument && (
                     <div className="rounded-xl border border-slate-200 bg-slate-50/70 p-3.5 text-xs leading-5 text-slate-500">

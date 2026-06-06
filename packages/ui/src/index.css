@@ -8,6 +8,33 @@
 
 @custom-variant dark (&:is(.dark *));
 
+@utility scroll {
+  @apply relative!;
+  @apply min-w-0! min-h-0!;
+  @apply overflow-auto!;
+  @apply overscroll-contain!;
+
+  -webkit-overflow-scrolling: touch !important;
+}
+
+@utility scroll-y {
+  @apply relative!;
+  @apply min-h-0!;
+  @apply overflow-y-auto! overflow-x-hidden!;
+  @apply overscroll-y-contain!;
+
+  -webkit-overflow-scrolling: touch !important;
+}
+
+@utility scroll-x {
+  @apply relative!;
+  @apply min-w-0!;
+  @apply overflow-x-auto! overflow-y-hidden!;
+  @apply overscroll-x-contain!;
+
+  -webkit-overflow-scrolling: touch !important;
+}
+
 @theme inline {
   --font-heading: var(--font-sans);
   --font-sans: 'Geist Variable', sans-serif;

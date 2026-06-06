@@ -273,7 +273,7 @@ function ProtectedLayout() {
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 overflow-auto bg-slate-50">
+      <main className="flex-1 scroll bg-slate-50">
         <Outlet />
       </main>
     </div>

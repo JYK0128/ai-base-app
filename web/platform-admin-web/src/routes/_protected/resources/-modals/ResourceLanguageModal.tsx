@@ -325,7 +325,7 @@ function ResourceLanguageFormContent({
         className="grid grid-rows-[1fr_auto] gap-4 h-full"
         onSubmit={(e) => void form.handleSubmit(e)}
       >
-        <section className="grid grid-rows-[auto_1fr] gap-4 min-h-0">
+        <section className="grid grid-rows-[auto_1fr] gap-4 ">
           <div className="border border-border/60 rounded-xl p-4 bg-muted/20 flex flex-col gap-3 shadow-xs">
             <div className="text-sm font-semibold text-foreground px-1">
               언어 추가
@@ -381,8 +381,8 @@ function ResourceLanguageFormContent({
             </div>
           </div>
 
-          <div className="grid grid-cols-[150px_1fr] gap-4 min-h-0">
-            <div className="border border-border/60 rounded-xl p-2 bg-background overflow-auto">
+          <div className="grid grid-cols-[150px_1fr] gap-4 ">
+            <div className="border border-border/60 rounded-xl p-2 bg-background scroll">
               <div className="flex items-center gap-2 px-2 py-2 text-xs font-semibold text-muted-foreground">
                 <Globe className="size-4" />
                 언어 목록
@@ -416,7 +416,7 @@ function ResourceLanguageFormContent({
               </div>
             </div>
 
-            <div className="border border-border/60 rounded-xl p-4 bg-background min-h-0 overflow-auto">
+            <div className="border border-border/60 rounded-xl p-4 bg-background scroll">
               {activeEntry
                 ? (
                   <div className="grid gap-3">

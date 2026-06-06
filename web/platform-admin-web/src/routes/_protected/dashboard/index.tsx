@@ -11,7 +11,7 @@ function Dashboard() {
   const { logout } = useAuth();
 
   return (
-    <div className="size-full mx-auto flex max-w-300 min-h-0 flex-col gap-6 overflow-hidden p-6">
+    <div className="size-full mx-auto flex max-w-300 flex-col gap-6 overflow-hidden p-6">
       <header className="space-y-2 border-b border-slate-200 pb-4">
         <h1 className="text-2xl font-bold tracking-tight text-slate-950">대시보드</h1>
         <p className="max-w-3xl text-sm text-slate-500">
@@ -19,8 +19,8 @@ function Dashboard() {
         </p>
       </header>
 
-      <Card className="flex min-h-0 flex-1 flex-col overflow-hidden border-slate-200 bg-white shadow-sm">
-        <CardContent className="flex min-h-0 flex-1 items-center justify-center p-6">
+      <Card className="flex flex-1 flex-col overflow-hidden border-slate-200 bg-white shadow-sm">
+        <CardContent className="flex flex-1 items-center justify-center p-6">
           <div className="flex w-full max-w-md flex-col items-center gap-4 rounded-2xl border border-slate-200 bg-slate-50 p-6 text-center">
             <div className="space-y-1">
               <h2 className="text-lg font-semibold text-slate-900">로그인 완료</h2>

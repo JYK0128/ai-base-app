@@ -88,16 +88,18 @@ const ANNOUNCEMENT_COLUMNS = [
     },
   },
   {
-    accessorKey: 'startAt',
-    header: '게시 기간',
+    accessorKey: 'publishedAt',
+    header: '게시 정보',
     size: 240,
     cell: ({ row }) => {
+      const publishedAtText = row.original.publishedAt ? formatDateTime(row.original.publishedAt) : '-';
+      const startAtText = row.original.startAt ? formatDateTime(row.original.startAt) : '-';
       const endAtText = row.original.endAt ? formatDateTime(row.original.endAt) : '-';
 
       return (
         <div className="flex flex-col gap-0.5 py-1 font-mono text-xs text-slate-600">
-          <span>{row.original.startAt ? formatDateTime(row.original.startAt) : '-'}</span>
-          <span className="text-[11px] text-slate-600">{`~ ${endAtText}`}</span>
+          <span>{`확정 ${publishedAtText}`}</span>
+          <span className="text-[11px] text-slate-600">{`${startAtText} ~ ${endAtText}`}</span>
         </div>
       );
     },
@@ -182,7 +184,7 @@ export function AnnouncementListTab() {
   };
 
   return (
-    <section className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+    <section className="flex flex-1 flex-col overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
       <header className="flex flex-col gap-3 border-b border-slate-200 px-4 py-4 lg:flex-row lg:items-center lg:justify-between">
         <div className="flex items-start gap-3">
           <div className="mt-0.5 rounded-xl border border-slate-200 bg-slate-50 p-1.5 text-slate-500">
@@ -204,7 +206,7 @@ export function AnnouncementListTab() {
         </div>
       </header>
 
-      <div className="min-h-0 flex-1 overflow-auto px-4 py-4">
+      <div className="flex-1 scroll px-4 py-4">
         <DataTable
           columns={ANNOUNCEMENT_COLUMNS}
           data={announcements}

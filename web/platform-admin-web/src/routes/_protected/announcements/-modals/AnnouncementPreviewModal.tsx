@@ -29,7 +29,7 @@ export function AnnouncementPreviewModal({ announcement, open, onOpenChange, onE
           </DialogDescription>
         </DialogHeader>
 
-        <div className="min-h-0 overflow-auto py-4 pr-1">
+        <div className="scroll py-4 pr-1">
           <div className="grid gap-4 lg:grid-cols-[minmax(0,280px)_minmax(0,1fr)]">
             <section className="space-y-4 rounded-xl border border-slate-200 bg-slate-50/70 p-4">
               <div className="space-y-2">
@@ -51,6 +51,12 @@ export function AnnouncementPreviewModal({ announcement, open, onOpenChange, onE
                   <div>{ANNOUNCEMENT_AUDIENCE_LABELS[announcement.audience]}</div>
                 </div>
                 <div className="space-y-1">
+                  <div className="text-[11px] uppercase tracking-[0.2em] text-slate-400">게시 확정</div>
+                  <div className="font-mono text-xs text-slate-700">
+                    {announcement.publishedAt ? formatDateTime(announcement.publishedAt) : '-'}
+                  </div>
+                </div>
+                <div className="space-y-1">
                   <div className="text-[11px] uppercase tracking-[0.2em] text-slate-400">게시 기간</div>
                   <div className="space-y-0.5 font-mono text-xs text-slate-700">
                     <div>{announcement.startAt ? formatDateTime(announcement.startAt) : '-'}</div>
@@ -70,11 +76,11 @@ export function AnnouncementPreviewModal({ announcement, open, onOpenChange, onE
               </div>
             </section>
 
-            <section className="min-h-0 rounded-xl border border-slate-200 bg-white shadow-sm">
+            <section className="rounded-xl border border-slate-200 bg-white shadow-sm">
               <div className="border-b border-slate-200 px-4 py-3">
                 <div className="text-sm font-medium text-slate-500">본문</div>
               </div>
-              <div className="min-h-0 overflow-auto px-4 py-4 text-sm leading-7 text-slate-700">
+              <div className="scroll px-4 py-4 text-sm leading-7 text-slate-700">
                 <Viewer key={announcement.id} initialValue={announcement.content} />
               </div>
             </section>
