@@ -4,7 +4,7 @@ import { Megaphone, Pin, Plus } from 'lucide-react';
 import { useState } from 'react';
 
 import { useAnnouncementsControllerCreateAnnouncementV1, useAnnouncementsControllerGetAnnouncementsV1 } from '../../../../api/endpoints';
-import { ANNOUNCEMENT_AUDIENCE_LABELS, ANNOUNCEMENT_CATEGORY_LABELS, ANNOUNCEMENT_STATUS_LABELS, type AnnouncementAudience, type AnnouncementEditorSeed, type AnnouncementItem, type AnnouncementStatus, createBlankAnnouncement, formatDateTime } from '../-announcements.shared';
+import { ANNOUNCEMENT_AUDIENCE_LABELS, ANNOUNCEMENT_CATEGORY_LABELS, ANNOUNCEMENT_STATUS_LABELS, type AnnouncementAudience, type AnnouncementEditorSeed, type AnnouncementItem, type AnnouncementStatus, buildAnnouncementPreviewText, createBlankAnnouncement, formatDateTime } from '../-announcements.shared';
 import { AnnouncementEditorModal } from '../-modals/AnnouncementEditorModal';
 import { AnnouncementPreviewModal } from '../-modals/AnnouncementPreviewModal';
 
@@ -39,7 +39,7 @@ const ANNOUNCEMENT_COLUMNS = [
               {title}
             </button>
           </div>
-          <p className="line-clamp-2 text-xs text-slate-500">{row.original.summary}</p>
+          <p className="line-clamp-2 text-xs text-slate-500">{buildAnnouncementPreviewText(row.original.content)}</p>
           <p className="text-[11px] text-slate-400">{row.original.author}</p>
         </div>
       );
@@ -210,8 +210,8 @@ export function AnnouncementListTab() {
         <DataTable
           columns={ANNOUNCEMENT_COLUMNS}
           data={announcements}
-          filterColumns={['title', 'summary', 'author', 'category', 'audience', 'status']}
-          filterPlaceholder="제목, 요약, 작성자, 분류, 대상로 검색"
+          filterColumns={['title', 'content', 'author', 'category', 'audience', 'status']}
+          filterPlaceholder="제목, 내용, 작성자, 분류, 대상로 검색"
           meta={metaValue}
         />
       </div>

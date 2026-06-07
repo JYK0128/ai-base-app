@@ -18,9 +18,15 @@
 │   ├── [feature-name].query.ts             # 예: get-resource.query.ts, get-active-terms.query.ts
 │   ├── [feature-name].error.ts             # 예: get-resource.error.ts, get-active-terms.error.ts
 │   └── [feature-name].handler.ts           # 예: get-resource.handler.ts, get-active-terms.handler.ts
-├── events/                                 # (선택 사항) 도메인 관련 비동기 이벤트 핸들러 그룹
+├── events/                                 # (선택 사항) 도메인 내부 이벤트 및 후속 처리 그룹
+│   ├── index.ts                            # 모든 이벤트/핸들러/퍼블리셔 일괄 export
+│   ├── [feature-name].event.ts             # 내부 이벤트 payload 계약 정의
+│   ├── [feature-name].handler.ts           # 이벤트 수신 후 후속 처리 오케스트레이션
+│   └── [feature-name].publisher.ts         # 필요한 경우 외부 이벤트/메시지 발행 래퍼
 ├── handlers.ts                             # commands, queries, events 내의 핸들러들을 하나로 모으는 파일
-├── [domain-name].constants.ts              # 도메인별 상수 및 마이크로서비스 메시지 패턴 정의
+├── [domain-name].contract.ts               # 마이크로서비스 메시지 패턴 및 payload 계약 정의
+├── [domain-name].tokens.ts                 # DI 토큰, queue/client key 등 주입용 식별자 정의
+├── [domain-name].helper.ts                 # 순수 변환/조회 유틸(필요한 경우)
 ├── [domain-name].controller.ts             # MessagePattern을 수신하고 CQRS Bus로 위임하는 컨트롤러
 └── [domain-name].module.ts                 # 컨트롤러, 리포지토리, CQRS 핸들러를 등록하는 NestJS 모듈
 ```
@@ -30,6 +36,8 @@
 - **Flat 구조 유지**: `commands/`와 `queries/` 폴더 내부에는 하위 폴더 없이 단일 깊이(1뎁스)로만 파일을 나열하여 관리함
 - **일관된 네이밍**: 기능 단위 명칭(`[feature-name]`)을 파일명으로 활용하여 Command, Error, Handler를 단일 그룹화
   - *예시*: `create-resource.command.ts`, `create-resource.error.ts`, `create-resource.handler.ts`
+- **계약/토큰/유틸 분리**: 메시지 패턴과 payload는 `*.contract.ts`, DI 식별자는 `*.tokens.ts`, 순수 변환/조회 유틸은 `*.helper.ts`로 분리함
+- **이벤트 분리**: 내부 이벤트는 `*.event.ts`, 이벤트 수신/후속 처리는 `*.handler.ts`, 외부 발행 래퍼가 필요하면 `*.publisher.ts`로 분리함
 - **배럴 익스포트**: 각 폴더의 `index.ts`에서 폴더 내 모든 구성 요소를 일괄 Export 처리
 
 ```typescript
@@ -113,7 +121,7 @@ import type { ResourceType } from '@pkg/database';
 
 import { CreateResourceCommand } from './commands';
 import { GetResourceCommand } from './queries';
-import { RESOURCE_SERVICE_PATTERNS } from './resource.constants';
+import { RESOURCE_SERVICE_PATTERNS } from './resource.contract';
 
 @Controller()
 export class ResourceController {

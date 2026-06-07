@@ -225,7 +225,6 @@ export const AnnouncementsControllerGetAnnouncementsV1Response = zod.object({
   "data": zod.array(zod.object({
   "id": zod.string().describe('공지사항 식별자'),
   "title": zod.string().describe('공지사항 제목'),
-  "summary": zod.string().describe('공지사항 요약'),
   "content": zod.string().describe('공지사항 내용'),
   "category": zod.enum(['NOTICE', 'MAINTENANCE', 'SECURITY', 'EVENT']).describe('공지 분류'),
   "audience": zod.enum(['ALL', 'PLATFORM', 'ORGANIZATION']).describe('공지 대상'),
@@ -282,7 +281,6 @@ export const AnnouncementsControllerCreateAnnouncementV1Response = zod.object({
   "data": zod.object({
   "id": zod.string().describe('공지사항 식별자'),
   "title": zod.string().describe('공지사항 제목'),
-  "summary": zod.string().describe('공지사항 요약'),
   "content": zod.string().describe('공지사항 내용'),
   "category": zod.enum(['NOTICE', 'MAINTENANCE', 'SECURITY', 'EVENT']).describe('공지 분류'),
   "audience": zod.enum(['ALL', 'PLATFORM', 'ORGANIZATION']).describe('공지 대상'),
@@ -1504,7 +1502,7 @@ export const TermsControllerGetTermsDocumentsV1Response = zod.object({
 export const TermsControllerCreateTermsDocumentV1Body = zod.object({
   "code": zod.string().describe('약관 문서 코드'),
   "title": zod.string().describe('약관 문서 제목'),
-  "required": zod.boolean().optional().describe('필수 약관 여부'),
+  "required": zod.boolean().describe('필수 약관 여부'),
   "scope": zod.enum(['platform', 'organization']).describe('생성 scope')
 })
 
@@ -1742,8 +1740,8 @@ export const TermsControllerCreateTermsVersionV1Body = zod.object({
   "termsDocumentId": zod.string().describe('약관 문서 식별자'),
   "label": zod.string().describe('약관 버전 라벨'),
   "content": zod.string().describe('약관 본문'),
-  "effectiveAt": zod.iso.datetime({"offset":true}).optional().describe('효력 시각'),
-  "status": zod.enum(['DRAFT', 'PUBLISHED']).optional().describe('버전 상태')
+  "effectiveAt": zod.iso.datetime({"offset":true}).describe('효력 시각'),
+  "status": zod.enum(['DRAFT', 'PUBLISHED']).describe('버전 상태')
 })
 
 export const TermsControllerCreateTermsVersionV1Response = zod.object({

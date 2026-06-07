@@ -15,7 +15,7 @@ export interface CreateTermsVersionDto {
   /** 약관 본문 */
   content: string;
   /** 효력 시각 */
-  effectiveAt?: string;
+  effectiveAt: string;
   /** 버전 상태 */
-  status?: CreateTermsVersionDtoStatus;
+  status: CreateTermsVersionDtoStatus;
 }

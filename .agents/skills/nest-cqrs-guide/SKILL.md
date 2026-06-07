@@ -1,6 +1,6 @@
 ---
 name: nest-cqrs-guide
-description: NestJS CQRS 핸들러 및 에러/어서터 구조 작성 가이드. 세 개 파일 분할(Command/Query, Error, Handler), ExceptionGuard 기반 다국어/메타데이터 에러 핸들링 및 Vitest 단위 테스트 가이드 정의. CQRS/에러/테스트 관련 요청 발생 시 필수 사용.
+description: NestJS CQRS 핸들러 및 에러/어서터 구조 작성 가이드. 세 개 파일 분할(Command/Query, Error, Handler), contract/token/helper 파일 분리, ExceptionGuard 기반 다국어/메타데이터 에러 핸들링 및 Vitest 단위 테스트 가이드 정의. CQRS/에러/테스트 관련 요청 발생 시 필수 사용.
 ---
 
 # NestJS CQRS & Exception Guard 아키텍처 표준 가이드

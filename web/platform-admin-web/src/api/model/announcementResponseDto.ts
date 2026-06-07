@@ -16,8 +16,6 @@ export interface AnnouncementResponseDto {
   id: string;
   /** 공지사항 제목 */
   title: string;
-  /** 공지사항 요약 */
-  summary: string;
   /** 공지사항 내용 */
   content: string;
   /** 공지 분류 */

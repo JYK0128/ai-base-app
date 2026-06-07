@@ -13,7 +13,7 @@ export interface CreateTermsDocumentDto {
   /** 약관 문서 제목 */
   title: string;
   /** 필수 약관 여부 */
-  required?: boolean;
+  required: boolean;
   /** 생성 scope */
   scope: CreateTermsDocumentDtoScope;
 }

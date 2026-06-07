@@ -100,6 +100,51 @@ export function formatDateTime(value: string): string {
   return `${date.getFullYear()}.${pad(date.getMonth() + 1)}.${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}`;
 }
 
+function normalizeAnnouncementPreviewLine(value: string): string {
+  const trimmed = value.trim();
+
+  if (!trimmed) {
+    return '';
+  }
+
+  let index = 0;
+
+  while (index < trimmed.length && trimmed[index] === '#') {
+    index += 1;
+  }
+
+  if (index > 0) {
+    return trimmed.slice(index).trimStart();
+  }
+
+  if (trimmed.startsWith('>')) {
+    return trimmed.slice(1).trimStart();
+  }
+
+  if (trimmed.startsWith('- ') || trimmed.startsWith('* ') || trimmed.startsWith('+ ')) {
+    return trimmed.slice(2).trimStart();
+  }
+
+  return trimmed;
+}
+
+export function buildAnnouncementPreviewText(content: string): string {
+  const normalizedContent = content
+    .replaceAll('\r\n', '\n')
+    .replaceAll('\r', '\n');
+
+  const firstBlock = normalizedContent
+    .split('\n\n')
+    .map((block) => block.split('\n').map((line) => normalizeAnnouncementPreviewLine(line)).filter((line) => line.length > 0).join(' '))
+    .find((block) => block.length > 0);
+
+  if (firstBlock === undefined) {
+    return '공지 내용을 입력하세요.';
+  }
+
+  return firstBlock.replace(/\s+/g, ' ').trim();
+}
+
 export function createBlankAnnouncement(): AnnouncementEditorSeed {
   const now = new Date().toISOString();
   const endAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();

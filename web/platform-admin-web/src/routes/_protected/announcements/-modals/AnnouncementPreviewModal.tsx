@@ -4,7 +4,7 @@ import { Badge, Button, Dialog, DialogContent, DialogDescription, DialogFooter, 
 import { Viewer } from '@toast-ui/react-editor';
 import { Eye } from 'lucide-react';
 
-import { ANNOUNCEMENT_AUDIENCE_LABELS, ANNOUNCEMENT_CATEGORY_LABELS, ANNOUNCEMENT_STATUS_LABELS, type AnnouncementItem, formatDateTime } from '../-announcements.shared';
+import { ANNOUNCEMENT_AUDIENCE_LABELS, ANNOUNCEMENT_CATEGORY_LABELS, ANNOUNCEMENT_STATUS_LABELS, type AnnouncementItem, buildAnnouncementPreviewText, formatDateTime } from '../-announcements.shared';
 
 interface AnnouncementPreviewModalProps {
   readonly announcement: AnnouncementItem
@@ -42,7 +42,7 @@ export function AnnouncementPreviewModal({ announcement, open, onOpenChange, onE
                   </Badge>
                 </div>
                 <h3 className="text-lg font-semibold leading-snug text-slate-950">{announcement.title}</h3>
-                <p className="text-sm text-slate-600">{announcement.summary}</p>
+                <p className="line-clamp-2 text-sm text-slate-600">{buildAnnouncementPreviewText(announcement.content)}</p>
               </div>
 
               <div className="space-y-3 border-t border-slate-200 pt-3 text-sm text-slate-600">

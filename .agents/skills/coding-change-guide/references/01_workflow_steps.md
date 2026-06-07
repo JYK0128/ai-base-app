@@ -9,7 +9,7 @@
 
 - **검색 도구 활용**: 활성화된 편집기 화면 외에 `rg` 등을 사용하여 실제 참조 및 의존성을 정밀하게 검색함
 - **계층 간 확인**: 여러 레이어에 걸쳐 유사한 성격의 타입, DTO, Enum, Generated Model이 중복 존재하는지 파악함
-- **영향 범위 확장**: 특정 소스 수정 요청 시, 이와 연동되는 Mapper, Handler, Controller, DTO, Web 타입까지 종합적으로 모니터링함
+- **영향 범위 확장**: 특정 소스 수정 요청 시, 이와 연동되는 Helper, Handler, Controller, DTO, Contract, Token, Web 타입까지 종합적으로 모니터링함
 - **작업 공간 신뢰**: dirty worktree 내 기존 수정 이력을 임의로 되돌리지 않고, 현재 상태에서 연속적으로 작업을 진행함
 - **검색 템플릿**:
 
@@ -26,7 +26,8 @@
 - **편집 도구**: 코드 수정 시 `replace_file_content` 또는 `multi_replace_file_content` 도구를 사용함
 - **추상화 최소화**: 실제 반복 코드나 복잡도가 감소하는 조건에만 레이어 및 신규 추상화를 도입함
 - **도메인 정합성**: 도메인 의미가 상이한 날짜/속성 필드는 개별 필드로 분리하여 유지함
-- **캡슐화 지향**: 필요한 비즈니스 연산은 getter 또는 mapper 함수로 한정하여 노출함
+- **캡슐화 지향**: 필요한 비즈니스 연산은 getter 또는 helper 함수로 한정하여 노출함
+- **명명 규칙 정합성**: `*.contract.ts`는 메시지/페이로드 계약, `*.tokens.ts`는 DI 토큰, `*.helper.ts`는 순수 변환/유틸, `*.constants.ts`는 정말 공통 리터럴 상수에만 사용함
 
 ---
 
@@ -34,7 +35,8 @@
 
 - **체크리스트**: 코드 수정 완료 후 아래 대상 중 영향 범위에 해당하는 항목이 있는지 종합 진단함
   - Database Entity, Schema, Metadata
-  - Service Mapper, Command/Query Handler, Controller
+  - Service Helper, Command/Query Handler, Controller
+  - Contract, Token, Message Pattern, Queue/Inject Key
   - Gateway DTO, Validation Decorator, Swagger Response
   - Web Generated API Model, Zod Schema, UI 컴포넌트
   - Test Code, Fixtures, Seed, Mock 데이터
