@@ -15,20 +15,6 @@ const ERROR_MESSAGES = defineErrors({
     },
     exception: Error,
   },
-  ROLE_CODE_REQUIRED: {
-    message: {
-      ko: '권한 세트 코드를 입력해 주세요.',
-      en: 'Permission set code is required.',
-    },
-    exception: Error,
-  },
-  ROLE_NAME_REQUIRED: {
-    message: {
-      ko: '권한 세트 이름을 입력해 주세요.',
-      en: 'Permission set name is required.',
-    },
-    exception: Error,
-  },
   SOURCE_ROLE_NOT_FOUND: {
     message: {
       ko: '복사할 권한 세트를 찾을 수 없습니다.',

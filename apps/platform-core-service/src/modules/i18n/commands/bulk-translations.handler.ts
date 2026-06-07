@@ -28,13 +28,9 @@ export class BulkTranslationsHandler implements ICommandHandler<BulkTranslations
     for (const operation of command.operations) {
       const localeCode = await this.identifyActiveLocaleCode(operation.locale);
       const action = operation.action;
-      const namespace = operation.namespace?.trim();
-      const key = operation.key?.trim();
-      const value = operation.value?.trim();
-
-      await this.Asserter.throwIf(!namespace, 'INVALID_NAMESPACE');
-      await this.Asserter.throwIf(!key, 'INVALID_KEY');
-      await this.Asserter.throwIf(!action || !['CREATE', 'UPDATE', 'DELETE'].includes(action), 'INVALID_OPERATION');
+      const namespace = operation.namespace;
+      const key = operation.key;
+      const value = operation.value;
 
       if (action === 'CREATE' || action === 'UPDATE') {
         await this.Asserter.throwIf(!value, 'VALUE_REQUIRED');

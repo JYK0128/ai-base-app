@@ -165,8 +165,8 @@ export function applyAnnouncementInput(
 ) {
   const metadata = getEntityMetadata(announcement);
 
-  announcement.title = input.title.trim();
-  announcement.content = input.content.trim();
+  announcement.title = input.title;
+  announcement.content = input.content;
   const category = resolveAnnouncementCategory(input.category ?? metadata.category);
   const audience = resolveAnnouncementAudience(input.audience ?? metadata.audience);
   const channel = resolveAnnouncementChannel(input.channel ?? metadata.channel);

@@ -4,24 +4,18 @@ import { NotFoundException } from '@nestjs/common';
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
 import { I18nTranslation, I18nTranslationRepository } from '@pkg/database';
 
-import { GetTranslationAsserter } from './get-translation.error';
 import { GetTranslationQuery } from './get-translation.query';
 
 export type I18nTranslationSingleResult = Record<string, Record<string, Record<string, string>>>;
 
 @QueryHandler(GetTranslationQuery)
 export class GetTranslationHandler implements IQueryHandler<GetTranslationQuery> {
-  private readonly Asserter = GetTranslationAsserter;
-
   constructor(
     @InjectRepository(I18nTranslation)
     private readonly translationRepo: I18nTranslationRepository,
   ) {}
 
   async execute(query: GetTranslationQuery): Promise<I18nTranslationSingleResult> {
-    await this.validateNamespacePresent(query.namespace);
-    await this.validateKeyPresent(query.key);
-
     const records = await this.identifyTranslations(
       query.namespace,
       query.key,
@@ -29,14 +23,6 @@ export class GetTranslationHandler implements IQueryHandler<GetTranslationQuery>
     );
 
     return this.processLocaleTranslations(records);
-  }
-
-  private async validateNamespacePresent(namespace: string) {
-    await this.Asserter.throwIf(!namespace, 'INVALID_NAMESPACE');
-  }
-
-  private async validateKeyPresent(key: string) {
-    await this.Asserter.throwIf(!key, 'INVALID_KEY');
   }
 
   private async identifyTranslations(

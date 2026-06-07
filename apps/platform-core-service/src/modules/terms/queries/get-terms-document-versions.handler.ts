@@ -6,7 +6,7 @@ import { mapTermsVersionResponse, type TermsVersionResponse } from '../terms.map
 import { GetTermsDocumentVersionsAsserter } from './get-terms-document-versions.error';
 import { GetTermsDocumentVersionsQuery } from './get-terms-document-versions.query';
 
-const normalizeKeyword = (value?: string) => value?.trim().toLowerCase() ?? '';
+const normalizeKeyword = (value?: string) => value?.toLowerCase() ?? '';
 
 /**
  * 약관 문서 버전 목록 조회 핸들러

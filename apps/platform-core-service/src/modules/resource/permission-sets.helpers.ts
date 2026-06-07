@@ -18,7 +18,7 @@ export function normalizePermissionCodes(codes: readonly string[]): string[] {
 }
 
 export function normalizeRoleCode(code: string): string {
-  return code.trim().toUpperCase().replace(/\s+/g, '_');
+  return code.toUpperCase().replace(/\s+/g, '_');
 }
 
 export function buildPermissionSetRecord(role: OrganizationRole): PermissionSetRecord {

@@ -1,6 +1,6 @@
-import { ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Announcement, AnnouncementAudience, AnnouncementCategory, AnnouncementChannel, AnnouncementPriority } from '@pkg/database';
-import { IsBoolean, IsDateString, IsEnum, IsOptional, IsString } from 'class-validator';
+import { IsBoolean, IsDateString, IsEnum, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
 export class CreateAnnouncementDto implements Pick<Announcement, 'title' | 'content'> {
   @ApiPropertyOptional({ example: 'announcement-001', description: '공지사항 식별자' })
@@ -8,11 +8,13 @@ export class CreateAnnouncementDto implements Pick<Announcement, 'title' | 'cont
   @IsString()
   id?: string;
 
-  @ApiPropertyOptional({ example: '새 기능 출시', description: '공지사항 제목' })
+  @ApiProperty({ example: '새 기능 출시', description: '공지사항 제목' })
+  @IsNotEmpty()
   @IsString()
   title!: string;
 
-  @ApiPropertyOptional({ example: '새 기능에 대한 설명...', description: '공지사항 본문' })
+  @ApiProperty({ example: '새 기능에 대한 설명...', description: '공지사항 본문' })
+  @IsNotEmpty()
   @IsString()
   content!: string;
 

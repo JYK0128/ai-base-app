@@ -21,28 +21,12 @@ export class UpdateTranslationHandler implements ICommandHandler<UpdateTranslati
 
   @Transactional()
   async execute(command: UpdateTranslationCommand): Promise<{ id: string }> {
-    await this.validateNamespacePresent(command.namespace);
-    await this.validateKeyPresent(command.key);
-    await this.validateTranslationValueType(command.value);
-
     const localeCode = await this.identifyActiveLocaleCode(command.locale);
     const identified = await this.identifyTranslation(command.namespace, command.key, localeCode);
 
     identified.value = command.value;
 
     return { id: identified.id };
-  }
-
-  private async validateNamespacePresent(namespace?: string) {
-    await this.Asserter.throwIf(!namespace, 'INVALID_NAMESPACE');
-  }
-
-  private async validateKeyPresent(key?: string) {
-    await this.Asserter.throwIf(!key, 'INVALID_KEY');
-  }
-
-  private async validateTranslationValueType(value?: string) {
-    await this.Asserter.throwIf(typeof value !== 'string', 'VALUE_REQUIRED');
   }
 
   private async identifyActiveLocaleCode(locale: string) {

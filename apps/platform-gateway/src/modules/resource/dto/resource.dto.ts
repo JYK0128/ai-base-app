@@ -1,14 +1,16 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { OrganizationRole, Resource, ResourceScope, ResourceType } from '@pkg/database';
 import { Type } from 'class-transformer';
-import { IsArray, IsEnum, IsInt, IsOptional, IsString, IsUUID, ValidateNested } from 'class-validator';
+import { IsArray, IsEnum, IsInt, IsNotEmpty, IsOptional, IsString, IsUUID, ValidateNested } from 'class-validator';
 
 export class CreateResourceDto implements Pick<Resource, 'code' | 'name' | 'type' | 'path'> {
   @ApiProperty({ example: 'DASHBOARD', description: '리소스 코드' })
+  @IsNotEmpty()
   @IsString()
   code!: string;
 
   @ApiProperty({ example: '대시보드', description: '리소스 이름' })
+  @IsNotEmpty()
   @IsString()
   name!: string;
 
@@ -42,10 +44,12 @@ export class UpdateResourceDetailBodyDto implements Pick<Resource, 'id' | 'scope
   scope!: ResourceScope;
 
   @ApiProperty({ example: 'DASHBOARD', description: '리소스 코드' })
+  @IsNotEmpty()
   @IsString()
   code!: string;
 
   @ApiProperty({ example: '대시보드', description: '리소스 이름' })
+  @IsNotEmpty()
   @IsString()
   name!: string;
 
@@ -89,6 +93,7 @@ export class UpdateRolePermissionsDto {
   })
   @IsArray()
   @IsString({ each: true })
+  @IsNotEmpty({ each: true })
   permissionCodes!: string[];
 }
 
@@ -180,10 +185,12 @@ export class PermissionSetResponseDto {
 
 export class CreatePermissionSetDto {
   @ApiProperty({ example: 'SYSTEM_OPERATOR', description: '권한 세트 코드' })
+  @IsNotEmpty()
   @IsString()
   code!: string;
 
   @ApiProperty({ example: '시스템 운영 담당자', description: '권한 세트 이름' })
+  @IsNotEmpty()
   @IsString()
   name!: string;
 
@@ -206,6 +213,7 @@ export class UpdatePermissionSetPermissionsDto {
   @ApiProperty({ type: [String], example: ['DASHBOARD:READ', 'RESOURCE:READ'], description: '부여할 권한 코드 목록' })
   @IsArray()
   @IsString({ each: true })
+  @IsNotEmpty({ each: true })
   permissionCodes!: string[];
 }
 
@@ -221,6 +229,7 @@ export class UpdateResourcePermissionsDto {
   @ApiProperty({ type: [String], example: ['CREATE', 'READ'], description: '리소스 액션 목록' })
   @IsArray()
   @IsString({ each: true })
+  @IsNotEmpty({ each: true })
   actions!: string[];
 
   @ApiPropertyOptional({ example: 'READ', description: '제약 조건' })

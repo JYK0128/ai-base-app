@@ -21,10 +21,6 @@ export class CreateTranslationHandler implements ICommandHandler<CreateTranslati
 
   @Transactional()
   async execute(command: CreateTranslationCommand): Promise<{ id: string }> {
-    await this.validateNamespacePresent(command.namespace);
-    await this.validateKeyPresent(command.key);
-    await this.validateTranslationValueType(command.value);
-
     const localeCode = await this.identifyActiveLocaleCode(command.locale);
     await this.validateNoDuplicateTranslation(command.namespace, command.key, localeCode);
 
@@ -36,18 +32,6 @@ export class CreateTranslationHandler implements ICommandHandler<CreateTranslati
     });
 
     return { id: translation.id };
-  }
-
-  private async validateNamespacePresent(namespace?: string) {
-    await this.Asserter.throwIf(!namespace, 'INVALID_NAMESPACE');
-  }
-
-  private async validateKeyPresent(key?: string) {
-    await this.Asserter.throwIf(!key, 'INVALID_KEY');
-  }
-
-  private async validateTranslationValueType(value?: string) {
-    await this.Asserter.throwIf(typeof value !== 'string', 'VALUE_REQUIRED');
   }
 
   private async identifyActiveLocaleCode(locale: string) {

@@ -1,7 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { I18nTranslation } from '@pkg/database';
 import { Type } from 'class-transformer';
-import { ArrayNotEmpty, IsArray, IsIn, IsOptional, IsString, ValidateNested } from 'class-validator';
+import { ArrayNotEmpty, IsArray, IsIn, IsNotEmpty, IsOptional, IsString, ValidateNested } from 'class-validator';
 
 export class TranslationsQueryDto {
   @ApiPropertyOptional({ example: 'DASHBOARD,ROLE_RESOURCE_CREATE_BUTTON', description: '조회할 번역 키 목록' })
@@ -14,7 +14,7 @@ export class TranslationsQueryDto {
   @IsString()
   namespace?: string;
 
-  @ApiPropertyOptional({ example: 'en', description: '배치 조회할 로케일' })
+  @ApiPropertyOptional({ example: 'ko,en', description: '배치 조회할 로케일 목록' })
   @IsOptional()
   @IsString()
   locale?: string;
@@ -29,79 +29,96 @@ export class TranslationQueryDto {
 
 export class TranslationParamDto {
   @ApiProperty({ example: 'resource', description: '번역 네임스페이스' })
+  @IsNotEmpty()
   @IsString()
   namespace!: string;
 
   @ApiProperty({ example: 'DASHBOARD', description: '번역 키' })
+  @IsNotEmpty()
   @IsString()
   key!: string;
 }
 
 export class TranslationCreateDto implements Pick<I18nTranslation, 'namespace' | 'key' | 'value'> {
   @ApiProperty({ example: 'resource', description: '번역 네임스페이스' })
+  @IsNotEmpty()
   @IsString()
   namespace!: string;
 
   @ApiProperty({ example: 'DASHBOARD', description: '번역 키' })
+  @IsNotEmpty()
   @IsString()
   key!: string;
 
   @ApiProperty({ example: 'ko', description: '번역 로케일' })
+  @IsNotEmpty()
   @IsString()
   locale!: string;
 
   @ApiProperty({ example: '대시보드', description: '번역 값' })
+  @IsNotEmpty()
   @IsString()
   value!: string;
 }
 
 export class TranslationUpdateDto implements Pick<I18nTranslation, 'namespace' | 'key' | 'value'> {
   @ApiProperty({ example: 'resource', description: '번역 네임스페이스' })
+  @IsNotEmpty()
   @IsString()
   namespace!: string;
 
   @ApiProperty({ example: 'DASHBOARD', description: '번역 키' })
+  @IsNotEmpty()
   @IsString()
   key!: string;
 
   @ApiProperty({ example: 'ko', description: '번역 로케일' })
+  @IsNotEmpty()
   @IsString()
   locale!: string;
 
   @ApiProperty({ example: '대시보드', description: '번역 값' })
+  @IsNotEmpty()
   @IsString()
   value!: string;
 }
 
 export class TranslationDeleteDto implements Pick<I18nTranslation, 'namespace' | 'key'> {
   @ApiProperty({ example: 'resource', description: '번역 네임스페이스' })
+  @IsNotEmpty()
   @IsString()
   namespace!: string;
 
   @ApiProperty({ example: 'DASHBOARD', description: '번역 키' })
+  @IsNotEmpty()
   @IsString()
   key!: string;
 
   @ApiProperty({ example: 'ko', description: '번역 로케일' })
+  @IsNotEmpty()
   @IsString()
   locale!: string;
 }
 
 export class TranslationBulkOperationDto implements Pick<I18nTranslation, 'namespace' | 'key'> {
   @ApiProperty({ enum: ['CREATE', 'UPDATE', 'DELETE'], example: 'UPDATE', description: '처리 유형' })
+  @IsNotEmpty()
   @IsString()
   @IsIn(['CREATE', 'UPDATE', 'DELETE'])
   action!: 'CREATE' | 'UPDATE' | 'DELETE';
 
   @ApiProperty({ example: 'resource', description: '번역 네임스페이스' })
+  @IsNotEmpty()
   @IsString()
   namespace!: string;
 
   @ApiProperty({ example: 'DASHBOARD', description: '번역 키' })
+  @IsNotEmpty()
   @IsString()
   key!: string;
 
   @ApiProperty({ example: 'ko', description: '번역 로케일' })
+  @IsNotEmpty()
   @IsString()
   locale!: string;
 

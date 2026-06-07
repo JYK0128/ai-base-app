@@ -41,12 +41,9 @@ export class UpdateResourceDetailHandler implements ICommandHandler<UpdateResour
     resource: Resource,
     command: UpdateResourceDetailCommand,
   ): Promise<void> {
-    const nextPath = command.path?.trim();
-    const nextIcon = command.icon?.trim();
-
     resource.code = command.code;
     resource.name = command.name;
-    resource.path = nextPath;
-    resource.icon = nextIcon;
+    resource.path = command.path;
+    resource.icon = command.icon;
   }
 }

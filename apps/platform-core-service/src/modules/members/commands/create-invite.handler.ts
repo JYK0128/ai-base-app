@@ -51,7 +51,6 @@ export class CreateInviteHandler implements ICommandHandler<CreateInviteCommand>
     const invite = await this.em.transactional(async (em) => this.processCreation(
       em,
       organization,
-      inviter,
       roleEntity,
       name,
       email,
@@ -125,26 +124,19 @@ export class CreateInviteHandler implements ICommandHandler<CreateInviteCommand>
   private async processCreation(
     em: EntityManager,
     organization: Organization,
-    inviter: MemberAccount,
     role: OrganizationRole,
     name: string,
     email: string,
     note?: string,
   ): Promise<MemberInvite> {
     const now = new Date();
-    const normalizedEmail = email.trim().toLowerCase();
-    const normalizedName = name.trim();
-    const trimmedNote = note?.trim();
-
-    await this.Asserter.throwIf(normalizedEmail.length === 0, 'INVITE_EMAIL_REQUIRED');
-    await this.Asserter.throwIf(normalizedName.length === 0, 'INVITE_NAME_REQUIRED');
 
     const metadata = new MemberInviteMetadata();
-    metadata.info.note = trimmedNote;
+    metadata.info.note = note;
 
     const invite = this.inviteRepo.create({
-      name: normalizedName,
-      email: normalizedEmail,
+      name,
+      email,
       role,
       organization,
       token: randomUUID(),

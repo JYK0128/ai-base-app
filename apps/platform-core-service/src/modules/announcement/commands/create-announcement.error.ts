@@ -12,20 +12,6 @@ const ERROR_MESSAGES = defineErrors({
     },
     exception: NotFoundException,
   },
-  TITLE_REQUIRED: {
-    message: {
-      ko: '공지사항 제목을 입력해주세요.',
-      en: 'Announcement title is required.',
-    },
-    exception: BadRequestException,
-  },
-  CONTENT_REQUIRED: {
-    message: {
-      ko: '공지사항 본문을 입력해주세요.',
-      en: 'Announcement content is required.',
-    },
-    exception: BadRequestException,
-  },
   INVALID_PERIOD: {
     message: {
       ko: '공지사항 시작일은 종료일보다 빨라야 합니다.',

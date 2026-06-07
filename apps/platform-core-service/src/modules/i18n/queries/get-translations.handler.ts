@@ -24,8 +24,7 @@ export class GetTranslationsHandler implements IQueryHandler<GetTranslationsQuer
       deletedAt: null,
     };
 
-    const rawNamespace = query.namespace;
-    const namespace = typeof rawNamespace === 'string' ? rawNamespace.trim() : undefined;
+    const namespace = query.namespace;
 
     if (namespace) {
       where.namespace = namespace;

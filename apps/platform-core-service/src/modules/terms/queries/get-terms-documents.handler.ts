@@ -5,7 +5,7 @@ import { TermsDocument, TermsDocumentRepository } from '@pkg/database';
 import { mapTermsDocumentResponse, type TermsDocumentResponse } from '../terms.mapper';
 import { GetTermsDocumentsQuery } from './get-terms-documents.query';
 
-const normalizeKeyword = (value?: string) => value?.trim().toLowerCase() ?? '';
+const normalizeKeyword = (value?: string) => value?.toLowerCase() ?? '';
 
 const getDocumentLifecycle = (document: TermsDocument) => {
   if (document.isDraft) {

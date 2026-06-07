@@ -42,11 +42,6 @@ export class CreateAnnouncementHandler implements ICommandHandler<CreateAnnounce
     );
     const author = authorAccount.member as Member;
 
-    const title = command.data.title.trim();
-    const content = command.data.content.trim();
-
-    await this.Asserter.throwIf(title.length === 0, 'TITLE_REQUIRED');
-    await this.Asserter.throwIf(content.length === 0, 'CONTENT_REQUIRED');
     await this.Asserter.throwIf(
       !!command.data.startAt
       && !!command.data.endAt
@@ -60,16 +55,14 @@ export class CreateAnnouncementHandler implements ICommandHandler<CreateAnnounce
 
     const nextAnnouncement = existingAnnouncement ?? this.announcementRepo.create({
       ...(command.data.id ? { id: command.data.id } : {}),
-      title,
-      content,
+      title: command.data.title,
+      content: command.data.content,
       author,
       metadata: {},
     });
 
     applyAnnouncementInput(nextAnnouncement, {
       ...command.data,
-      title,
-      content,
     });
 
     nextAnnouncement.author = author;

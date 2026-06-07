@@ -7,7 +7,6 @@ import { CoreClient } from '@/common/clients/core.client';
 import { type TranslationBulkDto, type TranslationCreateDto, type TranslationDeleteDto, type TranslationsQueryDto, type TranslationUpdateDto } from './dto/i18n-request.dto';
 import type { LocalesDataDto, TranslationBulkDataDto, TranslationCreateDataDto, TranslationDataDto, TranslationDeleteDataDto, TranslationListDataDto, TranslationUpdateDataDto } from './dto/i18n-response.dto';
 import { I18N_SERVICE, I18N_SERVICE_PATTERNS } from './i18n.constants';
-import { parseKeys } from './i18n.helpers';
 
 @Injectable()
 export class I18nClient extends CoreClient {
@@ -34,7 +33,7 @@ export class I18nClient extends CoreClient {
       I18N_SERVICE_PATTERNS.TRANSLATIONS.GET_MANY,
       {
         namespace: query.namespace,
-        keys: query.keys ? parseKeys(query.keys) : undefined,
+        keys: query.keys,
         locale: query.locale,
       },
     );

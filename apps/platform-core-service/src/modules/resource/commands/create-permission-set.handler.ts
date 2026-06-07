@@ -30,12 +30,7 @@ export class CreatePermissionSetHandler implements ICommandHandler<CreatePermiss
   async execute(command: CreatePermissionSetCommand) {
     const organization = await this.identifyOrganization();
     const normalizedCode = normalizeRoleCode(command.code);
-    const normalizedName = command.name.trim();
-    const normalizedDescription = command.description?.trim() || undefined;
     const sourceRole = await this.identifySourceRole(organization, command.copyFromId);
-
-    await this.Asserter.throwIf(normalizedCode.length === 0, 'ROLE_CODE_REQUIRED');
-    await this.Asserter.throwIf(normalizedName.length === 0, 'ROLE_NAME_REQUIRED');
 
     const existingRole = await this.roleRepo.findOne({ organization, code: normalizedCode, deletedAt: null });
     await this.Asserter.throwIf(!!existingRole, 'ROLE_CODE_ALREADY_EXISTS');
@@ -49,8 +44,8 @@ export class CreatePermissionSetHandler implements ICommandHandler<CreatePermiss
     const role = this.roleRepo.create({
       organization,
       code: normalizedCode,
-      name: normalizedName,
-      description: normalizedDescription,
+      name: command.name,
+      description: command.description,
     });
     this.em.persist(role);
 

@@ -1,4 +1,4 @@
-import { BadRequestException, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { defineErrors, ExceptionGuard } from '@pkg/shared/server';
 
 const ERROR_MESSAGES = defineErrors({
@@ -29,20 +29,6 @@ const ERROR_MESSAGES = defineErrors({
       en: 'Organization role not found.',
     },
     exception: NotFoundException,
-  },
-  INVITE_NAME_REQUIRED: {
-    message: {
-      ko: '초대 이름은 필수입니다.',
-      en: 'Invite name is required.',
-    },
-    exception: BadRequestException,
-  },
-  INVITE_EMAIL_REQUIRED: {
-    message: {
-      ko: '초대 이메일은 필수입니다.',
-      en: 'Invite email is required.',
-    },
-    exception: BadRequestException,
   },
 });
 

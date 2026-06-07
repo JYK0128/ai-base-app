@@ -51,7 +51,7 @@ function resolveRoleCode(role: MemberRole): string {
 }
 
 function normalizeSearchValue(value: string): string {
-  return value.trim().toLowerCase();
+  return value.toLowerCase();
 }
 
 function getMemberName(member: Member): string {

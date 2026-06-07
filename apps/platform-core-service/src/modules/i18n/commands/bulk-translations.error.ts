@@ -9,27 +9,6 @@ const ERROR_MESSAGES = defineErrors({
     },
     exception: BadRequestException,
   },
-  INVALID_OPERATION: {
-    message: {
-      ko: '지원하지 않는 처리 유형입니다.',
-      en: 'Unsupported bulk translation action.',
-    },
-    exception: BadRequestException,
-  },
-  INVALID_NAMESPACE: {
-    message: {
-      ko: '번역 네임스페이스가 필요합니다.',
-      en: 'Translation namespace is required.',
-    },
-    exception: BadRequestException,
-  },
-  INVALID_KEY: {
-    message: {
-      ko: '번역 키가 필요합니다.',
-      en: 'Translation key is required.',
-    },
-    exception: BadRequestException,
-  },
   INVALID_LOCALE: {
     message: {
       ko: '유효하지 않은 로케일입니다.',
