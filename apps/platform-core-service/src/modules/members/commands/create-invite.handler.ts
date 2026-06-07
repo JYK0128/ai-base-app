@@ -14,7 +14,7 @@ import { MemberAccount,
          OrganizationRoleRepository } from '@pkg/database';
 import { ClsService } from 'nestjs-cls';
 
-import { resolveMemberRoleCode } from '../members.mapper';
+import { resolveMemberRoleCode } from '../members.helper';
 import type { InviteMutationResult, MemberRole } from '../members.types';
 import { CreateInviteCommand } from './create-invite.command';
 import { CreateInviteAsserter } from './create-invite.error';

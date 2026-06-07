@@ -41,9 +41,6 @@ export class AnnouncementResponseDto implements Pick<Announcement, 'id' | 'title
   @ApiPropertyOptional({ example: '2026-06-16T14:00:00.000Z', description: '게시 종료일' })
   endAt?: Date;
 
-  @ApiProperty({ example: '새 기능이 출시되었습니다', description: '공지사항 요약' })
-  summary!: string;
-
   @ApiProperty({ example: 'PUBLISHED', enum: ['DRAFT', 'PUBLISHED'], description: '게시 상태' })
   status!: string;
 

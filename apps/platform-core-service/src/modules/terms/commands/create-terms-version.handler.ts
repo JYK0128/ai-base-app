@@ -6,7 +6,7 @@ import { EntityManager } from '@mikro-orm/postgresql';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { TermsDocument, TermsDocumentRepository, TermsDocumentStatus, TermsVersion, TermsVersionRepository } from '@pkg/database';
 
-import { mapTermsVersionResponse, type TermsVersionResponse } from '../terms.mapper';
+import { mapTermsVersionResponse, type TermsVersionResponse } from '../terms.helper';
 import { CreateTermsVersionCommand } from './create-terms-version.command';
 import { CreateTermsVersionAsserter } from './create-terms-version.error';
 

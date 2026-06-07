@@ -4,7 +4,7 @@ import { EntityManager } from '@mikro-orm/postgresql';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { Member, TermsConsent, TermsConsentRepository, TermsVersion, TermsVersionRepository } from '@pkg/database';
 
-import { getCurrentPublishedVersion, mapTermsConsentResponse, type TermsConsentResponse } from '../terms.mapper';
+import { getCurrentPublishedVersion, mapTermsConsentResponse, type TermsConsentResponse } from '../terms.helper';
 import { AgreeTermsCommand } from './agree-terms.command';
 import { AgreeTermsAsserter } from './agree-terms.error';
 

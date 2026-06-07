@@ -2,7 +2,7 @@ import { InjectRepository } from '@mikro-orm/nestjs';
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
 import { TermsDocument, TermsDocumentRepository, TermsDocumentStatus } from '@pkg/database';
 
-import { getCurrentPublishedVersion, mapTermsDocumentResponse, type TermsDocumentResponse } from '../terms.mapper';
+import { getCurrentPublishedVersion, mapTermsDocumentResponse, type TermsDocumentResponse } from '../terms.helper';
 import { GetActiveTermsQuery } from './get-active-terms.query';
 
 /**

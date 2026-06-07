@@ -2,7 +2,7 @@ import { Inject, Injectable, Logger } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 
 import { MAIL_EVENT_PATTERNS, type SendInviteEmailPayload } from '../../mail/mail.contract';
-import { INVITE_EMAIL_QUEUE } from '../members.constants';
+import { INVITE_EMAIL_QUEUE } from '../members.tokens';
 
 @Injectable()
 export class InviteEmailPublisher {

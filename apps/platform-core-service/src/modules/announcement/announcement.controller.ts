@@ -2,7 +2,7 @@ import { Controller } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 
-import { ANNOUNCEMENT_SERVICE_PATTERNS } from './announcement.constants';
+import { ANNOUNCEMENT_SERVICE_PATTERNS } from './announcement.contract';
 import type { AnnouncementInput } from './announcement.types';
 import { CreateAnnouncementCommand } from './commands';
 import { GetAnnouncementsQuery } from './queries';

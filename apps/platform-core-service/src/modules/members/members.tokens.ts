@@ -1,0 +1,1 @@
+export const INVITE_EMAIL_QUEUE = Symbol('INVITE_EMAIL_QUEUE');

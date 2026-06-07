@@ -3,7 +3,7 @@ import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 
 import { ApproveOrganizationCommand } from './commands';
-import { ORGANIZATION_SERVICE_PATTERNS } from './organization.constants';
+import { ORGANIZATION_SERVICE_PATTERNS } from './organization.contract';
 import type { ApproveOrganizationInput, GetOrganizationsInput } from './organization.types';
 import { GetOrganizationsQuery } from './queries';
 

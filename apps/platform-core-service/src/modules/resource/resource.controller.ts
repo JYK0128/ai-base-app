@@ -11,7 +11,7 @@ import { CreatePermissionSetCommand,
          UpdateResourceSortCommand } from './commands';
 import { GetPermissionSetsQuery, GetResourceQuery, GetResourcesQuery } from './queries';
 import type { ResourceTreeNode } from './queries/get-resources.handler';
-import { RESOURCE_SERVICE_PATTERNS } from './resource.constants';
+import { RESOURCE_SERVICE_PATTERNS } from './resource.contract';
 import type { CreatePermissionSetInput,
               CreateResourceInput,
               DeleteResourceInput,

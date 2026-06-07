@@ -17,8 +17,8 @@ export type GetTermsDocumentVersionsInput = Pick<TermsDocument, 'id'> & {
   keyword?: string
 };
 
-export type CreateTermsDocumentInput = Pick<TermsDocument, 'code' | 'title'>
-  & Partial<Pick<TermsDocument, 'required'>> & {
+export type CreateTermsDocumentInput = Pick<TermsDocument, 'code' | 'title' | 'required'>
+  & {
     organizationId?: string | null
   };
 
@@ -32,8 +32,8 @@ export type DeleteTermsDocumentInput = Pick<TermsDocument, 'id'>;
 
 export type CreateTermsVersionInput = Pick<TermsVersion, 'label' | 'content'> & {
   termsDocumentId: string
-  effectiveAt?: Date | string
-  status?: TermsVersionStatus
+  effectiveAt: Date | string
+  status: TermsVersionStatus
 };
 
 export type UpdateTermsVersionInput = Pick<TermsVersion, 'id' | 'label' | 'content' | 'status'> & {

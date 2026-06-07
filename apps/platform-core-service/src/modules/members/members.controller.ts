@@ -9,7 +9,7 @@ import { CancelInviteCommand,
          ToggleMemberStatusCommand,
          UpdateMemberRoleCommand } from './commands';
 import { InviteEmailEvent } from './events';
-import { MEMBERS_SERVICE_PATTERNS } from './members.constants';
+import { MEMBERS_SERVICE_PATTERNS } from './members.contract';
 import type { CancelInviteInput, CreateInviteInput, GetInvitesInput, GetMemberInput, GetMembersInput, InviteMutationResult, ResendInviteInput, ReviveInviteInput, ToggleMemberStatusInput, UpdateMemberRoleInput } from './members.types';
 import { GetInvitesQuery, GetMemberQuery, GetMembersQuery } from './queries';
 

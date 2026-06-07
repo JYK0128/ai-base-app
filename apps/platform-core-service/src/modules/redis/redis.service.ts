@@ -1,9 +1,9 @@
 import { Inject, Injectable, Optional } from '@nestjs/common';
 import { Redis } from 'ioredis';
 
-import { REDIS_CLIENT, REDIS_FEATURE_OPTIONS } from './redis.constants';
 import { RedisKeyBuilder } from './redis.key-builder';
 import type { RedisFeatureOptions } from './redis.module';
+import { REDIS_CLIENT, REDIS_FEATURE_OPTIONS } from './redis.tokens';
 
 @Injectable()
 export class RedisService {

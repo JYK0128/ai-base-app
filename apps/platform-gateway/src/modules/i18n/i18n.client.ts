@@ -66,8 +66,4 @@ export class I18nClient extends CoreClient {
       dto,
     );
   }
-
-  private identifyLocale(locale?: string): string {
-    return locale ?? this.cls.get('acceptLanguage');
-  }
 }

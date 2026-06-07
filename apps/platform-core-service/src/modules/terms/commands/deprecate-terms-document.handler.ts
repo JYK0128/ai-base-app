@@ -4,7 +4,7 @@ import { EntityManager } from '@mikro-orm/postgresql';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { TermsDocument, TermsDocumentRepository } from '@pkg/database';
 
-import { getCurrentPublishedVersion, mapTermsDocumentResponse, type TermsDocumentResponse } from '../terms.mapper';
+import { getCurrentPublishedVersion, mapTermsDocumentResponse, type TermsDocumentResponse } from '../terms.helper';
 import { DeprecateTermsDocumentCommand } from './deprecate-terms-document.command';
 import { DeprecateTermsDocumentAsserter } from './deprecate-terms-document.error';
 

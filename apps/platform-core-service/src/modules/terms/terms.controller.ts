@@ -1,11 +1,10 @@
 import { Controller } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { MessagePattern, Payload } from '@nestjs/microservices';
-import { TermsVersionStatus } from '@pkg/database';
 
 import { AgreeTermsCommand, CancelDeprecationTermsDocumentCommand, CreateTermsDocumentCommand, CreateTermsVersionCommand, DeleteTermsDocumentCommand, DeprecateTermsDocumentCommand, UpdateTermsVersionCommand } from './commands';
 import { GetActiveTermsQuery, GetTermsDocumentQuery, GetTermsDocumentsQuery, GetTermsDocumentVersionsQuery } from './queries';
-import { TERMS_SERVICE_PATTERNS } from './terms.constants';
+import { TERMS_SERVICE_PATTERNS } from './terms.contract';
 import type { AgreeTermsInput,
               CancelDeprecationTermsDocumentInput,
               CreateTermsDocumentInput,
@@ -57,8 +56,8 @@ export class TermsController {
     return this.commandBus.execute(new CreateTermsDocumentCommand(
       data.code,
       data.title,
-      data.required ?? true,
-      data.organizationId ?? undefined,
+      data.required,
+      data.organizationId,
     ));
   }
 
@@ -88,8 +87,8 @@ export class TermsController {
       data.termsDocumentId,
       data.label,
       data.content,
-      data.effectiveAt ? new Date(data.effectiveAt) : new Date(),
-      data.status ?? TermsVersionStatus.DRAFT,
+      data.effectiveAt,
+      data.status,
     ));
   }
 

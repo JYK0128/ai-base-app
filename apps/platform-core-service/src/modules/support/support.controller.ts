@@ -5,7 +5,7 @@ import { TicketPriority, TicketStatus } from '@pkg/database';
 
 import { CreateTicketCommand } from './commands';
 import { GetTicketsQuery } from './queries';
-import { SUPPORT_SERVICE_PATTERNS } from './support.constants';
+import { SUPPORT_SERVICE_PATTERNS } from './support.contract';
 
 @Controller()
 export class SupportController {

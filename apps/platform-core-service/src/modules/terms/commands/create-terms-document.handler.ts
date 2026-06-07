@@ -4,7 +4,7 @@ import { EntityManager } from '@mikro-orm/postgresql';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { Organization, TermsDocument, TermsDocumentRepository, TermsDocumentStatus } from '@pkg/database';
 
-import { mapTermsDocumentResponse, type TermsDocumentResponse } from '../terms.mapper';
+import { mapTermsDocumentResponse, type TermsDocumentResponse } from '../terms.helper';
 import { CreateTermsDocumentCommand } from './create-terms-document.command';
 import { CreateTermsDocumentAsserter } from './create-terms-document.error';
 

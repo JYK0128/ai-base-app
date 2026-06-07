@@ -4,7 +4,7 @@ import { EntityManager } from '@mikro-orm/postgresql';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { TermsConsent, TermsDocument, TermsDocumentRepository, TermsVersion, TermsVersionRepository } from '@pkg/database';
 
-import { getCurrentPublishedVersion } from '../terms.mapper';
+import { getCurrentPublishedVersion } from '../terms.helper';
 import { DeleteTermsDocumentCommand } from './delete-terms-document.command';
 import { DeleteTermsDocumentAsserter } from './delete-terms-document.error';
 

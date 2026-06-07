@@ -1,8 +1,8 @@
 import { DynamicModule, Module, Provider } from '@nestjs/common';
 import Redis, { type RedisOptions } from 'ioredis';
 
-import { REDIS_CLIENT, REDIS_FEATURE_OPTIONS } from './redis.constants';
 import { RedisService } from './redis.service';
+import { REDIS_CLIENT, REDIS_FEATURE_OPTIONS } from './redis.tokens';
 
 export interface RedisFeatureOptions {
   namespace?: string

@@ -2,7 +2,7 @@ import { InjectRepository } from '@mikro-orm/nestjs';
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
 import { Announcement, AnnouncementRepository } from '@pkg/database';
 
-import { buildAnnouncementRecord } from '../announcement.mapper';
+import { buildAnnouncementRecord } from '../announcement.helper';
 import type { AnnouncementRecord } from '../announcement.types';
 import { GetAnnouncementsAsserter } from './get-announcements.error';
 import { GetAnnouncementsQuery } from './get-announcements.query';

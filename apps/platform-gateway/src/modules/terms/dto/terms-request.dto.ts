@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { TermsDocument, TermsVersion } from '@pkg/database';
+import { TermsDocument, TermsVersion, TermsVersionStatus } from '@pkg/database';
 import { Type } from 'class-transformer';
 import { IsBoolean, IsDate, IsDateString, IsIn, IsNotEmpty, IsOptional, IsString, IsUUID } from 'class-validator';
 
@@ -34,7 +34,7 @@ export class TermsDocumentParamDto {
   id!: string;
 }
 
-export class CreateTermsDocumentDto implements Pick<TermsDocument, 'code' | 'title'>, Partial<Pick<TermsDocument, 'required'>> {
+export class CreateTermsDocumentDto implements Pick<TermsDocument, 'code' | 'title' | 'required'> {
   @ApiProperty({ example: 'privacy', description: '약관 코드' })
   @IsNotEmpty()
   @IsString()
@@ -45,10 +45,9 @@ export class CreateTermsDocumentDto implements Pick<TermsDocument, 'code' | 'tit
   @IsString()
   title!: string;
 
-  @ApiPropertyOptional({ example: true, description: '필수 동의 여부' })
-  @IsOptional()
+  @ApiProperty({ example: true, description: '필수 동의 여부' })
   @IsBoolean()
-  required?: boolean;
+  required!: boolean;
 
   @ApiProperty({ example: 'platform', enum: ['platform', 'organization'], description: '생성 scope' })
   @IsNotEmpty()
@@ -81,7 +80,7 @@ export class DeleteTermsDocumentDto {
   id!: string;
 }
 
-export class CreateTermsVersionDto implements Pick<TermsVersion, 'label' | 'content'>, Partial<Pick<TermsVersion, 'effectiveAt'>> {
+export class CreateTermsVersionDto implements Pick<TermsVersion, 'label' | 'content' | 'effectiveAt'> {
   @ApiProperty({ example: '019e5236-adae-70d7-a8f7-2dc90bdf7089', description: '약관 문서 식별자' })
   @IsNotEmpty()
   @IsUUID()
@@ -97,16 +96,14 @@ export class CreateTermsVersionDto implements Pick<TermsVersion, 'label' | 'cont
   @IsString()
   content!: string;
 
-  @ApiPropertyOptional({ example: '2026-06-01T00:00:00.000Z', description: '발효 시점' })
-  @IsOptional()
+  @ApiProperty({ example: '2026-06-01T00:00:00.000Z', description: '발효 시점' })
   @Type(() => Date)
   @IsDate()
-  effectiveAt?: Date;
+  effectiveAt!: Date;
 
-  @ApiPropertyOptional({ example: 'DRAFT', enum: ['DRAFT', 'PUBLISHED'], description: '버전 상태' })
-  @IsOptional()
+  @ApiProperty({ example: 'DRAFT', enum: ['DRAFT', 'PUBLISHED'], description: '버전 상태' })
   @IsIn(['DRAFT', 'PUBLISHED'])
-  status?: string;
+  status!: TermsVersionStatus;
 }
 
 export class UpdateTermsVersionDto implements Pick<TermsVersion, 'id' | 'label' | 'content' | 'effectiveAt'> {
@@ -133,7 +130,7 @@ export class UpdateTermsVersionDto implements Pick<TermsVersion, 'id' | 'label' 
   @ApiProperty({ example: 'PUBLISHED', enum: ['DRAFT', 'PUBLISHED'], description: '버전 상태' })
   @IsNotEmpty()
   @IsIn(['DRAFT', 'PUBLISHED'])
-  status!: string;
+  status!: TermsVersionStatus;
 }
 
 export class AgreeTermsDto {

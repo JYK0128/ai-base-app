@@ -12,8 +12,8 @@ import { Member,
 import { ENV } from '../../env';
 import { InviteEmailPublisher } from './events/invite-email.publisher';
 import { MembersHandlers } from './handlers';
-import { INVITE_EMAIL_QUEUE } from './members.constants';
 import { MembersController } from './members.controller';
+import { INVITE_EMAIL_QUEUE } from './members.tokens';
 
 @Module({
   imports: [

@@ -5,7 +5,7 @@ import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { Member, MemberRepository, MemberStatus, Organization, OrganizationRepository, OrganizationRole, OrganizationRoleAssignment, OrganizationRoleAssignmentRepository, OrganizationRoleRepository } from '@pkg/database';
 import { ClsService } from 'nestjs-cls';
 
-import { resolveMemberRoleCode } from '../members.mapper';
+import { resolveMemberRoleCode } from '../members.helper';
 import type { MemberMutationResult, MemberRole } from '../members.types';
 import { UpdateMemberRoleCommand } from './update-member-role.command';
 import { UpdateMemberRoleAsserter } from './update-member-role.error';
@@ -117,7 +117,7 @@ export class UpdateMemberRoleHandler implements ICommandHandler<UpdateMemberRole
     }
     else {
       const organizationRole = this.organizationRoleAssignmentRepo.create({
-        member: member,
+        member,
         role,
         organization,
       });

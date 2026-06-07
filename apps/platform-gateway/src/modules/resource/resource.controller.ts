@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Query, UnauthorizedException } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import type { JWTPayload } from 'jose';
 
@@ -49,10 +49,14 @@ export class ResourceController {
   })
   @SwaggerResult([ResourceResponseDto])
   async getMyResources(
-    @CurrentUser() user: JWTPayload,
+    @CurrentUser() user: (JWTPayload & { permissions?: string[] }) | undefined,
     // @Query() query: ResourceQueryDto,
   ) {
-    const result = await this.resourceClient.getMyResources(user.permissions ?? []);
+    if (!user?.permissions) {
+      throw new UnauthorizedException('권한 정보가 없는 토큰입니다.');
+    }
+
+    const result = await this.resourceClient.getMyResources(user.permissions);
     return ApiResponse.success(result, '내 허용 리소스 목록을 조회했습니다.');
   }
 

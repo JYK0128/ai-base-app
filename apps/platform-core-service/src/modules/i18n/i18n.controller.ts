@@ -6,7 +6,7 @@ import { BulkTranslationsCommand,
          CreateTranslationCommand,
          DeleteTranslationCommand,
          UpdateTranslationCommand } from './commands';
-import { I18N_SERVICE_PATTERNS } from './i18n.constants';
+import { I18N_SERVICE_PATTERNS } from './i18n.contract';
 import { GetLocalesQuery } from './queries';
 import { GetTranslationQuery } from './queries';
 import { GetTranslationsQuery } from './queries';

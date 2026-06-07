@@ -17,6 +17,7 @@ export class ExceptionFilter implements NestExceptionFilter {
     const originResponse = ctx.getResponse<Response>();
 
     const res = ApiResponse.error(exception, { traceId, requestId });
-    originResponse.status(res.error?.status || 500).json(res);
+    const status = res.error?.status;
+    originResponse.status(typeof status === 'number' ? status : 500).json(res);
   }
 }

@@ -2,11 +2,11 @@ import { InjectRepository } from '@mikro-orm/nestjs';
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
 import { TermsDocument, TermsDocumentRepository, TermsVersion, TermsVersionRepository } from '@pkg/database';
 
-import { mapTermsVersionResponse, type TermsVersionResponse } from '../terms.mapper';
+import { mapTermsVersionResponse, type TermsVersionResponse } from '../terms.helper';
 import { GetTermsDocumentVersionsAsserter } from './get-terms-document-versions.error';
 import { GetTermsDocumentVersionsQuery } from './get-terms-document-versions.query';
 
-const normalizeKeyword = (value?: string) => value?.toLowerCase() ?? '';
+const normalizeKeyword = (value?: string) => value?.toLowerCase();
 
 /**
  * 약관 문서 버전 목록 조회 핸들러

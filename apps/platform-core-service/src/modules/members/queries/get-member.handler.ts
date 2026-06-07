@@ -3,7 +3,7 @@ import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
 import { Member, MemberInvite, MemberInviteRepository, MemberRepository, Organization, OrganizationRepository } from '@pkg/database';
 import { ClsService } from 'nestjs-cls';
 
-import { buildCreatedByEmailLookup, buildMemberRecord, getLinkedInvite } from '../members.mapper';
+import { buildCreatedByEmailLookup, buildMemberRecord, getLinkedInvite } from '../members.helper';
 import type { MemberRecord } from '../members.types';
 import { GetMemberAsserter } from './get-member.error';
 import { GetMemberQuery } from './get-member.query';
