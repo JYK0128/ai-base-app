@@ -31,7 +31,7 @@ import { TermsModule } from '@/modules/terms/terms.module';
     }),
     LoggerModule.forRoot({
       pinoHttp: {
-        transport: process.env.NODE_ENV !== 'production'
+        transport: ENV.NODE_ENV !== 'production'
           ? { target: 'pino-pretty', options: { colorize: true } }
           : undefined,
         customLogLevel: (_req, res, err) => {
@@ -44,7 +44,7 @@ import { TermsModule } from '@/modules/terms/terms.module';
           return 'info';
         },
         base: {
-          env: process.env.NODE_ENV || 'development',
+          env: ENV.NODE_ENV,
           host: hostname(),
         },
       },

@@ -30,7 +30,7 @@ const envSchema = z.object({
   AUTH_SERVICE_URL: hostPortSchema,
   CORE_SERVICE_URL: hostPortSchema,
   NODE_ENV: z.string().trim().min(1),
-  CORS_ORIGIN: z.string().trim().optional().transform((value) => value || undefined),
+  CORS_ORIGIN: z.string().trim().min(1),
 });
 
 const env = envSchema.parse(process.env);

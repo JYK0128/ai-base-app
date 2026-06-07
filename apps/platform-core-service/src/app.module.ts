@@ -20,6 +20,8 @@ import { ResourceModule } from './modules/resource/resource.module';
 import { SupportModule } from './modules/support/support.module';
 import { TermsModule } from './modules/terms/terms.module';
 
+const redisUrl = new URL(ENV.REDIS_URL);
+
 @Module({
   imports: [
     MikroOrmModule.forRoot(databaseConfig),
@@ -29,20 +31,20 @@ import { TermsModule } from './modules/terms/terms.module';
     }),
     LoggerModule.forRoot({
       pinoHttp: {
-        transport: process.env.NODE_ENV !== 'production'
+        transport: ENV.NODE_ENV !== 'production'
           ? { target: 'pino-pretty', options: { colorize: true } }
           : undefined,
         base: {
-          env: process.env.NODE_ENV || 'development',
+          env: ENV.NODE_ENV,
           host: hostname(),
         },
       },
     }),
     RedisModule.forRoot({
-      host: new URL(ENV.REDIS_URL).hostname,
-      port: Number(new URL(ENV.REDIS_URL).port) || 6379,
-      username: new URL(ENV.REDIS_URL).username || undefined,
-      password: new URL(ENV.REDIS_URL).password || undefined,
+      host: redisUrl.hostname,
+      port: Number(redisUrl.port),
+      username: redisUrl.username,
+      password: redisUrl.password,
       maxRetriesPerRequest: null,
     }),
     HealthModule,

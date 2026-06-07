@@ -15,7 +15,7 @@ import { ENV } from '@/env';
 
 export function configureApp(app: NestExpressApplication) {
   const expressApp = app.getHttpAdapter().getInstance();
-  const isProduction = process.env.NODE_ENV === 'production';
+  const isProduction = ENV.NODE_ENV === 'production';
 
   if (isProduction) {
     app.set('trust proxy', 1);
@@ -52,15 +52,10 @@ export function configureApp(app: NestExpressApplication) {
     }),
   );
 
-  if (isProduction) {
-    app.enableCors({
-      origin: ENV.CORS_ORIGIN ? ENV.CORS_ORIGIN.split(',') : false,
-      credentials: true,
-    });
-  }
-  else {
-    app.enableCors();
-  }
+  app.enableCors({
+    origin: ENV.CORS_ORIGIN,
+    credentials: true,
+  });
 
   app.enableShutdownHooks();
 }

@@ -1,5 +1,7 @@
 import type { CookieOptions } from 'express';
 
+import { ENV } from '@/env';
+
 // csrf 토큰
 // origin, referrer 검사
 
@@ -18,7 +20,7 @@ export function createCookieOptions(
     httpOnly: true,
     sameSite: 'lax' as const,
     path: '/',
-    secure: process.env.NODE_ENV === 'production',
+    secure: ENV.NODE_ENV === 'production',
     ...options,
   };
 }
