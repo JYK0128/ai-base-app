@@ -46,31 +46,12 @@ export class MailService {
       </div>
     `;
 
-    try {
-      await this.transporter.sendMail({
-        from: `"AI Base App" <${this.fromAddress}>`,
-        to,
-        subject,
-        html,
-      });
-      this.logger.log(`Invitation email sent successfully to ${to}`);
-    }
-    catch (error) {
-      const message = this.describeError(error);
-      this.logger.error(`Failed to send email to ${to}: ${message}`);
-      throw error;
-    }
-  }
-
-  private describeError(error: unknown): string {
-    if (error instanceof Error) {
-      return error.message;
-    }
-
-    if (typeof error === 'string') {
-      return error;
-    }
-
-    return 'Unknown error';
+    await this.transporter.sendMail({
+      from: `"AI Base App" <${this.fromAddress}>`,
+      to,
+      subject,
+      html,
+    });
+    this.logger.log(`Invitation email sent successfully to ${to}`);
   }
 }

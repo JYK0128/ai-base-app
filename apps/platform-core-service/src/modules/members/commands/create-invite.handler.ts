@@ -1,8 +1,6 @@
 import { randomUUID } from 'node:crypto';
 
 import { InjectRepository } from '@mikro-orm/nestjs';
-import { EntityManager } from '@mikro-orm/postgresql';
-import { Logger } from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { MemberAccount,
          MemberAccountRepository,
@@ -16,9 +14,8 @@ import { MemberAccount,
          OrganizationRoleRepository } from '@pkg/database';
 import { ClsService } from 'nestjs-cls';
 
-import { MailProducerService } from '../../mail/mail-producer.service';
 import { resolveMemberRoleCode } from '../members.mapper';
-import type { MemberMutationResult, MemberRole } from '../members.types';
+import type { InviteMutationResult, MemberRole } from '../members.types';
 import { CreateInviteCommand } from './create-invite.command';
 import { CreateInviteAsserter } from './create-invite.error';
 
@@ -27,7 +24,6 @@ const INVITE_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 @CommandHandler(CreateInviteCommand)
 export class CreateInviteHandler implements ICommandHandler<CreateInviteCommand> {
   private readonly Asserter = CreateInviteAsserter;
-  private readonly logger = new Logger(CreateInviteHandler.name);
 
   constructor(
     @InjectRepository(Organization)
@@ -38,46 +34,31 @@ export class CreateInviteHandler implements ICommandHandler<CreateInviteCommand>
     private readonly inviteRepo: MemberInviteRepository,
     @InjectRepository(OrganizationRole)
     private readonly roleRepo: OrganizationRoleRepository,
-    private readonly em: EntityManager,
     private readonly cls: ClsService,
-    private readonly mailProducer: MailProducerService,
   ) {}
 
-  async execute(command: CreateInviteCommand): Promise<MemberMutationResult> {
+  async execute(command: CreateInviteCommand): Promise<InviteMutationResult> {
     const { name, email, role, note } = command.payload;
     const organization = await this.identifyOrganization();
     const inviter = await this.identifyInviter();
     const roleEntity = await this.identifyRole(organization, role);
-    const invite = await this.em.transactional(async (em) => this.processCreation(
-      em,
+    const invite = await this.processCreation(
       organization,
       roleEntity,
       name,
       email,
       note,
-    ));
+    );
     const attemptId = invite.metadata.mailDelivery?.attemptId;
 
     if (!attemptId) {
       throw new Error('MAIL_DELIVERY_ATTEMPT_ID_NOT_FOUND');
     }
 
-    try {
-      await this.mailProducer.sendInviteEmail({
-        inviteId: invite.id,
-        attemptId,
-        email: invite.email,
-        organizationName: organization.name,
-        inviterName: inviter.member.name,
-        token: invite.token,
-      });
-    }
-    catch (error) {
-      this.logger.warn(`Failed to publish invite email event for invite ${invite.id} attempt ${attemptId}: ${error instanceof Error ? error.message : String(error)}`);
-    }
-
     return {
-      id: invite.id,
+      invite,
+      organization,
+      inviter,
     };
   }
 
@@ -122,7 +103,6 @@ export class CreateInviteHandler implements ICommandHandler<CreateInviteCommand>
   }
 
   private async processCreation(
-    em: EntityManager,
     organization: Organization,
     role: OrganizationRole,
     name: string,
@@ -145,8 +125,6 @@ export class CreateInviteHandler implements ICommandHandler<CreateInviteCommand>
     });
 
     invite.metadata.mailDelivery = new MemberInviteMailDeliveryMetadata({ queuedAt: now });
-    em.persist(invite);
-
     return invite;
   }
 }

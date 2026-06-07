@@ -1,7 +1,8 @@
 import * as Commands from './commands';
-import * as Events from './events';
-import * as Queries from './queries';
 
+/**
+ * 모듈 내 'Handler'로 끝나는 클래스들만 필터링하여 반환합니다.
+ */
 const filterHandlers = (modules: Record<string, unknown>) =>
   Object.values(modules).filter(
     (val): val is { new (...args: unknown[]): unknown, name: string } =>
@@ -11,8 +12,6 @@ const filterHandlers = (modules: Record<string, unknown>) =>
       && val.name.endsWith('Handler'),
   );
 
-export const MembersHandlers = [
+export const MailHandlers = [
   ...filterHandlers(Commands),
-  ...filterHandlers(Events),
-  ...filterHandlers(Queries),
 ];

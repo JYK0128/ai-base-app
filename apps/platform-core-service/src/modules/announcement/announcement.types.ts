@@ -26,7 +26,6 @@ export interface AnnouncementRecordMetadata {
 export interface AnnouncementRecord {
   id: string
   title: string
-  summary: string
   content: string
   category: AnnouncementCategory
   audience: AnnouncementAudience

@@ -1,14 +1,6 @@
 import { MAIL_DELIVERY_TIMEOUT_MS, type MemberInvite, MemberInviteMailDeliveryMetadata, MemberInviteMetadata } from '@pkg/database';
 
-export const MAIL_DELIVERY_STATUS_VALUES = ['QUEUED', 'SENT', 'FAILED'] as const;
-export type MailDeliveryStatus = (typeof MAIL_DELIVERY_STATUS_VALUES)[number];
-
-export interface MailDeliveryView {
-  mailDeliveryStatus?: MailDeliveryStatus
-  mailDeliveryQueuedAt?: string
-  mailDeliverySentAt?: string
-  mailDeliveryFailedAt?: string
-}
+import type { MailDeliveryStatus, MailDeliveryStatusView } from './mail.types';
 
 export function getMailDelivery(metadata: MemberInviteMetadata | undefined): MemberInviteMailDeliveryMetadata | undefined {
   return metadata?.mailDelivery;
@@ -26,7 +18,11 @@ export function markMailDeliverySent(
   const delivery = getMailDelivery(metadata);
 
   if (!delivery || delivery.attemptId !== attemptId) {
-    return metadata ?? new MemberInviteMetadata();
+    if (metadata) {
+      return metadata;
+    }
+
+    return new MemberInviteMetadata();
   }
 
   const next = new MemberInviteMetadata(metadata);
@@ -49,7 +45,11 @@ export function markMailDeliveryFailed(
   const delivery = getMailDelivery(metadata);
 
   if (!delivery || delivery.attemptId !== attemptId) {
-    return metadata ?? new MemberInviteMetadata();
+    if (metadata) {
+      return metadata;
+    }
+
+    return new MemberInviteMetadata();
   }
 
   const next = new MemberInviteMetadata(metadata);
@@ -64,9 +64,9 @@ export function markMailDeliveryFailed(
   return next;
 }
 
-export function resolveMailDeliveryView(
+export function resolveMailDeliveryStatusView(
   invite: MemberInvite | undefined,
-): MailDeliveryView | undefined {
+): MailDeliveryStatusView | undefined {
   const delivery = getMailDelivery(invite?.metadata);
 
   if (!delivery) {

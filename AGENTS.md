@@ -1,3 +1,3 @@
-# AI Assistant Instructions
+# 공통 에이전트 지침 (Codex/Copilot/Cursor)
 
-Please read and strictly follow the guidelines, protocols, and domain skills defined in the `.agents/` directory before performing any actions in this repository.
+이 저장소에서 작업하기 전에 `.agents/` 디렉터리에 정의된 지침, 프로토콜, 도메인 스킬을 반드시 읽고 엄격히 따르세요.

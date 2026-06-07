@@ -8,20 +8,6 @@ const DEFAULT_AUDIENCE = AnnouncementAudience.ALL;
 const DEFAULT_CHANNEL = AnnouncementChannel.IN_APP;
 const DEFAULT_PRIORITY = AnnouncementPriority.NORMAL;
 
-function buildSummary(content: string) {
-  const firstLine = content
-    .split('\n')
-    .map((line) => line.trim())
-    .find((line) => line.length > 0)
-    ?? '';
-
-  if (!firstLine) {
-    return '공지 내용을 입력하세요.';
-  }
-
-  return firstLine.length > 60 ? `${firstLine.slice(0, 57)}...` : firstLine;
-}
-
 function resolveAnnouncementCategory(value: unknown): AnnouncementCategory {
   switch (value) {
     case AnnouncementCategory.NOTICE:
@@ -128,7 +114,11 @@ function getAuthorDisplayName(author: Member): string {
   const latestAccount = [...author.accounts.getItems()]
     .sort((left, right) => right.createdAt.getTime() - left.createdAt.getTime())[0];
 
-  return latestAccount?.email ?? author.name;
+  if (latestAccount && latestAccount.email) {
+    return latestAccount.email;
+  }
+
+  return author.name;
 }
 
 export function buildAnnouncementRecord(
@@ -136,12 +126,11 @@ export function buildAnnouncementRecord(
 ): AnnouncementRecord {
   const metadata = getAnnouncementMetadata(announcement);
   const status = resolveAnnouncementStatus(announcement.isPublished);
-  const updatedAt = announcement.updatedAt ?? announcement.createdAt;
+  const updatedAt = announcement.updatedAt ? announcement.updatedAt : announcement.createdAt;
 
   return {
     id: announcement.id,
     title: announcement.title,
-    summary: buildSummary(announcement.content),
     content: announcement.content,
     category: metadata.category,
     audience: metadata.audience,
@@ -167,10 +156,18 @@ export function applyAnnouncementInput(
 
   announcement.title = input.title;
   announcement.content = input.content;
-  const category = resolveAnnouncementCategory(input.category ?? metadata.category);
-  const audience = resolveAnnouncementAudience(input.audience ?? metadata.audience);
-  const channel = resolveAnnouncementChannel(input.channel ?? metadata.channel);
-  const priority = resolveAnnouncementPriority(input.priority ?? metadata.priority);
+  const category = resolveAnnouncementCategory(
+    input.category === undefined ? metadata.category : input.category,
+  );
+  const audience = resolveAnnouncementAudience(
+    input.audience === undefined ? metadata.audience : input.audience,
+  );
+  const channel = resolveAnnouncementChannel(
+    input.channel === undefined ? metadata.channel : input.channel,
+  );
+  const priority = resolveAnnouncementPriority(
+    input.priority === undefined ? metadata.priority : input.priority,
+  );
 
   announcement.metadata = new AnnouncementEntityMetadata({
     ...metadata,

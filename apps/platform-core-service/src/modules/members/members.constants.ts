@@ -15,3 +15,5 @@ export const MEMBERS_SERVICE_PATTERNS = {
     REVIVE: 'members.invites.revive',
   },
 } as const;
+
+export const INVITE_EMAIL_QUEUE = 'MAIL_QUEUE' as const;

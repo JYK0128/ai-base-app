@@ -5,7 +5,7 @@ import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { Announcement, AnnouncementRepository, Member, MemberAccount, MemberAccountRepository } from '@pkg/database';
 
 import { applyAnnouncementInput, buildAnnouncementRecord } from '../announcement.mapper';
-import type { AnnouncementRecord } from '../announcement.types';
+import type { AnnouncementInput, AnnouncementRecord } from '../announcement.types';
 import { CreateAnnouncementCommand } from './create-announcement.command';
 import { CreateAnnouncementAsserter } from './create-announcement.error';
 
@@ -26,49 +26,80 @@ export class CreateAnnouncementHandler implements ICommandHandler<CreateAnnounce
 
   @Transactional()
   async execute(command: CreateAnnouncementCommand): Promise<AnnouncementRecord> {
-    return this.processCreation(command);
+    const author = await this.identifyAuthor(command.memberId);
+    await this.verifyAnnouncementPeriod(command.data.startAt, command.data.endAt);
+    const existingAnnouncement = await this.identifyExistingAnnouncement(command.data.id);
+
+    return this.processAnnouncement(author, existingAnnouncement, command.data);
   }
 
   /**
-   * STEP 1: 작성자 확인
+   * STEP 1: 작성자 식별
    */
-  private async processCreation(command: CreateAnnouncementCommand): Promise<AnnouncementRecord> {
+  private async identifyAuthor(memberId: string): Promise<Member> {
     const authorAccount = await this.Asserter.assert(
       this.memberAccountRepo.findOne(
-        { id: command.memberId },
+        { id: memberId },
         { populate: ['member.accounts'] },
       ),
       'AUTHOR_NOT_FOUND',
     );
-    const author = authorAccount.member as Member;
 
+    return authorAccount.member as Member;
+  }
+
+  /**
+   * STEP 2: 게시 기간 검증
+   */
+  private async verifyAnnouncementPeriod(startAt?: string, endAt?: string): Promise<void> {
     await this.Asserter.throwIf(
-      !!command.data.startAt
-      && !!command.data.endAt
-      && new Date(command.data.startAt).getTime() >= new Date(command.data.endAt).getTime(),
+      !!startAt
+      && !!endAt
+      && new Date(startAt).getTime() >= new Date(endAt).getTime(),
       'INVALID_PERIOD',
     );
+  }
 
-    const existingAnnouncement = command.data.id
-      ? await this.announcementRepo.findOne({ id: command.data.id })
-      : undefined;
+  /**
+   * STEP 3: 기존 공지사항 식별
+   */
+  private async identifyExistingAnnouncement(announcementId?: string) {
+    if (!announcementId) {
+      return undefined;
+    }
 
-    const nextAnnouncement = existingAnnouncement ?? this.announcementRepo.create({
-      ...(command.data.id ? { id: command.data.id } : {}),
-      title: command.data.title,
-      content: command.data.content,
+    return await this.announcementRepo.findOne({ id: announcementId }) ?? undefined;
+  }
+
+  /**
+   * STEP 4: 공지사항 생성/수정 처리
+   */
+  private async processAnnouncement(
+    author: Member,
+    existingAnnouncement: Announcement | undefined,
+    input: AnnouncementInput,
+  ): Promise<AnnouncementRecord> {
+    const announcement = existingAnnouncement ?? this.createAnnouncement(author, input);
+
+    applyAnnouncementInput(announcement, input);
+
+    announcement.author = author;
+    this.em.persist(announcement);
+    await this.em.flush();
+
+    return buildAnnouncementRecord(announcement);
+  }
+
+  private createAnnouncement(
+    author: Member,
+    input: AnnouncementInput,
+  ) {
+    return this.announcementRepo.create({
+      ...(input.id ? { id: input.id } : {}),
+      title: input.title,
+      content: input.content,
       author,
       metadata: {},
     });
-
-    applyAnnouncementInput(nextAnnouncement, {
-      ...command.data,
-    });
-
-    nextAnnouncement.author = author;
-    this.em.persist(nextAnnouncement);
-    await this.em.flush();
-
-    return buildAnnouncementRecord(nextAnnouncement);
   }
 }

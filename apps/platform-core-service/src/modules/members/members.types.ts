@@ -1,6 +1,6 @@
-import type { Member, MemberInvite } from '@pkg/database';
+import type { Member, MemberAccount, MemberInvite, Organization } from '@pkg/database';
 
-import type { MailDeliveryStatus } from '../mail/mail-delivery';
+import type { MailDeliveryStatus } from '../mail/mail.types';
 
 export type MemberRole = 'OWNER' | 'MANAGER' | 'VIEWER';
 
@@ -29,6 +29,12 @@ export interface InviteRecord extends MemberRecord {
 }
 
 export type MemberMutationResult = Pick<Member, 'id'>;
+
+export interface InviteMutationResult {
+  invite: MemberInvite
+  organization: Organization
+  inviter: MemberAccount
+}
 
 export type GetMemberInput = Pick<Member, 'id'>;
 

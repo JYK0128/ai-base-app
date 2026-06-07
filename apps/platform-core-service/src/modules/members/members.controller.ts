@@ -1,5 +1,5 @@
 import { Controller } from '@nestjs/common';
-import { CommandBus, QueryBus } from '@nestjs/cqrs';
+import { CommandBus, EventBus, QueryBus } from '@nestjs/cqrs';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 
 import { CancelInviteCommand,
@@ -8,8 +8,9 @@ import { CancelInviteCommand,
          ReviveInviteCommand,
          ToggleMemberStatusCommand,
          UpdateMemberRoleCommand } from './commands';
+import { InviteEmailEvent } from './events';
 import { MEMBERS_SERVICE_PATTERNS } from './members.constants';
-import type { CancelInviteInput, CreateInviteInput, GetInvitesInput, GetMemberInput, GetMembersInput, ResendInviteInput, ReviveInviteInput, ToggleMemberStatusInput, UpdateMemberRoleInput } from './members.types';
+import type { CancelInviteInput, CreateInviteInput, GetInvitesInput, GetMemberInput, GetMembersInput, InviteMutationResult, ResendInviteInput, ReviveInviteInput, ToggleMemberStatusInput, UpdateMemberRoleInput } from './members.types';
 import { GetInvitesQuery, GetMemberQuery, GetMembersQuery } from './queries';
 
 @Controller()
@@ -17,6 +18,7 @@ export class MembersController {
   constructor(
     private readonly queryBus: QueryBus,
     private readonly commandBus: CommandBus,
+    private readonly eventBus: EventBus,
   ) {}
 
   @MessagePattern(MEMBERS_SERVICE_PATTERNS.MEMBER.LIST)
@@ -58,14 +60,24 @@ export class MembersController {
   async createInvite(
     @Payload() data: CreateInviteInput,
   ) {
-    return this.commandBus.execute(new CreateInviteCommand(data));
+    const result = await this.commandBus.execute(new CreateInviteCommand(data));
+    this.publishInviteEmail(result);
+
+    return {
+      id: result.invite.id,
+    };
   }
 
   @MessagePattern(MEMBERS_SERVICE_PATTERNS.INVITE.RESEND)
   async resendInvite(
     @Payload() data: ResendInviteInput,
   ) {
-    return this.commandBus.execute(new ResendInviteCommand(data));
+    const result = await this.commandBus.execute(new ResendInviteCommand(data));
+    this.publishInviteEmail(result);
+
+    return {
+      id: result.invite.id,
+    };
   }
 
   @MessagePattern(MEMBERS_SERVICE_PATTERNS.INVITE.CANCEL)
@@ -80,5 +92,22 @@ export class MembersController {
     @Payload() data: ReviveInviteInput,
   ) {
     return this.commandBus.execute(new ReviveInviteCommand(data));
+  }
+
+  private publishInviteEmail(result: InviteMutationResult): void {
+    const attemptId = result.invite.metadata.mailDelivery?.attemptId;
+
+    if (!attemptId) {
+      throw new Error('MAIL_DELIVERY_ATTEMPT_ID_NOT_FOUND');
+    }
+
+    this.eventBus.publish(new InviteEmailEvent({
+      inviteId: result.invite.id,
+      attemptId,
+      email: result.invite.email,
+      organizationName: result.organization.name,
+      inviterName: result.inviter.member.name,
+      token: result.invite.token,
+    }));
   }
 }

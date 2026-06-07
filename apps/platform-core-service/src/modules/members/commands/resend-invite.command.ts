@@ -1,5 +1,8 @@
-import type { ResendInviteInput } from '../members.types';
+import { Command } from '@nestjs/cqrs';
 
-export class ResendInviteCommand {
+import type { ResendInviteInput } from '../members.types';
+import type { InviteMutationResult } from '../members.types';
+
+export class ResendInviteCommand extends Command<InviteMutationResult> {
   constructor(readonly payload: ResendInviteInput) {}
 }

@@ -1,7 +1,7 @@
 import type { Loaded } from '@mikro-orm/core';
 import { type Member, type MemberInvite, MemberStatus as DbMemberStatus, type Organization, type OrganizationRoleAssignment } from '@pkg/database';
 
-import { resolveMailDeliveryView } from '../mail/mail-delivery';
+import { resolveMailDeliveryStatusView } from '../mail/mail.helper';
 import type { InviteRecord, MemberRecord, MemberRole, MemberStatus } from './members.types';
 
 function normalizeEmail(value: string | undefined): string | undefined {
@@ -107,7 +107,9 @@ function getCreatedBy(
   invite: MemberInvite | undefined,
   createdByEmailLookup: ReadonlyMap<string, string>,
 ): string | undefined {
-  const creatorAccountId = invite?.createdBy ?? member?.createdBy;
+  const creatorAccountId = invite?.createdBy
+    ? invite.createdBy
+    : member?.createdBy;
 
   if (!creatorAccountId) {
     return undefined;
@@ -172,7 +174,7 @@ export function buildMemberRecord(
 ): MemberRecord {
   const roleCode = getRoleCode(member, organization.id, invite);
   const createdBy = getCreatedBy(member, invite, createdByEmailLookup);
-  const mailDelivery = resolveMailDeliveryView(invite);
+  const mailDelivery = resolveMailDeliveryStatusView(invite);
 
   return {
     id: member.id,
@@ -184,7 +186,7 @@ export function buildMemberRecord(
     invitedAt: getInvitedAt(member, invite),
     ...(createdBy !== undefined ? { createdBy } : {}),
     note: getNote(member, invite),
-    ...(mailDelivery ?? {}),
+    ...(mailDelivery ? mailDelivery : {}),
     isMe: member.accounts.getItems().some((account) => account.id === requestedById),
   };
 }
@@ -203,7 +205,7 @@ export function buildInviteRecord(
     ? getRoleCode(linkedMember, organization.id, invite)
     : invite.role.code;
   const createdBy = getCreatedBy(linkedMember, invite, createdByEmailLookup);
-  const mailDelivery = resolveMailDeliveryView(invite);
+  const mailDelivery = resolveMailDeliveryStatusView(invite);
 
   let status: MemberStatus = 'INACTIVE';
 
@@ -223,7 +225,7 @@ export function buildInviteRecord(
     invitedAt: getInvitedAt(linkedMember, invite),
     ...(createdBy !== undefined ? { createdBy } : {}),
     note: getNote(linkedMember, invite),
-    ...(mailDelivery ?? {}),
+    ...(mailDelivery ? mailDelivery : {}),
     isMe: !!linkedMember && linkedMember.accounts.getItems().some((account) => account.id === requestedById),
   };
 }
@@ -248,10 +250,10 @@ export function filterMemberRecords(
       record.email,
       record.role,
       record.status,
-      record.lastLoginAt ?? '',
+      record.lastLoginAt ? record.lastLoginAt : '',
       record.invitedAt,
-      record.createdBy ?? '',
-      record.note ?? '',
+      record.createdBy ? record.createdBy : '',
+      record.note ? record.note : '',
     ]
       .join(' ')
       .toLowerCase();
@@ -281,10 +283,10 @@ export function filterInviteRecords(
       record.role,
       record.status,
       record.inviteStatus,
-      record.lastLoginAt ?? '',
+      record.lastLoginAt ? record.lastLoginAt : '',
       record.invitedAt,
-      record.createdBy ?? '',
-      record.note ?? '',
+      record.createdBy ? record.createdBy : '',
+      record.note ? record.note : '',
     ]
       .join(' ')
       .toLowerCase();

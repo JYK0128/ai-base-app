@@ -1,32 +1,13 @@
 import { Module } from '@nestjs/common';
-import { ClientsModule, Transport } from '@nestjs/microservices';
+import { CqrsModule } from '@nestjs/cqrs';
 
-import { ENV } from '../../env';
+import { MailHandlers } from './handlers';
 import { MailController } from './mail.controller';
 import { MailService } from './mail.service';
-import { MailProducerService } from './mail-producer.service';
 
 @Module({
-  imports: [
-    ClientsModule.register([
-      {
-        name: 'MAIL_QUEUE',
-        transport: Transport.RMQ,
-        options: {
-          urls: [ENV.RABBITMQ_URL],
-          queue: 'mail_queue',
-          queueOptions: {
-            durable: true,
-          },
-          socketOptions: {
-            frameMax: 8192,
-          },
-        },
-      },
-    ]),
-  ],
+  imports: [CqrsModule],
   controllers: [MailController],
-  providers: [MailService, MailProducerService],
-  exports: [MailProducerService, MailService],
+  providers: [MailService, ...MailHandlers],
 })
 export class MailModule {}

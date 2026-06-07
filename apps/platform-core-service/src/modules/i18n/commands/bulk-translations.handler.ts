@@ -4,8 +4,14 @@ import { EntityManager } from '@mikro-orm/postgresql';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { I18nLocale, I18nLocaleRepository, I18nTranslation, I18nTranslationRepository } from '@pkg/database';
 
-import { BulkTranslationsCommand } from './bulk-translations.command';
+import { type BulkTranslationOperation, BulkTranslationsCommand } from './bulk-translations.command';
 import { BulkTranslationsAsserter } from './bulk-translations.error';
+
+const TRANSLATION_QUERY_CHUNK_SIZE = 100;
+
+type IdentifiedBulkTranslationOperation = BulkTranslationOperation & {
+  localeCode: string
+};
 
 @CommandHandler(BulkTranslationsCommand)
 export class BulkTranslationsHandler implements ICommandHandler<BulkTranslationsCommand> {
@@ -21,50 +27,23 @@ export class BulkTranslationsHandler implements ICommandHandler<BulkTranslations
 
   @Transactional()
   async execute(command: BulkTranslationsCommand): Promise<{ processedCount: number }> {
-    await this.Asserter.throwIf(!command.operations || command.operations.length === 0, 'EMPTY_OPERATIONS');
+    await this.verifyOperations(command.operations);
+    const activeLocales = await this.identifyActiveLocales(command.operations);
+    const translationMap = await this.identifyTranslations(command.operations);
 
     let processedCount = 0;
 
     for (const operation of command.operations) {
-      const localeCode = await this.identifyActiveLocaleCode(operation.locale);
-      const action = operation.action;
-      const namespace = operation.namespace;
-      const key = operation.key;
-      const value = operation.value;
-
-      if (action === 'CREATE' || action === 'UPDATE') {
-        await this.Asserter.throwIf(!value, 'VALUE_REQUIRED');
-      }
-
-      const existing = await this.translationRepo.findOne({
-        namespace,
-        key,
+      const localeCode = await this.identifyActiveLocaleCode(operation.locale, activeLocales);
+      const translationKey = this.buildTranslationKey(operation.namespace, operation.key, localeCode);
+      const translation = translationMap.get(translationKey) ?? null;
+      const identifiedOperation = {
+        ...operation,
         localeCode,
-        deletedAt: null,
-      });
+      };
 
-      if (action === 'CREATE') {
-        await this.Asserter.throwIf(!!existing, 'TRANSLATION_ALREADY_EXISTS');
-
-        this.translationRepo.create({
-          namespace,
-          key,
-          localeCode,
-          value: value as string,
-        });
-        processedCount++;
-        continue;
-      }
-
-      if (action === 'UPDATE') {
-        const translation = await this.Asserter.assert(existing, 'TRANSLATION_NOT_FOUND');
-        translation.value = value as string;
-        processedCount++;
-        continue;
-      }
-
-      const translation = await this.Asserter.assert(existing, 'TRANSLATION_NOT_FOUND');
-      translation.remove();
+      await this.verifyTranslationOperation(identifiedOperation, translation);
+      this.processTranslationOperation(identifiedOperation, translation, translationKey, translationMap);
       processedCount++;
     }
 
@@ -73,9 +52,147 @@ export class BulkTranslationsHandler implements ICommandHandler<BulkTranslations
     return { processedCount };
   }
 
-  private async identifyActiveLocaleCode(locale: string) {
-    const record = await this.localeRepo.findOne({ code: locale, isActive: true });
-    const active = await this.Asserter.assert(record, 'INVALID_LOCALE');
+  /**
+   * STEP 1: 입력 검증
+   */
+  private async verifyOperations(operations: BulkTranslationOperation[]): Promise<void> {
+    await this.Asserter.throwIf(operations.length === 0, 'EMPTY_OPERATIONS');
+  }
+
+  /**
+   * STEP 2: 활성 로케일 식별
+   */
+  private async identifyActiveLocales(
+    operations: BulkTranslationOperation[],
+  ): Promise<Map<string, I18nLocale>> {
+    const localeCodes = [...new Set(operations.map((operation) => operation.locale))];
+
+    if (localeCodes.length === 0) {
+      return new Map();
+    }
+
+    const locales = await this.localeRepo.find({
+      code: { $in: localeCodes },
+      isActive: true,
+    });
+
+    return new Map(locales.map((locale) => [locale.code, locale]));
+  }
+
+  /**
+   * STEP 3: 기존 번역 일괄 식별
+   */
+  private async identifyTranslations(
+    operations: BulkTranslationOperation[],
+  ): Promise<Map<string, I18nTranslation>> {
+    const conditions = this.buildTranslationConditions(operations);
+
+    if (conditions.length === 0) {
+      return new Map();
+    }
+
+    const translations = new Map<string, I18nTranslation>();
+
+    for (const conditionChunk of this.chunkTranslationConditions(conditions)) {
+      const chunkTranslations = await this.translationRepo.find({
+        deletedAt: null,
+        $or: conditionChunk,
+      });
+
+      for (const translation of chunkTranslations) {
+        translations.set(
+          this.buildTranslationKey(translation.namespace, translation.key, translation.localeCode),
+          translation,
+        );
+      }
+    }
+
+    return translations;
+  }
+
+  /**
+   * STEP 4: 액션별 번역 검증
+   */
+  private async verifyTranslationOperation(
+    operation: IdentifiedBulkTranslationOperation,
+    translation: I18nTranslation | null,
+  ): Promise<void> {
+    if (operation.action === 'CREATE' || operation.action === 'UPDATE') {
+      await this.Asserter.throwIf(!operation.value, 'VALUE_REQUIRED');
+    }
+
+    if (operation.action === 'CREATE') {
+      await this.Asserter.throwIf(!!translation, 'TRANSLATION_ALREADY_EXISTS');
+      return;
+    }
+
+    await this.Asserter.assert(translation, 'TRANSLATION_NOT_FOUND');
+  }
+
+  /**
+   * STEP 5: 액션별 번역 처리
+   */
+  private processTranslationOperation(
+    operation: IdentifiedBulkTranslationOperation,
+    translation: I18nTranslation | null,
+    translationKey: string,
+    translationMap: Map<string, I18nTranslation>,
+  ): void {
+    switch (operation.action) {
+      case 'CREATE':
+        translationMap.set(translationKey, this.translationRepo.create({
+          namespace: operation.namespace,
+          key: operation.key,
+          localeCode: operation.localeCode,
+          value: operation.value!,
+        }));
+        return;
+      case 'UPDATE':
+        translation!.value = operation.value!;
+        translationMap.set(translationKey, translation!);
+        return;
+      case 'DELETE':
+        translation!.remove();
+        translationMap.delete(translationKey);
+    }
+  }
+
+  private async identifyActiveLocaleCode(
+    locale: string,
+    activeLocales: Map<string, I18nLocale>,
+  ) {
+    const active = await this.Asserter.assert(activeLocales.get(locale) ?? null, 'INVALID_LOCALE');
     return active.code;
+  }
+
+  private buildTranslationConditions(operations: BulkTranslationOperation[]) {
+    const conditions = new Map<string, { namespace: string, key: string, localeCode: string }>();
+
+    for (const operation of operations) {
+      const translationKey = this.buildTranslationKey(operation.namespace, operation.key, operation.locale);
+      conditions.set(translationKey, {
+        namespace: operation.namespace,
+        key: operation.key,
+        localeCode: operation.locale,
+      });
+    }
+
+    return [...conditions.values()];
+  }
+
+  private chunkTranslationConditions(
+    conditions: Array<{ namespace: string, key: string, localeCode: string }>,
+  ) {
+    const chunks: Array<Array<{ namespace: string, key: string, localeCode: string }>> = [];
+
+    for (let index = 0; index < conditions.length; index += TRANSLATION_QUERY_CHUNK_SIZE) {
+      chunks.push(conditions.slice(index, index + TRANSLATION_QUERY_CHUNK_SIZE));
+    }
+
+    return chunks;
+  }
+
+  private buildTranslationKey(namespace: string, key: string, localeCode: string) {
+    return `${namespace}::${key}::${localeCode}`;
   }
 }
