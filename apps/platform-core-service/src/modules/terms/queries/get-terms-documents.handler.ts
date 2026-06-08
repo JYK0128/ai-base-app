@@ -2,10 +2,10 @@ import { InjectRepository } from '@mikro-orm/nestjs';
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
 import { TermsDocument, TermsDocumentRepository } from '@pkg/database';
 
-import { mapTermsDocumentResponse, type TermsDocumentResponse } from '../terms.mapper';
+import { mapTermsDocumentResponse, type TermsDocumentResponse } from '../terms.helper';
 import { GetTermsDocumentsQuery } from './get-terms-documents.query';
 
-const normalizeKeyword = (value?: string) => value?.toLowerCase() ?? '';
+const normalizeKeyword = (value?: string) => value?.toLowerCase();
 
 const getDocumentLifecycle = (document: TermsDocument) => {
   if (document.isDraft) {

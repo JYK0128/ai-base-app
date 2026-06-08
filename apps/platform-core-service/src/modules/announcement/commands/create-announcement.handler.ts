@@ -1,11 +1,9 @@
 import { Transactional } from '@mikro-orm/decorators/legacy';
-import { InjectRepository } from '@mikro-orm/nestjs';
-import { EntityManager } from '@mikro-orm/postgresql';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { Announcement, AnnouncementRepository, Member, MemberAccount, MemberAccountRepository } from '@pkg/database';
+import { Announcement, AnnouncementMetadata } from '@pkg/database';
 
-import { applyAnnouncementInput, buildAnnouncementRecord } from '../announcement.mapper';
-import type { AnnouncementInput, AnnouncementRecord } from '../announcement.types';
+import { buildAnnouncementOutput } from '../announcement.helper';
+import type { AnnouncementInput, AnnouncementOutput } from '../announcement.types';
 import { CreateAnnouncementCommand } from './create-announcement.command';
 import { CreateAnnouncementAsserter } from './create-announcement.error';
 
@@ -17,39 +15,16 @@ export class CreateAnnouncementHandler implements ICommandHandler<CreateAnnounce
   private readonly Asserter = CreateAnnouncementAsserter;
 
   constructor(
-    @InjectRepository(Announcement)
-    private readonly announcementRepo: AnnouncementRepository,
-    @InjectRepository(MemberAccount)
-    private readonly memberAccountRepo: MemberAccountRepository,
-    private readonly em: EntityManager,
   ) {}
 
   @Transactional()
-  async execute(command: CreateAnnouncementCommand): Promise<AnnouncementRecord> {
-    const author = await this.identifyAuthor(command.memberId);
-    await this.verifyAnnouncementPeriod(command.data.startAt, command.data.endAt);
-    const existingAnnouncement = await this.identifyExistingAnnouncement(command.data.id);
-
-    return this.processAnnouncement(author, existingAnnouncement, command.data);
+  async execute({ payload }: CreateAnnouncementCommand): Promise<AnnouncementOutput> {
+    await this.verifyAnnouncementPeriod(payload.data.startAt, payload.data.endAt);
+    return this.processAnnouncementCreation(payload.data);
   }
 
   /**
-   * STEP 1: 작성자 식별
-   */
-  private async identifyAuthor(memberId: string): Promise<Member> {
-    const authorAccount = await this.Asserter.assert(
-      this.memberAccountRepo.findOne(
-        { id: memberId },
-        { populate: ['member.accounts'] },
-      ),
-      'AUTHOR_NOT_FOUND',
-    );
-
-    return authorAccount.member as Member;
-  }
-
-  /**
-   * STEP 2: 게시 기간 검증
+   * STEP 1: 게시 기간 검증
    */
   private async verifyAnnouncementPeriod(startAt?: string, endAt?: string): Promise<void> {
     await this.Asserter.throwIf(
@@ -61,45 +36,25 @@ export class CreateAnnouncementHandler implements ICommandHandler<CreateAnnounce
   }
 
   /**
-   * STEP 3: 기존 공지사항 식별
+   * STEP 2: 공지사항 생성 처리
    */
-  private async identifyExistingAnnouncement(announcementId?: string) {
-    if (!announcementId) {
-      return undefined;
-    }
-
-    return await this.announcementRepo.findOne({ id: announcementId }) ?? undefined;
-  }
-
-  /**
-   * STEP 4: 공지사항 생성/수정 처리
-   */
-  private async processAnnouncement(
-    author: Member,
-    existingAnnouncement: Announcement | undefined,
+  private async processAnnouncementCreation(
     input: AnnouncementInput,
-  ): Promise<AnnouncementRecord> {
-    const announcement = existingAnnouncement ?? this.createAnnouncement(author, input);
-
-    applyAnnouncementInput(announcement, input);
-
-    announcement.author = author;
-    this.em.persist(announcement);
-    await this.em.flush();
-
-    return buildAnnouncementRecord(announcement);
-  }
-
-  private createAnnouncement(
-    author: Member,
-    input: AnnouncementInput,
-  ) {
-    return this.announcementRepo.create({
-      ...(input.id ? { id: input.id } : {}),
-      title: input.title,
-      content: input.content,
-      author,
-      metadata: {},
+  ): Promise<AnnouncementOutput> {
+    const { title, content, ...rest } = input;
+    const metadata = new AnnouncementMetadata({
+      ...rest,
+      publishedAt: rest.publishedAt ? new Date(rest.publishedAt) : undefined,
+      startAt: rest.startAt ? new Date(rest.startAt) : undefined,
+      endAt: rest.endAt ? new Date(rest.endAt) : undefined,
     });
+
+    const announcement = Announcement.create({
+      title,
+      content,
+      metadata,
+    });
+
+    return buildAnnouncementOutput(announcement);
   }
 }

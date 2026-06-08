@@ -9,6 +9,14 @@ import { PERMISSIONS_KEY } from '@/common/decorators/permissions.decorator';
 import { IS_PERSONAL_KEY } from '@/common/decorators/personal.decorator';
 import { IS_PUBLIC_KEY } from '@/common/decorators/public.decorator';
 
+type AuthPayload = JWTPayload & {
+  accountId?: string
+  memberId?: string
+  organizationId?: string
+  permissions?: string[]
+  mustChangePassword?: boolean
+};
+
 @Injectable()
 export class AuthGuard implements CanActivate {
   constructor(
@@ -18,7 +26,7 @@ export class AuthGuard implements CanActivate {
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     if (!this.checkPublic(context)) {
-      const request = context.switchToHttp().getRequest<Request & { user?: JWTPayload }>();
+      const request = context.switchToHttp().getRequest<Request & { user?: AuthPayload }>();
       const payload = this.verifyToken(request);
       request.user = payload;
 
@@ -30,7 +38,7 @@ export class AuthGuard implements CanActivate {
     return true;
   }
 
-  private verifyToken(request: Request): JWTPayload {
+  private verifyToken(request: Request): AuthPayload {
     const authorizationHeader = request.headers['authorization'];
 
     if (typeof authorizationHeader !== 'string') {
@@ -39,12 +47,16 @@ export class AuthGuard implements CanActivate {
 
     const [scheme, token] = authorizationHeader.split(' ');
 
-    if (scheme !== 'Bearer' || !token) {
+    if (scheme !== 'Bearer') {
+      throw new UnauthorizedException('Authentication token is missing');
+    }
+
+    if (!token) {
       throw new UnauthorizedException('Authentication token is missing');
     }
 
     try {
-      return this.jwtService.verify<JWTPayload>(token);
+      return this.jwtService.verify<AuthPayload>(token);
     }
     catch {
       throw new UnauthorizedException('Invalid or expired token');
@@ -58,21 +70,23 @@ export class AuthGuard implements CanActivate {
     ]);
   }
 
-  private handleBypass(context: ExecutionContext, payload: JWTPayload) {
-    const bypassPolicies = (this.reflector.getAllAndOverride<string[]>(BYPASS_KEY, [
+  private handleBypass(context: ExecutionContext, payload: AuthPayload) {
+    const bypassPolicies = this.reflector.getAllAndOverride<string[]>(BYPASS_KEY, [
       context.getHandler(),
       context.getClass(),
-    ]) ?? []);
+    ]);
+    const canBypassPassword = Array.isArray(bypassPolicies)
+      && bypassPolicies.some((policy) => policy === BYPASS_POLICIES.PASSWORD);
 
     // 비밀번호 변경이 필요한 토큰인데, 해당 정책 우회가 없는 경우
-    if (payload.mustChangePassword && !bypassPolicies.some((p) => p === BYPASS_POLICIES.PASSWORD)) {
+    if (payload.mustChangePassword && !canBypassPassword) {
       throw new ForbiddenException('Password change is required before accessing this resource');
     }
 
     // MFA, 약관 동의 등 추가 정책도 여기서 확장 가능
   }
 
-  private handlePersonal(context: ExecutionContext, request: Request, payload: JWTPayload) {
+  private handlePersonal(context: ExecutionContext, request: Request, payload: AuthPayload) {
     const isPersonal = this.reflector.getAllAndOverride<boolean>(IS_PERSONAL_KEY, [
       context.getHandler(),
       context.getClass(),
@@ -84,8 +98,19 @@ export class AuthGuard implements CanActivate {
       const params = request.params as Record<string, unknown>;
 
       // 요청에서 accountId(UUID)로 전송된 값 추출
-      const ownerId = (params?.id || params?.accountId || body?.id || body?.accountId || query?.id || query?.accountId) as string | undefined;
-      const organizationId = (params?.organizationId || body?.organizationId || query?.organizationId) as string | undefined;
+      const ownerId = this.pickFirstString(
+        params.id,
+        params.accountId,
+        body.id,
+        body.accountId,
+        query.id,
+        query.accountId,
+      );
+      const organizationId = this.pickFirstString(
+        params.organizationId,
+        body.organizationId,
+        query.organizationId,
+      );
 
       if (!ownerId) {
         throw new ForbiddenException('Resource owner identification (id) is required');
@@ -105,17 +130,25 @@ export class AuthGuard implements CanActivate {
     }
   }
 
-  private handlePermissions(context: ExecutionContext, payload: JWTPayload) {
+  private handlePermissions(context: ExecutionContext, payload: AuthPayload) {
     const requiredPermissions = this.reflector.getAllAndOverride<string[]>(PERMISSIONS_KEY, [
       context.getHandler(),
       context.getClass(),
     ]);
 
-    if (!requiredPermissions || requiredPermissions.length === 0) {
+    if (!Array.isArray(requiredPermissions)) {
       return;
     }
 
-    const userPermissions = payload.permissions ?? [];
+    if (requiredPermissions.length === 0) {
+      return;
+    }
+
+    if (!Array.isArray(payload.permissions)) {
+      throw new UnauthorizedException('Invalid token payload');
+    }
+
+    const userPermissions = payload.permissions;
     const hasPermission = requiredPermissions.every((required) =>
       userPermissions.some((owned) => owned === required),
     );
@@ -123,5 +156,15 @@ export class AuthGuard implements CanActivate {
     if (!hasPermission) {
       throw new ForbiddenException('Insufficient permissions to access this resource');
     }
+  }
+
+  private pickFirstString(...values: Array<unknown>): string | undefined {
+    for (const value of values) {
+      if (typeof value === 'string' && value.length > 0) {
+        return value;
+      }
+    }
+
+    return undefined;
   }
 }

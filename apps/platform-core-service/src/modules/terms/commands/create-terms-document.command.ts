@@ -6,6 +6,6 @@ export class CreateTermsDocumentCommand {
     readonly code: string,
     readonly title: string,
     readonly required: boolean,
-    readonly organizationId?: string,
+    readonly organizationId?: string | null,
   ) {}
 }

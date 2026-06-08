@@ -23,10 +23,20 @@ class ErrorInfoBase implements ErrorInfoProps {
   status!: number;
 
   constructor(init: Partial<ErrorInfoProps>) {
-    this.code = init.code || 'INTERNAL_ERROR';
-    this.message = init.message || 'An unexpected error occurred';
-    this.details = init.details || null;
-    this.status = init.status || 500;
+    this.code = typeof init.code === 'string' && init.code.length > 0
+      ? init.code
+      : 'INTERNAL_ERROR';
+    this.message = Array.isArray(init.message)
+      ? init.message
+      : typeof init.message === 'string' && init.message.length > 0
+        ? init.message
+        : 'An unexpected error occurred';
+    this.details = init.details == null
+      ? null
+      : init.details;
+    this.status = typeof init.status === 'number' && Number.isFinite(init.status)
+      ? init.status
+      : 500;
   }
 }
 

@@ -2,9 +2,9 @@ import { Controller } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 
+import type { CreateAnnouncementInput, DeleteAnnouncementInput, GetAnnouncementsInput, UpdateAnnouncementInput } from './announcement.contract';
 import { ANNOUNCEMENT_SERVICE_PATTERNS } from './announcement.contract';
-import type { AnnouncementInput } from './announcement.types';
-import { CreateAnnouncementCommand } from './commands';
+import { CreateAnnouncementCommand, DeleteAnnouncementCommand, UpdateAnnouncementCommand } from './commands';
 import { GetAnnouncementsQuery } from './queries';
 
 @Controller()
@@ -15,14 +15,28 @@ export class AnnouncementController {
   ) {}
 
   @MessagePattern(ANNOUNCEMENT_SERVICE_PATTERNS.ANNOUNCEMENT.LIST)
-  async getAnnouncements(@Payload() data: { isPublishedOnly?: boolean }) {
-    return this.queryBus.execute(new GetAnnouncementsQuery(data.isPublishedOnly));
+  async getAnnouncements(@Payload() data: GetAnnouncementsInput) {
+    return this.queryBus.execute(new GetAnnouncementsQuery(data));
   }
 
   @MessagePattern(ANNOUNCEMENT_SERVICE_PATTERNS.ANNOUNCEMENT.CREATE)
-  async createAnnouncement(@Payload() data: { memberId: string, data: AnnouncementInput }) {
+  async createAnnouncement(@Payload() data: CreateAnnouncementInput) {
     return this.commandBus.execute(
-      new CreateAnnouncementCommand(data.memberId, data.data),
+      new CreateAnnouncementCommand(data),
+    );
+  }
+
+  @MessagePattern(ANNOUNCEMENT_SERVICE_PATTERNS.ANNOUNCEMENT.UPDATE)
+  async updateAnnouncement(@Payload() data: UpdateAnnouncementInput) {
+    return this.commandBus.execute(
+      new UpdateAnnouncementCommand(data),
+    );
+  }
+
+  @MessagePattern(ANNOUNCEMENT_SERVICE_PATTERNS.ANNOUNCEMENT.DELETE)
+  async deleteAnnouncement(@Payload() data: DeleteAnnouncementInput) {
+    return this.commandBus.execute(
+      new DeleteAnnouncementCommand(data),
     );
   }
 }

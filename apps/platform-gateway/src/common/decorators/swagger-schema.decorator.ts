@@ -15,8 +15,13 @@ export const SwaggerSchema = (schema: SwaggerSchemaObject): ClassDecorator => {
 };
 
 export function applySwaggerSchemas(document: OpenAPIObject) {
-  document.components ??= {};
-  document.components.schemas ??= {};
+  if (!document.components) {
+    document.components = {};
+  }
+
+  if (!document.components.schemas) {
+    document.components.schemas = {};
+  }
 
   for (const target of SWAGGER_SCHEMA_REGISTRY) {
     const schema = Reflect.getMetadata(SWAGGER_SCHEMA_METADATA_KEY, target) as SwaggerSchemaObject | undefined;

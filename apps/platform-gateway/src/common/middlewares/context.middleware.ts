@@ -29,8 +29,16 @@ export class ContextMiddleware implements NestMiddleware {
   }
 
   private setTraceContext(req: AppRequest, res: Response) {
-    const sid = getHeaderValue(req.cookies?.['sid']) || randomUUID();
-    const traceId = getHeaderValue(req.headers['x-trace-id']) || randomUUID();
+    let sid = getHeaderValue(req.cookies?.['sid']);
+    if (!sid) {
+      sid = randomUUID();
+    }
+
+    let traceId = getHeaderValue(req.headers['x-trace-id']);
+    if (!traceId) {
+      traceId = randomUUID();
+    }
+
     const requestId = randomUUID();
     this.cls.set('sid', sid);
     this.cls.set('traceId', traceId);
@@ -55,7 +63,15 @@ export class ContextMiddleware implements NestMiddleware {
       }
     }
 
-    this.cls.set('clientIp', getHeaderValue(req.headers['x-real-ip']) || req.ip || '0.0.0.0');
+    let clientIp = getHeaderValue(req.headers['x-real-ip']);
+    if (!clientIp) {
+      clientIp = req.ip;
+    }
+    if (!clientIp) {
+      clientIp = '0.0.0.0';
+    }
+
+    this.cls.set('clientIp', clientIp);
     this.cls.set('userAgent', getHeaderValue(req.headers['user-agent']));
     this.cls.set('referer', getHeaderValue(req.headers['referer']));
     this.cls.set('method', req.method);
@@ -68,7 +84,8 @@ export class ContextMiddleware implements NestMiddleware {
     if (typeof authHeader !== 'string') return;
 
     const [scheme, token] = authHeader.split(' ');
-    if (scheme !== 'Bearer' || !token) return;
+    if (scheme !== 'Bearer') return;
+    if (!token) return;
 
     try {
       const payload = this.jwtService.verify<JWTPayload>(token);

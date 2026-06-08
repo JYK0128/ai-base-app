@@ -1,17 +1,10 @@
-import { BadRequestException, NotFoundException } from '@nestjs/common';
+import { BadRequestException } from '@nestjs/common';
 import { defineErrors, ExceptionGuard } from '@pkg/shared/server';
 
 /**
  * 공지사항 생성 에러 메시지 및 예외 타입 정의
  */
 const ERROR_MESSAGES = defineErrors({
-  AUTHOR_NOT_FOUND: {
-    message: {
-      ko: '공지사항 작성자를 찾을 수 없습니다.',
-      en: 'Announcement author not found.',
-    },
-    exception: NotFoundException,
-  },
   INVALID_PERIOD: {
     message: {
       ko: '공지사항 시작일은 종료일보다 빨라야 합니다.',

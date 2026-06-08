@@ -2,8 +2,8 @@ import { InjectRepository } from '@mikro-orm/nestjs';
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
 import { Announcement, AnnouncementRepository } from '@pkg/database';
 
-import { buildAnnouncementRecord } from '../announcement.helper';
-import type { AnnouncementRecord } from '../announcement.types';
+import { buildAnnouncementOutput } from '../announcement.helper';
+import type { AnnouncementOutput } from '../announcement.types';
 import { GetAnnouncementsAsserter } from './get-announcements.error';
 import { GetAnnouncementsQuery } from './get-announcements.query';
 
@@ -19,16 +19,13 @@ export class GetAnnouncementsHandler implements IQueryHandler<GetAnnouncementsQu
     private readonly announcementRepo: AnnouncementRepository,
   ) {}
 
-  async execute(query: GetAnnouncementsQuery): Promise<AnnouncementRecord[]> {
-    const announcements = await this.announcementRepo.find({}, {
-      populate: ['author.accounts'],
+  async execute({ payload }: GetAnnouncementsQuery): Promise<AnnouncementOutput[]> {
+    const announcements = await this.announcementRepo.find({
+      isPublished: payload.isPublishedOnly ? true : undefined,
+    }, {
       orderBy: { createdAt: 'DESC' },
     });
 
-    const filteredAnnouncements = query.isPublishedOnly
-      ? announcements.filter((announcement) => announcement.isPublished)
-      : announcements;
-
-    return filteredAnnouncements.map((announcement) => buildAnnouncementRecord(announcement));
+    return announcements.map(buildAnnouncementOutput);
   }
 }

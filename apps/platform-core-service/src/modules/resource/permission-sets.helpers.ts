@@ -30,7 +30,7 @@ export function buildPermissionSetRecord(role: OrganizationRole): PermissionSetR
     id: role.id,
     code: role.code,
     name: role.name,
-    description: role.description ?? '',
+    description: role.description ? role.description : '',
     assignmentCount: role.assignments.getItems().length,
     permissionCodes,
   };

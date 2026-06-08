@@ -36,7 +36,10 @@ export class CreateTicketHandler implements ICommandHandler<CreateTicketCommand>
       { populate: ['member'] },
     );
 
-    const author = await this.Asserter.assert(authorAccount?.member ?? null, 'AUTHOR_NOT_FOUND');
+    const author = await this.Asserter.assert(
+      authorAccount && authorAccount.member ? authorAccount.member : null,
+      'AUTHOR_NOT_FOUND',
+    );
     const organization = this.em.getReference(Organization, command.organizationId);
 
     const ticket = this.supportTicketRepo.create({

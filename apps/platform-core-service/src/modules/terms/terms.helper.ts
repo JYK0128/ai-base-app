@@ -53,11 +53,6 @@ export function isDocumentScheduledForDeprecation(document: TermsDocument): bool
   return document.isScheduledForDeprecation;
 }
 
-export function hasCurrentPublishedVersion(document: TermsDocument): boolean {
-  const versions = document.versions.getItems();
-  return !!getCurrentPublishedVersion(versions);
-}
-
 export function mapTermsVersionResponse(version: TermsVersion): TermsVersionResponse {
   return {
     id: version.id,
