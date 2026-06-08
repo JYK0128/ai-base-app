@@ -1,4 +1,4 @@
-import type { Rel } from '@mikro-orm/core';
+import { EntityName, type Rel } from '@mikro-orm/core';
 import { Entity, ManyToOne, Property } from '@mikro-orm/decorators/legacy';
 
 import { CoreEntity } from '../../core/core.entity';
@@ -8,6 +8,8 @@ import { TermsVersion } from './terms.version.entity';
 
 @Entity({ schema: 'platform', repository: () => TermsConsentRepository })
 export class TermsConsent extends CoreEntity<TermsConsent> {
+  [EntityName]?: 'TermsConsent';
+
   @ManyToOne(() => Member)
   member!: Rel<Member>;
 

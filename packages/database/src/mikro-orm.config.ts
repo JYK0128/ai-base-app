@@ -8,14 +8,18 @@ import { TsMorphMetadataProvider } from '@mikro-orm/reflection';
 import { SeedManager } from '@mikro-orm/seeder';
 import { SqlHighlighter } from '@mikro-orm/sql-highlighter';
 
-import * as entities from './domains';
 import metadataJson from './metadata.json' with { type: 'json' };
 import { AuditSubscriber } from './subscribers';
 
 const metadata = metadataJson as Record<string, unknown>;
 
 export default defineConfig({
-  entities: Object.values(entities).filter((e) => typeof e === 'function'),
+  entities: [
+    'dist/domains/**/*.entity.js',
+  ],
+  entitiesTs: [
+    'src/domains/**/*.entity.ts',
+  ],
   driver: PostgreSqlDriver,
   clientUrl: process.env.DATABASE_URL,
   metadataProvider: process.env.MIKRO_ORM_CLI_TS_LOADER

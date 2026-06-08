@@ -1,4 +1,4 @@
-import { Collection, type Opt, type Rel } from '@mikro-orm/core';
+import { Collection, EntityName, type Opt, type Rel } from '@mikro-orm/core';
 import { Entity, Enum, ManyToOne, OneToMany, Property } from '@mikro-orm/decorators/legacy';
 
 import { CoreEntity } from '../../core/core.entity';
@@ -16,6 +16,8 @@ export enum ResourceScope {
 
 @Entity({ schema: 'platform', repository: () => ResourceRepository })
 export class Resource extends CoreEntity<Resource> {
+  [EntityName]?: 'Resource';
+
   @Property({ type: 'string' })
   code!: string;
 

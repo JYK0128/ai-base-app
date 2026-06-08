@@ -1,4 +1,4 @@
-import type { Opt, Rel } from '@mikro-orm/core';
+import { EntityName, type Opt, type Rel } from '@mikro-orm/core';
 import { Entity, Enum, ManyToOne, Property } from '@mikro-orm/decorators/legacy';
 
 import { CoreEntity } from '../../core/core.entity';
@@ -22,6 +22,8 @@ export enum TicketPriority {
 
 @Entity({ schema: 'platform', repository: () => SupportTicketRepository })
 export class SupportTicket extends CoreEntity<SupportTicket> {
+  [EntityName]?: 'SupportTicket';
+
   @Property({ type: 'string' })
   title!: string;
 

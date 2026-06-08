@@ -1,4 +1,4 @@
-import type { Opt, Rel } from '@mikro-orm/core';
+import { EntityName, type Opt, type Rel } from '@mikro-orm/core';
 import { Entity, Enum, ManyToOne, Property } from '@mikro-orm/decorators/legacy';
 import bcrypt from 'bcrypt';
 
@@ -13,6 +13,8 @@ export enum AccountStatus {
 
 @Entity({ schema: 'platform', repository: () => MemberAccountRepository })
 export class MemberAccount extends CoreEntity<MemberAccount> {
+  [EntityName]?: 'MemberAccount';
+
   @Property({ type: 'string', unique: true })
   email!: string;
 

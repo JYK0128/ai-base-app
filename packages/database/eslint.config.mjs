@@ -4,6 +4,9 @@ import { defineConfig } from 'eslint/config';
 export default defineConfig([
   nodeConfig,
   {
+    ignores: ['src/entities.generated.ts'],
+  },
+  {
     languageOptions: {
       parserOptions: {
         projectService: true,

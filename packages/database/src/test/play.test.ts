@@ -1,11 +1,11 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
+import { MemberStatus } from '@/domains';
 import type { PostgresTestContext } from '@/test/context';
 import { createPostgresTestContext, destroyPostgresTestContext } from '@/test/context';
 
 describe('Database Playground', () => {
   let context: PostgresTestContext;
-
   beforeAll(async () => {
     context = await createPostgresTestContext();
   }, 120_000);
@@ -21,5 +21,26 @@ describe('Database Playground', () => {
     const result = await em.getConnection().execute('SELECT 1 as val');
     expect(result).toBeDefined();
     expect(result[0].val).toBe(1);
+  });
+
+  it('should select database using kysely', async () => {
+    const em = context.orm.em.fork();
+    const kysely = em.getKysely();
+    const members = await kysely.selectFrom('member').selectAll().execute();
+    expect(Array.isArray(members)).toBe(true);
+  });
+
+  it('should test where clause filtering', async () => {
+    const em = context.orm.em.fork();
+    const kysely = em.getKysely();
+    const activeMembers = await kysely
+      .selectFrom('member')
+      .selectAll()
+      .where('status', '=', MemberStatus.ACTIVE)
+      .execute();
+    expect(Array.isArray(activeMembers)).toBe(true);
+    activeMembers.forEach((member) => {
+      expect(member.status).toBe('ACTIVE');
+    });
   });
 });

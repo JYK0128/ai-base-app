@@ -1,4 +1,4 @@
-import { Collection, type Opt, type Rel } from '@mikro-orm/core';
+import { Collection, EntityName, type Opt, type Rel } from '@mikro-orm/core';
 import { Entity, Enum, ManyToOne, OneToMany, Property } from '@mikro-orm/decorators/legacy';
 
 import { CoreEntity } from '../../core/core.entity';
@@ -13,6 +13,8 @@ export enum TermsVersionStatus {
 
 @Entity({ schema: 'platform', repository: () => TermsVersionRepository })
 export class TermsVersion extends CoreEntity<TermsVersion> {
+  [EntityName]?: 'TermsVersion';
+
   @ManyToOne(() => TermsDocument)
   termsDocument!: Rel<TermsDocument>;
 

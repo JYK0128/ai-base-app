@@ -1,4 +1,4 @@
-import type { Opt } from '@mikro-orm/core';
+import { EntityName, type Opt } from '@mikro-orm/core';
 import { Embeddable, Embedded, Entity, Enum, Property } from '@mikro-orm/decorators/legacy';
 
 import { CoreEntity } from '../../core/core.entity';
@@ -64,6 +64,8 @@ export class AnnouncementMetadata {
 
 @Entity({ schema: 'platform', repository: () => AnnouncementRepository })
 export class Announcement extends CoreEntity<Announcement> {
+  [EntityName]?: 'Announcement';
+
   @Property({ type: 'string' })
   title!: string;
 

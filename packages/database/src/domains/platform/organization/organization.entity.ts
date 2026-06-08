@@ -1,4 +1,4 @@
-import { Collection, type Opt } from '@mikro-orm/core';
+import { Collection, EntityName, type Opt } from '@mikro-orm/core';
 import { Entity, Enum, OneToMany, Property } from '@mikro-orm/decorators/legacy';
 
 import { CoreEntity } from '../../core/core.entity';
@@ -17,6 +17,8 @@ export enum OrganizationStatus {
 
 @Entity({ schema: 'platform', repository: () => OrganizationRepository })
 export class Organization extends CoreEntity<Organization> {
+  [EntityName]?: 'Organization';
+
   @Property({ type: 'string', unique: true })
   code!: string;
 

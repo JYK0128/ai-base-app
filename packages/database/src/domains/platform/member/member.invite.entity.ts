@@ -1,4 +1,4 @@
-import type { Opt, Rel } from '@mikro-orm/core';
+import { EntityName, type Opt, type Rel } from '@mikro-orm/core';
 import { Embeddable, Embedded, Entity, Enum, ManyToOne, Property } from '@mikro-orm/decorators/legacy';
 import { randomUUID } from 'crypto';
 
@@ -46,9 +46,6 @@ export class MemberInviteInfoMetadata {
   }
 
   @Property({ type: 'string', nullable: true })
-  email?: string;
-
-  @Property({ type: 'string', nullable: true })
   note?: string;
 }
 
@@ -64,7 +61,7 @@ export class MemberInviteTimelineMetadata {
   resentAt?: Date;
 
   @Property({ type: Date, nullable: true })
-  canceledAt?: Date;
+  cancelAt?: Date;
 
   @Property({ type: Date, nullable: true })
   revivedAt?: Date;
@@ -78,18 +75,20 @@ export class MemberInviteMetadata {
     Object.assign(this, data);
   }
 
-  @Embedded({ entity: () => MemberInviteInfoMetadata, object: true, nullable: true })
-  info: Opt<MemberInviteInfoMetadata> = new MemberInviteInfoMetadata();
+  @Embedded({ entity: () => MemberInviteInfoMetadata, object: true })
+  info: MemberInviteInfoMetadata = new MemberInviteInfoMetadata();
 
-  @Embedded({ entity: () => MemberInviteTimelineMetadata, object: true, nullable: true })
-  timeline: Opt<MemberInviteTimelineMetadata> = new MemberInviteTimelineMetadata();
+  @Embedded({ entity: () => MemberInviteTimelineMetadata, object: true })
+  timeline: MemberInviteTimelineMetadata = new MemberInviteTimelineMetadata();
 
-  @Embedded({ entity: () => MemberInviteMailDeliveryMetadata, object: true, nullable: true })
-  mailDelivery?: MemberInviteMailDeliveryMetadata = new MemberInviteMailDeliveryMetadata();
+  @Embedded({ entity: () => MemberInviteMailDeliveryMetadata, object: true })
+  mailDelivery: MemberInviteMailDeliveryMetadata = new MemberInviteMailDeliveryMetadata();
 }
 
 @Entity({ schema: 'platform', repository: () => MemberInviteRepository })
 export class MemberInvite extends CoreEntity<MemberInvite> {
+  [EntityName]?: 'MemberInvite';
+
   @Property({ type: 'string' })
   name!: string;
 

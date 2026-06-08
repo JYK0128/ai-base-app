@@ -1,4 +1,4 @@
-import type { Rel } from '@mikro-orm/core';
+import { EntityName, type Rel } from '@mikro-orm/core';
 import { Entity, ManyToOne } from '@mikro-orm/decorators/legacy';
 
 import { CoreEntity } from '../../core/core.entity';
@@ -9,6 +9,8 @@ import { OrganizationRoleAssignmentRepository } from './organization.role-assign
 
 @Entity({ schema: 'platform', repository: () => OrganizationRoleAssignmentRepository })
 export class OrganizationRoleAssignment extends CoreEntity<OrganizationRoleAssignment> {
+  [EntityName]?: 'OrganizationRoleAssignment';
+
   @ManyToOne(() => Member)
   member!: Rel<Member>;
 
