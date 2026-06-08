@@ -1,8 +1,7 @@
-import type { Opt, Rel } from '@mikro-orm/core';
-import { Embeddable, Embedded, Entity, Enum, ManyToOne, Property } from '@mikro-orm/decorators/legacy';
+import type { Opt } from '@mikro-orm/core';
+import { Embeddable, Embedded, Entity, Enum, Property } from '@mikro-orm/decorators/legacy';
 
 import { CoreEntity } from '../../core/core.entity';
-import { Member } from '../member/member.entity';
 import { AnnouncementRepository } from './announcement.repository';
 
 export enum AnnouncementCategory {
@@ -38,29 +37,29 @@ export class AnnouncementMetadata {
     Object.assign(this, data);
   }
 
-  @Enum({ items: () => AnnouncementCategory, nullable: true })
-  category?: AnnouncementCategory;
+  @Enum({ items: () => AnnouncementCategory })
+  category: AnnouncementCategory = AnnouncementCategory.NOTICE;
 
-  @Enum({ items: () => AnnouncementAudience, nullable: true })
-  audience?: AnnouncementAudience;
+  @Enum({ items: () => AnnouncementAudience })
+  audience: AnnouncementAudience = AnnouncementAudience.ORGANIZATION;
 
-  @Enum({ items: () => AnnouncementChannel, nullable: true })
-  channel?: AnnouncementChannel;
+  @Enum({ items: () => AnnouncementChannel })
+  channel: AnnouncementChannel = AnnouncementChannel.IN_APP;
 
-  @Enum({ items: () => AnnouncementPriority, nullable: true })
-  priority?: AnnouncementPriority;
+  @Enum({ items: () => AnnouncementPriority })
+  priority: AnnouncementPriority = AnnouncementPriority.NORMAL;
 
-  @Property({ type: 'boolean', nullable: true })
-  pinned?: boolean;
+  @Property({ type: 'boolean' })
+  pinned: boolean = false;
 
-  @Property({ type: Date, nullable: true })
-  publishedAt?: Date;
+  @Property({ type: Date })
+  publishedAt!: Date;
 
-  @Property({ type: Date, nullable: true })
-  startAt?: Date;
+  @Property({ type: Date })
+  startAt!: Date;
 
-  @Property({ type: Date, nullable: true })
-  endAt?: Date;
+  @Property({ type: Date })
+  endAt!: Date;
 }
 
 @Entity({ schema: 'platform', repository: () => AnnouncementRepository })
@@ -73,9 +72,6 @@ export class Announcement extends CoreEntity<Announcement> {
 
   @Embedded({ entity: () => AnnouncementMetadata, object: true, nullable: true })
   override metadata: Opt<AnnouncementMetadata> = new AnnouncementMetadata();
-
-  @ManyToOne(() => Member)
-  author!: Rel<Member>;
 
   get isPublished(): Opt<boolean> {
     const publishedAt = this.metadata.publishedAt;

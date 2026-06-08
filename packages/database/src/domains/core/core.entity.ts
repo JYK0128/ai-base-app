@@ -1,6 +1,7 @@
-import type { EntityData, EntityName, FilterQuery, FindOptions, FromEntityType, Loaded, Primary, RequiredEntityData } from '@mikro-orm/core';
+import type { EntityData, EntityName, FilterQuery, FindOptions, FromEntityType, Loaded, Primary, RequiredEntityData, UpdateOptions } from '@mikro-orm/core';
 import { BaseEntity, EntityRepositoryType, OptionalProps, RequestContext } from '@mikro-orm/core';
 import { PrimaryKey, Property } from '@mikro-orm/decorators/legacy';
+import type { ServerContext } from '@pkg/shared';
 import { uuidv7 } from 'uuidv7';
 
 import type { CoreRepository } from './core.repository';
@@ -100,6 +101,26 @@ export abstract class CoreEntity<
   }
 
   /**
+   * 엔티티를 데이터베이스에서 즉시 갱신합니다.
+   */
+  async nativeUpdate(data: EntityData<this>, options?: UpdateOptions<this>): Promise<number> {
+    const em = RequestContext.getEntityManager();
+    if (!em) throw new Error('EntityManager not found in RequestContext.');
+
+    const context = em.getLoggerContext<ServerContext>();
+    const entityName = this.constructor as EntityName<this>;
+    const where = { id: this.id } as FilterQuery<this>;
+
+    const updateData: EntityData<this> = {
+      ...data,
+      updatedAt: new Date(),
+      updatedBy: context?.accountId,
+    };
+
+    return em.nativeUpdate(entityName, where, updateData, options);
+  }
+
+  /**
    * 엔티티를 데이터베이스에서 즉시 물리 삭제합니다.
    */
   async nativeDelete(): Promise<number> {
@@ -107,7 +128,9 @@ export abstract class CoreEntity<
     if (!em) throw new Error('EntityManager not found in RequestContext.');
 
     const entityName = this.constructor as EntityName<this>;
-    return em.nativeDelete(entityName, { id: this.id } as FilterQuery<this>);
+    const where = { id: this.id } as FilterQuery<this>;
+
+    return em.nativeDelete(entityName, where);
   }
 
   /**

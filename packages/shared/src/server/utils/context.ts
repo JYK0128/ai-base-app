@@ -28,7 +28,7 @@ export interface ServerContext {
   acceptLanguage?: string
 
   /** 계정 ID */
-  accountId: string
+  accountId?: string
   /** 회원 ID */
   memberId?: string
   /** 조직 ID */

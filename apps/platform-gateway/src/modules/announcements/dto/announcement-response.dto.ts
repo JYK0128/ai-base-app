@@ -1,7 +1,10 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty } from '@nestjs/swagger';
 import { Announcement, AnnouncementAudience, AnnouncementCategory, AnnouncementChannel, AnnouncementMetadata, AnnouncementPriority } from '@pkg/database';
 
-export class AnnouncementResponseDto implements Pick<Announcement, 'id' | 'title' | 'content' | 'createdAt' | 'updatedAt'>, Pick<AnnouncementMetadata, 'category' | 'audience' | 'channel' | 'priority' | 'pinned' | 'publishedAt' | 'startAt' | 'endAt'> {
+export class AnnouncementResponseDto implements
+  Pick<Announcement, 'id' | 'title' | 'content' | 'createdAt'>,
+  Pick<Announcement, 'updatedAt'>,
+  Pick<AnnouncementMetadata, 'category' | 'audience' | 'channel' | 'priority' | 'pinned' | 'publishedAt' | 'startAt' | 'endAt'> {
   @ApiProperty({ example: '019e5236-adae-70d7-a8f7-2dc90bdf7081', description: '공지사항 식별자' })
   id!: string;
 
@@ -32,21 +35,18 @@ export class AnnouncementResponseDto implements Pick<Announcement, 'id' | 'title
   @ApiProperty({ example: false, description: '상단 고정 여부' })
   pinned!: boolean;
 
-  @ApiPropertyOptional({ example: '2026-06-06T14:00:00.000Z', description: '게시 확정 일시' })
-  publishedAt?: Date;
+  @ApiProperty({ example: '2026-06-06T14:00:00.000Z', description: '게시 확정 일시' })
+  publishedAt!: Date;
 
-  @ApiPropertyOptional({ example: '2026-06-06T14:00:00.000Z', description: '게시 시작일' })
-  startAt?: Date;
+  @ApiProperty({ example: '2026-06-06T14:00:00.000Z', description: '게시 시작일' })
+  startAt!: Date;
 
-  @ApiPropertyOptional({ example: '2026-06-16T14:00:00.000Z', description: '게시 종료일' })
-  endAt?: Date;
+  @ApiProperty({ example: '2026-06-16T14:00:00.000Z', description: '게시 종료일' })
+  endAt!: Date;
 
   @ApiProperty({ example: 'PUBLISHED', enum: ['DRAFT', 'PUBLISHED'], description: '게시 상태' })
   status!: string;
 
   @ApiProperty({ example: true, description: '게시 확정 여부' })
   isPublished!: boolean;
-
-  @ApiProperty({ example: 'admin@platform.com', description: '작성자' })
-  author!: string;
 }

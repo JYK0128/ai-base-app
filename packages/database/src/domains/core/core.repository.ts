@@ -1,4 +1,5 @@
-import { type BaseEntity, type EntityData, type FilterQuery, type FromEntityType, type Primary, type RequiredEntityData } from '@mikro-orm/core';
+import { type BaseEntity, type EntityData, type FilterQuery, type FromEntityType, type Primary, RequestContext, type RequiredEntityData, type UpdateOptions } from '@mikro-orm/core';
+import type { ServerContext } from '@pkg/shared';
 
 import { SearchableRepository } from './searchable.repository';
 
@@ -19,6 +20,20 @@ export abstract class CoreRepository<
     const entity = this.em.getReference(this.entityName, id);
     this.em.assign(entity, data);
     return entity;
+  }
+
+  override async nativeUpdate(where: FilterQuery<T>, data: EntityData<T>, options?: UpdateOptions<T>): Promise<number> {
+    const em = RequestContext.getEntityManager();
+    if (!em) throw new Error('EntityManager not found in RequestContext.');
+
+    const context = this.em.getLoggerContext<ServerContext>();
+    const updateData: EntityData<T> = {
+      ...data,
+      updatedAt: new Date(),
+      updatedBy: context?.accountId,
+    };
+
+    return em.nativeUpdate(this.entityName, where, updateData, options);
   }
 
   /**

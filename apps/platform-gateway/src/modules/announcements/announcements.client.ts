@@ -4,7 +4,8 @@ import { ClsService } from 'nestjs-cls';
 
 import { CoreClient } from '@/common/clients/core.client';
 
-import { ANNOUNCEMENTS_SERVICE, ANNOUNCEMENTS_SERVICE_PATTERNS } from './announcements.constants';
+import { ANNOUNCEMENTS_SERVICE_PATTERNS } from './announcements.contract';
+import { ANNOUNCEMENTS_SERVICE } from './announcements.tokens';
 import { CreateAnnouncementDto, GetAnnouncementsQueryDto } from './dto';
 
 @Injectable()
@@ -20,7 +21,15 @@ export class AnnouncementsClient extends CoreClient {
     return this.send(ANNOUNCEMENTS_SERVICE_PATTERNS.ANNOUNCEMENT.LIST, query);
   }
 
-  async createAnnouncement(memberId: string, data: CreateAnnouncementDto) {
-    return this.send(ANNOUNCEMENTS_SERVICE_PATTERNS.ANNOUNCEMENT.CREATE, { memberId, data });
+  async createAnnouncement(data: CreateAnnouncementDto) {
+    return this.send(ANNOUNCEMENTS_SERVICE_PATTERNS.ANNOUNCEMENT.CREATE, { data });
+  }
+
+  async updateAnnouncement(id: string, data: CreateAnnouncementDto) {
+    return this.send(ANNOUNCEMENTS_SERVICE_PATTERNS.ANNOUNCEMENT.UPDATE, { announcementId: id, data });
+  }
+
+  async deleteAnnouncement(id: string) {
+    return this.send(ANNOUNCEMENTS_SERVICE_PATTERNS.ANNOUNCEMENT.DELETE, { announcementId: id });
   }
 }

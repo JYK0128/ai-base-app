@@ -4,8 +4,8 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
 import { ENV } from '@/env';
 
 import { AnnouncementsClient } from './announcements.client';
-import { ANNOUNCEMENTS_SERVICE } from './announcements.constants';
 import { AnnouncementsController } from './announcements.controller';
+import { ANNOUNCEMENTS_SERVICE } from './announcements.tokens';
 
 @Module({
   imports: [
