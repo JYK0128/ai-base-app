@@ -3,7 +3,7 @@ import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
 import { Announcement, AnnouncementRepository } from '@pkg/database';
 
 import { buildAnnouncementOutput } from '../announcement.helper';
-import type { AnnouncementOutput } from '../announcement.types';
+import type { AnnouncementRecord } from '../announcement.types';
 import { GetAnnouncementsAsserter } from './get-announcements.error';
 import { GetAnnouncementsQuery } from './get-announcements.query';
 
@@ -19,7 +19,7 @@ export class GetAnnouncementsHandler implements IQueryHandler<GetAnnouncementsQu
     private readonly announcementRepo: AnnouncementRepository,
   ) {}
 
-  async execute({ payload }: GetAnnouncementsQuery): Promise<AnnouncementOutput[]> {
+  async execute({ payload }: GetAnnouncementsQuery): Promise<AnnouncementRecord[]> {
     const announcements = await this.announcementRepo.find({
       isPublished: payload.isPublishedOnly ? true : undefined,
     }, {

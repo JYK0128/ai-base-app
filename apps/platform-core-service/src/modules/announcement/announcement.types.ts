@@ -1,16 +1,16 @@
 import type { Announcement, AnnouncementMetadata } from '@pkg/database';
-import type { Plain } from '@pkg/shared';
+import type { PickPrimitive, Plain } from '@pkg/shared';
 
 export type AnnouncementInput = Prettify<
-  Pick<Announcement, 'title' | 'content'>
+  PickPrimitive<Announcement, 'title' | 'content'>
   & Partial<Plain<AnnouncementMetadata>>
 >;
 
-export type AnnouncementOutput = Prettify<
-  Pick<Announcement, 'title' | 'content'>
+export type AnnouncementRecord = Prettify<
+  PickPrimitive<Announcement>
   & Plain<AnnouncementMetadata>
 >;
 
-export type AnnouncementOutputId = Prettify<
-  Pick<Announcement, 'id'>
+export type AnnouncementIdRecord = Prettify<
+  PickPrimitive<Announcement, 'id'>
 >;

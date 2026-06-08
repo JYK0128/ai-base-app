@@ -2,7 +2,7 @@ import { Transactional } from '@mikro-orm/decorators/legacy';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { Announcement } from '@pkg/database';
 
-import type { AnnouncementInput, AnnouncementOutputId } from '../announcement.types';
+import type { AnnouncementInput, AnnouncementIdRecord } from '../announcement.types';
 import { UpdateAnnouncementCommand } from './update-announcement.command';
 import { UpdateAnnouncementAsserter } from './update-announcement.error';
 
@@ -17,7 +17,7 @@ export class UpdateAnnouncementHandler implements ICommandHandler<UpdateAnnounce
   ) {}
 
   @Transactional()
-  async execute({ payload }: UpdateAnnouncementCommand): Promise<AnnouncementOutputId> {
+  async execute({ payload }: UpdateAnnouncementCommand): Promise<AnnouncementIdRecord> {
     await this.verifyAnnouncementPeriod(payload.data.startAt, payload.data.endAt);
     return this.processAnnouncementUpdate(payload.announcementId, payload.data);
   }
@@ -40,7 +40,7 @@ export class UpdateAnnouncementHandler implements ICommandHandler<UpdateAnnounce
   private async processAnnouncementUpdate(
     announcementId: string,
     input: AnnouncementInput,
-  ): Promise<AnnouncementOutputId> {
+  ): Promise<AnnouncementIdRecord> {
     const announcement = Announcement.getReference(announcementId);
     const { title, content, ...metadata } = input;
 

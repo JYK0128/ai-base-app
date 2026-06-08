@@ -35,3 +35,14 @@ export type Prettify<T> = {
  * Strips index signatures and serializes Date properties to string.
  */
 export type Plain<T> = Prettify<SerializeDate<StripIndex<T>>>;
+
+/**
+ * Pick properties of T that are primitive types.
+ */
+type Primitive = string | number | boolean | symbol | bigint | Date | null | undefined;
+
+type PrimitiveKeys<T> = {
+  [K in keyof T]: T[K] extends Primitive ? K : never;
+}[keyof T];
+
+export type PickPrimitive<T, K extends PrimitiveKeys<T> = PrimitiveKeys<T>> = Prettify<Pick<T, K>>;
