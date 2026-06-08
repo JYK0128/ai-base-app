@@ -2,7 +2,7 @@ import { Transactional } from '@mikro-orm/decorators/legacy';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { Announcement, AnnouncementMetadata } from '@pkg/database';
 
-import type { AnnouncementInput, AnnouncementIdRecord } from '../announcement.types';
+import type { AnnouncementIdRecord, AnnouncementInput } from '../announcement.contract';
 import { CreateAnnouncementCommand } from './create-announcement.command';
 import { CreateAnnouncementAsserter } from './create-announcement.error';
 
