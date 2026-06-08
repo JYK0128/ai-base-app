@@ -1,7 +1,6 @@
 import { Query } from '@nestjs/cqrs';
 
-import type { GetAnnouncementsInput } from '../announcement.contract';
-import type { AnnouncementRecord } from '../announcement.types';
+import type { AnnouncementRecord, GetAnnouncementsInput } from '../announcement.contract';
 
 /**
  * 공지사항 목록 조회 쿼리

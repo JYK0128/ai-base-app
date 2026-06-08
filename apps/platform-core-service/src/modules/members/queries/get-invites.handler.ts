@@ -40,7 +40,6 @@ export class GetInvitesHandler implements IQueryHandler<GetInvitesQuery> {
     );
   }
 
-
   private async identifyOrganization(): Promise<Organization> {
     const organizationId = this.cls.get('organizationId');
 
@@ -90,4 +89,3 @@ export class GetInvitesHandler implements IQueryHandler<GetInvitesQuery> {
     );
   }
 }
-

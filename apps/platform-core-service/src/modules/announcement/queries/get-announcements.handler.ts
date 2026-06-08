@@ -2,8 +2,8 @@ import { InjectRepository } from '@mikro-orm/nestjs';
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
 import { Announcement, AnnouncementRepository } from '@pkg/database';
 
+import { AnnouncementRecord } from '../announcement.contract';
 import { buildAnnouncementOutput } from '../announcement.helper';
-import type { AnnouncementRecord } from '../announcement.types';
 import { GetAnnouncementsAsserter } from './get-announcements.error';
 import { GetAnnouncementsQuery } from './get-announcements.query';
 

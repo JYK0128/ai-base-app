@@ -1,6 +1,6 @@
 import type { Announcement } from '@pkg/database';
 
-import type { AnnouncementRecord } from './announcement.types';
+import type { AnnouncementRecord } from './announcement.contract';
 
 /**
  * 공지사항을 반환 객체 타입으로 변환합니다.
