@@ -2,8 +2,7 @@ import { Transactional } from '@mikro-orm/decorators/legacy';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { Announcement, AnnouncementMetadata } from '@pkg/database';
 
-import { buildAnnouncementOutput } from '../announcement.helper';
-import type { AnnouncementInput, AnnouncementOutput } from '../announcement.types';
+import type { AnnouncementInput, AnnouncementOutputId } from '../announcement.types';
 import { CreateAnnouncementCommand } from './create-announcement.command';
 import { CreateAnnouncementAsserter } from './create-announcement.error';
 
@@ -18,7 +17,7 @@ export class CreateAnnouncementHandler implements ICommandHandler<CreateAnnounce
   ) {}
 
   @Transactional()
-  async execute({ payload }: CreateAnnouncementCommand): Promise<AnnouncementOutput> {
+  async execute({ payload }: CreateAnnouncementCommand): Promise<AnnouncementOutputId> {
     await this.verifyAnnouncementPeriod(payload.data.startAt, payload.data.endAt);
     return this.processAnnouncementCreation(payload.data);
   }
@@ -40,7 +39,7 @@ export class CreateAnnouncementHandler implements ICommandHandler<CreateAnnounce
    */
   private async processAnnouncementCreation(
     input: AnnouncementInput,
-  ): Promise<AnnouncementOutput> {
+  ): Promise<AnnouncementOutputId> {
     const { title, content, ...rest } = input;
     const metadata = new AnnouncementMetadata({
       ...rest,
@@ -55,6 +54,6 @@ export class CreateAnnouncementHandler implements ICommandHandler<CreateAnnounce
       metadata,
     });
 
-    return buildAnnouncementOutput(announcement);
+    return { id: announcement.id };
   }
 }
