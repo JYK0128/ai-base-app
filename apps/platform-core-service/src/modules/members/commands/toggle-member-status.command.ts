@@ -1,5 +1,9 @@
-import type { ToggleMemberStatusInput } from '../members.types';
+import { Command } from '@nestjs/cqrs';
 
-export class ToggleMemberStatusCommand {
-  constructor(readonly payload: ToggleMemberStatusInput) {}
+import type { MemberOutputId, ToggleMemberStatusInput } from '../members.types';
+
+export class ToggleMemberStatusCommand extends Command<MemberOutputId> {
+  constructor(readonly payload: ToggleMemberStatusInput) {
+    super();
+  }
 }

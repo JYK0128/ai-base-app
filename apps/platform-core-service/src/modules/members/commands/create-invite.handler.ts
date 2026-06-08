@@ -1,21 +1,17 @@
 import { randomUUID } from 'node:crypto';
 
-import { InjectRepository } from '@mikro-orm/nestjs';
+import { Transactional } from '@mikro-orm/decorators/legacy';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { MemberAccount,
-         MemberAccountRepository,
          MemberInvite,
          MemberInviteMailDeliveryMetadata,
          MemberInviteMetadata,
-         MemberInviteRepository,
          Organization,
-         OrganizationRepository,
-         OrganizationRole,
-         OrganizationRoleRepository } from '@pkg/database';
+         OrganizationRole } from '@pkg/database';
 import { ClsService } from 'nestjs-cls';
 
 import { resolveMemberRoleCode } from '../members.helper';
-import type { InviteMutationResult, MemberRole } from '../members.types';
+import type { InviteOutputResult, MemberRole } from '../members.types';
 import { CreateInviteCommand } from './create-invite.command';
 import { CreateInviteAsserter } from './create-invite.error';
 
@@ -26,19 +22,12 @@ export class CreateInviteHandler implements ICommandHandler<CreateInviteCommand>
   private readonly Asserter = CreateInviteAsserter;
 
   constructor(
-    @InjectRepository(Organization)
-    private readonly organizationRepo: OrganizationRepository,
-    @InjectRepository(MemberAccount)
-    private readonly memberAccountRepo: MemberAccountRepository,
-    @InjectRepository(MemberInvite)
-    private readonly inviteRepo: MemberInviteRepository,
-    @InjectRepository(OrganizationRole)
-    private readonly roleRepo: OrganizationRoleRepository,
     private readonly cls: ClsService,
   ) {}
 
-  async execute(command: CreateInviteCommand): Promise<InviteMutationResult> {
-    const { name, email, role, note } = command.payload;
+  @Transactional()
+  async execute({ payload }: CreateInviteCommand): Promise<InviteOutputResult> {
+    const { name, email, role, note } = payload;
     const organization = await this.identifyOrganization();
     const inviter = await this.identifyInviter();
     const roleEntity = await this.identifyRole(organization, role);
@@ -70,7 +59,7 @@ export class CreateInviteHandler implements ICommandHandler<CreateInviteCommand>
     }
 
     return await this.Asserter.assert(
-      this.organizationRepo.findOne({ id: organizationId }),
+      Organization.findOne({ id: organizationId }),
       'ORGANIZATION_NOT_FOUND',
     );
   }
@@ -83,7 +72,7 @@ export class CreateInviteHandler implements ICommandHandler<CreateInviteCommand>
     }
 
     return await this.Asserter.assert(
-      this.memberAccountRepo.findOne(
+      MemberAccount.findOne(
         { id: requestedById },
         {
           populate: ['member'],
@@ -97,7 +86,7 @@ export class CreateInviteHandler implements ICommandHandler<CreateInviteCommand>
     const roleCode = resolveMemberRoleCode(role);
 
     return await this.Asserter.assert(
-      this.roleRepo.findOne({ organization, code: roleCode }),
+      OrganizationRole.findOne({ organization, code: roleCode }),
       'ROLE_NOT_FOUND',
     );
   }
@@ -114,7 +103,7 @@ export class CreateInviteHandler implements ICommandHandler<CreateInviteCommand>
     const metadata = new MemberInviteMetadata();
     metadata.info.note = note;
 
-    const invite = this.inviteRepo.create({
+    const invite = MemberInvite.create({
       name,
       email,
       role,
@@ -128,3 +117,4 @@ export class CreateInviteHandler implements ICommandHandler<CreateInviteCommand>
     return invite;
   }
 }
+

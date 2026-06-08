@@ -1,10 +1,9 @@
-import { InjectRepository } from '@mikro-orm/nestjs';
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
-import { Member, MemberInvite, MemberInviteRepository, MemberRepository, Organization, OrganizationRepository } from '@pkg/database';
+import { Member, MemberInvite, Organization } from '@pkg/database';
 import { ClsService } from 'nestjs-cls';
 
-import { buildCreatedByEmailLookup, buildMemberRecord, getLinkedInvite } from '../members.helper';
-import type { MemberRecord } from '../members.types';
+import { buildCreatedByEmailLookup, buildMemberOutput, getLinkedInvite } from '../members.helper';
+import type { MemberOutput } from '../members.types';
 import { GetMemberAsserter } from './get-member.error';
 import { GetMemberQuery } from './get-member.query';
 
@@ -13,25 +12,19 @@ export class GetMemberHandler implements IQueryHandler<GetMemberQuery> {
   private readonly Asserter = GetMemberAsserter;
 
   constructor(
-    @InjectRepository(Organization)
-    private readonly organizationRepo: OrganizationRepository,
-    @InjectRepository(Member)
-    private readonly memberRepo: MemberRepository,
-    @InjectRepository(MemberInvite)
-    private readonly inviteRepo: MemberInviteRepository,
     private readonly cls: ClsService,
   ) {}
 
-  async execute(query: GetMemberQuery): Promise<MemberRecord> {
+  async execute({ payload }: GetMemberQuery): Promise<MemberOutput> {
     const organization = await this.identifyOrganization();
-    const member = await this.identifyMember(organization, query.payload.id);
+    const member = await this.identifyMember(organization, payload.id);
     const members = await this.loadMembers(organization);
     const invites = await this.loadInvites(organization);
     const createdByEmailLookup = buildCreatedByEmailLookup(members);
     const linkedInvite = getLinkedInvite(invites, member);
     const requestedById = await this.identifyRequestUserId();
 
-    return buildMemberRecord(
+    return buildMemberOutput(
       member,
       organization,
       requestedById,
@@ -39,6 +32,7 @@ export class GetMemberHandler implements IQueryHandler<GetMemberQuery> {
       linkedInvite,
     );
   }
+
 
   private async identifyOrganization(): Promise<Organization> {
     const organizationId = this.cls.get('organizationId');
@@ -48,7 +42,7 @@ export class GetMemberHandler implements IQueryHandler<GetMemberQuery> {
     }
 
     return await this.Asserter.assert(
-      this.organizationRepo.findOne({ id: organizationId }),
+      Organization.findOne({ id: organizationId }),
       'ORGANIZATION_NOT_FOUND',
     );
   }
@@ -65,7 +59,7 @@ export class GetMemberHandler implements IQueryHandler<GetMemberQuery> {
 
   private async identifyMember(organization: Organization, id: string): Promise<Member> {
     return await this.Asserter.assert(
-      this.memberRepo.findOne(
+      Member.findOne(
         { id, organization },
         {
           populate: ['accounts', 'organizationRoles.role', 'organizationRoles.organization'],
@@ -75,9 +69,9 @@ export class GetMemberHandler implements IQueryHandler<GetMemberQuery> {
     );
   }
 
-  private async loadMembers(organization: Organization) {
+  private async loadMembers(organization: Organization): Promise<Member[]> {
     return await this.Asserter.assert(
-      this.memberRepo.find(
+      Member.find(
         { organization },
         {
           populate: ['accounts', 'organizationRoles.role', 'organizationRoles.organization'],
@@ -88,9 +82,9 @@ export class GetMemberHandler implements IQueryHandler<GetMemberQuery> {
     );
   }
 
-  private async loadInvites(organization: Organization) {
+  private async loadInvites(organization: Organization): Promise<MemberInvite[]> {
     return await this.Asserter.assert(
-      this.inviteRepo.find(
+      MemberInvite.find(
         { organization },
         {
           populate: ['role'],
@@ -100,3 +94,4 @@ export class GetMemberHandler implements IQueryHandler<GetMemberQuery> {
     );
   }
 }
+

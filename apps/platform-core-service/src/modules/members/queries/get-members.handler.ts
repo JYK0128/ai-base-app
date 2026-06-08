@@ -1,10 +1,9 @@
-import { InjectRepository } from '@mikro-orm/nestjs';
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
-import { Member, MemberInvite, MemberInviteRepository, MemberRepository, Organization, OrganizationRepository } from '@pkg/database';
+import { Member, MemberInvite, Organization } from '@pkg/database';
 import { ClsService } from 'nestjs-cls';
 
-import { buildCreatedByEmailLookup, buildMemberRecord, filterMemberRecords, getLinkedInvite, sortByRecentDate } from '../members.helper';
-import type { MemberRecord } from '../members.types';
+import { buildCreatedByEmailLookup, buildMemberOutput, filterMemberOutputs, getLinkedInvite, sortByRecentDate } from '../members.helper';
+import type { MemberOutput } from '../members.types';
 import { GetMembersAsserter } from './get-members.error';
 import { GetMembersQuery } from './get-members.query';
 
@@ -13,17 +12,11 @@ export class GetMembersHandler implements IQueryHandler<GetMembersQuery> {
   private readonly Asserter = GetMembersAsserter;
 
   constructor(
-    @InjectRepository(Organization)
-    private readonly organizationRepo: OrganizationRepository,
-    @InjectRepository(Member)
-    private readonly memberRepo: MemberRepository,
-    @InjectRepository(MemberInvite)
-    private readonly inviteRepo: MemberInviteRepository,
     private readonly cls: ClsService,
   ) {}
 
-  async execute(query: GetMembersQuery): Promise<MemberRecord[]> {
-    const { search, status, role } = query.payload;
+  async execute({ payload }: GetMembersQuery): Promise<MemberOutput[]> {
+    const { search, status, role } = payload;
     const organization = await this.identifyOrganization();
     const requestedById = await this.identifyRequestUserId();
     const loadedMembers = await this.loadMembers(organization);
@@ -33,7 +26,7 @@ export class GetMembersHandler implements IQueryHandler<GetMembersQuery> {
     const memberRecords = loadedMembers.map((member) => {
       const linkedInvite = getLinkedInvite(invites, member);
 
-      return buildMemberRecord(
+      return buildMemberOutput(
         member,
         organization,
         requestedById,
@@ -43,13 +36,14 @@ export class GetMembersHandler implements IQueryHandler<GetMembersQuery> {
     });
 
     return sortByRecentDate(
-      filterMemberRecords(memberRecords, {
+      filterMemberOutputs(memberRecords, {
         search,
         status,
         role,
       }),
     );
   }
+
 
   private async identifyOrganization(): Promise<Organization> {
     const organizationId = this.cls.get('organizationId');
@@ -59,7 +53,7 @@ export class GetMembersHandler implements IQueryHandler<GetMembersQuery> {
     }
 
     return await this.Asserter.assert(
-      this.organizationRepo.findOne({ id: organizationId }),
+      Organization.findOne({ id: organizationId }),
       'ORGANIZATION_NOT_FOUND',
     );
   }
@@ -74,9 +68,9 @@ export class GetMembersHandler implements IQueryHandler<GetMembersQuery> {
     return requestedById;
   }
 
-  private async loadMembers(organization: Organization) {
+  private async loadMembers(organization: Organization): Promise<Member[]> {
     return await this.Asserter.assert(
-      this.memberRepo.find(
+      Member.find(
         { organization },
         {
           populate: ['accounts', 'organizationRoles.role', 'organizationRoles.organization'],
@@ -87,9 +81,9 @@ export class GetMembersHandler implements IQueryHandler<GetMembersQuery> {
     );
   }
 
-  private async loadInvites(organization: Organization) {
+  private async loadInvites(organization: Organization): Promise<MemberInvite[]> {
     return await this.Asserter.assert(
-      this.inviteRepo.find(
+      MemberInvite.find(
         { organization },
         {
           populate: ['role'],
@@ -100,3 +94,4 @@ export class GetMembersHandler implements IQueryHandler<GetMembersQuery> {
     );
   }
 }
+

@@ -65,6 +65,36 @@ export abstract class CoreEntity<
   }
 
   /**
+   * 조건에 부합하는 엔티티 개수를 반환합니다.
+   */
+  static async count<T extends BaseEntity>(
+    this: new () => T,
+    where: FilterQuery<T> = {},
+  ): Promise<number> {
+    const em = RequestContext.getEntityManager();
+    if (!em) throw new Error('EntityManager not found in RequestContext.');
+    return em.count<T>(this, where);
+  }
+
+  /**
+   * 조건에 맞는 단일 엔티티를 조회합니다.
+   */
+  static async findOne<
+    T extends BaseEntity,
+    Hint extends string = never,
+    Fields extends string = never,
+    Excludes extends string = never,
+  >(
+    this: new () => T,
+    where: FilterQuery<T>,
+    options: FindOptions<T, Hint, Fields, Excludes> = {},
+  ): Promise<Loaded<T, Hint, Fields, Excludes> | null> {
+    const em = RequestContext.getEntityManager();
+    if (!em) throw new Error('EntityManager not found in RequestContext.');
+    return em.findOne<T, Hint, Fields, Excludes>(this, where, options);
+  }
+
+  /**
    * 조건에 맞는 엔티티를 조회합니다.
    */
   static async find<

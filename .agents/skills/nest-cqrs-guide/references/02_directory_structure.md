@@ -7,47 +7,40 @@
 - **원칙**: 모든 로직은 도메인 모듈별로 완벽 격리하며, 서비스 소스 디렉토리(`src/modules/`) 하위에 다음의 Flat 디렉토리 구성을 유지
 
 ```
-[domain-name]/                              # 예: resource/, support/, terms/
+announcement/                               # 예: announcement/
 ├── commands/                               # 도메인의 변경(CUD)을 처리하는 커맨드 그룹
 │   ├── index.ts                            # 모든 커맨드/에러/핸들러 일괄 export
-│   ├── [feature-name].command.ts           # 예: create-resource.command.ts, agree-terms.command.ts
-│   ├── [feature-name].error.ts             # 예: create-resource.error.ts, agree-terms.error.ts
-│   └── [feature-name].handler.ts           # 예: create-resource.handler.ts, agree-terms.handler.ts
+│   ├── [feature-name].command.ts           # 예: create-announcement.command.ts, delete-announcement.command.ts
+│   ├── [feature-name].error.ts             # 예: create-announcement.error.ts, (필요시) delete-announcement.error.ts
+│   └── [feature-name].handler.ts           # 예: create-announcement.handler.ts, delete-announcement.handler.ts
 ├── queries/                                # 도메인의 조회(R)를 처리하는 쿼리 그룹
 │   ├── index.ts                            # 모든 쿼리/에러/핸들러 일괄 export
-│   ├── [feature-name].query.ts             # 예: get-resource.query.ts, get-active-terms.query.ts
-│   ├── [feature-name].error.ts             # 예: get-resource.error.ts, get-active-terms.error.ts
-│   └── [feature-name].handler.ts           # 예: get-resource.handler.ts, get-active-terms.handler.ts
-├── events/                                 # (선택 사항) 도메인 내부 이벤트 및 후속 처리 그룹
-│   ├── index.ts                            # 모든 이벤트/핸들러/퍼블리셔 일괄 export
-│   ├── [feature-name].event.ts             # 내부 이벤트 payload 계약 정의
-│   ├── [feature-name].handler.ts           # 이벤트 수신 후 후속 처리 오케스트레이션
-│   └── [feature-name].publisher.ts         # 필요한 경우 외부 이벤트/메시지 발행 래퍼
-├── handlers.ts                             # commands, queries, events 내의 핸들러들을 하나로 모으는 파일
-├── [domain-name].contract.ts               # 마이크로서비스 메시지 패턴 및 payload 계약 정의
-├── [domain-name].tokens.ts                 # DI 토큰, queue/client key 등 주입용 식별자 정의
-├── [domain-name].helper.ts                 # 순수 변환/조회 유틸(필요한 경우)
-├── [domain-name].controller.ts             # MessagePattern을 수신하고 CQRS Bus로 위임하는 컨트롤러
-└── [domain-name].module.ts                 # 컨트롤러, 리포지토리, CQRS 핸들러를 등록하는 NestJS 모듈
+│   ├── [feature-name].query.ts             # 예: get-announcements.query.ts, get-announcement.query.ts
+│   ├── [feature-name].error.ts             # 예: get-announcements.error.ts, get-announcement.error.ts
+│   └── [feature-name].handler.ts           # 예: get-announcements.handler.ts, get-announcement.handler.ts
+├── announcement.contract.ts                 # 마이크로서비스 메시지 패턴 및 payload 계약 정의
+├── announcement.tokens.ts                   # DI 토큰, queue/client key 등 주입용 식별자 정의
+├── announcement.types.ts                    # 도메인 데이터 입출력 관련 공유 타입 선언
+├── announcement.helper.ts                   # 순수 변환/조회 유틸(필요한 경우)
+├── announcement.controller.ts               # MessagePattern을 수신하고 CQRS Bus로 위임하는 컨트롤러
+└── announcement.module.ts                   # 컨트롤러, 리포지토리, CQRS 핸들러를 등록하는 NestJS 모듈
 ```
 
 ### 1.2. 폴더 내 파일 규칙 (Flat File Structure)
 
 - **Flat 구조 유지**: `commands/`와 `queries/` 폴더 내부에는 하위 폴더 없이 단일 깊이(1뎁스)로만 파일을 나열하여 관리함
 - **일관된 네이밍**: 기능 단위 명칭(`[feature-name]`)을 파일명으로 활용하여 Command, Error, Handler를 단일 그룹화
-  - *예시*: `create-resource.command.ts`, `create-resource.error.ts`, `create-resource.handler.ts`
-- **계약/토큰/유틸 분리**: 메시지 패턴과 payload는 `*.contract.ts`, DI 식별자는 `*.tokens.ts`, 순수 변환/조회 유틸은 `*.helper.ts`로 분리함
-- **이벤트 분리**: 내부 이벤트는 `*.event.ts`, 이벤트 수신/후속 처리는 `*.handler.ts`, 외부 발행 래퍼가 필요하면 `*.publisher.ts`로 분리함
+  - *예시*: `create-announcement.command.ts`, `create-announcement.error.ts`, `create-announcement.handler.ts`
+- **계약/토큰/타입 분리**: 메시지 패턴과 payload는 `*.contract.ts`, DI 식별자는 `*.tokens.ts`, 도메인 내 공통 타입 정의는 `*.types.ts`로 분리함
 - **배럴 익스포트**: 각 폴더의 `index.ts`에서 폴더 내 모든 구성 요소를 일괄 Export 처리
 
 ```typescript
 // commands/index.ts 예시
-export * from './create-resource.command';
-export * from './create-resource.error';
-export * from './create-resource.handler';
-export * from './delete-resource.command';
-export * from './delete-resource.error';
-export * from './delete-resource.handler';
+export * from './create-announcement.command';
+export * from './create-announcement.error';
+export * from './create-announcement.handler';
+export * from './delete-announcement.command';
+export * from './delete-announcement.handler';
 ```
 
 ---
@@ -76,85 +69,62 @@ const filterHandlers = (modules: Record<string, unknown>) =>
       && val.name.endsWith('Handler'),
   );
 
-export const ResourceHandlers = [
+export const AnnouncementHandlers = [
   ...filterHandlers(Commands),
   ...filterHandlers(Queries),
-  ...filterHandlers(Events),
 ];
 ```
 
 ### 2.2. 모듈 등록 (`*.module.ts`)
 
-- **바인딩**: 위에서 구성한 일괄 핸들러 배열(`ResourceHandlers`)을 `providers`에 스프레드 연산자(`...`)로 바인딩
+- **바인딩**: 위에서 구성한 일괄 핸들러 배열(`AnnouncementHandlers`)을 `providers`에 스프레드 연산자(`...`)로 바인딩
+- **ORM 격리**: 스태틱 액티브 레코드를 활용하여 리포지토리 DI 주입을 피할지라도, 엔티티 로딩을 위해 `MikroOrmModule.forFeature`에 엔티티 타입을 바인딩함
 
 ```typescript
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import { Module } from '@nestjs/common';
 import { CqrsModule } from '@nestjs/cqrs';
-import { Resource } from '@pkg/database';
+import { Announcement } from '@pkg/database';
 
-import { ResourceHandlers } from './handlers';
-import { ResourceController } from './resource.controller';
+import { AnnouncementController } from './announcement.controller';
+import { AnnouncementHandlers } from './handlers';
 
 @Module({
   imports: [
     CqrsModule,
-    MikroOrmModule.forFeature([Resource]),
+    MikroOrmModule.forFeature([Announcement]),
   ],
-  controllers: [ResourceController],
-  providers: [...ResourceHandlers], // 자동 필터링 핸들러 적용
+  controllers: [AnnouncementController],
+  providers: [...AnnouncementHandlers], // 자동 필터링 핸들러 적용
 })
-export class ResourceModule {}
+export class AnnouncementModule {}
 ```
 
 ### 2.3. 컨트롤러 라우팅 및 버스 위임 (`*.controller.ts`)
 
 - **통신 표준**: 백엔드 내부 통신 규격으로 마이크로서비스 데코레이터 **`@MessagePattern`**을 단독으로 채택함
-- **오케스트레이션**: 전달받은 Payload/DTO를 Command 또는 Query 객체로 래핑하여 `CommandBus.execute()`로 전달
-- **참고사항**: CQRS 패턴에서는 데이터의 조회(Query) 및 변경(Command) 모두 `commandBus.execute(commandOrQuery)` 메서드로 단일 처리
+- **오케스트레이션**: 전달받은 Payload를 Command 객체에 직접 주입(payload 변수 래핑 형식)하여 `CommandBus.execute()`로 전달
 
 ```typescript
 import { Controller } from '@nestjs/common';
 import { CommandBus } from '@nestjs/cqrs';
 import { MessagePattern, Payload } from '@nestjs/microservices';
-import type { ResourceType } from '@pkg/database';
 
-import { CreateResourceCommand } from './commands';
-import { GetResourceCommand } from './queries';
-import { RESOURCE_SERVICE_PATTERNS } from './resource.contract';
+import { ANNOUNCEMENT_SERVICE_PATTERNS, CreateAnnouncementInput } from './announcement.contract';
+import { CreateAnnouncementCommand } from './commands';
 
 @Controller()
-export class ResourceController {
+export class AnnouncementController {
   constructor(
     private readonly commandBus: CommandBus,
   ) {}
 
-  /** 리소스 단건 조회 (Query 위임) */
-  @MessagePattern(RESOURCE_SERVICE_PATTERNS.RESOURCE.GET)
-  async getResource(
-    @Payload() data: { id: string },
+  /** 공지사항 생성 (Command 위임) */
+  @MessagePattern(ANNOUNCEMENT_SERVICE_PATTERNS.ANNOUNCEMENT.CREATE)
+  async createAnnouncement(
+    @Payload() data: CreateAnnouncementInput,
   ) {
-    return this.commandBus.execute(new GetResourceCommand(data.id));
-  }
-
-  /** 리소스 생성 (Command 위임) */
-  @MessagePattern(RESOURCE_SERVICE_PATTERNS.RESOURCE.CREATE)
-  async createResource(
-    @Payload() data: {
-      code: string;
-      name: string;
-      type: ResourceType;
-      parentId?: string;
-    },
-  ) {
-    return this.commandBus.execute(new CreateResourceCommand(
-      data.code,
-      data.name,
-      data.type,
-      undefined,
-      undefined,
-      data.parentId,
-    ));
+    return this.commandBus.execute(new CreateAnnouncementCommand(data));
   }
 }
 ```

@@ -1,12 +1,10 @@
 import { Transactional } from '@mikro-orm/decorators/legacy';
-import { InjectRepository } from '@mikro-orm/nestjs';
-import { EntityManager } from '@mikro-orm/postgresql';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { Member, MemberRepository, MemberStatus, Organization, OrganizationRepository, OrganizationRole, OrganizationRoleAssignment, OrganizationRoleAssignmentRepository, OrganizationRoleRepository } from '@pkg/database';
+import { Member, MemberStatus, Organization, OrganizationRole, OrganizationRoleAssignment } from '@pkg/database';
 import { ClsService } from 'nestjs-cls';
 
 import { resolveMemberRoleCode } from '../members.helper';
-import type { MemberMutationResult, MemberRole } from '../members.types';
+import type { MemberOutputId, MemberRole } from '../members.types';
 import { UpdateMemberRoleCommand } from './update-member-role.command';
 import { UpdateMemberRoleAsserter } from './update-member-role.error';
 
@@ -15,25 +13,16 @@ export class UpdateMemberRoleHandler implements ICommandHandler<UpdateMemberRole
   private readonly Asserter = UpdateMemberRoleAsserter;
 
   constructor(
-    @InjectRepository(Organization)
-    private readonly organizationRepo: OrganizationRepository,
-    @InjectRepository(Member)
-    private readonly memberRepo: MemberRepository,
-    @InjectRepository(OrganizationRoleAssignment)
-    private readonly organizationRoleAssignmentRepo: OrganizationRoleAssignmentRepository,
-    @InjectRepository(OrganizationRole)
-    private readonly roleRepo: OrganizationRoleRepository,
-    private readonly em: EntityManager,
     private readonly cls: ClsService,
   ) {}
 
   @Transactional()
-  async execute(command: UpdateMemberRoleCommand): Promise<MemberMutationResult> {
+  async execute({ payload }: UpdateMemberRoleCommand): Promise<MemberOutputId> {
     const organization = await this.identifyOrganization();
-    const member = await this.identifyMember(organization, command.payload.id);
+    const member = await this.identifyMember(organization, payload.id);
     const requestedById = await this.identifyRequestUserId();
     await this.validateSelfMutation(member, requestedById);
-    const role = await this.identifyRole(organization, command.payload.role);
+    const role = await this.identifyRole(organization, payload.role);
     await this.validateLastOwner(member, organization, role);
     await this.processRoleUpdate(member, organization, role);
 
@@ -46,7 +35,7 @@ export class UpdateMemberRoleHandler implements ICommandHandler<UpdateMemberRole
     const currentRoleAssignment = member.organizationRoles.getItems().find((r) => r.organization.id === organization.id);
 
     if (currentRoleAssignment?.role.code === 'OWNER' && targetRole.code !== 'OWNER') {
-      const activeOwnerCount = await this.organizationRoleAssignmentRepo.count({
+      const activeOwnerCount = await OrganizationRoleAssignment.count({
         organization,
         role: { code: 'OWNER' },
         member: { status: MemberStatus.ACTIVE },
@@ -66,7 +55,7 @@ export class UpdateMemberRoleHandler implements ICommandHandler<UpdateMemberRole
     }
 
     return await this.Asserter.assert(
-      this.organizationRepo.findOne({ id: organizationId }),
+      Organization.findOne({ id: organizationId }),
       'ORGANIZATION_NOT_FOUND',
     );
   }
@@ -83,7 +72,7 @@ export class UpdateMemberRoleHandler implements ICommandHandler<UpdateMemberRole
 
   private async identifyMember(organization: Organization, id: string): Promise<Member> {
     return await this.Asserter.assert(
-      this.memberRepo.findOne(
+      Member.findOne(
         { id, organization },
         {
           populate: ['accounts', 'organizationRoles.role', 'organizationRoles.organization'],
@@ -104,7 +93,7 @@ export class UpdateMemberRoleHandler implements ICommandHandler<UpdateMemberRole
     const roleCode = resolveMemberRoleCode(role);
 
     return await this.Asserter.assert(
-      this.roleRepo.findOne({ organization, code: roleCode }),
+      OrganizationRole.findOne({ organization, code: roleCode }),
       'ROLE_NOT_FOUND',
     );
   }
@@ -116,12 +105,13 @@ export class UpdateMemberRoleHandler implements ICommandHandler<UpdateMemberRole
       existing.role = role;
     }
     else {
-      const organizationRole = this.organizationRoleAssignmentRepo.create({
+      const organizationRole = OrganizationRoleAssignment.create({
         member,
         role,
         organization,
       });
-      this.em.persist(organizationRole);
+      organizationRole.persist();
     }
   }
 }
+

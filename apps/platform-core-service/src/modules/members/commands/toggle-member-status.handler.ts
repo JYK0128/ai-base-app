@@ -1,11 +1,9 @@
 import { Transactional } from '@mikro-orm/decorators/legacy';
-import { InjectRepository } from '@mikro-orm/nestjs';
-import { EntityManager } from '@mikro-orm/postgresql';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { AccountStatus, Member, MemberRepository, MemberStatus as DbMemberStatus, Organization, OrganizationRepository, OrganizationRoleAssignment, OrganizationRoleAssignmentRepository } from '@pkg/database';
+import { AccountStatus, Member, MemberStatus as DbMemberStatus, Organization, OrganizationRoleAssignment } from '@pkg/database';
 import { ClsService } from 'nestjs-cls';
 
-import type { MemberMutationResult } from '../members.types';
+import type { MemberOutputId } from '../members.types';
 import { ToggleMemberStatusCommand } from './toggle-member-status.command';
 import { ToggleMemberStatusAsserter } from './toggle-member-status.error';
 
@@ -14,20 +12,13 @@ export class ToggleMemberStatusHandler implements ICommandHandler<ToggleMemberSt
   private readonly Asserter = ToggleMemberStatusAsserter;
 
   constructor(
-    @InjectRepository(Organization)
-    private readonly organizationRepo: OrganizationRepository,
-    @InjectRepository(Member)
-    private readonly memberRepo: MemberRepository,
-    @InjectRepository(OrganizationRoleAssignment)
-    private readonly organizationRoleAssignmentRepo: OrganizationRoleAssignmentRepository,
-    private readonly em: EntityManager,
     private readonly cls: ClsService,
   ) {}
 
   @Transactional()
-  async execute(command: ToggleMemberStatusCommand): Promise<MemberMutationResult> {
+  async execute({ payload }: ToggleMemberStatusCommand): Promise<MemberOutputId> {
     const organization = await this.identifyOrganization();
-    const member = await this.identifyMember(organization, command.payload.id);
+    const member = await this.identifyMember(organization, payload.id);
     const requestedById = await this.identifyRequestUserId();
     await this.validateSelfMutation(member, requestedById);
     await this.validateLastOwner(member, organization);
@@ -43,7 +34,7 @@ export class ToggleMemberStatusHandler implements ICommandHandler<ToggleMemberSt
       const currentRoleAssignment = member.organizationRoles.getItems().find((r) => r.organization.id === organization.id);
 
       if (currentRoleAssignment?.role.code === 'OWNER') {
-        const activeOwnerCount = await this.organizationRoleAssignmentRepo.count({
+        const activeOwnerCount = await OrganizationRoleAssignment.count({
           organization,
           role: { code: 'OWNER' },
           member: { status: DbMemberStatus.ACTIVE },
@@ -64,7 +55,7 @@ export class ToggleMemberStatusHandler implements ICommandHandler<ToggleMemberSt
     }
 
     return await this.Asserter.assert(
-      this.organizationRepo.findOne({ id: organizationId }),
+      Organization.findOne({ id: organizationId }),
       'ORGANIZATION_NOT_FOUND',
     );
   }
@@ -81,7 +72,7 @@ export class ToggleMemberStatusHandler implements ICommandHandler<ToggleMemberSt
 
   private async identifyMember(organization: Organization, id: string): Promise<Member> {
     return await this.Asserter.assert(
-      this.memberRepo.findOne(
+      Member.findOne(
         { id, organization },
         {
           populate: ['accounts', 'organizationRoles.role', 'organizationRoles.organization'],
@@ -107,3 +98,4 @@ export class ToggleMemberStatusHandler implements ICommandHandler<ToggleMemberSt
     }
   }
 }
+

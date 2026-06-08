@@ -10,7 +10,7 @@ import { CancelInviteCommand,
          UpdateMemberRoleCommand } from './commands';
 import { InviteEmailEvent } from './events';
 import { MEMBERS_SERVICE_PATTERNS } from './members.contract';
-import type { CancelInviteInput, CreateInviteInput, GetInvitesInput, GetMemberInput, GetMembersInput, InviteMutationResult, ResendInviteInput, ReviveInviteInput, ToggleMemberStatusInput, UpdateMemberRoleInput } from './members.types';
+import type { CancelInviteInput, CreateInviteInput, GetInvitesInput, GetMemberInput, GetMembersInput, InviteOutputResult, ResendInviteInput, ReviveInviteInput, ToggleMemberStatusInput, UpdateMemberRoleInput } from './members.types';
 import { GetInvitesQuery, GetMemberQuery, GetMembersQuery } from './queries';
 
 @Controller()
@@ -94,7 +94,7 @@ export class MembersController {
     return this.commandBus.execute(new ReviveInviteCommand(data));
   }
 
-  private publishInviteEmail(result: InviteMutationResult): void {
+  private publishInviteEmail(result: InviteOutputResult): void {
     const attemptId = result.invite.metadata.mailDelivery?.attemptId;
 
     if (!attemptId) {
@@ -111,3 +111,4 @@ export class MembersController {
     }));
   }
 }
+

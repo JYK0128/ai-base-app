@@ -1,11 +1,11 @@
 import { randomUUID } from 'node:crypto';
 
-import { InjectRepository } from '@mikro-orm/nestjs';
+import { Transactional } from '@mikro-orm/decorators/legacy';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { MemberAccount, MemberAccountRepository, MemberInvite, MemberInviteMailDeliveryMetadata, MemberInviteMetadata, MemberInviteRepository, MemberInviteStatus, Organization, OrganizationRepository } from '@pkg/database';
+import { MemberAccount, MemberInvite, MemberInviteMailDeliveryMetadata, MemberInviteMetadata, MemberInviteStatus, Organization } from '@pkg/database';
 import { ClsService } from 'nestjs-cls';
 
-import type { InviteMutationResult } from '../members.types';
+import type { InviteOutputResult } from '../members.types';
 import { ResendInviteCommand } from './resend-invite.command';
 import { ResendInviteAsserter } from './resend-invite.error';
 
@@ -16,18 +16,13 @@ export class ResendInviteHandler implements ICommandHandler<ResendInviteCommand>
   private readonly Asserter = ResendInviteAsserter;
 
   constructor(
-    @InjectRepository(Organization)
-    private readonly organizationRepo: OrganizationRepository,
-    @InjectRepository(MemberAccount)
-    private readonly memberAccountRepo: MemberAccountRepository,
-    @InjectRepository(MemberInvite)
-    private readonly inviteRepo: MemberInviteRepository,
     private readonly cls: ClsService,
   ) {}
 
-  async execute(command: ResendInviteCommand): Promise<InviteMutationResult> {
+  @Transactional()
+  async execute({ payload }: ResendInviteCommand): Promise<InviteOutputResult> {
     const organization = await this.identifyOrganization();
-    const invite = await this.identifyInvite(organization, command.payload.id);
+    const invite = await this.identifyInvite(organization, payload.id);
     await this.validateInviteState(invite);
     const inviter = await this.identifyInviter();
     this.processResend(invite);
@@ -52,14 +47,14 @@ export class ResendInviteHandler implements ICommandHandler<ResendInviteCommand>
     }
 
     return await this.Asserter.assert(
-      this.organizationRepo.findOne({ id: organizationId }),
+      Organization.findOne({ id: organizationId }),
       'ORGANIZATION_NOT_FOUND',
     );
   }
 
   private async identifyInvite(organization: Organization, id: string): Promise<MemberInvite> {
     return await this.Asserter.assert(
-      this.inviteRepo.findOne({ id, organization }),
+      MemberInvite.findOne({ id, organization }),
       'INVITE_NOT_FOUND',
     );
   }
@@ -72,7 +67,7 @@ export class ResendInviteHandler implements ICommandHandler<ResendInviteCommand>
     }
 
     return await this.Asserter.assert(
-      this.memberAccountRepo.findOne(
+      MemberAccount.findOne(
         { id: requestedById },
         { populate: ['member'] },
       ),
@@ -100,3 +95,4 @@ export class ResendInviteHandler implements ICommandHandler<ResendInviteCommand>
     invite.metadata = metadata;
   }
 }
+

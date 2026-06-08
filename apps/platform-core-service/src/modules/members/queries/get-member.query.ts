@@ -1,5 +1,9 @@
-import type { GetMemberInput } from '../members.types';
+import { Query } from '@nestjs/cqrs';
 
-export class GetMemberQuery {
-  constructor(readonly payload: GetMemberInput) {}
+import type { GetMemberInput, MemberOutput } from '../members.types';
+
+export class GetMemberQuery extends Query<MemberOutput> {
+  constructor(readonly payload: GetMemberInput) {
+    super();
+  }
 }

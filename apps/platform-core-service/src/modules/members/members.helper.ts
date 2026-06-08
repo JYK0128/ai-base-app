@@ -2,7 +2,7 @@ import type { Loaded } from '@mikro-orm/core';
 import { type Member, type MemberInvite, MemberStatus as DbMemberStatus, type Organization, type OrganizationRoleAssignment } from '@pkg/database';
 
 import { resolveMailDeliveryStatusView } from '../mail/mail.helper';
-import type { InviteRecord, MemberRecord, MemberRole, MemberStatus } from './members.types';
+import type { InviteOutput, MemberOutput, MemberRole, MemberStatus } from './members.types';
 
 function normalizeEmail(value: string | undefined): string | undefined {
   const normalized = value?.trim().toLowerCase();
@@ -58,6 +58,7 @@ function getMemberName(member: Member): string {
   return member.name;
 }
 
+// biome-ignore lint/correctness/noUnusedVariables: keep for future usage
 function getMemberEmail(member: Member): string {
   return getPrimaryAccount(member).email;
 }
@@ -131,8 +132,8 @@ function getMemberStatus(member: Member): MemberStatus {
   return member.status === DbMemberStatus.ACTIVE ? 'ACTIVE' : 'INACTIVE';
 }
 
-function getInviteStatus(invite: MemberInvite): InviteRecord['inviteStatus'] {
-  return invite.status as InviteRecord['inviteStatus'];
+function getInviteStatus(invite: MemberInvite): InviteOutput['inviteStatus'] {
+  return invite.status as InviteOutput['inviteStatus'];
 }
 
 function getRoleCode(member: Member, organizationId: string, invite?: MemberInvite): string {
@@ -165,13 +166,13 @@ export function getLinkedMember(members: Member[], invite: MemberInvite): Member
   return members.find((member) => hasSharedEmail(getMemberEmailCandidates(member), inviteEmails));
 }
 
-export function buildMemberRecord(
+export function buildMemberOutput(
   member: Member,
   organization: Organization,
   requestedById: string,
   createdByEmailLookup: ReadonlyMap<string, string>,
   invite?: MemberInvite,
-): MemberRecord {
+): MemberOutput {
   const roleCode = getRoleCode(member, organization.id, invite);
   const createdBy = getCreatedBy(member, invite, createdByEmailLookup);
   const mailDelivery = resolveMailDeliveryStatusView(invite);
@@ -191,13 +192,13 @@ export function buildMemberRecord(
   };
 }
 
-export function buildInviteRecord(
+export function buildInviteOutput(
   invite: MemberInvite,
   organization: Organization,
   requestedById: string,
   createdByEmailLookup: ReadonlyMap<string, string>,
   member?: Member,
-): InviteRecord {
+): InviteOutput {
   const linkedMember = member && hasSharedEmail(getMemberEmailCandidates(member), getInviteEmailCandidates(invite))
     ? member
     : undefined;
@@ -230,14 +231,14 @@ export function buildInviteRecord(
   };
 }
 
-export function filterMemberRecords(
-  records: MemberRecord[],
+export function filterMemberOutputs(
+  records: MemberOutput[],
   filters: {
     search?: string
     status?: MemberStatus
     role?: MemberRole
   },
-): MemberRecord[] {
+): MemberOutput[] {
   const search = filters.search ? normalizeSearchValue(filters.search) : '';
 
   return records.filter((record) => {
@@ -262,14 +263,14 @@ export function filterMemberRecords(
   });
 }
 
-export function filterInviteRecords(
-  records: InviteRecord[],
+export function filterInviteOutputs(
+  records: InviteOutput[],
   filters: {
     search?: string
-    inviteStatus?: InviteRecord['inviteStatus']
+    inviteStatus?: InviteOutput['inviteStatus']
     role?: MemberRole
   },
-): InviteRecord[] {
+): InviteOutput[] {
   const search = filters.search ? normalizeSearchValue(filters.search) : '';
 
   return records.filter((record) => {
@@ -298,3 +299,4 @@ export function filterInviteRecords(
 export function sortByRecentDate<T extends { invitedAt: string }>(records: T[]): T[] {
   return [...records].sort((a, b) => new Date(b.invitedAt).getTime() - new Date(a.invitedAt).getTime());
 }
+

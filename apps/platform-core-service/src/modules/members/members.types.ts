@@ -8,7 +8,7 @@ export type MemberStatus = 'ACTIVE' | 'INACTIVE';
 
 export type InviteStatus = 'PENDING' | 'CANCELED' | 'ACCEPTED' | 'REJECTED';
 
-export interface MemberRecord extends Pick<Member, 'id' | 'name'> {
+export interface MemberOutput extends Pick<Member, 'id' | 'name'> {
   email: string
   role: MemberRole
   status: MemberStatus
@@ -23,14 +23,14 @@ export interface MemberRecord extends Pick<Member, 'id' | 'name'> {
   mailDeliveryFailedAt?: string
 }
 
-export interface InviteRecord extends MemberRecord {
+export interface InviteOutput extends MemberOutput {
   inviteStatus: InviteStatus
   expiresAt: string
 }
 
-export type MemberMutationResult = Pick<Member, 'id'>;
+export type MemberOutputId = Pick<Member, 'id'>;
 
-export interface InviteMutationResult {
+export interface InviteOutputResult {
   invite: MemberInvite
   organization: Organization
   inviter: MemberAccount
