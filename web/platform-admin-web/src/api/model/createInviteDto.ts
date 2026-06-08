@@ -8,12 +8,12 @@
 import type { CreateInviteDtoRole } from './createInviteDtoRole';
 
 export interface CreateInviteDto {
-  /** 이름 */
+  /** 초대할 사람 이름 */
   name: string;
-  /** 이메일 */
+  /** 초대할 사람 이메일 */
   email: string;
   /** 부여할 역할 */
   role: CreateInviteDtoRole;
-  /** 메모 */
+  /** 메모/메모사항 */
   note?: string;
 }

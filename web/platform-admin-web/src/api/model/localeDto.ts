@@ -19,5 +19,5 @@ export interface LocaleDto {
   /** 활성화 여부 */
   isActive: boolean;
   /** 정렬 순서 */
-  sortOrder?: number;
+  sortOrder: number;
 }

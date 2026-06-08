@@ -16,8 +16,12 @@ export interface AnnouncementResponseDto {
   id: string;
   /** 공지사항 제목 */
   title: string;
-  /** 공지사항 내용 */
+  /** 공지사항 본문 내용 */
   content: string;
+  /** 생성 일시 */
+  createdAt: string;
+  /** 수정 일시 */
+  updatedAt: string;
   /** 공지 분류 */
   category: AnnouncementResponseDtoCategory;
   /** 공지 대상 */
@@ -26,22 +30,17 @@ export interface AnnouncementResponseDto {
   channel: AnnouncementResponseDtoChannel;
   /** 공지 우선순위 */
   priority: AnnouncementResponseDtoPriority;
+  /** 상단 고정 여부 */
+  pinned: boolean;
+  /** 게시 확정 일시 */
+  publishedAt?: string;
+  /** 게시 시작일 */
+  startAt?: string;
+  /** 게시 종료일 */
+  endAt?: string;
   /** 게시 상태 */
   status: AnnouncementResponseDtoStatus;
   /** 게시 확정 여부 */
   isPublished: boolean;
-  /** 상단 고정 여부 */
-  pinned: boolean;
-  /** 작성자 */
-  author: string;
-  /** 게시 확정 일시 */
-  publishedAt: string;
-  /** 게시 시작일 */
-  startAt: string;
-  /** 게시 종료일 */
-  endAt: string;
-  /** 생성 일시 */
-  createdAt: string;
-  /** 수정 일시 */
-  updatedAt: string;
 }
+

@@ -7,7 +7,7 @@
  */
 
 /**
- * 리소스 범위
+ * 리소스 관리 범위
  */
 export type ResourceResponseDtoScope = typeof ResourceResponseDtoScope[keyof typeof ResourceResponseDtoScope];
 

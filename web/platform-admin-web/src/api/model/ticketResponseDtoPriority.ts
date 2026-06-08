@@ -7,7 +7,7 @@
  */
 
 /**
- * 우선순위
+ * 티켓 우선순위
  */
 export type TicketResponseDtoPriority = typeof TicketResponseDtoPriority[keyof typeof TicketResponseDtoPriority];
 

@@ -31,7 +31,7 @@ class ErrorInfoBase implements ErrorInfoProps {
       : typeof init.message === 'string' && init.message.length > 0
         ? init.message
         : 'An unexpected error occurred';
-    this.details = init.details == null
+    this.details = init.details === null || init.details === undefined
       ? null
       : init.details;
     this.status = typeof init.status === 'number' && Number.isFinite(init.status)

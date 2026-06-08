@@ -5,8 +5,6 @@
  * The AI Base App Gateway API documentation
  * OpenAPI spec version: 1.0
  */
-import type { AuthAccountInfoDtoLastLoginAt } from './authAccountInfoDtoLastLoginAt';
-import type { AuthAccountInfoDtoLockUntil } from './authAccountInfoDtoLockUntil';
 import type { AuthAccountInfoDtoStatus } from './authAccountInfoDtoStatus';
 
 export interface AuthAccountInfoDto {
@@ -16,18 +14,12 @@ export interface AuthAccountInfoDto {
   email: string;
   /** 계정 상태 */
   status: AuthAccountInfoDtoStatus;
-  /**
-     * 최근 로그인 일시
-     * @nullable
-     */
-  lastLoginAt: AuthAccountInfoDtoLastLoginAt;
+  /** 마지막 로그인 일시 */
+  lastLoginAt?: string;
   /** 비밀번호 만료 일시 */
   passwordExpiresAt: string;
-  /**
-     * 계정 잠금 해제 시각
-     * @nullable
-     */
-  lockUntil: AuthAccountInfoDtoLockUntil;
+  /** 잠금 해제 일시 */
+  lockUntil?: string;
   /** 휴면 여부 */
   isDormant: boolean;
   /** 비밀번호 만료 여부 */

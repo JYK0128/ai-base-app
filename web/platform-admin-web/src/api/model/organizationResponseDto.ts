@@ -10,12 +10,12 @@ import type { OrganizationResponseDtoStatus } from './organizationResponseDtoSta
 export interface OrganizationResponseDto {
   /** 조직 식별자 */
   id: string;
-  /** 조직명 */
+  /** 조직 이름 */
   name: string;
+  /** 생성 일시 */
+  createdAt: string;
   /** 서브도메인 */
   subdomain: string;
   /** 조직 상태 */
   status: OrganizationResponseDtoStatus;
-  /** 생성 일시 */
-  createdAt: string;
 }

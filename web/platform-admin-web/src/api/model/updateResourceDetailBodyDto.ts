@@ -18,6 +18,6 @@ export interface UpdateResourceDetailBodyDto {
   name: string;
   /** 리소스 경로 */
   path?: string;
-  /** 아이콘 이름 */
+  /** 아이콘 */
   icon?: string;
 }

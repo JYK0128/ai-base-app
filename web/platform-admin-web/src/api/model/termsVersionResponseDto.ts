@@ -10,14 +10,14 @@ import type { TermsVersionResponseDtoStatus } from './termsVersionResponseDtoSta
 export interface TermsVersionResponseDto {
   /** 약관 버전 식별자 */
   id: string;
-  /** 버전 라벨 */
-  versionLabel: string;
-  /** 약관 본문 */
+  /** 약관 내용 */
   content: string;
   /** 체크섬 */
   checksum: string;
   /** 버전 상태 */
   status: TermsVersionResponseDtoStatus;
-  /** 효력 시각 */
+  /** 효력 일시 */
   effectiveAt: string;
+  /** 버전 라벨 */
+  versionLabel: string;
 }

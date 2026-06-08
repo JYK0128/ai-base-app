@@ -12,9 +12,9 @@ export interface CreateTermsVersionDto {
   termsDocumentId: string;
   /** 약관 버전 라벨 */
   label: string;
-  /** 약관 본문 */
+  /** 약관 버전 본문 */
   content: string;
-  /** 효력 시각 */
+  /** 발효 시점 */
   effectiveAt: string;
   /** 버전 상태 */
   status: CreateTermsVersionDtoStatus;

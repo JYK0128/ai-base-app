@@ -7,7 +7,7 @@
  */
 
 export interface MemberTermsConsentResponseDto {
-  /** 동의 이력 식별자 */
+  /** 동의 식별자 */
   id: string;
   /** 동의 여부 */
   agreed: boolean;

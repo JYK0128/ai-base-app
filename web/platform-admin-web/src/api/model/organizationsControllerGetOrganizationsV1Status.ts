@@ -11,7 +11,7 @@ export type OrganizationsControllerGetOrganizationsV1Status = typeof Organizatio
 
 export const OrganizationsControllerGetOrganizationsV1Status = {
   PENDING: 'PENDING',
-  APPROVED: 'APPROVED',
+  ACTIVE: 'ACTIVE',
+  INACTIVE: 'INACTIVE',
   REJECTED: 'REJECTED',
-  DORMANT: 'DORMANT',
 } as const;

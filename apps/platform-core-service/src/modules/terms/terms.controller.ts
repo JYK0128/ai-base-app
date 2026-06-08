@@ -87,7 +87,7 @@ export class TermsController {
       data.termsDocumentId,
       data.label,
       data.content,
-      data.effectiveAt,
+      new Date(data.effectiveAt),
       data.status,
     ));
   }

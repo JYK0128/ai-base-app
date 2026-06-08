@@ -10,7 +10,7 @@ import type { AuthMemberInfoDtoStatus } from './authMemberInfoDtoStatus';
 export interface AuthMemberInfoDto {
   /** 멤버 식별자 */
   id: string;
-  /** 이름 */
+  /** 멤버 이름 */
   name: string;
   /** 멤버 상태 */
   status: AuthMemberInfoDtoStatus;

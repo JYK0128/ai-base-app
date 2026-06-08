@@ -16,7 +16,7 @@ keys?: string;
  */
 namespace?: string;
 /**
- * 배치 조회할 로케일
+ * 배치 조회할 로케일 목록
  */
 locale?: string;
 };

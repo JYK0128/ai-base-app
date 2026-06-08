@@ -10,22 +10,19 @@ import type { TermsDocumentResponseDtoStatus } from './termsDocumentResponseDtoS
 export interface TermsDocumentResponseDto {
   /** 약관 문서 식별자 */
   id: string;
+  /** 약관 코드 */
+  code: string;
+  /** 약관 제목 */
+  title: string;
+  /** 필수 동의 여부 */
+  required: boolean;
+  /** 폐기 일시 */
+  deprecatedAt?: string;
+  /** 약관 상태 */
+  status: TermsDocumentResponseDtoStatus;
   /**
      * 조직 식별자
      * @nullable
      */
   organizationId?: string | null;
-  /** 약관 문서 코드 */
-  code: string;
-  /** 약관 제목 */
-  title: string;
-  /** 필수 약관 여부 */
-  required: boolean;
-  /**
-     * 폐기 시점
-     * @nullable
-     */
-  deprecatedAt?: string | null;
-  /** 문서 상태 */
-  status: TermsDocumentResponseDtoStatus;
 }

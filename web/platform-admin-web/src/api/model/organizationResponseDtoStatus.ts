@@ -14,7 +14,7 @@ export type OrganizationResponseDtoStatus = typeof OrganizationResponseDtoStatus
 
 export const OrganizationResponseDtoStatus = {
   PENDING: 'PENDING',
-  APPROVED: 'APPROVED',
+  ACTIVE: 'ACTIVE',
+  INACTIVE: 'INACTIVE',
   REJECTED: 'REJECTED',
-  DORMANT: 'DORMANT',
 } as const;

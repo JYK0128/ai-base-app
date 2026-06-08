@@ -13,14 +13,18 @@ import type { MemberResponseDtoStatus } from './memberResponseDtoStatus';
 export interface MemberResponseDto {
   /** 멤버 식별자 */
   id: string;
-  /** 이름 */
+  /** 멤버 이름 */
   name: string;
+  /** 멤버 상태 */
+  status: MemberResponseDtoStatus;
+  /** 생성자 식별자 */
+  createdBy?: string;
+  /** 메모 */
+  note?: string;
   /** 이메일 */
   email: string;
   /** 권한 */
   role: MemberResponseDtoRole;
-  /** 멤버 상태 */
-  status: MemberResponseDtoStatus;
   /**
      * 최근 로그인
      * @nullable
@@ -28,10 +32,6 @@ export interface MemberResponseDto {
   lastLoginAt: MemberResponseDtoLastLoginAt;
   /** 초대 일시 (생성 시각 기준) */
   invitedAt: string;
-  /** 초대한 사람 */
-  createdBy?: string;
-  /** 메모 */
-  note?: string;
   /** 메일 전송 상태 */
   mailDeliveryStatus?: MemberResponseDtoMailDeliveryStatus;
   /** 메일 큐 적재 시각 */

@@ -27,8 +27,10 @@ import type {
 import type {
   AgreeTermsDto,
   AnnouncementsControllerCreateAnnouncementV1200,
+  AnnouncementsControllerDeleteAnnouncementV1200,
   AnnouncementsControllerGetAnnouncementsV1200,
   AnnouncementsControllerGetAnnouncementsV1Params,
+  AnnouncementsControllerUpdateAnnouncementV1200,
   ApiResponse,
   AuthControllerGetMeV1200,
   AuthControllerLoginV1200,
@@ -130,6 +132,10 @@ import announcementsControllerGetAnnouncementsV1Mutator from '../lib/axios';
 import type { ErrorType as AnnouncementsControllerGetAnnouncementsV1ErrorType } from '../lib/axios';
 import announcementsControllerCreateAnnouncementV1Mutator from '../lib/axios';
 import type { ErrorType as AnnouncementsControllerCreateAnnouncementV1ErrorType } from '../lib/axios';
+import announcementsControllerUpdateAnnouncementV1Mutator from '../lib/axios';
+import type { ErrorType as AnnouncementsControllerUpdateAnnouncementV1ErrorType } from '../lib/axios';
+import announcementsControllerDeleteAnnouncementV1Mutator from '../lib/axios';
+import type { ErrorType as AnnouncementsControllerDeleteAnnouncementV1ErrorType } from '../lib/axios';
 import i18nControllerGetLocalesV1Mutator from '../lib/axios';
 import type { ErrorType as I18nControllerGetLocalesV1ErrorType } from '../lib/axios';
 import i18nControllerGetTranslationV1Mutator from '../lib/axios';
@@ -793,6 +799,135 @@ export const useAnnouncementsControllerCreateAnnouncementV1 = <TError = Announce
         TContext
       > => {
       return useMutation(getAnnouncementsControllerCreateAnnouncementV1MutationOptions(options), queryClient);
+    }
+
+/**
+ * 공지사항을 수정합니다.
+ * @summary 공지사항 수정
+ */
+export const announcementsControllerUpdateAnnouncementV1 = (
+    id: string,
+    createAnnouncementDto: CreateAnnouncementDto,
+ signal?: AbortSignal
+) => {
+
+
+      return announcementsControllerUpdateAnnouncementV1Mutator<AnnouncementsControllerUpdateAnnouncementV1200>(
+      {url: `/api/v1/announcements/${id}`, method: 'PUT',
+      headers: {'Content-Type': 'application/json', },
+      data: createAnnouncementDto, signal
+    },
+      );
+    }
+
+
+
+export const getAnnouncementsControllerUpdateAnnouncementV1MutationOptions = <TError = AnnouncementsControllerUpdateAnnouncementV1ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof announcementsControllerUpdateAnnouncementV1>>, TError,{id: string;data: CreateAnnouncementDto}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof announcementsControllerUpdateAnnouncementV1>>, TError,{id: string;data: CreateAnnouncementDto}, TContext> => {
+
+const mutationKey = ['announcementsControllerUpdateAnnouncementV1'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof announcementsControllerUpdateAnnouncementV1>>, {id: string;data: CreateAnnouncementDto}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  announcementsControllerUpdateAnnouncementV1(id,data,)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AnnouncementsControllerUpdateAnnouncementV1MutationResult = NonNullable<Awaited<ReturnType<typeof announcementsControllerUpdateAnnouncementV1>>>
+    export type AnnouncementsControllerUpdateAnnouncementV1MutationBody = CreateAnnouncementDto
+    export type AnnouncementsControllerUpdateAnnouncementV1MutationError = AnnouncementsControllerUpdateAnnouncementV1ErrorType<unknown>
+
+    /**
+ * @summary 공지사항 수정
+ */
+export const useAnnouncementsControllerUpdateAnnouncementV1 = <TError = AnnouncementsControllerUpdateAnnouncementV1ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof announcementsControllerUpdateAnnouncementV1>>, TError,{id: string;data: CreateAnnouncementDto}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof announcementsControllerUpdateAnnouncementV1>>,
+        TError,
+        {id: string;data: CreateAnnouncementDto},
+        TContext
+      > => {
+      return useMutation(getAnnouncementsControllerUpdateAnnouncementV1MutationOptions(options), queryClient);
+    }
+
+/**
+ * 공지사항을 삭제합니다.
+ * @summary 공지사항 삭제
+ */
+export const announcementsControllerDeleteAnnouncementV1 = (
+    id: string,
+ signal?: AbortSignal
+) => {
+
+
+      return announcementsControllerDeleteAnnouncementV1Mutator<AnnouncementsControllerDeleteAnnouncementV1200>(
+      {url: `/api/v1/announcements/${id}`, method: 'DELETE', signal
+    },
+      );
+    }
+
+
+
+export const getAnnouncementsControllerDeleteAnnouncementV1MutationOptions = <TError = AnnouncementsControllerDeleteAnnouncementV1ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof announcementsControllerDeleteAnnouncementV1>>, TError,{id: string}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof announcementsControllerDeleteAnnouncementV1>>, TError,{id: string}, TContext> => {
+
+const mutationKey = ['announcementsControllerDeleteAnnouncementV1'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof announcementsControllerDeleteAnnouncementV1>>, {id: string}> = (props) => {
+          const {id} = props ?? {};
+
+          return  announcementsControllerDeleteAnnouncementV1(id,)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AnnouncementsControllerDeleteAnnouncementV1MutationResult = NonNullable<Awaited<ReturnType<typeof announcementsControllerDeleteAnnouncementV1>>>
+
+    export type AnnouncementsControllerDeleteAnnouncementV1MutationError = AnnouncementsControllerDeleteAnnouncementV1ErrorType<unknown>
+
+    /**
+ * @summary 공지사항 삭제
+ */
+export const useAnnouncementsControllerDeleteAnnouncementV1 = <TError = AnnouncementsControllerDeleteAnnouncementV1ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof announcementsControllerDeleteAnnouncementV1>>, TError,{id: string}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof announcementsControllerDeleteAnnouncementV1>>,
+        TError,
+        {id: string},
+        TContext
+      > => {
+      return useMutation(getAnnouncementsControllerDeleteAnnouncementV1MutationOptions(options), queryClient);
     }
 
 /**

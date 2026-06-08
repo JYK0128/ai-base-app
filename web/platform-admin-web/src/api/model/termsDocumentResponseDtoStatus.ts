@@ -7,7 +7,7 @@
  */
 
 /**
- * 문서 상태
+ * 약관 상태
  */
 export type TermsDocumentResponseDtoStatus = typeof TermsDocumentResponseDtoStatus[keyof typeof TermsDocumentResponseDtoStatus];
 

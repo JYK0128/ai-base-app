@@ -3,7 +3,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { Megaphone, Pin, Plus } from 'lucide-react';
 import { useState } from 'react';
 
-import { useAnnouncementsControllerCreateAnnouncementV1, useAnnouncementsControllerGetAnnouncementsV1 } from '../../../../api/endpoints';
+import { useAnnouncementsControllerCreateAnnouncementV1, useAnnouncementsControllerDeleteAnnouncementV1, useAnnouncementsControllerGetAnnouncementsV1, useAnnouncementsControllerUpdateAnnouncementV1 } from '../../../../api/endpoints';
 import { ANNOUNCEMENT_AUDIENCE_LABELS, ANNOUNCEMENT_CATEGORY_LABELS, ANNOUNCEMENT_STATUS_LABELS, type AnnouncementAudience, type AnnouncementEditorSeed, type AnnouncementItem, type AnnouncementStatus, buildAnnouncementPreviewText, createBlankAnnouncement, formatDateTime } from '../-announcements.shared';
 import { AnnouncementEditorModal } from '../-modals/AnnouncementEditorModal';
 import { AnnouncementPreviewModal } from '../-modals/AnnouncementPreviewModal';
@@ -40,7 +40,6 @@ const ANNOUNCEMENT_COLUMNS = [
             </button>
           </div>
           <p className="line-clamp-2 text-xs text-slate-500">{buildAnnouncementPreviewText(row.original.content)}</p>
-          <p className="text-[11px] text-slate-400">{row.original.author}</p>
         </div>
       );
     },
@@ -136,6 +135,28 @@ export function AnnouncementListTab() {
     },
   });
 
+  const updateAnnouncementMutation = useAnnouncementsControllerUpdateAnnouncementV1({
+    mutation: {
+      onSuccess: () => {
+        void queryClient.invalidateQueries({ queryKey: announcementsQuery.queryKey });
+      },
+      onError: () => {
+        toast.error('공지사항 수정에 실패했습니다.');
+      },
+    },
+  });
+
+  const deleteAnnouncementMutation = useAnnouncementsControllerDeleteAnnouncementV1({
+    mutation: {
+      onSuccess: () => {
+        void queryClient.invalidateQueries({ queryKey: announcementsQuery.queryKey });
+      },
+      onError: () => {
+        toast.error('공지사항 삭제에 실패했습니다.');
+      },
+    },
+  });
+
   const handleOpenCreateEditor = () => {
     const nextAnnouncement = createBlankAnnouncement();
     setDraftAnnouncement(nextAnnouncement);
@@ -152,7 +173,26 @@ export function AnnouncementListTab() {
   };
 
   const handleSaveAnnouncement = async (announcement: Parameters<typeof saveAnnouncementMutation.mutateAsync>[0]['data']) => {
-    await saveAnnouncementMutation.mutateAsync({ data: announcement });
+    if (draftAnnouncement?.id) {
+      await updateAnnouncementMutation.mutateAsync({ id: draftAnnouncement.id, data: announcement });
+    }
+    else {
+      await saveAnnouncementMutation.mutateAsync({ data: announcement });
+    }
+  };
+
+  const handleDeleteAnnouncement = async (id: string) => {
+    if (confirm('정말로 이 공지사항을 삭제하시겠습니까?')) {
+      try {
+        await deleteAnnouncementMutation.mutateAsync({ id });
+        toast.success('공지사항이 삭제되었습니다.');
+        setPreviewOpen(false);
+        setPreviewAnnouncement(null);
+      }
+      catch {
+        // Parent mutation handles error toast
+      }
+    }
   };
 
   const handleOpenPreview = (announcement: AnnouncementItem) => {
@@ -210,8 +250,8 @@ export function AnnouncementListTab() {
         <DataTable
           columns={ANNOUNCEMENT_COLUMNS}
           data={announcements}
-          filterColumns={['title', 'content', 'author', 'category', 'audience', 'status']}
-          filterPlaceholder="제목, 내용, 작성자, 분류, 대상로 검색"
+          filterColumns={['title', 'content', 'category', 'audience', 'status']}
+          filterPlaceholder="제목, 내용, 분류, 대상으로 검색"
           meta={metaValue}
         />
       </div>
@@ -235,6 +275,7 @@ export function AnnouncementListTab() {
             open={previewOpen}
             onOpenChange={handlePreviewOpenChange}
             onEdit={handleOpenEdit}
+            onDelete={handleDeleteAnnouncement}
           />
         )
         : null}

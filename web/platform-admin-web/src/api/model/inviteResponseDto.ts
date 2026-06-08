@@ -14,14 +14,18 @@ import type { InviteResponseDtoStatus } from './inviteResponseDtoStatus';
 export interface InviteResponseDto {
   /** 멤버 식별자 */
   id: string;
-  /** 이름 */
+  /** 멤버 이름 */
   name: string;
+  /** 멤버 상태 */
+  status: InviteResponseDtoStatus;
+  /** 생성자 식별자 */
+  createdBy?: string;
+  /** 메모 */
+  note?: string;
   /** 이메일 */
   email: string;
   /** 권한 */
   role: InviteResponseDtoRole;
-  /** 멤버 상태 */
-  status: InviteResponseDtoStatus;
   /**
      * 최근 로그인
      * @nullable
@@ -29,10 +33,6 @@ export interface InviteResponseDto {
   lastLoginAt: InviteResponseDtoLastLoginAt;
   /** 초대 일시 (생성 시각 기준) */
   invitedAt: string;
-  /** 초대한 사람 */
-  createdBy?: string;
-  /** 메모 */
-  note?: string;
   /** 메일 전송 상태 */
   mailDeliveryStatus?: InviteResponseDtoMailDeliveryStatus;
   /** 메일 큐 적재 시각 */
@@ -43,7 +43,7 @@ export interface InviteResponseDto {
   mailDeliveryFailedAt?: string;
   /** 현재 사용자 여부 */
   isMe: boolean;
-  /** 만료 일시 */
+  /** 초대 만료 시각 */
   expiresAt: string;
   /** 초대 상태 */
   inviteStatus: InviteResponseDtoInviteStatus;

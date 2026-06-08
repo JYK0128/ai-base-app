@@ -17,15 +17,15 @@ export interface ResourceResponseDto {
   name: string;
   /** 리소스 유형 */
   type: ResourceResponseDtoType;
-  /** 리소스 범위 */
+  /** 리소스 관리 범위 */
   scope: ResourceResponseDtoScope;
-  /** 경로 */
+  /** 리소스 경로 */
   path?: string;
-  /** 아이콘 이름 */
+  /** 아이콘 */
   icon?: string;
   /** 정렬 순서 */
   sortOrder?: number;
-  /** 허용 액션 목록 */
+  /** 리소스 액션 목록 */
   actions: string[];
   /** 제약 조건 */
   constraint?: string;

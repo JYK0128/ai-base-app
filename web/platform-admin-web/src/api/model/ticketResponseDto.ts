@@ -11,16 +11,16 @@ import type { TicketResponseDtoStatus } from './ticketResponseDtoStatus';
 export interface TicketResponseDto {
   /** 티켓 식별자 */
   id: string;
-  /** 조직 식별자 */
-  organizationId: string;
   /** 티켓 제목 */
   title: string;
   /** 티켓 내용 */
   content: string;
   /** 티켓 상태 */
   status: TicketResponseDtoStatus;
-  /** 우선순위 */
+  /** 티켓 우선순위 */
   priority: TicketResponseDtoPriority;
   /** 생성 일시 */
   createdAt: string;
+  /** 조직 식별자 */
+  organizationId: string;
 }

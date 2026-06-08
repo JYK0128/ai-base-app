@@ -11,9 +11,10 @@ interface AnnouncementPreviewModalProps {
   readonly open: boolean
   readonly onOpenChange: (open: boolean) => void
   readonly onEdit: (announcement: AnnouncementItem) => void
+  readonly onDelete: (id: string) => void | Promise<void>
 }
 
-export function AnnouncementPreviewModal({ announcement, open, onOpenChange, onEdit }: AnnouncementPreviewModalProps) {
+export function AnnouncementPreviewModal({ announcement, open, onOpenChange, onEdit, onDelete }: AnnouncementPreviewModalProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="grid h-[85vh] w-full grid-rows-[auto_1fr_auto] overflow-hidden bg-white p-6 sm:max-w-5xl!">
@@ -66,10 +67,6 @@ export function AnnouncementPreviewModal({ announcement, open, onOpenChange, onE
                   </div>
                 </div>
                 <div className="space-y-1">
-                  <div className="text-[11px] uppercase tracking-[0.2em] text-slate-400">작성자</div>
-                  <div>{announcement.author}</div>
-                </div>
-                <div className="space-y-1">
                   <div className="text-[11px] uppercase tracking-[0.2em] text-slate-400">수정 시각</div>
                   <div className="font-mono text-xs text-slate-700">{formatDateTime(announcement.updatedAt)}</div>
                 </div>
@@ -87,13 +84,20 @@ export function AnnouncementPreviewModal({ announcement, open, onOpenChange, onE
           </div>
         </div>
 
-        <DialogFooter className="border-t border-slate-200 pt-3">
-          <Button type="button" variant="outline" onClick={() => onEdit(announcement)}>
-            수정
-          </Button>
-          <Button type="button" onClick={() => onOpenChange(false)}>
-            닫기
-          </Button>
+        <DialogFooter className="flex border-t border-slate-200 pt-3 justify-between items-center w-full">
+          <div>
+            <Button type="button" variant="destructive" onClick={() => { void onDelete(announcement.id); }}>
+              삭제
+            </Button>
+          </div>
+          <div className="flex gap-2">
+            <Button type="button" variant="outline" onClick={() => onEdit(announcement)}>
+              수정
+            </Button>
+            <Button type="button" onClick={() => onOpenChange(false)}>
+              닫기
+            </Button>
+          </div>
         </DialogFooter>
       </DialogContent>
     </Dialog>

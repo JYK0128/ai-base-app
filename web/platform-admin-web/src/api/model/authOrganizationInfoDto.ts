@@ -12,7 +12,7 @@ export interface AuthOrganizationInfoDto {
   id: string;
   /** 조직 코드 */
   code: string;
-  /** 조직명 */
+  /** 조직 이름 */
   name: string;
   /** 조직 이메일 */
   email: string;

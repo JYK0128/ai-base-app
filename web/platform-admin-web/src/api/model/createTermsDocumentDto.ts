@@ -8,11 +8,11 @@
 import type { CreateTermsDocumentDtoScope } from './createTermsDocumentDtoScope';
 
 export interface CreateTermsDocumentDto {
-  /** 약관 문서 코드 */
+  /** 약관 코드 */
   code: string;
-  /** 약관 문서 제목 */
+  /** 약관 제목 */
   title: string;
-  /** 필수 약관 여부 */
+  /** 필수 동의 여부 */
   required: boolean;
   /** 생성 scope */
   scope: CreateTermsDocumentDtoScope;

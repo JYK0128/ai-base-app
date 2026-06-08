@@ -15,7 +15,7 @@ export interface CreateAnnouncementDto {
   id?: string;
   /** 공지사항 제목 */
   title: string;
-  /** 공지사항 내용 */
+  /** 공지사항 본문 */
   content: string;
   /** 공지 분류 */
   category?: CreateAnnouncementDtoCategory;

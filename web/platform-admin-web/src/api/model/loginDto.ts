@@ -7,7 +7,7 @@
  */
 
 export interface LoginDto {
-  /** 관리자 이메일 */
+  /** 이메일 주소 */
   email: string;
   /** 비밀번호 */
   password: string;
