@@ -6,18 +6,20 @@ import { build, context } from 'esbuild';
 import { swcPlugin } from 'esbuild-plugin-swc';
 
 const OUTDIR = 'dist';
+const isWatch = process.argv.includes('--watch');
 
 /** @type {import('esbuild').BuildOptions} */
 const sharedOptions = {
   entryPoints: [
     'src/index.ts',
-    'src/domains/index.ts',
   ],
   bundle: true,
   sourcemap: true,
   platform: 'node',
   target: 'es2022',
   packages: 'external',
+  outbase: 'src',
+  logLevel: 'info',
   plugins: [
     swcPlugin({
       jsc: {
@@ -38,8 +40,6 @@ const sharedOptions = {
   ],
 };
 
-const isWatch = process.argv.includes('--watch');
-
 /**
  * DTS Rolling using Programmatic API
  */
@@ -47,15 +47,22 @@ function generateTypes() {
   console.log('[dts] rolling up type declarations...');
 
   const entries = [
-    { filePath: './src/index.ts', outFile: 'index.d.ts' },
-    { filePath: './src/domains/index.ts', outFile: 'domains/index.d.ts' },
+    {
+      filePath: './src/index.ts',
+      outFile: 'index.d.ts',
+    },
   ];
 
   try {
     const bundles = generateDtsBundle(
       entries.map((entry) => ({
         filePath: entry.filePath,
-        output: { noCheck: true },
+        output: {
+          inlineDeclareGlobals: true,
+          inlineDeclareExternals: true,
+
+          noCheck: true,
+        },
       })),
       { preferredConfigPath: './tsconfig.app.json' },
     );
@@ -67,8 +74,8 @@ function generateTypes() {
 
     console.log('[dts] types generated successfully.');
   }
-  catch (err) {
-    console.error('[dts] failed to generate types:', err);
+  catch (error) {
+    console.error('[dts] failed to generate types:', error);
     process.exit(1);
   }
 }
@@ -98,20 +105,19 @@ async function main() {
     const cjsCtx = await context(cjsOptions);
     await Promise.all([esmCtx.watch(), cjsCtx.watch()]);
     console.log('[esbuild] watching for changes...');
+    return;
   }
-  else {
-    console.log('[esbuild] building...');
-    await Promise.all([
-      build(esmOptions),
-      build(cjsOptions),
-    ]);
 
-    generateTypes();
-    console.log('[build] all tasks complete.');
-  }
+  console.log('[esbuild] building...');
+  await Promise.all([
+    build(esmOptions),
+    build(cjsOptions),
+  ]);
+  generateTypes();
+  console.log('[build] all tasks complete.');
 }
 
-main().catch((err) => {
-  console.error(err);
+main().catch((error) => {
+  console.error(error);
   process.exit(1);
 });

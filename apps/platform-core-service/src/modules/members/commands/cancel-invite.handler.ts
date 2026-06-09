@@ -1,9 +1,10 @@
 import { Transactional } from '@mikro-orm/decorators/legacy';
+import { EntityManager } from '@mikro-orm/postgresql';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { MemberInvite, MemberInviteMetadata, MemberInviteStatus, Organization } from '@pkg/database';
+import { MemberInvite, MemberInviteStatus, Organization } from '@pkg/database';
 import { ClsService } from 'nestjs-cls';
 
-import type { MemberOutputId } from '../members.types';
+import type { InviteIdRecord } from '../members.contract';
 import { CancelInviteCommand } from './cancel-invite.command';
 import { CancelInviteAsserter } from './cancel-invite.error';
 
@@ -12,15 +13,16 @@ export class CancelInviteHandler implements ICommandHandler<CancelInviteCommand>
   private readonly Asserter = CancelInviteAsserter;
 
   constructor(
+    private readonly em: EntityManager,
     private readonly cls: ClsService,
-  ) {}
+  ) { }
 
   @Transactional()
-  async execute({ payload }: CancelInviteCommand): Promise<MemberOutputId> {
+  async execute({ payload }: CancelInviteCommand): Promise<InviteIdRecord> {
+    const invite = await this.identifyInvite(payload.id);
     const organization = await this.identifyOrganization();
-    const invite = await this.identifyInvite(organization, payload.id);
-    await this.validateInviteState(invite);
-    this.processCancellation(invite);
+
+    await this.processCancellation(invite, organization);
 
     return {
       id: invite.id,
@@ -34,17 +36,11 @@ export class CancelInviteHandler implements ICommandHandler<CancelInviteCommand>
       return this.Asserter.throw('ORGANIZATION_NOT_FOUND');
     }
 
-    return await this.Asserter.assert(
-      Organization.findOne({ id: organizationId }),
-      'ORGANIZATION_NOT_FOUND',
-    );
+    return Organization.getReference(organizationId);
   }
 
-  private async identifyInvite(organization: Organization, id: string): Promise<MemberInvite> {
-    return await this.Asserter.assert(
-      MemberInvite.findOne({ id, organization }),
-      'INVITE_NOT_FOUND',
-    );
+  private async identifyInvite(inviteId: string): Promise<MemberInvite> {
+    return MemberInvite.getReference(inviteId);
   }
 
   private async validateInviteState(invite: MemberInvite): Promise<void> {
@@ -53,12 +49,21 @@ export class CancelInviteHandler implements ICommandHandler<CancelInviteCommand>
     }
   }
 
-  private processCancellation(invite: MemberInvite): void {
-    const now = new Date();
-    const metadata = new MemberInviteMetadata(invite.metadata);
+  private async processCancellation(invite: MemberInvite, organization: Organization): Promise<void> {
+    const qb = this.em.createQueryBuilder(MemberInvite);
+    const result = await qb
+      .update({
+        status: MemberInviteStatus.CANCELED,
+      })
+      .where({
+        id: invite.id,
+        organization: organization.id,
+        status: MemberInviteStatus.PENDING,
+      })
+      .execute();
 
-    invite.status = MemberInviteStatus.CANCELED;
-    metadata.timeline.canceledAt = now;
-    invite.metadata = metadata;
+    if (!result.affectedRows) {
+      await this.Asserter.throw('INVITE_NOT_FOUND');
+    }
   }
 }

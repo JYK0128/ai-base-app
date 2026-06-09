@@ -1,3 +1,6 @@
+import type { MemberInvite, MemberInviteInfoMetadata, MemberInviteMailDeliveryMetadata, MemberInviteTimelineMetadata } from '@pkg/database';
+import type { PickPrimitive, Plain } from '@pkg/shared';
+
 export const MEMBERS_SERVICE_PATTERNS = {
   MEMBER: {
     LIST: 'members.get',
@@ -15,3 +18,16 @@ export const MEMBERS_SERVICE_PATTERNS = {
     REVIVE: 'members.invites.revive',
   },
 } as const;
+
+export type CancelInviteInput = Pick<MemberInvite, 'id'>;
+
+export type InviteRecord = Prettify<
+  PickPrimitive<MemberInvite>
+  & Plain<MemberInviteInfoMetadata>
+  & Plain<MemberInviteMailDeliveryMetadata>
+  & Plain<MemberInviteTimelineMetadata>
+>;
+
+export type InviteIdRecord = Prettify<
+  PickPrimitive<MemberInvite, 'id'>
+>;

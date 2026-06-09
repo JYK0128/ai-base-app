@@ -65,6 +65,6 @@ export type GetInvitesInput = {
 export type CreateInviteInput = {
   name: string
   email: string
-  role: MemberRole
+  roleId: string
   note?: string
 };

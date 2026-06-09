@@ -2,7 +2,31 @@ import type { Loaded } from '@mikro-orm/core';
 import { type Member, type MemberInvite, MemberStatus as DbMemberStatus, type Organization, type OrganizationRoleAssignment } from '@pkg/database';
 
 import { resolveMailDeliveryStatusView } from '../mail/mail.helper';
+import type { InviteRecord } from './members.contract';
 import type { InviteOutput, MemberOutput, MemberRole, MemberStatus } from './members.types';
+
+export function buildInviteRecord(invite: MemberInvite): InviteRecord {
+  return {
+    ...invite,
+    isPending: invite.isPending,
+    isCanceled: invite.isCanceled,
+    isAccepted: invite.isAccepted,
+    isRejected: invite.isRejected,
+    isMailDeliveryFailed: invite.isMailDeliveryFailed,
+    isMailDeliveryQueued: invite.isMailDeliveryQueued,
+    isMailDeliveryTimeout: invite.isMailDeliveryTimeout,
+    ...invite.metadata.info,
+    ...invite.metadata.mailDelivery,
+    ...invite.metadata.timeline,
+    attemptId: invite.metadata.mailDelivery.attemptId,
+    queuedAt: invite.metadata.mailDelivery.queuedAt.toISOString(),
+    sentAt: invite.metadata.mailDelivery.sentAt?.toISOString(),
+    failedAt: invite.metadata.mailDelivery.failedAt?.toISOString(),
+    resentAt: invite.metadata.timeline.resentAt?.toISOString(),
+    cancelAt: invite.metadata.timeline.cancelAt?.toISOString(),
+    revivedAt: invite.metadata.timeline.revivedAt?.toISOString(),
+  };
+}
 
 function normalizeEmail(value: string | undefined): string | undefined {
   const normalized = value?.trim().toLowerCase();
@@ -299,4 +323,3 @@ export function filterInviteOutputs(
 export function sortByRecentDate<T extends { invitedAt: string }>(records: T[]): T[] {
   return [...records].sort((a, b) => new Date(b.invitedAt).getTime() - new Date(a.invitedAt).getTime());
 }
-

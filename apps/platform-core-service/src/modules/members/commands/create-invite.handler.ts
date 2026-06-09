@@ -2,16 +2,13 @@ import { randomUUID } from 'node:crypto';
 
 import { Transactional } from '@mikro-orm/decorators/legacy';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { MemberAccount,
-         MemberInvite,
-         MemberInviteMailDeliveryMetadata,
+import { MemberInvite,
          MemberInviteMetadata,
          Organization,
          OrganizationRole } from '@pkg/database';
 import { ClsService } from 'nestjs-cls';
 
-import { resolveMemberRoleCode } from '../members.helper';
-import type { InviteOutputResult, MemberRole } from '../members.types';
+import type { InviteIdRecord } from '../members.contract';
 import { CreateInviteCommand } from './create-invite.command';
 import { CreateInviteAsserter } from './create-invite.error';
 
@@ -26,29 +23,19 @@ export class CreateInviteHandler implements ICommandHandler<CreateInviteCommand>
   ) {}
 
   @Transactional()
-  async execute({ payload }: CreateInviteCommand): Promise<InviteOutputResult> {
-    const { name, email, role, note } = payload;
+  async execute({ payload }: CreateInviteCommand): Promise<InviteIdRecord> {
+    const { name, email, roleId, note } = payload;
     const organization = await this.identifyOrganization();
-    const inviter = await this.identifyInviter();
-    const roleEntity = await this.identifyRole(organization, role);
+    const role = await this.identifyRole(roleId);
     const invite = await this.processCreation(
       organization,
-      roleEntity,
+      role,
       name,
       email,
       note,
     );
-    const attemptId = invite.metadata.mailDelivery?.attemptId;
 
-    if (!attemptId) {
-      throw new Error('MAIL_DELIVERY_ATTEMPT_ID_NOT_FOUND');
-    }
-
-    return {
-      invite,
-      organization,
-      inviter,
-    };
+    return { id: invite.id };
   }
 
   private async identifyOrganization(): Promise<Organization> {
@@ -58,37 +45,11 @@ export class CreateInviteHandler implements ICommandHandler<CreateInviteCommand>
       return this.Asserter.throw('ORGANIZATION_NOT_FOUND');
     }
 
-    return await this.Asserter.assert(
-      Organization.findOne({ id: organizationId }),
-      'ORGANIZATION_NOT_FOUND',
-    );
+    return Organization.getReference(organizationId);
   }
 
-  private async identifyInviter(): Promise<MemberAccount> {
-    const requestedById = this.cls.get('accountId');
-
-    if (!requestedById) {
-      return this.Asserter.throw('REQUEST_CONTEXT_NOT_FOUND');
-    }
-
-    return await this.Asserter.assert(
-      MemberAccount.findOne(
-        { id: requestedById },
-        {
-          populate: ['member'],
-        },
-      ),
-      'INVITER_NOT_FOUND',
-    );
-  }
-
-  private async identifyRole(organization: Organization, role: MemberRole): Promise<OrganizationRole> {
-    const roleCode = resolveMemberRoleCode(role);
-
-    return await this.Asserter.assert(
-      OrganizationRole.findOne({ organization, code: roleCode }),
-      'ROLE_NOT_FOUND',
-    );
+  private async identifyRole(roleId: string): Promise<OrganizationRole> {
+    return OrganizationRole.getReference(roleId);
   }
 
   private async processCreation(
@@ -98,8 +59,6 @@ export class CreateInviteHandler implements ICommandHandler<CreateInviteCommand>
     email: string,
     note?: string,
   ): Promise<MemberInvite> {
-    const now = new Date();
-
     const metadata = new MemberInviteMetadata();
     metadata.info.note = note;
 
@@ -109,12 +68,10 @@ export class CreateInviteHandler implements ICommandHandler<CreateInviteCommand>
       role,
       organization,
       token: randomUUID(),
-      expiresAt: new Date(now.getTime() + INVITE_TTL_MS),
+      expiresAt: new Date(Date.now() + INVITE_TTL_MS),
       metadata,
     });
 
-    invite.metadata.mailDelivery = new MemberInviteMailDeliveryMetadata({ queuedAt: now });
     return invite;
   }
 }
-

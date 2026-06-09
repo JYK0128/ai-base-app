@@ -31,10 +31,10 @@ export class MemberInviteMailDeliveryMetadata {
   queuedAt: Opt<Date> = new Date();
 
   @Property({ type: Date, nullable: true })
-  sentAt?: Date;
+  sentAt?: Date | null;
 
   @Property({ type: Date, nullable: true })
-  failedAt?: Date;
+  failedAt?: Date | null;
 }
 
 @Embeddable()
