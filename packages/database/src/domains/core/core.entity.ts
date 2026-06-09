@@ -1,4 +1,4 @@
-import type { EntityData, EntityName, FilterQuery, FindOptions, FromEntityType, Loaded, Primary, RequiredEntityData, UpdateOptions } from '@mikro-orm/core';
+import type { CountOptions, EntityData, EntityName, FilterQuery, FindOneOptions, FindOptions, FromEntityType, IndexFilterQuery, Loaded, Primary, RequiredEntityData, UpdateOptions } from '@mikro-orm/core';
 import { BaseEntity, EntityRepositoryType, OptionalProps, RequestContext } from '@mikro-orm/core';
 import { PrimaryKey, Property } from '@mikro-orm/decorators/legacy';
 import type { ServerContext } from '@pkg/shared';
@@ -67,13 +67,14 @@ export abstract class CoreEntity<
   /**
    * 조건에 부합하는 엔티티 개수를 반환합니다.
    */
-  static async count<T extends BaseEntity>(
+  static async count<T extends BaseEntity, Hint extends string = never>(
     this: new () => T,
     where: FilterQuery<T> = {},
-  ): Promise<number> {
+    options?: CountOptions<T, Hint>,
+  ) {
     const em = RequestContext.getEntityManager();
     if (!em) throw new Error('EntityManager not found in RequestContext.');
-    return em.count<T>(this, where);
+    return em.count<T, Hint>(this, where, options);
   }
 
   /**
@@ -84,14 +85,17 @@ export abstract class CoreEntity<
     Hint extends string = never,
     Fields extends string = never,
     Excludes extends string = never,
+    Using extends string = never,
   >(
     this: new () => T,
-    where: FilterQuery<T>,
-    options: FindOptions<T, Hint, Fields, Excludes> = {},
-  ): Promise<Loaded<T, Hint, Fields, Excludes> | null> {
+    where: [Using] extends [never]
+      ? FilterQuery<NoInfer<T>> : IndexFilterQuery<NoInfer<T>, Using>,
+    options?: FindOneOptions<T, Hint, Fields, Excludes> & {
+      using?: Using | Using[]
+    }): Promise<Loaded<T, Hint, Fields, Excludes> | null> {
     const em = RequestContext.getEntityManager();
     if (!em) throw new Error('EntityManager not found in RequestContext.');
-    return em.findOne<T, Hint, Fields, Excludes>(this, where, options);
+    return em.findOne<T, Hint, Fields, Excludes, Using>(this, where, options);
   }
 
   /**
@@ -102,14 +106,15 @@ export abstract class CoreEntity<
     Hint extends string = never,
     Fields extends string = never,
     Excludes extends string = never,
-  >(
+    Using extends string = never>(
     this: new () => T,
-    where: FilterQuery<T>,
-    options: FindOptions<T, Hint, Fields, Excludes> = {},
-  ): Promise<Loaded<T, Hint, Fields, Excludes>[]> {
+    where: [Using] extends [never] ? FilterQuery<NoInfer<T>> : IndexFilterQuery<NoInfer<T>, Using>,
+    options?: FindOptions<T, Hint, Fields, Excludes> & {
+      using?: Using | Using[]
+    }): Promise<Loaded<T, Hint, Fields, Excludes>[]> {
     const em = RequestContext.getEntityManager();
     if (!em) throw new Error('EntityManager not found in RequestContext.');
-    return em.find<T, Hint, Fields, Excludes>(this, where, options);
+    return em.find<T, Hint, Fields, Excludes, Using>(this, where, options);
   }
 
   /**

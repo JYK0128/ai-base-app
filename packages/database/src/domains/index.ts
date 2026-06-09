@@ -1,7 +1,5 @@
 export * from './core/core.entity';
 export * from './core/core.repository';
-export * from './core/pagination.repository';
-export * from './core/searchable.repository';
 export * from './platform/content/announcement.entity';
 export * from './platform/content/announcement.repository';
 export * from './platform/i18n/i18n.locale.entity';
