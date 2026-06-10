@@ -1,9 +1,9 @@
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
-import { Member, MemberInvite, Organization } from '@pkg/database';
+import { MemberInvite, Organization } from '@pkg/database';
 import { ClsService } from 'nestjs-cls';
 
-import { buildCreatedByEmailLookup, buildInviteOutput, filterInviteOutputs, getLinkedMember, sortByRecentDate } from '../members.helper';
-import type { InviteOutput } from '../members.types';
+import type { InviteRecord } from '../members.contract';
+import { buildInviteRecord } from '../members.helper';
 import { GetInvitesAsserter } from './get-invites.error';
 import { GetInvitesQuery } from './get-invites.query';
 
@@ -15,29 +15,13 @@ export class GetInvitesHandler implements IQueryHandler<GetInvitesQuery> {
     private readonly cls: ClsService,
   ) {}
 
-  async execute({ payload }: GetInvitesQuery): Promise<InviteOutput[]> {
-    const { search, inviteStatus, role } = payload;
+  async execute({ payload }: GetInvitesQuery): Promise<InviteRecord[]> {
+    // TODO: payload 무엇을 의미하는지 조사
+    const { inviteStatus, role, search } = payload;
     const organization = await this.identifyOrganization();
-    const requestedById = await this.identifyRequestUserId();
     const invites = await this.loadInvites(organization);
-    const members = await this.loadMembers(organization);
-    const createdByEmailLookup = buildCreatedByEmailLookup(members);
 
-    const records = invites.map((invite) => buildInviteOutput(
-      invite,
-      organization,
-      requestedById,
-      createdByEmailLookup,
-      getLinkedMember(members, invite),
-    ));
-
-    return sortByRecentDate(
-      filterInviteOutputs(records, {
-        search,
-        inviteStatus,
-        role,
-      }),
-    );
+    return invites.map((invite) => buildInviteRecord(invite));
   }
 
   private async identifyOrganization(): Promise<Organization> {
@@ -47,33 +31,7 @@ export class GetInvitesHandler implements IQueryHandler<GetInvitesQuery> {
       return this.Asserter.throw('ORGANIZATION_NOT_FOUND');
     }
 
-    return await this.Asserter.assert(
-      Organization.findOne({ id: organizationId }),
-      'ORGANIZATION_NOT_FOUND',
-    );
-  }
-
-  private async identifyRequestUserId(): Promise<string> {
-    const requestedById = this.cls.get('accountId');
-
-    if (!requestedById) {
-      return this.Asserter.throw('REQUEST_CONTEXT_NOT_FOUND');
-    }
-
-    return requestedById;
-  }
-
-  private async loadMembers(organization: Organization): Promise<Member[]> {
-    return await this.Asserter.assert(
-      Member.find(
-        { organization },
-        {
-          populate: ['accounts', 'organizationRoles.role', 'organizationRoles.organization'],
-          orderBy: { createdAt: 'DESC' },
-        },
-      ),
-      'LOAD_FAILED',
-    );
+    return Organization.getReference(organizationId);
   }
 
   private async loadInvites(organization: Organization): Promise<MemberInvite[]> {

@@ -2,7 +2,7 @@ import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
 import { Member, MemberInvite, Organization } from '@pkg/database';
 import { ClsService } from 'nestjs-cls';
 
-import { buildCreatedByEmailLookup, buildMemberOutput, getLinkedInvite } from '../members.helper';
+import { buildInviteRecord } from '../members.helper';
 import type { MemberOutput } from '../members.types';
 import { GetMemberAsserter } from './get-member.error';
 import { GetMemberQuery } from './get-member.query';
@@ -17,22 +17,10 @@ export class GetMemberHandler implements IQueryHandler<GetMemberQuery> {
 
   async execute({ payload }: GetMemberQuery): Promise<MemberOutput> {
     const organization = await this.identifyOrganization();
-    const member = await this.identifyMember(organization, payload.id);
-    const members = await this.loadMembers(organization);
     const invites = await this.loadInvites(organization);
-    const createdByEmailLookup = buildCreatedByEmailLookup(members);
-    const linkedInvite = getLinkedInvite(invites, member);
-    const requestedById = await this.identifyRequestUserId();
 
-    return buildMemberOutput(
-      member,
-      organization,
-      requestedById,
-      createdByEmailLookup,
-      linkedInvite,
-    );
+    return invites.map((invite) => buildInviteRecord(invite));
   }
-
 
   private async identifyOrganization(): Promise<Organization> {
     const organizationId = this.cls.get('organizationId');
@@ -94,4 +82,3 @@ export class GetMemberHandler implements IQueryHandler<GetMemberQuery> {
     );
   }
 }
-

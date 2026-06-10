@@ -1,7 +1,6 @@
 import { Command } from '@nestjs/cqrs';
 
-import type { CreateAnnouncementInput } from '../announcement.contract';
-import type { AnnouncementIdRecord } from '../announcement.types';
+import type { AnnouncementIdRecord, CreateAnnouncementInput } from '../announcement.contract';
 
 /**
  * 공지사항 생성 커맨드
