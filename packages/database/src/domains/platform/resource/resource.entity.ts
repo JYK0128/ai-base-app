@@ -51,10 +51,12 @@ export class Resource extends CoreEntity<Resource> {
   @Property({ type: 'string', nullable: true })
   constraint?: string;
 
+  @Property({ persist: false })
   get isMenu(): Opt<boolean> {
     return this.type === ResourceType.MENU;
   }
 
+  @Property({ persist: false })
   get isComponent(): Opt<boolean> {
     return this.type === ResourceType.COMPONENT;
   }

@@ -43,6 +43,7 @@ export class Organization extends CoreEntity<Organization> {
   @OneToMany(() => TermsDocument, (doc) => doc.organization)
   termsDocuments = new Collection<TermsDocument>(this);
 
+  @Property({ persist: false })
   get isActive(): Opt<boolean> {
     return this.status === OrganizationStatus.ACTIVE;
   }

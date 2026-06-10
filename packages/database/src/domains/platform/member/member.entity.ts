@@ -39,6 +39,7 @@ export class Member extends CoreEntity<Member> {
   /**
    * 상태 확인 getter
    */
+  @Property({ persist: false })
   get isActive(): Opt<boolean> {
     return this.status === MemberStatus.ACTIVE;
   }

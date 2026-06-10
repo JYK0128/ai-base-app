@@ -40,18 +40,22 @@ export class TermsDocument extends CoreEntity<TermsDocument> {
   @OneToMany(() => TermsVersion, (version) => version.termsDocument)
   versions = new Collection<TermsVersion>(this);
 
+  @Property({ persist: false })
   get isDraft(): Opt<boolean> {
     return this.status === TermsDocumentStatus.DRAFT;
   }
 
+  @Property({ persist: false })
   get isPublished(): Opt<boolean> {
     return this.status === TermsDocumentStatus.PUBLISHED;
   }
 
+  @Property({ persist: false })
   get isDeprecated(): Opt<boolean> {
     return !!this.deprecatedAt && this.deprecatedAt.getTime() <= Date.now();
   }
 
+  @Property({ persist: false })
   get isScheduledForDeprecation(): Opt<boolean> {
     return !!this.deprecatedAt && this.deprecatedAt.getTime() > Date.now();
   }

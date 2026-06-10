@@ -75,6 +75,7 @@ export class Announcement extends CoreEntity<Announcement> {
   @Embedded({ entity: () => AnnouncementMetadata, object: true, nullable: true })
   override metadata: Opt<AnnouncementMetadata> = new AnnouncementMetadata();
 
+  @Property({ persist: false })
   get isPublished(): Opt<boolean> {
     const publishedAt = this.metadata.publishedAt;
 

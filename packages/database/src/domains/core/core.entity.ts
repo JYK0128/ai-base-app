@@ -36,6 +36,7 @@ export abstract class CoreEntity<
   @Property({ type: 'json', nullable: true })
   metadata?: Record<string, unknown>;
 
+  @Property({ persist: false })
   get isDeleted(): boolean {
     return !!this.deletedAt;
   }

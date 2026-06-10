@@ -36,18 +36,22 @@ export class TermsVersion extends CoreEntity<TermsVersion> {
   @OneToMany(() => TermsConsent, (consent) => consent.termsVersion)
   consents = new Collection<TermsConsent>(this);
 
+  @Property({ persist: false })
   get isDraft(): Opt<boolean> {
     return this.status === TermsVersionStatus.DRAFT;
   }
 
+  @Property({ persist: false })
   get isPublished(): Opt<boolean> {
     return this.status === TermsVersionStatus.PUBLISHED;
   }
 
+  @Property({ persist: false })
   get isCurrentlyEffective(): Opt<boolean> {
     return this.isPublished && this.effectiveAt.getTime() <= Date.now();
   }
 
+  @Property({ persist: false })
   get isScheduledForActivation(): Opt<boolean> {
     return this.isPublished && this.effectiveAt.getTime() > Date.now();
   }

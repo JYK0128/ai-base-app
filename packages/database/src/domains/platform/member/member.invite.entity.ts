@@ -113,22 +113,27 @@ export class MemberInvite extends CoreEntity<MemberInvite> {
   @Embedded({ entity: () => MemberInviteMetadata, object: true })
   override metadata: Opt<MemberInviteMetadata> = new MemberInviteMetadata();
 
+  @Property({ persist: false })
   get isPending(): Opt<boolean> {
     return this.status === MemberInviteStatus.PENDING;
   }
 
+  @Property({ persist: false })
   get isCanceled(): Opt<boolean> {
     return this.status === MemberInviteStatus.CANCELED;
   }
 
+  @Property({ persist: false })
   get isAccepted(): Opt<boolean> {
     return this.status === MemberInviteStatus.ACCEPTED;
   }
 
+  @Property({ persist: false })
   get isRejected(): Opt<boolean> {
     return this.status === MemberInviteStatus.REJECTED;
   }
 
+  @Property({ persist: false })
   get isMailDeliveryQueued(): Opt<boolean> {
     const delivery = this.metadata.mailDelivery;
 
@@ -139,6 +144,7 @@ export class MemberInvite extends CoreEntity<MemberInvite> {
     return !delivery.sentAt && !delivery.failedAt && !this.isMailDeliveryTimeout;
   }
 
+  @Property({ persist: false })
   get isMailDeliveryTimeout(): Opt<boolean> {
     const delivery = this.metadata.mailDelivery;
 
@@ -150,6 +156,7 @@ export class MemberInvite extends CoreEntity<MemberInvite> {
     return Number.isFinite(queuedAtTime) && queuedAtTime + MAIL_DELIVERY_TIMEOUT_MS <= Date.now();
   }
 
+  @Property({ persist: false })
   get isMailDeliveryFailed(): Opt<boolean> {
     const delivery = this.metadata.mailDelivery;
 

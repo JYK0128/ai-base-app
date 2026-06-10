@@ -42,6 +42,7 @@ export class MemberAccount extends CoreEntity<MemberAccount> {
   /**
    * 비밀번호 만료 여부 확인
    */
+  @Property({ persist: false })
   get isPasswordExpired(): Opt<boolean> {
     return !this.passwordExpiresAt || this.passwordExpiresAt.getTime() < Date.now();
   }
@@ -49,6 +50,7 @@ export class MemberAccount extends CoreEntity<MemberAccount> {
   /**
    * 계정 잠금 여부 확인 (DB 기반)
    */
+  @Property({ persist: false })
   get isLocked(): Opt<boolean> {
     return !!this.lockUntil && this.lockUntil.getTime() > Date.now();
   }
@@ -56,6 +58,7 @@ export class MemberAccount extends CoreEntity<MemberAccount> {
   /**
    * 계정 활성화 여부 확인
    */
+  @Property({ persist: false })
   get isActive(): Opt<boolean> {
     return this.status === AccountStatus.ACTIVE;
   }
@@ -63,6 +66,7 @@ export class MemberAccount extends CoreEntity<MemberAccount> {
   /**
    * 휴면 계정 여부 확인 (90일 미접속)
    */
+  @Property({ persist: false })
   get isDormant(): Opt<boolean> {
     if (!this.lastLoginAt) return false;
     const dormancyPeriodMs = 90 * 24 * 60 * 60 * 1000;
