@@ -29,9 +29,8 @@ function flattenJsonPatch(
     return [{ path, value }];
   });
 }
-
-export function buildJsonbSetQuery<T>() {
-  return function<K extends keyof T>(
+export class JsonbSetQueryBuilder<T> {
+  build<K extends keyof T>(
     columnName: K,
     patch: DeepPartialJson<T[K]>,
   ) {
@@ -52,5 +51,5 @@ export function buildJsonbSetQuery<T>() {
     }, `COALESCE(??, '{}'::jsonb)`);
 
     return raw(sql, params);
-  };
+  }
 }

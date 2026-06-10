@@ -1,8 +1,8 @@
 import { Command } from '@nestjs/cqrs';
 
-import type { MemberOutputId, UpdateMemberRoleInput } from '../members.types';
+import type { MemberIdRecord, UpdateMemberRoleInput } from '../members.contract';
 
-export class UpdateMemberRoleCommand extends Command<MemberOutputId> {
+export class UpdateMemberRoleCommand extends Command<MemberIdRecord> {
   constructor(readonly payload: UpdateMemberRoleInput) {
     super();
   }

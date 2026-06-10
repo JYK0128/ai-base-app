@@ -4,7 +4,7 @@ import { Transactional } from '@mikro-orm/decorators/legacy';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { MemberInvite, MemberInviteStatus, Organization } from '@pkg/database';
-import { buildJsonbSetQuery } from '@pkg/shared/server';
+import { JsonbSetQueryBuilder } from '@pkg/shared/server';
 import { ClsService } from 'nestjs-cls';
 
 import type { InviteIdRecord } from '../members.contract';
@@ -52,13 +52,13 @@ export class ResendInviteHandler implements ICommandHandler<ResendInviteCommand>
   ): Promise<void> {
     const qb = this.em.createQueryBuilder(MemberInvite);
     const now = new Date();
-    const builder = buildJsonbSetQuery<MemberInvite>();
+    const builder = new JsonbSetQueryBuilder<MemberInvite>();
 
     const result = await qb.update({
       status: MemberInviteStatus.PENDING,
       token: randomUUID(),
       expiresAt: new Date(now.getTime() + INVITE_TTL_MS),
-      metadata: builder('metadata', {
+      metadata: builder.build('metadata', {
         timeline: {
           resentAt: now,
         },

@@ -1,11 +1,13 @@
 import { randomUUID } from 'node:crypto';
 
 import { Transactional } from '@mikro-orm/decorators/legacy';
+import { EntityManager } from '@mikro-orm/postgresql';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { MemberInvite, MemberInviteMetadata, MemberInviteStatus, Organization } from '@pkg/database';
+import { MemberInvite, MemberInviteStatus, Organization } from '@pkg/database';
+import { JsonbSetQueryBuilder } from '@pkg/shared/server';
 import { ClsService } from 'nestjs-cls';
 
-import type { MemberOutputId } from '../members.types';
+import type { InviteIdRecord } from '../members.contract';
 import { ReviveInviteCommand } from './revive-invite.command';
 import { ReviveInviteAsserter } from './revive-invite.error';
 
@@ -17,18 +19,17 @@ export class ReviveInviteHandler implements ICommandHandler<ReviveInviteCommand>
 
   constructor(
     private readonly cls: ClsService,
+    private readonly em: EntityManager,
   ) {}
 
   @Transactional()
-  async execute({ payload }: ReviveInviteCommand): Promise<MemberOutputId> {
+  async execute({ payload }: ReviveInviteCommand): Promise<InviteIdRecord> {
     const organization = await this.identifyOrganization();
-    const invite = await this.identifyInvite(organization, payload.id);
-    await this.validateInviteState(invite);
-
-    this.processRevive(invite);
+    const invite = await this.identifyInvite(payload.id);
+    await this.processRevive(invite, organization);
 
     return {
-      id: invite.id,
+      id: payload.id,
     };
   }
 
@@ -39,34 +40,46 @@ export class ReviveInviteHandler implements ICommandHandler<ReviveInviteCommand>
       return this.Asserter.throw('ORGANIZATION_NOT_FOUND');
     }
 
-    return await this.Asserter.assert(
-      Organization.findOne({ id: organizationId }),
-      'ORGANIZATION_NOT_FOUND',
-    );
+    return Organization.getReference(organizationId);
   }
 
-  private async identifyInvite(organization: Organization, id: string): Promise<MemberInvite> {
-    return await this.Asserter.assert(
-      MemberInvite.findOne({ id, organization }),
-      'INVITE_NOT_FOUND',
-    );
+  private async identifyInvite(inviteId: string): Promise<MemberInvite> {
+    return MemberInvite.getReference(inviteId);
   }
 
-  private async validateInviteState(invite: MemberInvite): Promise<void> {
-    if (!invite.isCanceled) {
-      await this.Asserter.throw('INVITE_NOT_REVIVABLE');
+  private async processRevive(
+    invite: MemberInvite,
+    organization: Organization,
+  ): Promise<void> {
+    const now = new Date();
+    const builder = new JsonbSetQueryBuilder<MemberInvite>();
+
+    const qb = this.em.createQueryBuilder(MemberInvite);
+    const result = await qb
+      .update({
+        status: MemberInviteStatus.PENDING,
+        token: randomUUID(),
+        expiresAt: new Date(now.getTime() + INVITE_TTL_MS),
+        metadata: builder.build('metadata', {
+          timeline: {
+            revivedAt: now,
+            resentAt: null,
+          },
+          mailDelivery: {
+            queuedAt: now,
+            sentAt: null,
+          },
+        }),
+      })
+      .where({
+        id: invite.id,
+        organization: organization.id,
+        status: MemberInviteStatus.CANCELED,
+      })
+      .execute();
+
+    if (!result.affectedRows) {
+      await this.Asserter.throw('INVITE_NOT_FOUND');
     }
   }
-
-  private processRevive(invite: MemberInvite): void {
-    const now = new Date();
-    const metadata = new MemberInviteMetadata(invite.metadata);
-
-    invite.status = MemberInviteStatus.PENDING;
-    invite.token = randomUUID();
-    invite.expiresAt = new Date(now.getTime() + INVITE_TTL_MS);
-    metadata.timeline.revivedAt = now;
-    invite.metadata = metadata;
-  }
 }
-

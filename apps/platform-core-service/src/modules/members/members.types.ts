@@ -28,8 +28,6 @@ export interface InviteOutput extends MemberOutput {
   expiresAt: string
 }
 
-export type MemberOutputId = Pick<Member, 'id'>;
-
 export interface InviteOutputResult {
   invite: MemberInvite
   organization: Organization
@@ -38,33 +36,8 @@ export interface InviteOutputResult {
 
 export type GetMemberInput = Pick<Member, 'id'>;
 
-export type UpdateMemberRoleInput = Pick<Member, 'id'> & {
-  role: MemberRole
-};
-
-export type ToggleMemberStatusInput = Pick<Member, 'id'>;
-
-export type ResendInviteInput = Pick<MemberInvite, 'id'>;
-
-export type CancelInviteInput = Pick<MemberInvite, 'id'>;
-
-export type ReviveInviteInput = Pick<MemberInvite, 'id'>;
-
 export type GetMembersInput = {
   search?: string
   status?: MemberStatus
   role?: MemberRole
-};
-
-export type GetInvitesInput = {
-  search?: string
-  inviteStatus?: InviteStatus
-  role?: MemberRole
-};
-
-export type CreateInviteInput = {
-  name: string
-  email: string
-  roleId: string
-  note?: string
 };

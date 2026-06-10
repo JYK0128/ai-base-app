@@ -1,16 +1,16 @@
 import { Transactional } from '@mikro-orm/decorators/legacy';
 import { EntityManager, raw } from '@mikro-orm/postgresql';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { Member, MemberStatus, Organization, OrganizationRole, OrganizationRoleAssignment } from '@pkg/database';
+import { Member, MemberStatus, Organization, OrganizationRoleAssignment } from '@pkg/database';
 import { ClsService } from 'nestjs-cls';
 
 import type { MemberIdRecord } from '../members.contract';
-import { UpdateMemberRoleCommand } from './update-member-role.command';
-import { UpdateMemberRoleAsserter } from './update-member-role.error';
+import { UpdateMemberStatusCommand } from './update-member-status.command';
+import { ToggleMemberStatusAsserter } from './update-member-status.error';
 
-@CommandHandler(UpdateMemberRoleCommand)
-export class UpdateMemberRoleHandler implements ICommandHandler<UpdateMemberRoleCommand> {
-  private readonly Asserter = UpdateMemberRoleAsserter;
+@CommandHandler(UpdateMemberStatusCommand)
+export class ToggleMemberStatusHandler implements ICommandHandler<UpdateMemberStatusCommand> {
+  private readonly Asserter = ToggleMemberStatusAsserter;
 
   constructor(
     private readonly cls: ClsService,
@@ -18,14 +18,18 @@ export class UpdateMemberRoleHandler implements ICommandHandler<UpdateMemberRole
   ) {}
 
   @Transactional()
-  async execute({ payload }: UpdateMemberRoleCommand): Promise<MemberIdRecord> {
+  async execute({ payload }: UpdateMemberStatusCommand): Promise<MemberIdRecord> {
     const organization = await this.identifyOrganization();
     const member = await this.identifyMember(payload.id);
     const requestMember = await this.identifyRequestMember();
-    const role = await this.identifyRole(payload.roleId);
     await this.validateSelfMutation(member, requestMember);
 
-    await this.processRoleUpdate(member, requestMember, organization, role);
+    await this.processStatusUpdate(
+      member,
+      requestMember,
+      organization,
+      payload.status,
+    );
 
     return {
       id: member.id,
@@ -39,10 +43,7 @@ export class UpdateMemberRoleHandler implements ICommandHandler<UpdateMemberRole
       return this.Asserter.throw('ORGANIZATION_NOT_FOUND');
     }
 
-    return await this.Asserter.assert(
-      Organization.findOne({ id: organizationId }),
-      'ORGANIZATION_NOT_FOUND',
-    );
+    return Organization.getReference(organizationId);
   }
 
   private async identifyRequestMember(): Promise<Member> {
@@ -65,17 +66,13 @@ export class UpdateMemberRoleHandler implements ICommandHandler<UpdateMemberRole
     }
   }
 
-  private async identifyRole(roleId: string): Promise<OrganizationRole> {
-    return OrganizationRole.getReference(roleId);
-  }
-
-  private async processRoleUpdate(
+  private async processStatusUpdate(
     member: Member,
     requestMember: Member,
     organization: Organization,
-    role: OrganizationRole,
+    status: MemberStatus,
   ): Promise<void> {
-    const qb1 = this.em.createQueryBuilder(OrganizationRoleAssignment);
+    const qb1 = this.em.createQueryBuilder(Member);
     const qb2 = this.em.createQueryBuilder(OrganizationRoleAssignment);
 
     const subquery = qb2
@@ -88,18 +85,17 @@ export class UpdateMemberRoleHandler implements ICommandHandler<UpdateMemberRole
 
     const result = await qb1
       .withSubQuery(subquery, 'ownerCount')
-      .update({ role: role })
+      .update({ status })
       .where({
         $and: [
-          { $not: { member: requestMember } },
-          { member, organization },
+          { id: { $ne: requestMember.id } },
           { [raw(`"ownerCount" > 1`)]: true },
         ],
       })
       .execute();
 
     if (result.affectedRows === 0) {
-      await this.Asserter.throw('LAST_OWNER_ROLE_CANNOT_BE_CHANGED');
+      await this.Asserter.throw('LAST_OWNER_STATUS_CANNOT_BE_CHANGED');
     }
   }
 }

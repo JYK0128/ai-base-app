@@ -58,13 +58,13 @@ export class MemberInviteTimelineMetadata {
   }
 
   @Property({ type: Date, nullable: true })
-  resentAt?: Date;
+  resentAt?: Date | null;
 
   @Property({ type: Date, nullable: true })
-  cancelAt?: Date;
+  cancelAt?: Date | null;
 
   @Property({ type: Date, nullable: true })
-  revivedAt?: Date;
+  revivedAt?: Date | null;
 }
 
 @Embeddable()

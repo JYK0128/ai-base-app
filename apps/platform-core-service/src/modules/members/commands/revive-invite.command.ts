@@ -1,8 +1,8 @@
 import { Command } from '@nestjs/cqrs';
 
-import type { MemberOutputId, ReviveInviteInput } from '../members.types';
+import type { InviteIdRecord, ReviveInviteInput } from '../members.contract';
 
-export class ReviveInviteCommand extends Command<MemberOutputId> {
+export class ReviveInviteCommand extends Command<InviteIdRecord> {
   constructor(readonly payload: ReviveInviteInput) {
     super();
   }

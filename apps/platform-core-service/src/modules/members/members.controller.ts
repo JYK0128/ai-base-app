@@ -6,11 +6,11 @@ import { CancelInviteCommand,
          CreateInviteCommand,
          ResendInviteCommand,
          ReviveInviteCommand,
-         ToggleMemberStatusCommand,
+         UpdateMemberStatusCommand,
          UpdateMemberRoleCommand } from './commands';
 import { InviteEmailEvent } from './events';
 import { MEMBERS_SERVICE_PATTERNS } from './members.contract';
-import type { CancelInviteInput, CreateInviteInput, GetInvitesInput, GetMemberInput, GetMembersInput, InviteOutputResult, ResendInviteInput, ReviveInviteInput, ToggleMemberStatusInput, UpdateMemberRoleInput } from './members.types';
+import type { CancelInviteInput, CreateInviteInput, GetInvitesInput, GetMemberInput, GetMembersInput, InviteOutputResult, ResendInviteInput, ReviveInviteInput, UpdateMemberStatusInput, UpdateMemberRoleInput } from './members.types';
 import { GetInvitesQuery, GetMemberQuery, GetMembersQuery } from './queries';
 
 @Controller()
@@ -44,9 +44,9 @@ export class MembersController {
 
   @MessagePattern(MEMBERS_SERVICE_PATTERNS.MEMBER.TOGGLE_STATUS)
   async toggleMemberStatus(
-    @Payload() data: ToggleMemberStatusInput,
+    @Payload() data: UpdateMemberStatusInput,
   ) {
-    return this.commandBus.execute(new ToggleMemberStatusCommand(data));
+    return this.commandBus.execute(new UpdateMemberStatusCommand(data));
   }
 
   @MessagePattern(MEMBERS_SERVICE_PATTERNS.INVITE.LIST)
