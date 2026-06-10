@@ -1,6 +1,6 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
-import { MemberStatus } from '@/domains';
+import { Member, MemberStatus } from '@/domains';
 import type { PostgresTestContext } from '@/test/context';
 import { createPostgresTestContext, destroyPostgresTestContext } from '@/test/context';
 
@@ -42,5 +42,11 @@ describe('Database Playground', () => {
     activeMembers.forEach((member) => {
       expect(member.status).toBe('ACTIVE');
     });
+  });
+
+  it('test', async () => {
+    const repo = Member.getRepository();
+    const res = await repo.find({});
+    expect(res.length).toEqual(0);
   });
 });
