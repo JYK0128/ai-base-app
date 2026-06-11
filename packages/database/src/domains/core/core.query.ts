@@ -1,4 +1,4 @@
-import { type BaseEntity, type CountByOptions, type CountOptions, type CreateOptions, type Cursor, type DeleteOptions, type Dictionary, type EntityData, type EntityKey, type EntityManager, type EntityName, type FilterQuery, type FindByCursorOptions, type FindOneOptions, type FindOneOrFailOptions, type FindOptions, type Loaded, type Primary, RequestContext, type RequiredEntityData, type UpdateOptions, type WithUsingOptions } from '@mikro-orm/core';
+import { type BaseEntity, type CountByOptions, type CountOptions, type CreateOptions, type Cursor, type DeleteOptions, type Dictionary, type EntityData, type EntityKey, type EntityManager, type EntityName, type FilterQuery, type FindByCursorOptions, type FindOneOptions, type FindOneOrFailOptions, type FindOptions, type Loaded, type NativeInsertUpdateOptions, type Primary, RequestContext, type RequiredEntityData, type UpdateOptions, type UpsertManyOptions, type UpsertOptions, type WithUsingOptions } from '@mikro-orm/core';
 import type { ServerContext } from '@pkg/shared/server';
 
 export const QueryEngine = {
@@ -155,8 +155,8 @@ export const QueryEngine = {
   },
 
   // === entity ===
-  /** @deprecated - 엔티티 개체 */
-  assign(data: unknown) {
+  /** @deprecated - 엔티티 내부함수 사용 */
+  assign(_data: unknown) {
     throw new Error('Not implemented');
   },
 
@@ -168,21 +168,37 @@ export const QueryEngine = {
   },
 
   // === INSERT ===
-  nativeInsert() {
-
+  nativeInsert<Entity extends object>(
+    clz: EntityName<Entity>,
+    data: RequiredEntityData<Entity>,
+    options?: NativeInsertUpdateOptions<Entity>,
+  ): Promise<Primary<Entity>> {
+    return this.em.insert<Entity>(clz, data, options);
   },
 
-  nativeInsertMany() {
-
+  nativeInsertMany<Entity extends object>(
+    clz: EntityName<Entity>,
+    data: RequiredEntityData<Entity>[],
+    options?: NativeInsertUpdateOptions<Entity>,
+  ): Promise<Primary<Entity>[]> {
+    return this.em.insertMany<Entity>(clz, data, options);
   },
 
   // === UPSERT ===
-  nativeUpsert() {
-
+  nativeUpsert<Entity extends object, Fields extends string = never>(
+    clz: EntityName<Entity>,
+    data: EntityData<Entity> | Entity,
+    options?: UpsertOptions<Entity, Fields>,
+  ): Promise<Entity> {
+    return this.em.upsert<Entity, Fields>(clz, data, options);
   },
 
-  nativeUpsertMany() {
-
+  nativeUpsertMany<Entity extends object, Fields extends string = never>(
+    clz: EntityName<Entity>,
+    data: (EntityData<Entity> | Entity)[],
+    options?: UpsertManyOptions<Entity, Fields>,
+  ): Promise<Entity[]> {
+    return this.em.upsertMany<Entity, Fields>(clz, data, options);
   },
 
   // === UPDATE ===

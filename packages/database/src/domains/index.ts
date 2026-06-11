@@ -1,6 +1,6 @@
 export * from './core/core.entity';
 export * from './core/core.repository';
-export * from './platform/content/announcement.entity';
+export * from './platform/announcement/announcement.entity';
 export * from './platform/i18n/i18n.locale.entity';
 export * from './platform/i18n/i18n.translation.entity';
 export * from './platform/member/member.account.entity';

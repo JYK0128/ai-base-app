@@ -1,4 +1,4 @@
-import { BaseEntity, type CountByOptions, type CountOptions, type CreateOptions, type Cursor, type DeleteOptions, type Dictionary, type EntityClass, type EntityData, type EntityKey, EntityRepositoryType, type FilterQuery, type FindByCursorOptions, type FindOneOptions, type FindOneOrFailOptions, type FindOptions, type Loaded, OptionalProps, type Primary, type RequiredEntityData, type UpdateOptions, type WithUsingOptions } from '@mikro-orm/core';
+import { BaseEntity, type CountByOptions, type CountOptions, type CreateOptions, type Cursor, type DeleteOptions, type Dictionary, type EntityClass, type EntityData, type EntityKey, EntityRepositoryType, type FilterQuery, type FindByCursorOptions, type FindOneOptions, type FindOneOrFailOptions, type FindOptions, type Loaded, type NativeInsertUpdateOptions, OptionalProps, type Primary, type RequiredEntityData, type UpdateOptions, type UpsertManyOptions, type UpsertOptions, type WithUsingOptions } from '@mikro-orm/core';
 import { PrimaryKey, Property } from '@mikro-orm/decorators/legacy';
 import { uuidv7 } from 'uuidv7';
 
@@ -168,7 +168,41 @@ export abstract class CoreEntity<
     QueryEngine.remove(this);
   }
 
-  // === Update ===
+  // === Native Insert ===
+  static nativeInsert<T extends CoreEntity>(
+    this: EntityClass<T>,
+    data: RequiredEntityData<T>,
+    options?: NativeInsertUpdateOptions<T>,
+  ): Promise<Primary<T>> {
+    return QueryEngine.nativeInsert(this, data, options);
+  }
+
+  static nativeInsertMany<T extends CoreEntity>(
+    this: EntityClass<T>,
+    data: RequiredEntityData<T>[],
+    options?: NativeInsertUpdateOptions<T>,
+  ): Promise<Primary<T>[]> {
+    return QueryEngine.nativeInsertMany(this, data, options);
+  }
+
+  // === Native Upsert ===
+  static nativeUpsert<T extends CoreEntity, Fields extends string = never>(
+    this: EntityClass<T>,
+    data: EntityData<T> | T,
+    options?: UpsertOptions<T, Fields>,
+  ): Promise<T> {
+    return QueryEngine.nativeUpsert<T, Fields>(this, data, options);
+  }
+
+  static nativeUpsertMany<T extends CoreEntity, Fields extends string = never>(
+    this: EntityClass<T>,
+    data: (EntityData<T> | T)[],
+    options?: UpsertManyOptions<T, Fields>,
+  ): Promise<T[]> {
+    return QueryEngine.nativeUpsertMany<T, Fields>(this, data, options);
+  }
+
+  // === Native Update ===
   nativeUpdate(
     data: EntityData<this>,
     options?: UpdateOptions<this>,
@@ -183,7 +217,7 @@ export abstract class CoreEntity<
     );
   }
 
-  // === Delete ===
+  // === Native Delete ===
   nativeDelete(
     options?: DeleteOptions<this>,
   ): Promise<number> {

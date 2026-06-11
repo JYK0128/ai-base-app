@@ -1,4 +1,4 @@
-import type { CountOptions, DeleteOptions, EntityData, EntityManager, EntityName, FilterQuery, FindOneOptions, FindOneOrFailOptions, FindOptions, Loaded, Primary, RequiredEntityData, UpdateOptions } from '@mikro-orm/core';
+import type { CountOptions, DeleteOptions, EntityData, EntityManager, EntityName, FilterQuery, FindOneOptions, FindOneOrFailOptions, FindOptions, Loaded, NativeInsertUpdateOptions, Primary, RequiredEntityData, UpdateOptions, UpsertManyOptions, UpsertOptions } from '@mikro-orm/core';
 
 import { QueryEngine } from './core.query';
 
@@ -25,6 +25,34 @@ export abstract class CoreRepository<
 
   createMany(data: RequiredEntityData<Entity>[]) {
     return QueryEngine.createMany(this.entityName, data);
+  }
+
+  nativeInsert(
+    data: RequiredEntityData<Entity>,
+    options?: NativeInsertUpdateOptions<Entity>,
+  ) {
+    return QueryEngine.nativeInsert(this.entityName, data, options);
+  }
+
+  nativeInsertMany(
+    data: RequiredEntityData<Entity>[],
+    options?: NativeInsertUpdateOptions<Entity>,
+  ) {
+    return QueryEngine.nativeInsertMany(this.entityName, data, options);
+  }
+
+  nativeUpsert<Fields extends string = never>(
+    data: EntityData<Entity> | Entity,
+    options?: UpsertOptions<Entity, Fields>,
+  ) {
+    return QueryEngine.nativeUpsert<Entity, Fields>(this.entityName, data, options);
+  }
+
+  nativeUpsertMany<Fields extends string = never>(
+    data: (EntityData<Entity> | Entity)[],
+    options?: UpsertManyOptions<Entity, Fields>,
+  ) {
+    return QueryEngine.nativeUpsertMany<Entity, Fields>(this.entityName, data, options);
   }
 
   find<Hint extends string = never, Fields extends string = never, Excludes extends string = never, Using extends string = never>(
@@ -59,13 +87,13 @@ export abstract class CoreRepository<
     where: [Using] extends [never] ? FilterQuery<Entity> : never,
     options: Omit<FindOptions<Entity, Hint, Fields, Excludes> & { using?: Using | Using[] }, 'offset'> & { page?: number },
   ): Promise<{
-    items: Loaded<Entity, Hint, Fields, Excludes>[];
-    totalCount: number;
-    hasNextPage: boolean;
-    hasPrevPage: boolean;
-    page: number;
-    limit: number;
-    totalPages: number;
+    items: Loaded<Entity, Hint, Fields, Excludes>[]
+    totalCount: number
+    hasNextPage: boolean
+    hasPrevPage: boolean
+    page: number
+    limit: number
+    totalPages: number
   }> {
     return QueryEngine.findByPage<Entity, Hint, Fields, Excludes, Using>(this.entityName, where, options);
   }
