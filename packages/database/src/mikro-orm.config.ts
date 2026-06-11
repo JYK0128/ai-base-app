@@ -8,10 +8,8 @@ import { TsMorphMetadataProvider } from '@mikro-orm/reflection';
 import { SeedManager } from '@mikro-orm/seeder';
 import { SqlHighlighter } from '@mikro-orm/sql-highlighter';
 
-import metadataJson from './metadata.json' with { type: 'json' };
+import metadata from './metadata.json' with { type: 'json' };
 import { AuditSubscriber } from './subscribers';
-
-const metadata = metadataJson as Record<string, unknown>;
 
 export default defineConfig({
   entities: [

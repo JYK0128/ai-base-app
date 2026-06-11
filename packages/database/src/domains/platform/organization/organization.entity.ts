@@ -31,7 +31,7 @@ export class Organization extends CoreEntity<Organization> {
   @Enum(() => OrganizationStatus)
   status: Opt<OrganizationStatus> = OrganizationStatus.ACTIVE;
 
-  @OneToMany({ mappedBy: 'organization' })
+  @OneToMany(() => Member, (member) => member.organization)
   members = new Collection<Member>(this);
 
   @OneToMany(() => MemberInvite, (invite) => invite.organization)

@@ -1,5 +1,5 @@
-import { rmSync, writeFileSync } from 'node:fs';
-import { join } from 'node:path';
+import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { dirname, join } from 'node:path';
 
 import { generateDtsBundle } from 'dts-bundle-generator';
 import { build, context } from 'esbuild';
@@ -8,12 +8,28 @@ import { swcPlugin } from 'esbuild-plugin-swc';
 const OUTDIR = 'dist';
 const isWatch = process.argv.includes('--watch');
 
+function resolveSourceJsImportsPlugin() {
+  return {
+    name: 'resolveSourceJsImportsPlugin',
+    setup(build) {
+      build.onResolve({ filter: /\.js$/ }, (args) => {
+        const sourcePath = join(args.resolveDir, args.path.replace(/\.js$/, '.ts'));
+
+        if (existsSync(sourcePath)) {
+          return {
+            path: sourcePath,
+          };
+        }
+
+        return undefined;
+      });
+    },
+  };
+}
+
 /** @type {import('esbuild').BuildOptions} */
 const sharedOptions = {
-  entryPoints: [
-    'src/index.ts',
-    'src/domains/index.ts',
-  ],
+  entryPoints: ['src/index.ts'],
   bundle: true,
   sourcemap: true,
   platform: 'node',
@@ -22,6 +38,7 @@ const sharedOptions = {
   outbase: 'src',
   logLevel: 'info',
   plugins: [
+    resolveSourceJsImportsPlugin(),
     swcPlugin({
       jsc: {
         parser: {
@@ -49,7 +66,6 @@ function generateTypes() {
 
   const entries = [
     { filePath: './src/index.ts', outFile: 'index.d.ts' },
-    { filePath: './src/domains/index.ts', outFile: 'domains/index.d.ts' },
   ];
 
   try {
@@ -79,6 +95,26 @@ function generateTypes() {
   }
 }
 
+function writeOutputFiles(result) {
+  for (const outputFile of result.outputFiles ?? []) {
+    mkdirSync(dirname(outputFile.path), { recursive: true });
+    writeFileSync(outputFile.path, outputFile.contents);
+  }
+}
+
+function patchJsonImportAttributes() {
+  const filePath = join(OUTDIR, 'index.js');
+  const code = readFileSync(filePath, 'utf-8');
+  const nextCode = code.replace(
+    'import metadataJson from "./metadata.json";',
+    'import metadataJson from "./metadata.json" with { type: "json" };',
+  );
+
+  if (nextCode !== code) {
+    writeFileSync(filePath, nextCode);
+  }
+}
+
 async function main() {
   if (!isWatch) {
     rmSync(OUTDIR, { recursive: true, force: true });
@@ -89,7 +125,8 @@ async function main() {
     outdir: OUTDIR,
     format: 'esm',
     outExtension: { '.js': '.js' },
-    splitting: true,
+    splitting: false,
+    write: false,
   };
 
   const cjsOptions = {
@@ -97,6 +134,8 @@ async function main() {
     outdir: OUTDIR,
     format: 'cjs',
     outExtension: { '.js': '.cjs' },
+    splitting: false,
+    write: false,
   };
 
   if (isWatch) {
@@ -108,10 +147,13 @@ async function main() {
   }
 
   console.log('[esbuild] building...');
-  await Promise.all([
+  const [esmResult, cjsResult] = await Promise.all([
     build(esmOptions),
     build(cjsOptions),
   ]);
+  writeOutputFiles(esmResult);
+  writeOutputFiles(cjsResult);
+  patchJsonImportAttributes();
   generateTypes();
   console.log('[build] all tasks complete.');
 }

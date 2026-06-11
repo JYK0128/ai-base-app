@@ -3,7 +3,7 @@ import { hostname } from 'node:os';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import { Module } from '@nestjs/common';
 import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
-import { databaseConfig } from '@pkg/database';
+import { databaseConfig, entities } from '@pkg/database';
 import { RpcContextInterceptor, RpcExceptionFilter, RpcLoggingInterceptor } from '@pkg/shared/server';
 import { ClsModule } from 'nestjs-cls';
 import { LoggerModule } from 'nestjs-pino';
@@ -17,7 +17,10 @@ const redisUrl = new URL(ENV.REDIS_URL);
 
 @Module({
   imports: [
-    MikroOrmModule.forRoot(databaseConfig),
+    MikroOrmModule.forRoot({
+      ...databaseConfig,
+      entities: entities,
+    }),
     ClsModule.forRoot({
       global: true,
       middleware: { mount: false },

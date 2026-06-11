@@ -92,10 +92,10 @@ export class MemberInvite extends CoreEntity<MemberInvite> {
   @Property({ type: 'string' })
   name!: string;
 
-  @ManyToOne()
+  @ManyToOne(() => OrganizationRole)
   role!: Rel<OrganizationRole>;
 
-  @ManyToOne()
+  @ManyToOne(() => Organization)
   organization!: Rel<Organization>;
 
   @Property({ type: 'string' })
