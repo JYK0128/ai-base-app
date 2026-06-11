@@ -32,6 +32,6 @@ export class DeleteAnnouncementHandler implements ICommandHandler<DeleteAnnounce
   private async processAnnouncementDeletion(
     announcement: Announcement,
   ): Promise<void> {
-    announcement.remove();
+    announcement.delete();
   }
 }

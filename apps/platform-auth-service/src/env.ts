@@ -1,31 +1,5 @@
 import { z } from 'zod';
 
-const redisUrlSchema = z.string().trim().min(1).superRefine((value, ctx) => {
-  try {
-    const parsed = new URL(value);
-
-    if (parsed.protocol !== 'redis:' && parsed.protocol !== 'rediss:') {
-      ctx.addIssue({
-        code: 'custom',
-        message: 'REDIS_URL must use redis:// or rediss://',
-      });
-    }
-
-    if (!parsed.port) {
-      ctx.addIssue({
-        code: 'custom',
-        message: 'REDIS_URL must include an explicit port',
-      });
-    }
-  }
-  catch {
-    ctx.addIssue({
-      code: 'custom',
-      message: 'REDIS_URL must be a valid URL',
-    });
-  }
-});
-
 const envSchema = z.object({
   PORT: z.coerce.number().int(),
   DATABASE_URL: z.string().trim().min(1),

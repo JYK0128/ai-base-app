@@ -49,6 +49,6 @@ export class DeleteTranslationHandler implements ICommandHandler<DeleteTranslati
    * 번역 레코드를 soft delete 합니다.
    */
   private softDeleteTranslation(translation: I18nTranslation): void {
-    translation.remove();
+    translation.delete();
   }
 }

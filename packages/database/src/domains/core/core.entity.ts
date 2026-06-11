@@ -4,6 +4,7 @@ import { uuidv7 } from 'uuidv7';
 
 import { QueryEngine } from './core.query';
 import { CoreRepository } from './core.repository';
+
 export abstract class CoreEntity<
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   Entity extends object = any,
@@ -158,13 +159,18 @@ export abstract class CoreEntity<
     return QueryEngine.update(this, data);
   }
 
-  static nativeUpdate<T extends CoreEntity>(
-    this: EntityClass<T>,
-    where: FilterQuery<T>,
-    data: EntityData<T>,
-    options?: UpdateOptions<T>,
+  nativeUpdate(
+    data: EntityData<this>,
+    options?: UpdateOptions<this>,
   ): Promise<number> {
-    return QueryEngine.nativeUpdate(this, where, data, options);
+    const where = { id: this.id } as FilterQuery<this>;
+
+    return QueryEngine.nativeUpdate<this>(
+      this.constructor,
+      where,
+      data,
+      options,
+    );
   }
 
   // === Delete ===
@@ -172,11 +178,15 @@ export abstract class CoreEntity<
     QueryEngine.delete(this);
   }
 
-  static nativeDelete<T extends CoreEntity>(
-    this: EntityClass<T>,
-    where: FilterQuery<T>,
-    options?: DeleteOptions<T>,
+  nativeDelete(
+    options?: DeleteOptions<this>,
   ): Promise<number> {
-    return QueryEngine.nativeDelete(this, where, options);
+    const where = { id: this.id } as FilterQuery<this>;
+
+    return QueryEngine.nativeDelete<this>(
+      this.constructor,
+      where,
+      options,
+    );
   }
 }
