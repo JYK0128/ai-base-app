@@ -4,7 +4,6 @@ import { Entity, Enum, ManyToOne, Property } from '@mikro-orm/decorators/legacy'
 import { CoreEntity } from '../../core/core.entity';
 import { Member } from '../member/member.entity';
 import { Organization } from '../organization/organization.entity';
-import { SupportTicketRepository } from './support-ticket.repository';
 
 export enum TicketStatus {
   OPEN = 'OPEN',
@@ -20,9 +19,18 @@ export enum TicketPriority {
   URGENT = 'URGENT',
 }
 
-@Entity({ schema: 'platform', repository: () => SupportTicketRepository })
+@Entity({ schema: 'platform' })
 export class SupportTicket extends CoreEntity<SupportTicket> {
   [EntityName]?: 'SupportTicket';
+
+  @ManyToOne(() => Member)
+  author!: Rel<Member>;
+
+  @ManyToOne(() => Member, { nullable: true })
+  assignedTo?: Rel<Member>;
+
+  @ManyToOne(() => Organization)
+  organization!: Rel<Organization>;
 
   @Property({ type: 'string' })
   title!: string;
@@ -35,13 +43,4 @@ export class SupportTicket extends CoreEntity<SupportTicket> {
 
   @Enum(() => TicketPriority)
   priority: Opt<TicketPriority> = TicketPriority.MEDIUM;
-
-  @ManyToOne(() => Member)
-  author!: Rel<Member>;
-
-  @ManyToOne(() => Member, { nullable: true })
-  assignedTo?: Rel<Member>;
-
-  @ManyToOne(() => Organization)
-  organization!: Rel<Organization>;
 }

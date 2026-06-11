@@ -2,7 +2,7 @@ import { Transactional } from '@mikro-orm/decorators/legacy';
 import { InjectRepository } from '@mikro-orm/nestjs';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { Resource, ResourceRepository } from '@pkg/database';
+import { CoreRepository, Resource } from '@pkg/database';
 
 import { DeleteResourceCommand } from './delete-resource.command';
 import { DeleteResourceAsserter } from './delete-resource.error';
@@ -13,7 +13,7 @@ export class DeleteResourceHandler implements ICommandHandler<DeleteResourceComm
 
   constructor(
     @InjectRepository(Resource)
-    private readonly resourceRepo: ResourceRepository,
+    private readonly resourceRepo: CoreRepository<Resource>,
     private readonly em: EntityManager,
   ) {}
 

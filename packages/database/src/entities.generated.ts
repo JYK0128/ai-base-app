@@ -7,7 +7,7 @@ import { I18nLocale } from './domains/platform/i18n/i18n.locale.entity.js';
 import { I18nTranslation } from './domains/platform/i18n/i18n.translation.entity.js';
 import { Member } from './domains/platform/member/member.entity.js';
 import { MemberAccount } from './domains/platform/member/member.account.entity.js';
-import { MemberInvite, MemberInviteInfoMetadata, MemberInviteMailDeliveryMetadata, MemberInviteMetadata, MemberInviteTimelineMetadata } from './domains/platform/member/member.invite.entity.js';
+import { MemberInvite, MemberInviteMetadata } from './domains/platform/member/member.invite.entity.js';
 import { Organization } from './domains/platform/organization/organization.entity.js';
 import { OrganizationPermission } from './domains/platform/organization/organization.permission.entity.js';
 import { OrganizationRole } from './domains/platform/organization/organization.role.entity.js';
@@ -28,10 +28,7 @@ export const entities = [
   Member,
   MemberAccount,
   MemberInvite,
-  MemberInviteInfoMetadata,
-  MemberInviteMailDeliveryMetadata,
   MemberInviteMetadata,
-  MemberInviteTimelineMetadata,
   Organization,
   OrganizationPermission,
   OrganizationRole,

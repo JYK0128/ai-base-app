@@ -1,9 +1,9 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { Member, MemberInvite, MemberInviteInfoMetadata } from '@pkg/database';
+import { Member } from '@pkg/database';
 
 import { InviteStatusDto, MAIL_DELIVERY_STATUS_VALUES, MemberRoleDto, MemberStatusDto } from './members-request.dto';
 
-export class MemberResponseDto implements Pick<Member, 'id' | 'name' | 'status' | 'createdBy'>, Pick<MemberInviteInfoMetadata, 'note'> {
+export class MemberResponseDto implements Pick<Member, 'id' | 'name' | 'status' | 'createdBy'>, Pick<{ note?: string }, 'note'> {
   @ApiProperty({ example: '019e5236-adae-70d7-a8f7-2dc90bdf7082', description: '멤버 식별자' })
   id!: string;
 
@@ -47,12 +47,30 @@ export class MemberResponseDto implements Pick<Member, 'id' | 'name' | 'status' 
   isMe?: boolean;
 }
 
-export class InviteResponseDto extends MemberResponseDto implements Pick<MemberInvite, 'expiresAt'> {
-  @ApiProperty({ example: '2026-06-13T08:30:00.000Z', description: '초대 만료 시각' })
-  expiresAt!: Date;
-
-  @ApiProperty({ enum: InviteStatusDto, example: 'PENDING', description: '초대 상태' })
+export class InviteResponseDto extends MemberResponseDto {
+  @ApiProperty({ enum: InviteStatusDto, example: 'QUEUED', description: '초대 상태' })
   inviteStatus!: InviteStatusDto;
+
+  @ApiProperty({ example: '8b7c9d2e-6d6f-4fbe-9f7f-8a3fd1d2f9d0', description: '메일 전송 시도 식별자' })
+  attemptId!: string;
+
+  @ApiProperty({ example: '2026-05-30T08:30:00.000Z', description: '큐 적재 시각' })
+  queuedAt!: string;
+
+  @ApiPropertyOptional({ example: '2026-05-30T08:31:00.000Z', description: '메일 전송 성공 시각' })
+  sentAt?: string | null;
+
+  @ApiPropertyOptional({ example: '2026-05-30T08:45:00.000Z', description: '메일 전송 실패 시각' })
+  failedAt?: string | null;
+
+  @ApiPropertyOptional({ example: '2026-05-30T09:00:00.000Z', description: '초대 취소 시각' })
+  cancelAt?: string | null;
+
+  @ApiPropertyOptional({ example: '2026-06-01T10:00:00.000Z', description: '초대 수락 시각' })
+  acceptedAt?: string | null;
+
+  @ApiPropertyOptional({ example: '2026-06-01T11:00:00.000Z', description: '초대 거절 시각' })
+  rejectedAt?: string | null;
 }
 
 export class MemberMutationResponseDto {

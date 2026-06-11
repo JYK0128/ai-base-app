@@ -1,6 +1,6 @@
 import { InjectRepository } from '@mikro-orm/nestjs';
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
-import { Organization, OrganizationRepository } from '@pkg/database';
+import { CoreRepository, Organization } from '@pkg/database';
 
 import { GetOrganizationsAsserter } from './get-organizations.error';
 import { GetOrganizationsQuery } from './get-organizations.query';
@@ -14,7 +14,7 @@ export class GetOrganizationsHandler implements IQueryHandler<GetOrganizationsQu
 
   constructor(
     @InjectRepository(Organization)
-    private readonly organizationRepo: OrganizationRepository,
+    private readonly organizationRepo: CoreRepository<Organization>,
   ) {}
 
   async execute(query: GetOrganizationsQuery): Promise<Organization[]> {

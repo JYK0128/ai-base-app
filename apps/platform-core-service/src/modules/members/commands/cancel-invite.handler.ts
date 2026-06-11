@@ -2,6 +2,7 @@ import { Transactional } from '@mikro-orm/decorators/legacy';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { MemberInvite, MemberInviteStatus, Organization } from '@pkg/database';
+import { JsonbSetQueryBuilder } from '@pkg/shared/server';
 import { ClsService } from 'nestjs-cls';
 
 import type { InviteIdRecord } from '../members.contract';
@@ -44,21 +45,28 @@ export class CancelInviteHandler implements ICommandHandler<CancelInviteCommand>
   }
 
   private async validateInviteState(invite: MemberInvite): Promise<void> {
-    if (!invite.isPending) {
+    if (!invite.isQueued) {
       await this.Asserter.throw('INVITE_NOT_CANCELLABLE');
     }
   }
 
   private async processCancellation(invite: MemberInvite, organization: Organization): Promise<void> {
     const qb = this.em.createQueryBuilder(MemberInvite);
+    const builder = new JsonbSetQueryBuilder<MemberInvite>();
+    const now = new Date();
     const result = await qb
       .update({
         status: MemberInviteStatus.CANCELED,
+        metadata: builder.build('metadata', {
+          cancelAt: now,
+          acceptedAt: null,
+          rejectedAt: null,
+        }),
       })
       .where({
         id: invite.id,
         organization: organization.id,
-        status: MemberInviteStatus.PENDING,
+        status: MemberInviteStatus.QUEUED,
       })
       .execute();
 

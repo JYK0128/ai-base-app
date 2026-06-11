@@ -1,4 +1,4 @@
-import { type BaseEntity, type CountByOptions, type CountOptions, type CreateOptions, type Cursor, type DeleteOptions, type Dictionary, type EntityData, type EntityKey, type EntityManager, type EntityName, type FilterQuery, type FindByCursorOptions, type FindOneOptions, type FindOneOrFailOptions, type FindOptions, type FromEntityType, type Loaded, type Primary, RequestContext, type RequiredEntityData, type UpdateOptions, type WithUsingOptions } from '@mikro-orm/core';
+import { type BaseEntity, type CountByOptions, type CountOptions, type CreateOptions, type Cursor, type DeleteOptions, type Dictionary, type EntityData, type EntityKey, type EntityManager, type EntityName, type FilterQuery, type FindByCursorOptions, type FindOneOptions, type FindOneOrFailOptions, type FindOptions, type Loaded, type Primary, RequestContext, type RequiredEntityData, type UpdateOptions, type WithUsingOptions } from '@mikro-orm/core';
 import type { ServerContext } from '@pkg/shared/server';
 
 export const QueryEngine = {
@@ -154,14 +154,38 @@ export const QueryEngine = {
     };
   },
 
-  // === UPDATE ===
-  update<Entity extends BaseEntity>(
-    entity: Entity,
-    data: EntityData<FromEntityType<Entity>>,
-  ): Entity {
-    if (!entity.isInitialized) throw new Error('Entity is not initialized.');
-    return this.em.assign(entity, data);
+  // === entity ===
+  /** @deprecated - 엔티티 개체 */
+  assign(data: unknown) {
+    throw new Error('Not implemented');
   },
+
+  remove<Entity extends BaseEntity>(
+    entity: Entity,
+  ): void {
+    if (!entity.isInitialized) throw new Error('Entity is not initialized.');
+    this.em.remove(entity);
+  },
+
+  // === INSERT ===
+  nativeInsert() {
+
+  },
+
+  nativeInsertMany() {
+
+  },
+
+  // === UPSERT ===
+  nativeUpsert() {
+
+  },
+
+  nativeUpsertMany() {
+
+  },
+
+  // === UPDATE ===
   nativeUpdate<Entity extends object>(
     clz: EntityName<Entity>,
     where: FilterQuery<Entity>,
@@ -176,12 +200,6 @@ export const QueryEngine = {
   },
 
   // === DELETE ===
-  delete<Entity extends BaseEntity>(
-    entity: Entity,
-  ): void {
-    if (!entity.isInitialized) throw new Error('Entity is not initialized.');
-    this.em.remove(entity);
-  },
   nativeDelete<Entity extends object>(
     clz: EntityName<Entity>,
     where: FilterQuery<Entity>,

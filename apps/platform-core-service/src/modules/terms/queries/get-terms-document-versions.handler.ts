@@ -1,6 +1,6 @@
 import { InjectRepository } from '@mikro-orm/nestjs';
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
-import { TermsDocument, TermsDocumentRepository, TermsVersion, TermsVersionRepository } from '@pkg/database';
+import { CoreRepository, TermsDocument, TermsVersion } from '@pkg/database';
 
 import { mapTermsVersionResponse, type TermsVersionResponse } from '../terms.helper';
 import { GetTermsDocumentVersionsAsserter } from './get-terms-document-versions.error';
@@ -17,9 +17,9 @@ export class GetTermsDocumentVersionsHandler implements IQueryHandler<GetTermsDo
 
   constructor(
     @InjectRepository(TermsDocument)
-    private readonly termsDocumentRepo: TermsDocumentRepository,
+    private readonly termsDocumentRepo: CoreRepository<TermsDocument>,
     @InjectRepository(TermsVersion)
-    private readonly termsVersionRepo: TermsVersionRepository,
+    private readonly termsVersionRepo: CoreRepository<TermsVersion>,
   ) {}
 
   async execute(query: GetTermsDocumentVersionsQuery): Promise<TermsVersionResponse[]> {

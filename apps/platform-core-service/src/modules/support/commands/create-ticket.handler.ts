@@ -2,7 +2,7 @@ import { Transactional } from '@mikro-orm/decorators/legacy';
 import { InjectRepository } from '@mikro-orm/nestjs';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { MemberAccount, MemberAccountRepository, Organization, SupportTicket, SupportTicketRepository, TicketStatus } from '@pkg/database';
+import { CoreRepository, MemberAccount, Organization, SupportTicket, TicketStatus } from '@pkg/database';
 
 import { CreateTicketCommand } from './create-ticket.command';
 import { CreateTicketAsserter } from './create-ticket.error';
@@ -16,9 +16,9 @@ export class CreateTicketHandler implements ICommandHandler<CreateTicketCommand>
 
   constructor(
     @InjectRepository(SupportTicket)
-    private readonly supportTicketRepo: SupportTicketRepository,
+    private readonly supportTicketRepo: CoreRepository<SupportTicket>,
     @InjectRepository(MemberAccount)
-    private readonly memberAccountRepo: MemberAccountRepository,
+    private readonly memberAccountRepo: CoreRepository<MemberAccount>,
     private readonly em: EntityManager,
   ) {}
 

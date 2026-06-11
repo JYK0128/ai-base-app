@@ -2,9 +2,8 @@ import { EntityName } from '@mikro-orm/core';
 import { Entity, Property } from '@mikro-orm/decorators/legacy';
 
 import { CoreEntity } from '../../core/core.entity';
-import { I18nTranslationRepository } from './i18n.translation.repository';
 
-@Entity({ schema: 'platform', repository: () => I18nTranslationRepository })
+@Entity({ schema: 'platform' })
 export class I18nTranslation extends CoreEntity<I18nTranslation> {
   [EntityName]?: 'I18nTranslation';
 

@@ -1,7 +1,7 @@
 import { Transactional } from '@mikro-orm/decorators/legacy';
-import { EntityManager, raw } from '@mikro-orm/postgresql';
+import { raw } from '@mikro-orm/postgresql';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { Member, MemberStatus, Organization, OrganizationRoleAssignment } from '@pkg/database';
+import { EntityManager, Member, MemberStatus, Organization, OrganizationRoleAssignment } from '@pkg/database';
 import { ClsService } from 'nestjs-cls';
 
 import type { MemberIdRecord } from '../members.contract';
@@ -74,6 +74,8 @@ export class ToggleMemberStatusHandler implements ICommandHandler<UpdateMemberSt
   ): Promise<void> {
     const qb1 = this.em.createQueryBuilder(Member);
     const qb2 = this.em.createQueryBuilder(OrganizationRoleAssignment);
+
+    const kysely = this.em.getKysely();
 
     const subquery = qb2
       .count()

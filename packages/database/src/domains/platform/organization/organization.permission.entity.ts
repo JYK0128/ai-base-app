@@ -3,10 +3,9 @@ import { Entity, ManyToOne, Property } from '@mikro-orm/decorators/legacy';
 
 import { CoreEntity } from '../../core/core.entity';
 import { Resource } from '../resource/resource.entity';
-import { OrganizationPermissionRepository } from './organization.permission.repository';
 import { OrganizationRole } from './organization.role.entity';
 
-@Entity({ schema: 'platform', repository: () => OrganizationPermissionRepository })
+@Entity({ schema: 'platform' })
 export class OrganizationPermission extends CoreEntity<OrganizationPermission> {
   [EntityName]?: 'OrganizationPermission';
 

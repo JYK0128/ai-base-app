@@ -2,7 +2,7 @@ import { Transactional } from '@mikro-orm/decorators/legacy';
 import { InjectRepository } from '@mikro-orm/nestjs';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { TermsConsent, TermsDocument, TermsDocumentRepository, TermsVersion, TermsVersionRepository } from '@pkg/database';
+import { CoreRepository, TermsConsent, TermsDocument, TermsVersion } from '@pkg/database';
 
 import { getCurrentPublishedVersion } from '../terms.helper';
 import { DeleteTermsDocumentCommand } from './delete-terms-document.command';
@@ -21,9 +21,9 @@ export class DeleteTermsDocumentHandler implements ICommandHandler<DeleteTermsDo
 
   constructor(
     @InjectRepository(TermsDocument)
-    private readonly termsDocumentRepo: TermsDocumentRepository,
+    private readonly termsDocumentRepo: CoreRepository<TermsDocument>,
     @InjectRepository(TermsVersion)
-    private readonly termsVersionRepo: TermsVersionRepository,
+    private readonly termsVersionRepo: CoreRepository<TermsVersion>,
     private readonly em: EntityManager,
   ) {}
 

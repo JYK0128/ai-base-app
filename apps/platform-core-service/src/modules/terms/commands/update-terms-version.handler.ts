@@ -2,7 +2,7 @@ import { Transactional } from '@mikro-orm/decorators/legacy';
 import { InjectRepository } from '@mikro-orm/nestjs';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { TermsDocumentStatus, TermsVersion, TermsVersionRepository } from '@pkg/database';
+import { CoreRepository, TermsDocumentStatus, TermsVersion } from '@pkg/database';
 
 import { mapTermsVersionResponse, type TermsVersionResponse } from '../terms.helper';
 import { UpdateTermsVersionCommand } from './update-terms-version.command';
@@ -17,7 +17,7 @@ export class UpdateTermsVersionHandler implements ICommandHandler<UpdateTermsVer
 
   constructor(
     @InjectRepository(TermsVersion)
-    private readonly termsVersionRepo: TermsVersionRepository,
+    private readonly termsVersionRepo: CoreRepository<TermsVersion>,
     private readonly em: EntityManager,
   ) {}
 

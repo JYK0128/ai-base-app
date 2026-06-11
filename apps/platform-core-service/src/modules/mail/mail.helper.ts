@@ -1,9 +1,64 @@
-import { MAIL_DELIVERY_TIMEOUT_MS, type MemberInvite, MemberInviteMailDeliveryMetadata, MemberInviteMetadata } from '@pkg/database';
+import { MemberInviteMetadata, type MemberInvite } from '@pkg/database';
 
 import type { MailDeliveryStatus, MailDeliveryStatusView } from './mail.types';
 
-export function getMailDelivery(metadata: MemberInviteMetadata | undefined): MemberInviteMailDeliveryMetadata | undefined {
-  return metadata?.mailDelivery;
+export const MAIL_DELIVERY_TIMEOUT_MS = 15 * 60 * 1000;
+
+type MailDeliveryMetadata = {
+  attemptId: string
+  queuedAt: Date
+  sentAt?: Date | null
+  failedAt?: Date | null
+  expiredAt?: Date | null
+};
+
+export function getMailDelivery(metadata: MemberInviteMetadata | undefined): MailDeliveryMetadata | undefined {
+  if (!metadata) {
+    return undefined;
+  }
+
+  return {
+    attemptId: metadata.attemptId,
+    queuedAt: metadata.queuedAt,
+    sentAt: metadata.sentAt,
+    failedAt: metadata.failedAt,
+    expiredAt: metadata.expiredAt as Date | null | undefined,
+  };
+}
+
+export function isMailDeliveryQueued(metadata: MemberInviteMetadata | undefined): boolean {
+  const delivery = getMailDelivery(metadata);
+
+  if (!delivery) {
+    return false;
+  }
+
+  return !delivery.sentAt && !delivery.failedAt && !isMailDeliveryTimeout(metadata);
+}
+
+export function isMailDeliveryTimeout(metadata: MemberInviteMetadata | undefined): boolean {
+  const delivery = getMailDelivery(metadata);
+
+  if (!delivery || delivery.sentAt || delivery.failedAt) {
+    return false;
+  }
+
+  if (delivery.expiredAt) {
+    return delivery.expiredAt.getTime() <= Date.now();
+  }
+
+  const queuedAtTime = delivery.queuedAt.getTime();
+  return Number.isFinite(queuedAtTime) && queuedAtTime + MAIL_DELIVERY_TIMEOUT_MS <= Date.now();
+}
+
+export function isMailDeliveryFailed(metadata: MemberInviteMetadata | undefined): boolean {
+  const delivery = getMailDelivery(metadata);
+
+  if (!delivery) {
+    return false;
+  }
+
+  return !!delivery.failedAt || isMailDeliveryTimeout(metadata);
 }
 
 export function markMailDeliverySent(
@@ -22,13 +77,8 @@ export function markMailDeliverySent(
   }
 
   const next = new MemberInviteMetadata(metadata);
-
-  next.mailDelivery = new MemberInviteMailDeliveryMetadata({
-    attemptId: delivery.attemptId,
-    queuedAt: delivery.queuedAt,
-    sentAt,
-    failedAt: undefined,
-  });
+  next.sentAt = sentAt;
+  next.failedAt = undefined;
 
   return next;
 }
@@ -49,13 +99,8 @@ export function markMailDeliveryFailed(
   }
 
   const next = new MemberInviteMetadata(metadata);
-
-  next.mailDelivery = new MemberInviteMailDeliveryMetadata({
-    attemptId: delivery.attemptId,
-    queuedAt: delivery.queuedAt,
-    sentAt: undefined,
-    failedAt,
-  });
+  next.sentAt = undefined;
+  next.failedAt = failedAt;
 
   return next;
 }
@@ -73,7 +118,7 @@ export function resolveMailDeliveryStatusView(
   const sentAt = delivery.sentAt?.toISOString();
   const failedAt = delivery.failedAt?.toISOString();
 
-  if (invite?.isMailDeliveryTimeout) {
+  if (isMailDeliveryTimeout(invite?.metadata)) {
     const queuedAtTime = delivery.queuedAt.getTime();
 
     if (Number.isFinite(queuedAtTime)) {
@@ -90,7 +135,7 @@ export function resolveMailDeliveryStatusView(
   if (delivery.sentAt) {
     mailDeliveryStatus = 'SENT';
   }
-  else if (invite?.isMailDeliveryFailed) {
+  else if (isMailDeliveryFailed(invite?.metadata)) {
     mailDeliveryStatus = 'FAILED';
   }
 

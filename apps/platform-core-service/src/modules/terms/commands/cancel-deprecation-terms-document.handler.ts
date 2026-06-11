@@ -2,7 +2,7 @@ import { Transactional } from '@mikro-orm/decorators/legacy';
 import { InjectRepository } from '@mikro-orm/nestjs';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { TermsDocument, TermsDocumentRepository } from '@pkg/database';
+import { CoreRepository, TermsDocument } from '@pkg/database';
 
 import { mapTermsDocumentResponse, type TermsDocumentResponse } from '../terms.helper';
 import { CancelDeprecationTermsDocumentCommand } from './cancel-deprecation-terms-document.command';
@@ -17,7 +17,7 @@ export class CancelDeprecationTermsDocumentHandler implements ICommandHandler<Ca
 
   constructor(
     @InjectRepository(TermsDocument)
-    private readonly termsDocumentRepo: TermsDocumentRepository,
+    private readonly termsDocumentRepo: CoreRepository<TermsDocument>,
     private readonly em: EntityManager,
   ) {}
 

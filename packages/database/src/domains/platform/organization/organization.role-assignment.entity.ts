@@ -5,9 +5,8 @@ import { CoreEntity } from '../../core/core.entity';
 import { Member } from '../member/member.entity';
 import { Organization } from './organization.entity';
 import { OrganizationRole } from './organization.role.entity';
-import { OrganizationRoleAssignmentRepository } from './organization.role-assignment.repository';
 
-@Entity({ schema: 'platform', repository: () => OrganizationRoleAssignmentRepository })
+@Entity({ schema: 'platform' })
 export class OrganizationRoleAssignment extends CoreEntity<OrganizationRoleAssignment> {
   [EntityName]?: 'OrganizationRoleAssignment';
 

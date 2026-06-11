@@ -1,6 +1,6 @@
 import { InjectRepository } from '@mikro-orm/nestjs';
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
-import { MemberAccount, MemberAccountRepository } from '@pkg/database';
+import { CoreRepository, MemberAccount } from '@pkg/database';
 import { ClsService } from 'nestjs-cls';
 
 import { GetMeAsserter } from './get-me.error';
@@ -13,7 +13,7 @@ export class GetMeHandler implements IQueryHandler<GetMeQuery> {
 
   constructor(
     @InjectRepository(MemberAccount)
-    private readonly memberAccountRepository: MemberAccountRepository,
+    private readonly memberAccountRepository: CoreRepository<MemberAccount>,
     private readonly cls: ClsService,
   ) {}
 

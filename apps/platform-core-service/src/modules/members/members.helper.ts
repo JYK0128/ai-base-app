@@ -1,28 +1,32 @@
-import { type Member, type MemberInvite } from '@pkg/database';
+import { type Member, type MemberInvite, MemberInviteMetadata } from '@pkg/database';
 
+import { isMailDeliveryFailed, isMailDeliveryQueued, isMailDeliveryTimeout } from '../mail/mail.helper';
 import type { InviteRecord, MemberRecord } from './members.contract';
 
 export function buildInviteRecord(invite: MemberInvite): InviteRecord {
+  const metadata = invite.metadata ?? new MemberInviteMetadata();
+
   return {
     ...invite,
+    status: invite.status,
     isPending: invite.isPending,
+    isExpired: invite.isExpired,
     isCanceled: invite.isCanceled,
     isAccepted: invite.isAccepted,
     isRejected: invite.isRejected,
+    isQueued: invite.isQueued,
     isDeleted: invite.isDeleted,
-    isMailDeliveryFailed: invite.isMailDeliveryFailed,
-    isMailDeliveryQueued: invite.isMailDeliveryQueued,
-    isMailDeliveryTimeout: invite.isMailDeliveryTimeout,
-    ...invite.metadata.info,
-    ...invite.metadata.mailDelivery,
-    ...invite.metadata.timeline,
-    attemptId: invite.metadata.mailDelivery.attemptId,
-    queuedAt: invite.metadata.mailDelivery.queuedAt.toISOString(),
-    sentAt: invite.metadata.mailDelivery.sentAt?.toISOString(),
-    failedAt: invite.metadata.mailDelivery.failedAt?.toISOString(),
-    resentAt: invite.metadata.timeline.resentAt?.toISOString(),
-    cancelAt: invite.metadata.timeline.cancelAt?.toISOString(),
-    revivedAt: invite.metadata.timeline.revivedAt?.toISOString(),
+    isMailDeliveryFailed: isMailDeliveryFailed(invite.metadata),
+    isMailDeliveryQueued: isMailDeliveryQueued(invite.metadata),
+    isMailDeliveryTimeout: isMailDeliveryTimeout(invite.metadata),
+    note: metadata.note,
+    attemptId: metadata.attemptId,
+    queuedAt: metadata.queuedAt.toISOString(),
+    sentAt: metadata.sentAt?.toISOString(),
+    failedAt: metadata.failedAt?.toISOString(),
+    cancelAt: metadata.cancelAt?.toISOString(),
+    acceptedAt: metadata.acceptedAt?.toISOString(),
+    rejectedAt: metadata.rejectedAt?.toISOString(),
   };
 }
 

@@ -4,14 +4,13 @@ import { Entity, Enum, ManyToOne, OneToMany, Property } from '@mikro-orm/decorat
 import { CoreEntity } from '../../core/core.entity';
 import { TermsConsent } from './terms.consent.entity';
 import { TermsDocument } from './terms.document.entity';
-import { TermsVersionRepository } from './terms.version.repository';
 
 export enum TermsVersionStatus {
   DRAFT = 'DRAFT',
   PUBLISHED = 'PUBLISHED',
 }
 
-@Entity({ schema: 'platform', repository: () => TermsVersionRepository })
+@Entity({ schema: 'platform' })
 export class TermsVersion extends CoreEntity<TermsVersion> {
   [EntityName]?: 'TermsVersion';
 

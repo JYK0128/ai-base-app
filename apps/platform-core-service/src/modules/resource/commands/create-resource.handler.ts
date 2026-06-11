@@ -1,6 +1,6 @@
 import { Transactional } from '@mikro-orm/decorators/legacy';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { Resource, ResourceRepository, ResourceScope } from '@pkg/database';
+import { CoreRepository, Resource, ResourceScope } from '@pkg/database';
 
 import { CreateResourceCommand } from './create-resource.command';
 import { CreateResourceAsserter } from './create-resource.error';
@@ -10,7 +10,7 @@ export class CreateResourceHandler implements ICommandHandler<CreateResourceComm
   private readonly Asserter = CreateResourceAsserter;
 
   constructor(
-    private readonly resourceRepo: ResourceRepository,
+    private readonly resourceRepo: CoreRepository<Resource>,
   ) {}
 
   @Transactional()

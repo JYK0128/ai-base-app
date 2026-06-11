@@ -1,4 +1,4 @@
-import { BaseEntity, type CountByOptions, type CountOptions, type CreateOptions, type Cursor, type DeleteOptions, type Dictionary, type EntityClass, type EntityData, type EntityKey, EntityRepositoryType, type FilterQuery, type FindByCursorOptions, type FindOneOptions, type FindOneOrFailOptions, type FindOptions, type FromEntityType, type Loaded, OptionalProps, type Primary, type RequiredEntityData, type UpdateOptions, type WithUsingOptions } from '@mikro-orm/core';
+import { BaseEntity, type CountByOptions, type CountOptions, type CreateOptions, type Cursor, type DeleteOptions, type Dictionary, type EntityClass, type EntityData, type EntityKey, EntityRepositoryType, type FilterQuery, type FindByCursorOptions, type FindOneOptions, type FindOneOrFailOptions, type FindOptions, type Loaded, OptionalProps, type Primary, type RequiredEntityData, type UpdateOptions, type WithUsingOptions } from '@mikro-orm/core';
 import { PrimaryKey, Property } from '@mikro-orm/decorators/legacy';
 import { uuidv7 } from 'uuidv7';
 
@@ -7,10 +7,10 @@ import { CoreRepository } from './core.repository';
 
 export abstract class CoreEntity<
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  Entity extends object = any,
-  Optional extends keyof Entity = never,
+  TEntity extends object = any,
+  Optional extends keyof TEntity = never,
 > extends BaseEntity {
-  [EntityRepositoryType]?: CoreRepository<Entity>;
+  [EntityRepositoryType]?: CoreRepository<TEntity>;
   [OptionalProps]?: 'createdAt' | 'updatedAt' | 'isDeleted' | Optional;
 
   @PrimaryKey()
@@ -162,11 +162,13 @@ export abstract class CoreEntity<
     return QueryEngine.findByPage<T, Hint, Fields, Excludes, Using>(this, where as never, options as never);
   }
 
-  // === Update ===
-  update(data: EntityData<FromEntityType<this>>) {
-    return QueryEngine.update(this, data);
+  // === Entity ===
+
+  remove() {
+    QueryEngine.remove(this);
   }
 
+  // === Update ===
   nativeUpdate(
     data: EntityData<this>,
     options?: UpdateOptions<this>,
@@ -182,10 +184,6 @@ export abstract class CoreEntity<
   }
 
   // === Delete ===
-  delete() {
-    QueryEngine.delete(this);
-  }
-
   nativeDelete(
     options?: DeleteOptions<this>,
   ): Promise<number> {

@@ -1,7 +1,7 @@
 import { Transactional } from '@mikro-orm/decorators/legacy';
 import { InjectRepository } from '@mikro-orm/nestjs';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { Organization, OrganizationRepository, OrganizationStatus } from '@pkg/database';
+import { CoreRepository, Organization, OrganizationStatus } from '@pkg/database';
 
 import { ApproveOrganizationCommand } from './approve-organization.command';
 import { ApproveOrganizationAsserter } from './approve-organization.error';
@@ -15,7 +15,7 @@ export class ApproveOrganizationHandler implements ICommandHandler<ApproveOrgani
 
   constructor(
     @InjectRepository(Organization)
-    private readonly organizationRepo: OrganizationRepository,
+    private readonly organizationRepo: CoreRepository<Organization>,
   ) {}
 
   @Transactional()

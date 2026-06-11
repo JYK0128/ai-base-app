@@ -1,6 +1,6 @@
 import { InjectRepository } from '@mikro-orm/nestjs';
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
-import { TermsDocument, TermsDocumentRepository } from '@pkg/database';
+import { CoreRepository, TermsDocument } from '@pkg/database';
 
 import { mapTermsDocumentResponse, type TermsDocumentResponse } from '../terms.helper';
 import { GetTermsDocumentsQuery } from './get-terms-documents.query';
@@ -47,7 +47,7 @@ const buildDocumentFilter = (query: GetTermsDocumentsQuery) => {
 export class GetTermsDocumentsHandler implements IQueryHandler<GetTermsDocumentsQuery> {
   constructor(
     @InjectRepository(TermsDocument)
-    private readonly termsDocumentRepo: TermsDocumentRepository,
+    private readonly termsDocumentRepo: CoreRepository<TermsDocument>,
   ) {}
 
   async execute(query: GetTermsDocumentsQuery): Promise<TermsDocumentResponse[]> {

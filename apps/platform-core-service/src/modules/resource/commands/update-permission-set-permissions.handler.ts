@@ -2,7 +2,7 @@ import { Transactional } from '@mikro-orm/decorators/legacy';
 import { InjectRepository } from '@mikro-orm/nestjs';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { Organization, OrganizationPermission, OrganizationPermissionRepository, OrganizationRepository, OrganizationRole, OrganizationRoleRepository, Resource, ResourceRepository } from '@pkg/database';
+import { CoreRepository, Organization, OrganizationPermission, OrganizationRole, Resource } from '@pkg/database';
 import { ClsService } from 'nestjs-cls';
 
 import { buildPermissionCode, buildPermissionSetRecord, normalizePermissionCodes } from '../permission-sets.helpers';
@@ -15,13 +15,13 @@ export class UpdatePermissionSetPermissionsHandler implements ICommandHandler<Up
 
   constructor(
     @InjectRepository(Organization)
-    private readonly organizationRepo: OrganizationRepository,
+    private readonly organizationRepo: CoreRepository<Organization>,
     @InjectRepository(OrganizationRole)
-    private readonly roleRepo: OrganizationRoleRepository,
+    private readonly roleRepo: CoreRepository<OrganizationRole>,
     @InjectRepository(Resource)
-    private readonly resourceRepo: ResourceRepository,
+    private readonly resourceRepo: CoreRepository<Resource>,
     @InjectRepository(OrganizationPermission)
-    private readonly permissionRepo: OrganizationPermissionRepository,
+    private readonly permissionRepo: CoreRepository<OrganizationPermission>,
     private readonly em: EntityManager,
     private readonly cls: ClsService,
   ) {}

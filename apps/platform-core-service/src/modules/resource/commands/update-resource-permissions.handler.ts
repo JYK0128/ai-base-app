@@ -1,7 +1,7 @@
 import { Transactional } from '@mikro-orm/decorators/legacy';
 import { InjectRepository } from '@mikro-orm/nestjs';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { Resource, ResourceRepository } from '@pkg/database';
+import { CoreRepository, Resource } from '@pkg/database';
 
 import { UpdateResourcePermissionsCommand } from './update-resource-permissions.command';
 import { UpdateResourcePermissionsAsserter } from './update-resource-permissions.error';
@@ -12,7 +12,7 @@ export class UpdateResourcePermissionsHandler implements ICommandHandler<UpdateR
 
   constructor(
     @InjectRepository(Resource)
-    private readonly resourceRepo: ResourceRepository,
+    private readonly resourceRepo: CoreRepository<Resource>,
   ) {}
 
   @Transactional()

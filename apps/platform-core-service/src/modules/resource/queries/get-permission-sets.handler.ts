@@ -1,6 +1,6 @@
 import { InjectRepository } from '@mikro-orm/nestjs';
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
-import { Organization, OrganizationRepository, OrganizationRole, OrganizationRoleRepository } from '@pkg/database';
+import { CoreRepository, Organization, OrganizationRole } from '@pkg/database';
 import { ClsService } from 'nestjs-cls';
 
 import { buildPermissionSetRecord } from '../permission-sets.helpers';
@@ -13,9 +13,9 @@ export class GetPermissionSetsHandler implements IQueryHandler<GetPermissionSets
 
   constructor(
     @InjectRepository(Organization)
-    private readonly organizationRepo: OrganizationRepository,
+    private readonly organizationRepo: CoreRepository<Organization>,
     @InjectRepository(OrganizationRole)
-    private readonly roleRepo: OrganizationRoleRepository,
+    private readonly roleRepo: CoreRepository<OrganizationRole>,
     private readonly cls: ClsService,
   ) {}
 

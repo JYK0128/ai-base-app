@@ -4,7 +4,7 @@ import { Transactional } from '@mikro-orm/decorators/legacy';
 import { InjectRepository } from '@mikro-orm/nestjs';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { TermsDocument, TermsDocumentRepository, TermsDocumentStatus, TermsVersion, TermsVersionRepository } from '@pkg/database';
+import { CoreRepository, TermsDocument, TermsDocumentStatus, TermsVersion } from '@pkg/database';
 
 import { mapTermsVersionResponse, type TermsVersionResponse } from '../terms.helper';
 import { CreateTermsVersionCommand } from './create-terms-version.command';
@@ -19,9 +19,9 @@ export class CreateTermsVersionHandler implements ICommandHandler<CreateTermsVer
 
   constructor(
     @InjectRepository(TermsDocument)
-    private readonly termsDocumentRepo: TermsDocumentRepository,
+    private readonly termsDocumentRepo: CoreRepository<TermsDocument>,
     @InjectRepository(TermsVersion)
-    private readonly termsVersionRepo: TermsVersionRepository,
+    private readonly termsVersionRepo: CoreRepository<TermsVersion>,
     private readonly em: EntityManager,
   ) {}
 

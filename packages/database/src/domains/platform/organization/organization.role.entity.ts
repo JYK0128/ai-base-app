@@ -4,15 +4,20 @@ import { Entity, ManyToOne, OneToMany, Property } from '@mikro-orm/decorators/le
 import { CoreEntity } from '../../core/core.entity';
 import { Organization } from './organization.entity';
 import { OrganizationPermission } from './organization.permission.entity';
-import { OrganizationRoleRepository } from './organization.role.repository';
 import { OrganizationRoleAssignment } from './organization.role-assignment.entity';
 
-@Entity({ schema: 'platform', repository: () => OrganizationRoleRepository })
+@Entity({ schema: 'platform' })
 export class OrganizationRole extends CoreEntity<OrganizationRole> {
   [EntityName]?: 'OrganizationRole';
 
   @ManyToOne(() => Organization)
   organization!: Rel<Organization>;
+
+  @OneToMany(() => OrganizationPermission, (permission) => permission.role)
+  permissions = new Collection<OrganizationPermission>(this);
+
+  @OneToMany(() => OrganizationRoleAssignment, (assignment) => assignment.role)
+  assignments = new Collection<OrganizationRoleAssignment>(this);
 
   @Property({ type: 'string' })
   code!: string;
@@ -22,10 +27,4 @@ export class OrganizationRole extends CoreEntity<OrganizationRole> {
 
   @Property({ type: 'string', nullable: true })
   description?: string;
-
-  @OneToMany(() => OrganizationPermission, (permission) => permission.role)
-  permissions = new Collection<OrganizationPermission>(this);
-
-  @OneToMany(() => OrganizationRoleAssignment, (assignment) => assignment.role)
-  assignments = new Collection<OrganizationRoleAssignment>(this);
 }

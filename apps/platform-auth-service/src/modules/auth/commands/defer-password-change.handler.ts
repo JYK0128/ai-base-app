@@ -1,6 +1,6 @@
 import { Transactional } from '@mikro-orm/decorators/legacy';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { MemberAccount, MemberAccountRepository } from '@pkg/database';
+import { CoreRepository, MemberAccount } from '@pkg/database';
 
 import { ENV } from '@/env';
 
@@ -14,7 +14,7 @@ import { DeferPasswordChangeAsserter } from './defer-password-change.error';
 export class DeferPasswordChangeHandler implements ICommandHandler<DeferPasswordChangeCommand> {
   private readonly Asserter = DeferPasswordChangeAsserter;
 
-  constructor(private readonly memberAccountRepository: MemberAccountRepository) {}
+  constructor(private readonly memberAccountRepository: CoreRepository<MemberAccount>) {}
 
   @Transactional()
   async execute(command: DeferPasswordChangeCommand): Promise<void> {

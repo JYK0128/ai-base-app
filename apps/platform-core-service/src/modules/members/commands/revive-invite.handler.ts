@@ -11,8 +11,6 @@ import type { InviteIdRecord } from '../members.contract';
 import { ReviveInviteCommand } from './revive-invite.command';
 import { ReviveInviteAsserter } from './revive-invite.error';
 
-const INVITE_TTL_MS = 7 * 24 * 60 * 60 * 1000;
-
 @CommandHandler(ReviveInviteCommand)
 export class ReviveInviteHandler implements ICommandHandler<ReviveInviteCommand> {
   private readonly Asserter = ReviveInviteAsserter;
@@ -57,18 +55,16 @@ export class ReviveInviteHandler implements ICommandHandler<ReviveInviteCommand>
     const qb = this.em.createQueryBuilder(MemberInvite);
     const result = await qb
       .update({
-        status: MemberInviteStatus.PENDING,
+        status: MemberInviteStatus.QUEUED,
         token: randomUUID(),
-        expiresAt: new Date(now.getTime() + INVITE_TTL_MS),
         metadata: builder.build('metadata', {
-          timeline: {
-            revivedAt: now,
-            resentAt: null,
-          },
-          mailDelivery: {
-            queuedAt: now,
-            sentAt: null,
-          },
+          attemptId: randomUUID(),
+          queuedAt: now,
+          sentAt: null,
+          failedAt: null,
+          cancelAt: null,
+          acceptedAt: null,
+          rejectedAt: null,
         }),
       })
       .where({

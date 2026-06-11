@@ -2,7 +2,6 @@ import { EntityName, type Opt } from '@mikro-orm/core';
 import { Embeddable, Embedded, Entity, Enum, Property } from '@mikro-orm/decorators/legacy';
 
 import { CoreEntity } from '../../core/core.entity';
-import { AnnouncementRepository } from './announcement.repository';
 
 export enum AnnouncementCategory {
   NOTICE = 'NOTICE',
@@ -62,7 +61,7 @@ export class AnnouncementMetadata {
   endAt!: Date;
 }
 
-@Entity({ schema: 'platform', repository: () => AnnouncementRepository })
+@Entity({ schema: 'platform' })
 export class Announcement extends CoreEntity<Announcement> {
   [EntityName]?: 'Announcement';
 

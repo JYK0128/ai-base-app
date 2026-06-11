@@ -64,7 +64,7 @@ export class GetInvitesHandler implements IQueryHandler<GetInvitesQuery> {
         invite.email,
         invite.role.name,
         invite.role.code,
-        invite.metadata?.info?.note ?? '',
+        invite.metadata?.note ?? '',
       ].join(' ').toLowerCase();
 
       return searchTargets.includes(search);

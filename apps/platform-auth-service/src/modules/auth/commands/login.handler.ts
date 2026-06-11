@@ -1,6 +1,6 @@
 import { Transactional } from '@mikro-orm/decorators/legacy';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { MemberAccount, MemberAccountRepository } from '@pkg/database';
+import { CoreRepository, MemberAccount } from '@pkg/database';
 import { JwtUtil } from '@pkg/shared';
 
 import { ENV } from '@/env';
@@ -23,7 +23,7 @@ export class LoginHandler implements ICommandHandler<LoginCommand> {
   });
 
   constructor(
-    private readonly memberAccountRepository: MemberAccountRepository,
+    private readonly memberAccountRepository: CoreRepository<MemberAccount>,
     private readonly redisService: RedisService,
   ) {}
 

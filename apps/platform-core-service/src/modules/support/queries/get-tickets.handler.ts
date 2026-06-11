@@ -1,7 +1,7 @@
 import { FilterQuery } from '@mikro-orm/core';
 import { InjectRepository } from '@mikro-orm/nestjs';
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
-import { SupportTicket, SupportTicketRepository } from '@pkg/database';
+import { CoreRepository, SupportTicket } from '@pkg/database';
 
 import { GetTicketsAsserter } from './get-tickets.error';
 import { GetTicketsQuery } from './get-tickets.query';
@@ -15,7 +15,7 @@ export class GetTicketsHandler implements IQueryHandler<GetTicketsQuery> {
 
   constructor(
     @InjectRepository(SupportTicket)
-    private readonly supportTicketRepo: SupportTicketRepository,
+    private readonly supportTicketRepo: CoreRepository<SupportTicket>,
   ) {}
 
   async execute(query: GetTicketsQuery): Promise<SupportTicket[]> {

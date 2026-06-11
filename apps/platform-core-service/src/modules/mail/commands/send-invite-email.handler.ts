@@ -4,7 +4,7 @@ import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { MemberInvite, type MemberInviteMetadata } from '@pkg/database';
 
 import type { SendInviteEmailPayload } from '../mail.contract';
-import { markMailDeliveryFailed, markMailDeliverySent } from '../mail.helper';
+import { isMailDeliveryQueued, markMailDeliveryFailed, markMailDeliverySent } from '../mail.helper';
 import { MailService } from '../mail.service';
 import type { SendInviteEmailFailureContext } from '../mail.types';
 import { SendInviteEmailCommand } from './send-invite-email.command';
@@ -48,7 +48,7 @@ export class SendInviteEmailHandler implements ICommandHandler<SendInviteEmailCo
    */
   private async verifyMailDeliveryAttempt(invite: MemberInvite, attemptId: string): Promise<void> {
     await this.Asserter.throwIf(
-      !invite.isMailDeliveryQueued || invite.metadata.mailDelivery?.attemptId !== attemptId,
+      !isMailDeliveryQueued(invite.metadata) || invite.metadata.attemptId !== attemptId,
       'INVITE_MAIL_DELIVERY_NOT_READY',
     );
   }
@@ -155,7 +155,7 @@ export class SendInviteEmailHandler implements ICommandHandler<SendInviteEmailCo
         return;
       }
 
-      if (!invite.isMailDeliveryQueued || invite.metadata.mailDelivery?.attemptId !== attemptId) {
+      if (!isMailDeliveryQueued(invite.metadata) || invite.metadata.attemptId !== attemptId) {
         this.logger.warn(`Skipping stale mail delivery ${recordType} update for invite ${inviteId} attempt ${attemptId}`);
         return;
       }

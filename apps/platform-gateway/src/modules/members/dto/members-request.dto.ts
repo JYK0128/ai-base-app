@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { MemberInvite, MemberInviteInfoMetadata, MemberInviteStatus as InviteStatusDto, MemberStatus as MemberStatusDto } from '@pkg/database';
+import { MemberInvite, MemberInviteStatus as InviteStatusDto, MemberStatus as MemberStatusDto } from '@pkg/database';
 import { IsEmail, IsEnum, IsOptional, IsString, IsUUID } from 'class-validator';
 
 import { IsNotEmptyString } from '@/common/decorators/is-not-empty-string.decorator';
@@ -44,7 +44,7 @@ export class GetInvitesQueryDto {
   @IsString()
   search?: string;
 
-  @ApiPropertyOptional({ enum: InviteStatusDto, example: 'PENDING', description: '초대 상태' })
+  @ApiPropertyOptional({ enum: InviteStatusDto, example: 'QUEUED', description: '초대 상태' })
   @IsOptional()
   @IsEnum(InviteStatusDto)
   inviteStatus?: InviteStatusDto;
@@ -55,7 +55,7 @@ export class GetInvitesQueryDto {
   role?: MemberRoleDto;
 }
 
-export class CreateInviteDto implements Pick<MemberInvite, 'name' | 'email'>, Pick<MemberInviteInfoMetadata, 'note'> {
+export class CreateInviteDto implements Pick<MemberInvite, 'name' | 'email'>, Pick<{ note?: string }, 'note'> {
   @ApiProperty({ example: '김개발', description: '초대할 사람 이름' })
   @IsNotEmptyString({ message: '이름은 공백만으로 구성될 수 없습니다.' })
   name!: string;

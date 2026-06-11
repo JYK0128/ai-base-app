@@ -1,5 +1,5 @@
-import type { Member, MemberInvite, MemberInviteInfoMetadata, MemberInviteMailDeliveryMetadata, MemberInviteStatus, MemberInviteTimelineMetadata, MemberStatus, OrganizationRole } from '@pkg/database';
-import type { PickPrimitive, Plain } from '@pkg/shared';
+import type { Member, MemberInvite, MemberInviteStatus, MemberStatus, OrganizationRole } from '@pkg/database';
+import type { PickPrimitive } from '@pkg/shared';
 
 export const MEMBERS_SERVICE_PATTERNS = {
   MEMBER: {
@@ -31,9 +31,26 @@ export type GetInvitesInput = {
 
 export type InviteRecord = Prettify<
   PickPrimitive<MemberInvite>
-  & Plain<MemberInviteInfoMetadata>
-  & Plain<MemberInviteMailDeliveryMetadata>
-  & Plain<MemberInviteTimelineMetadata>
+  & {
+    status: MemberInviteStatus
+    note?: string
+    attemptId: string
+    queuedAt: string
+    sentAt?: string | null
+    failedAt?: string | null
+    cancelAt?: string | null
+    acceptedAt?: string | null
+    rejectedAt?: string | null
+    isPending: boolean
+    isExpired: boolean
+    isCanceled: boolean
+    isAccepted: boolean
+    isRejected: boolean
+    isQueued: boolean
+    isMailDeliveryFailed: boolean
+    isMailDeliveryQueued: boolean
+    isMailDeliveryTimeout: boolean
+  }
 >;
 export type InviteIdRecord = Prettify<
   PickPrimitive<MemberInvite, 'id'>

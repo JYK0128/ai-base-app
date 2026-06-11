@@ -11,8 +11,6 @@ import type { InviteIdRecord } from '../members.contract';
 import { ResendInviteCommand } from './resend-invite.command';
 import { ResendInviteAsserter } from './resend-invite.error';
 
-const INVITE_TTL_MS = 7 * 24 * 60 * 60 * 1000;
-
 @CommandHandler(ResendInviteCommand)
 export class ResendInviteHandler implements ICommandHandler<ResendInviteCommand> {
   private readonly Asserter = ResendInviteAsserter;
@@ -55,23 +53,22 @@ export class ResendInviteHandler implements ICommandHandler<ResendInviteCommand>
     const builder = new JsonbSetQueryBuilder<MemberInvite>();
 
     const result = await qb.update({
-      status: MemberInviteStatus.PENDING,
+      status: MemberInviteStatus.QUEUED,
       token: randomUUID(),
-      expiresAt: new Date(now.getTime() + INVITE_TTL_MS),
       metadata: builder.build('metadata', {
-        timeline: {
-          resentAt: now,
-        },
-        mailDelivery: {
-          queuedAt: now,
-          sentAt: null,
-        },
+        attemptId: randomUUID(),
+        queuedAt: now,
+        sentAt: null,
+        failedAt: null,
+        cancelAt: null,
+        acceptedAt: null,
+        rejectedAt: null,
       }),
     })
       .where({
         id: invite.id,
         organization: organization.id,
-        status: { $in: [MemberInviteStatus.PENDING, MemberInviteStatus.CANCELED] },
+        status: { $in: [MemberInviteStatus.QUEUED, MemberInviteStatus.CANCELED] },
       })
       .execute();
 

@@ -8,7 +8,7 @@ vi.mock('@mikro-orm/decorators/legacy', async (importOriginal) => {
   };
 });
 
-import { Resource, ResourceRepository, ResourceScope } from '@pkg/database';
+import { CoreRepository, Resource, ResourceScope } from '@pkg/database';
 
 import { UpdateResourceSortCommand } from './update-resource-sort.command';
 import { UpdateResourceSortHandler } from './update-resource-sort.handler';
@@ -25,7 +25,7 @@ describe('UpdateResourceSortHandler', () => {
     };
 
     handler = new UpdateResourceSortHandler(
-      resourceRepo as unknown as ResourceRepository,
+      resourceRepo as unknown as CoreRepository<Resource>,
     );
   });
 

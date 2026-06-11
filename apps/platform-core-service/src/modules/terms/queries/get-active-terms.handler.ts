@@ -1,6 +1,6 @@
 import { InjectRepository } from '@mikro-orm/nestjs';
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
-import { TermsDocument, TermsDocumentRepository, TermsDocumentStatus } from '@pkg/database';
+import { CoreRepository, TermsDocument, TermsDocumentStatus } from '@pkg/database';
 
 import { getCurrentPublishedVersion, mapTermsDocumentResponse, type TermsDocumentResponse } from '../terms.helper';
 import { GetActiveTermsQuery } from './get-active-terms.query';
@@ -12,7 +12,7 @@ import { GetActiveTermsQuery } from './get-active-terms.query';
 export class GetActiveTermsHandler implements IQueryHandler<GetActiveTermsQuery> {
   constructor(
     @InjectRepository(TermsDocument)
-    private readonly termsDocumentRepo: TermsDocumentRepository,
+    private readonly termsDocumentRepo: CoreRepository<TermsDocument>,
   ) {}
 
   async execute(query: GetActiveTermsQuery): Promise<TermsDocumentResponse[]> {

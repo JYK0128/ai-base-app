@@ -1,28 +1,30 @@
 import { EntityName, type Opt, type Rel } from '@mikro-orm/core';
-import { Embeddable, Embedded, Entity, Enum, ManyToOne, Property } from '@mikro-orm/decorators/legacy';
+import { Embeddable, Embedded, Entity, ManyToOne, Property } from '@mikro-orm/decorators/legacy';
 import { randomUUID } from 'crypto';
 
 import { CoreEntity } from '../../core/core.entity';
 import { Organization } from '../organization/organization.entity';
 import { OrganizationRole } from '../organization/organization.role.entity';
-import { MemberInviteRepository } from './member.invite.repository';
 
 export enum MemberInviteStatus {
+  QUEUED = 'QUEUED',
   PENDING = 'PENDING',
+  EXPIRED = 'EXPIRED',
   CANCELED = 'CANCELED',
   ACCEPTED = 'ACCEPTED',
   REJECTED = 'REJECTED',
 }
 
-export const MAIL_DELIVERY_TIMEOUT_MS = 15 * 60 * 1000;
-
 @Embeddable()
-export class MemberInviteMailDeliveryMetadata {
+export class MemberInviteMetadata {
   [key: string]: unknown;
 
-  constructor(data?: Partial<MemberInviteMailDeliveryMetadata>) {
+  constructor(data?: Partial<MemberInviteMetadata>) {
     Object.assign(this, data);
   }
+
+  @Property({ type: 'string', nullable: true })
+  note?: string;
 
   @Property({ type: 'string' })
   attemptId: Opt<string> = randomUUID();
@@ -35,62 +37,23 @@ export class MemberInviteMailDeliveryMetadata {
 
   @Property({ type: Date, nullable: true })
   failedAt?: Date | null;
-}
-
-@Embeddable()
-export class MemberInviteInfoMetadata {
-  [key: string]: unknown;
-
-  constructor(data?: Partial<MemberInviteInfoMetadata>) {
-    Object.assign(this, data);
-  }
-
-  @Property({ type: 'string', nullable: true })
-  note?: string;
-}
-
-@Embeddable()
-export class MemberInviteTimelineMetadata {
-  [key: string]: unknown;
-
-  constructor(data?: Partial<MemberInviteTimelineMetadata>) {
-    Object.assign(this, data);
-  }
-
-  @Property({ type: Date, nullable: true })
-  resentAt?: Date | null;
 
   @Property({ type: Date, nullable: true })
   cancelAt?: Date | null;
 
   @Property({ type: Date, nullable: true })
-  revivedAt?: Date | null;
+  acceptedAt?: Date | null;
+
+  @Property({ type: Date, nullable: true })
+  rejectedAt?: Date | null;
+
+  @Property({ type: Date, nullable: true })
+  expiredAt?: Date | null;
 }
 
-@Embeddable()
-export class MemberInviteMetadata {
-  [key: string]: unknown;
-
-  constructor(data?: Partial<MemberInviteMetadata>) {
-    Object.assign(this, data);
-  }
-
-  @Embedded({ entity: () => MemberInviteInfoMetadata, object: true })
-  info: MemberInviteInfoMetadata = new MemberInviteInfoMetadata();
-
-  @Embedded({ entity: () => MemberInviteTimelineMetadata, object: true })
-  timeline: MemberInviteTimelineMetadata = new MemberInviteTimelineMetadata();
-
-  @Embedded({ entity: () => MemberInviteMailDeliveryMetadata, object: true })
-  mailDelivery: MemberInviteMailDeliveryMetadata = new MemberInviteMailDeliveryMetadata();
-}
-
-@Entity({ schema: 'platform', repository: () => MemberInviteRepository })
+@Entity({ schema: 'platform' })
 export class MemberInvite extends CoreEntity<MemberInvite> {
   [EntityName]?: 'MemberInvite';
-
-  @Property({ type: 'string' })
-  name!: string;
 
   @ManyToOne(() => OrganizationRole)
   role!: Rel<OrganizationRole>;
@@ -99,23 +62,54 @@ export class MemberInvite extends CoreEntity<MemberInvite> {
   organization!: Rel<Organization>;
 
   @Property({ type: 'string' })
+  name!: string;
+
+  @Property({ type: 'string' })
   token!: string;
 
   @Property({ type: 'string' })
   email!: string;
 
-  @Property({ type: Date })
-  expiresAt!: Date;
+  @Property({ persist: false })
+  get status(): Opt<MemberInviteStatus> {
+    const metadata = this.metadata;
 
-  @Enum(() => MemberInviteStatus)
-  status: Opt<MemberInviteStatus> = MemberInviteStatus.PENDING;
+    if (metadata?.acceptedAt) {
+      return MemberInviteStatus.ACCEPTED;
+    }
 
-  @Embedded({ entity: () => MemberInviteMetadata, object: true })
-  override metadata: Opt<MemberInviteMetadata> = new MemberInviteMetadata();
+    if (metadata?.rejectedAt) {
+      return MemberInviteStatus.REJECTED;
+    }
+
+    if (metadata?.cancelAt) {
+      return MemberInviteStatus.CANCELED;
+    }
+
+    if (metadata?.expiredAt) {
+      return MemberInviteStatus.EXPIRED;
+    }
+
+    if (metadata?.sentAt) {
+      return MemberInviteStatus.PENDING;
+    }
+
+    return MemberInviteStatus.QUEUED;
+  }
+
+  @Property({ persist: false })
+  get isQueued(): Opt<boolean> {
+    return this.status === MemberInviteStatus.QUEUED;
+  }
 
   @Property({ persist: false })
   get isPending(): Opt<boolean> {
     return this.status === MemberInviteStatus.PENDING;
+  }
+
+  @Property({ persist: false })
+  get isExpired(): Opt<boolean> {
+    return this.status === MemberInviteStatus.EXPIRED;
   }
 
   @Property({ persist: false })
@@ -133,37 +127,6 @@ export class MemberInvite extends CoreEntity<MemberInvite> {
     return this.status === MemberInviteStatus.REJECTED;
   }
 
-  @Property({ persist: false })
-  get isMailDeliveryQueued(): Opt<boolean> {
-    const delivery = this.metadata.mailDelivery;
-
-    if (!delivery) {
-      return false;
-    }
-
-    return !delivery.sentAt && !delivery.failedAt && !this.isMailDeliveryTimeout;
-  }
-
-  @Property({ persist: false })
-  get isMailDeliveryTimeout(): Opt<boolean> {
-    const delivery = this.metadata.mailDelivery;
-
-    if (!delivery || delivery.sentAt || delivery.failedAt) {
-      return false;
-    }
-
-    const queuedAtTime = delivery.queuedAt.getTime();
-    return Number.isFinite(queuedAtTime) && queuedAtTime + MAIL_DELIVERY_TIMEOUT_MS <= Date.now();
-  }
-
-  @Property({ persist: false })
-  get isMailDeliveryFailed(): Opt<boolean> {
-    const delivery = this.metadata.mailDelivery;
-
-    if (!delivery) {
-      return false;
-    }
-
-    return !!delivery.failedAt || this.isMailDeliveryTimeout;
-  }
+  @Embedded({ entity: () => MemberInviteMetadata, object: true })
+  override metadata: Opt<MemberInviteMetadata> = new MemberInviteMetadata();
 }

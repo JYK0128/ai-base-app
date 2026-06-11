@@ -8,7 +8,7 @@ vi.mock('@mikro-orm/decorators/legacy', async (importOriginal) => {
   };
 });
 
-import { Resource, ResourceRepository, ResourceScope, ResourceType } from '@pkg/database';
+import { CoreRepository, Resource, ResourceScope, ResourceType } from '@pkg/database';
 
 import { UpdateResourcePermissionsCommand } from './update-resource-permissions.command';
 import { UpdateResourcePermissionsHandler } from './update-resource-permissions.handler';
@@ -27,7 +27,7 @@ describe('UpdateResourcePermissionsHandler', () => {
     };
 
     handler = new UpdateResourcePermissionsHandler(
-      resourceRepo as unknown as ResourceRepository,
+      resourceRepo as unknown as CoreRepository<Resource>,
     );
   });
 

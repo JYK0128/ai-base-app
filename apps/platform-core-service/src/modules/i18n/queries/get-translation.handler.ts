@@ -2,7 +2,7 @@ import { FilterQuery } from '@mikro-orm/core';
 import { InjectRepository } from '@mikro-orm/nestjs';
 import { NotFoundException } from '@nestjs/common';
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
-import { I18nTranslation, I18nTranslationRepository } from '@pkg/database';
+import { CoreRepository, I18nTranslation } from '@pkg/database';
 
 import { GetTranslationQuery } from './get-translation.query';
 
@@ -12,7 +12,7 @@ export type I18nTranslationSingleResult = Record<string, Record<string, Record<s
 export class GetTranslationHandler implements IQueryHandler<GetTranslationQuery> {
   constructor(
     @InjectRepository(I18nTranslation)
-    private readonly translationRepo: I18nTranslationRepository,
+    private readonly translationRepo: CoreRepository<I18nTranslation>,
   ) {}
 
   async execute(query: GetTranslationQuery): Promise<I18nTranslationSingleResult> {

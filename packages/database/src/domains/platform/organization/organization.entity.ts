@@ -5,7 +5,6 @@ import { CoreEntity } from '../../core/core.entity';
 import { Member } from '../member/member.entity';
 import { MemberInvite } from '../member/member.invite.entity';
 import { TermsDocument } from '../terms/terms.document.entity';
-import { OrganizationRepository } from './organization.repository';
 import { OrganizationRole } from './organization.role.entity';
 
 export enum OrganizationStatus {
@@ -15,21 +14,9 @@ export enum OrganizationStatus {
   REJECTED = 'REJECTED',
 }
 
-@Entity({ schema: 'platform', repository: () => OrganizationRepository })
+@Entity({ schema: 'platform' })
 export class Organization extends CoreEntity<Organization> {
   [EntityName]?: 'Organization';
-
-  @Property({ type: 'string', unique: true })
-  code!: string;
-
-  @Property({ type: 'string' })
-  name!: string;
-
-  @Property({ type: 'string', unique: true })
-  email!: string;
-
-  @Enum(() => OrganizationStatus)
-  status: Opt<OrganizationStatus> = OrganizationStatus.ACTIVE;
 
   @OneToMany(() => Member, (member) => member.organization)
   members = new Collection<Member>(this);
@@ -42,6 +29,18 @@ export class Organization extends CoreEntity<Organization> {
 
   @OneToMany(() => TermsDocument, (doc) => doc.organization)
   termsDocuments = new Collection<TermsDocument>(this);
+
+  @Property({ type: 'string', unique: true })
+  code!: string;
+
+  @Property({ type: 'string' })
+  name!: string;
+
+  @Property({ type: 'string', unique: true })
+  email!: string;
+
+  @Enum(() => OrganizationStatus)
+  status: Opt<OrganizationStatus> = OrganizationStatus.ACTIVE;
 
   @Property({ persist: false })
   get isActive(): Opt<boolean> {

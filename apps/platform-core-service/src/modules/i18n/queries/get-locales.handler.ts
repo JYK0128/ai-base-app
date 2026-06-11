@@ -1,6 +1,6 @@
 import { InjectRepository } from '@mikro-orm/nestjs';
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
-import { I18nLocale, I18nLocaleRepository } from '@pkg/database';
+import { CoreRepository, I18nLocale } from '@pkg/database';
 
 import { GetLocalesQuery } from './get-locales.query';
 
@@ -21,7 +21,7 @@ export type I18nLocaleListResult = {
 export class GetLocalesHandler implements IQueryHandler<GetLocalesQuery> {
   constructor(
     @InjectRepository(I18nLocale)
-    private readonly localeRepo: I18nLocaleRepository,
+    private readonly localeRepo: CoreRepository<I18nLocale>,
   ) {}
 
   async execute(): Promise<I18nLocaleListResult> {

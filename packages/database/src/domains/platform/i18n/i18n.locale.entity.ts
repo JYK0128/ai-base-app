@@ -2,14 +2,13 @@ import { EntityName, type Opt } from '@mikro-orm/core';
 import { Entity, Enum, Property } from '@mikro-orm/decorators/legacy';
 
 import { CoreEntity } from '../../core/core.entity';
-import { I18nLocaleRepository } from './i18n.locale.repository';
 
 export enum I18nLocaleDirection {
   LTR = 'ltr',
   RTL = 'rtl',
 }
 
-@Entity({ schema: 'platform', repository: () => I18nLocaleRepository })
+@Entity({ schema: 'platform' })
 export class I18nLocale extends CoreEntity<I18nLocale> {
   [EntityName]?: 'I18nLocale';
 

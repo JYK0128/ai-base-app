@@ -3,7 +3,6 @@ import { Entity, Enum, ManyToOne, Property } from '@mikro-orm/decorators/legacy'
 import bcrypt from 'bcrypt';
 
 import { CoreEntity } from '../../core/core.entity';
-import { MemberAccountRepository } from './member.account.repository';
 import { Member } from './member.entity';
 
 export enum AccountStatus {
@@ -11,9 +10,12 @@ export enum AccountStatus {
   INACTIVE = 'INACTIVE',
 }
 
-@Entity({ schema: 'platform', repository: () => MemberAccountRepository })
+@Entity({ schema: 'platform' })
 export class MemberAccount extends CoreEntity<MemberAccount> {
   [EntityName]?: 'MemberAccount';
+
+  @ManyToOne(() => Member)
+  member!: Rel<Member>;
 
   @Property({ type: 'string', unique: true })
   email!: string;
@@ -35,9 +37,6 @@ export class MemberAccount extends CoreEntity<MemberAccount> {
 
   @Property({ type: Date, nullable: true })
   lockUntil?: Date;
-
-  @ManyToOne(() => Member)
-  member!: Rel<Member>;
 
   /**
    * 비밀번호 만료 여부 확인

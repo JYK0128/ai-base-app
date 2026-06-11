@@ -2,7 +2,7 @@ import { Transactional } from '@mikro-orm/decorators/legacy';
 import { InjectRepository } from '@mikro-orm/nestjs';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { Member, TermsConsent, TermsConsentRepository, TermsVersion, TermsVersionRepository } from '@pkg/database';
+import { CoreRepository, Member, TermsConsent, TermsVersion } from '@pkg/database';
 
 import { getCurrentPublishedVersion, mapTermsConsentResponse, type TermsConsentResponse } from '../terms.helper';
 import { AgreeTermsCommand } from './agree-terms.command';
@@ -17,9 +17,9 @@ export class AgreeTermsHandler implements ICommandHandler<AgreeTermsCommand> {
 
   constructor(
     @InjectRepository(TermsVersion)
-    private readonly termsVersionRepo: TermsVersionRepository,
+    private readonly termsVersionRepo: CoreRepository<TermsVersion>,
     @InjectRepository(TermsConsent)
-    private readonly termsConsentRepo: TermsConsentRepository,
+    private readonly termsConsentRepo: CoreRepository<TermsConsent>,
     private readonly em: EntityManager,
   ) {}
 

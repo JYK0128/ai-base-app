@@ -1,6 +1,6 @@
 import { Transactional } from '@mikro-orm/decorators/legacy';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { MemberAccount, MemberAccountRepository } from '@pkg/database';
+import { CoreRepository, MemberAccount } from '@pkg/database';
 
 import { ENV } from '@/env';
 
@@ -15,7 +15,7 @@ export class ChangePasswordHandler implements ICommandHandler<ChangePasswordComm
   private readonly Asserter = ChangePasswordAsserter;
 
   constructor(
-    private readonly memberAccountRepository: MemberAccountRepository,
+    private readonly memberAccountRepository: CoreRepository<MemberAccount>,
   ) {}
 
   @Transactional()

@@ -2,17 +2,12 @@ import { randomUUID } from 'node:crypto';
 
 import { Transactional } from '@mikro-orm/decorators/legacy';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { MemberInvite,
-         MemberInviteMetadata,
-         Organization,
-         OrganizationRole } from '@pkg/database';
+import { MemberInvite, MemberInviteMetadata, Organization, OrganizationRole } from '@pkg/database';
 import { ClsService } from 'nestjs-cls';
 
 import type { InviteIdRecord } from '../members.contract';
 import { CreateInviteCommand } from './create-invite.command';
 import { CreateInviteAsserter } from './create-invite.error';
-
-const INVITE_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 
 @CommandHandler(CreateInviteCommand)
 export class CreateInviteHandler implements ICommandHandler<CreateInviteCommand> {
@@ -60,7 +55,7 @@ export class CreateInviteHandler implements ICommandHandler<CreateInviteCommand>
     note?: string,
   ): Promise<MemberInvite> {
     const metadata = new MemberInviteMetadata();
-    metadata.info.note = note;
+    metadata.note = note;
 
     const invite = MemberInvite.create({
       name,
@@ -68,7 +63,6 @@ export class CreateInviteHandler implements ICommandHandler<CreateInviteCommand>
       role,
       organization,
       token: randomUUID(),
-      expiresAt: new Date(Date.now() + INVITE_TTL_MS),
       metadata,
     });
 

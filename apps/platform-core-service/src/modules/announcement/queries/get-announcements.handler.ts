@@ -1,6 +1,6 @@
 import { InjectRepository } from '@mikro-orm/nestjs';
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
-import { Announcement, AnnouncementRepository } from '@pkg/database';
+import { CoreRepository, Announcement } from '@pkg/database';
 
 import { AnnouncementRecord } from '../announcement.contract';
 import { buildAnnouncementOutput } from '../announcement.helper';
@@ -16,7 +16,7 @@ export class GetAnnouncementsHandler implements IQueryHandler<GetAnnouncementsQu
 
   constructor(
     @InjectRepository(Announcement)
-    private readonly announcementRepo: AnnouncementRepository,
+    private readonly announcementRepo: CoreRepository<Announcement>,
   ) {}
 
   async execute({ payload }: GetAnnouncementsQuery): Promise<AnnouncementRecord[]> {

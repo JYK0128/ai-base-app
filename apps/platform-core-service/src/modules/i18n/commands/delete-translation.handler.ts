@@ -2,7 +2,7 @@ import { Transactional } from '@mikro-orm/decorators/legacy';
 import { InjectRepository } from '@mikro-orm/nestjs';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { I18nLocale, I18nLocaleRepository, I18nTranslation, I18nTranslationRepository } from '@pkg/database';
+import { CoreRepository, I18nLocale, I18nTranslation } from '@pkg/database';
 
 import { DeleteTranslationCommand } from './delete-translation.command';
 import { DeleteTranslationAsserter } from './delete-translation.error';
@@ -13,9 +13,9 @@ export class DeleteTranslationHandler implements ICommandHandler<DeleteTranslati
 
   constructor(
     @InjectRepository(I18nLocale)
-    private readonly localeRepo: I18nLocaleRepository,
+    private readonly localeRepo: CoreRepository<I18nLocale>,
     @InjectRepository(I18nTranslation)
-    private readonly translationRepo: I18nTranslationRepository,
+    private readonly translationRepo: CoreRepository<I18nTranslation>,
     private readonly em: EntityManager,
   ) {}
 
