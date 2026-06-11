@@ -1,5 +1,5 @@
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
-import { MemberInvite, Organization } from '@pkg/database';
+import { MemberInvite, Organization, OrganizationRole } from '@pkg/database';
 import { ClsService } from 'nestjs-cls';
 
 import type { InviteRecord } from '../members.contract';
@@ -16,10 +16,8 @@ export class GetInvitesHandler implements IQueryHandler<GetInvitesQuery> {
   ) {}
 
   async execute({ payload }: GetInvitesQuery): Promise<InviteRecord[]> {
-    // TODO: payload 무엇을 의미하는지 조사
-    const { inviteStatus, role, search } = payload;
     const organization = await this.identifyOrganization();
-    const invites = await this.loadInvites(organization);
+    const invites = await this.loadInvites(organization, payload);
 
     return invites.map((invite) => buildInviteRecord(invite));
   }
@@ -34,10 +32,18 @@ export class GetInvitesHandler implements IQueryHandler<GetInvitesQuery> {
     return Organization.getReference(organizationId);
   }
 
-  private async loadInvites(organization: Organization): Promise<MemberInvite[]> {
-    return await this.Asserter.assert(
+  private async loadInvites(organization: Organization, payload: GetInvitesQuery['payload']): Promise<MemberInvite[]> {
+    const role = payload.roleId
+      ? OrganizationRole.getReference(payload.roleId)
+      : undefined;
+
+    const invites = await this.Asserter.assert(
       MemberInvite.find(
-        { organization },
+        {
+          organization,
+          status: payload.inviteStatus,
+          role,
+        },
         {
           populate: ['role'],
           orderBy: { createdAt: 'DESC' },
@@ -45,5 +51,23 @@ export class GetInvitesHandler implements IQueryHandler<GetInvitesQuery> {
       ),
       'LOAD_FAILED',
     );
+
+    const search = payload.search?.trim().toLowerCase();
+
+    if (!search) {
+      return invites;
+    }
+
+    return invites.filter((invite) => {
+      const searchTargets = [
+        invite.name,
+        invite.email,
+        invite.role.name,
+        invite.role.code,
+        invite.metadata?.info?.note ?? '',
+      ].join(' ').toLowerCase();
+
+      return searchTargets.includes(search);
+    });
   }
 }

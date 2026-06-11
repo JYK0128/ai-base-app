@@ -1,4 +1,4 @@
-import type { Member, MemberInvite, MemberInviteInfoMetadata, MemberInviteMailDeliveryMetadata, MemberInviteStatus, MemberInviteTimelineMetadata, OrganizationRole } from '@pkg/database';
+import type { Member, MemberInvite, MemberInviteInfoMetadata, MemberInviteMailDeliveryMetadata, MemberInviteStatus, MemberInviteTimelineMetadata, MemberStatus, OrganizationRole } from '@pkg/database';
 import type { PickPrimitive, Plain } from '@pkg/shared';
 
 export const MEMBERS_SERVICE_PATTERNS = {
@@ -28,13 +28,13 @@ export type GetInvitesInput = {
   inviteStatus?: MemberInviteStatus
   roleId?: string
 };
+
 export type InviteRecord = Prettify<
   PickPrimitive<MemberInvite>
   & Plain<MemberInviteInfoMetadata>
   & Plain<MemberInviteMailDeliveryMetadata>
   & Plain<MemberInviteTimelineMetadata>
 >;
-
 export type InviteIdRecord = Prettify<
   PickPrimitive<MemberInvite, 'id'>
 >;
@@ -43,5 +43,14 @@ export type UpdateMemberStatusInput = Pick<Member, 'id' | 'status'>;
 export type UpdateMemberRoleInput = Pick<Member, 'id'> & {
   roleId: OrganizationRole['id']
 };
+export type GetMemberInput = Pick<Member, 'id'>;
+export type GetMembersInput = {
+  search?: string
+  status?: MemberStatus
+  roleId?: OrganizationRole['id']
+};
 
+export type MemberRecord = Prettify<
+  PickPrimitive<Member>
+>;
 export type MemberIdRecord = Pick<Member, 'id'>;

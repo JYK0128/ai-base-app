@@ -1,9 +1,9 @@
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
-import { Member, MemberInvite, Organization } from '@pkg/database';
+import { Member, Organization } from '@pkg/database';
 import { ClsService } from 'nestjs-cls';
 
-import { buildCreatedByEmailLookup, buildMemberOutput, filterMemberOutputs, getLinkedInvite, sortByRecentDate } from '../members.helper';
-import type { MemberOutput } from '../members.types';
+import type { MemberRecord } from '../members.contract';
+import { buildMemberRecord } from '../members.helper';
 import { GetMembersAsserter } from './get-members.error';
 import { GetMembersQuery } from './get-members.query';
 
@@ -15,60 +15,19 @@ export class GetMembersHandler implements IQueryHandler<GetMembersQuery> {
     private readonly cls: ClsService,
   ) {}
 
-  async execute({ payload }: GetMembersQuery): Promise<MemberOutput[]> {
-    const { search, status, role } = payload;
-    const organization = await this.identifyOrganization();
-    const requestedById = await this.identifyRequestUserId();
-    const loadedMembers = await this.loadMembers(organization);
-    const invites = await this.loadInvites(organization);
-    const createdByEmailLookup = buildCreatedByEmailLookup(loadedMembers);
-
-    const memberRecords = loadedMembers.map((member) => {
-      const linkedInvite = getLinkedInvite(invites, member);
-
-      return buildMemberOutput(
-        member,
-        organization,
-        requestedById,
-        createdByEmailLookup,
-        linkedInvite,
-      );
-    });
-
-    return sortByRecentDate(
-      filterMemberOutputs(memberRecords, {
-        search,
-        status,
-        role,
-      }),
-    );
-  }
-
-  private async identifyOrganization(): Promise<Organization> {
+  async execute({ payload }: GetMembersQuery): Promise<MemberRecord[]> {
     const organizationId = this.cls.get('organizationId');
 
     if (!organizationId) {
       return this.Asserter.throw('ORGANIZATION_NOT_FOUND');
     }
 
-    return await this.Asserter.assert(
+    const organization = await this.Asserter.assert(
       Organization.findOne({ id: organizationId }),
       'ORGANIZATION_NOT_FOUND',
     );
-  }
 
-  private async identifyRequestUserId(): Promise<string> {
-    const requestedById = this.cls.get('accountId');
-
-    if (!requestedById) {
-      return this.Asserter.throw('REQUEST_CONTEXT_NOT_FOUND');
-    }
-
-    return requestedById;
-  }
-
-  private async loadMembers(organization: Organization): Promise<Member[]> {
-    return await this.Asserter.assert(
+    const loadedMembers = await this.Asserter.assert(
       Member.find(
         { organization },
         {
@@ -78,18 +37,47 @@ export class GetMembersHandler implements IQueryHandler<GetMembersQuery> {
       ),
       'LOAD_FAILED',
     );
-  }
 
-  private async loadInvites(organization: Organization): Promise<MemberInvite[]> {
-    return await this.Asserter.assert(
-      MemberInvite.find(
-        { organization },
-        {
-          populate: ['role'],
-          orderBy: { createdAt: 'DESC' },
-        },
-      ),
-      'LOAD_FAILED',
-    );
+    const search = payload.search?.trim().toLowerCase();
+    const status = payload.status;
+    const roleValue = (payload as { roleId?: string, role?: string }).roleId
+      ?? (payload as { role?: string }).role;
+
+    return loadedMembers
+      .filter((member) => {
+        if (status && member.status !== status) {
+          return false;
+        }
+
+        const organizationRoles = member.organizationRoles.getItems();
+
+        if (roleValue) {
+          const hasMatchedRole = organizationRoles.some((assignment) => (
+            assignment.role.id === roleValue
+            || assignment.role.code === roleValue
+          ));
+
+          if (!hasMatchedRole) {
+            return false;
+          }
+        }
+
+        if (!search) {
+          return true;
+        }
+
+        const accountItems = member.accounts.getItems();
+        const searchTargets = [
+          member.name,
+          member.createdBy ?? '',
+          ...accountItems.map((account) => account.email),
+          ...organizationRoles.map((assignment) => assignment.role.code),
+          ...organizationRoles.map((assignment) => assignment.role.name),
+        ].join(' ').toLowerCase();
+
+        return searchTargets.includes(search);
+      })
+      .sort((left, right) => right.createdAt.getTime() - left.createdAt.getTime())
+      .map((member) => buildMemberRecord(member));
   }
 }

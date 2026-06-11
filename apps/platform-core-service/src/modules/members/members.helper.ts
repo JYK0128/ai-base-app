@@ -1,6 +1,6 @@
-import { type MemberInvite } from '@pkg/database';
+import { type Member, type MemberInvite } from '@pkg/database';
 
-import type { InviteRecord } from './members.contract';
+import type { InviteRecord, MemberRecord } from './members.contract';
 
 export function buildInviteRecord(invite: MemberInvite): InviteRecord {
   return {
@@ -9,6 +9,7 @@ export function buildInviteRecord(invite: MemberInvite): InviteRecord {
     isCanceled: invite.isCanceled,
     isAccepted: invite.isAccepted,
     isRejected: invite.isRejected,
+    isDeleted: invite.isDeleted,
     isMailDeliveryFailed: invite.isMailDeliveryFailed,
     isMailDeliveryQueued: invite.isMailDeliveryQueued,
     isMailDeliveryTimeout: invite.isMailDeliveryTimeout,
@@ -22,5 +23,13 @@ export function buildInviteRecord(invite: MemberInvite): InviteRecord {
     resentAt: invite.metadata.timeline.resentAt?.toISOString(),
     cancelAt: invite.metadata.timeline.cancelAt?.toISOString(),
     revivedAt: invite.metadata.timeline.revivedAt?.toISOString(),
+  };
+}
+
+export function buildMemberRecord(member: Member): MemberRecord {
+  return {
+    ...member,
+    isDeleted: member.isDeleted,
+    isActive: member.isActive,
   };
 }

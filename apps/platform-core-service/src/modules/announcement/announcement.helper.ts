@@ -13,6 +13,7 @@ export const buildAnnouncementOutput = (
   return {
     ...rest,
     ...metadata,
+    isDeleted: announcement.isDeleted,
     isPublished: announcement.isPublished,
     startAt: metadata.startAt.toISOString(),
     endAt: metadata.endAt.toISOString(),

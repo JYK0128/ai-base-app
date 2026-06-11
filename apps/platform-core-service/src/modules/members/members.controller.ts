@@ -7,9 +7,7 @@ import { CancelInviteCommand,
          ResendInviteCommand,
          ReviveInviteCommand,
          UpdateMemberRoleCommand, UpdateMemberStatusCommand } from './commands';
-import { InviteEmailEvent } from './events';
-import { MEMBERS_SERVICE_PATTERNS } from './members.contract';
-import type { CancelInviteInput, CreateInviteInput, GetInvitesInput, GetMemberInput, GetMembersInput, InviteOutputResult, ResendInviteInput, ReviveInviteInput, UpdateMemberRoleInput, UpdateMemberStatusInput } from './members.types';
+import { type CancelInviteInput, type CreateInviteInput, type GetInvitesInput, type GetMemberInput, type GetMembersInput, MEMBERS_SERVICE_PATTERNS, type ResendInviteInput, type ReviveInviteInput, type UpdateMemberRoleInput, type UpdateMemberStatusInput } from './members.contract';
 import { GetInvitesQuery, GetMemberQuery, GetMembersQuery } from './queries';
 
 @Controller()
@@ -60,10 +58,9 @@ export class MembersController {
     @Payload() data: CreateInviteInput,
   ) {
     const result = await this.commandBus.execute(new CreateInviteCommand(data));
-    this.publishInviteEmail(result);
 
     return {
-      id: result.invite.id,
+      id: result.id,
     };
   }
 
@@ -72,10 +69,9 @@ export class MembersController {
     @Payload() data: ResendInviteInput,
   ) {
     const result = await this.commandBus.execute(new ResendInviteCommand(data));
-    this.publishInviteEmail(result);
 
     return {
-      id: result.invite.id,
+      id: result.id,
     };
   }
 
@@ -91,22 +87,5 @@ export class MembersController {
     @Payload() data: ReviveInviteInput,
   ) {
     return this.commandBus.execute(new ReviveInviteCommand(data));
-  }
-
-  private publishInviteEmail(result: InviteOutputResult): void {
-    const attemptId = result.invite.metadata.mailDelivery?.attemptId;
-
-    if (!attemptId) {
-      throw new Error('MAIL_DELIVERY_ATTEMPT_ID_NOT_FOUND');
-    }
-
-    this.eventBus.publish(new InviteEmailEvent({
-      inviteId: result.invite.id,
-      attemptId,
-      email: result.invite.email,
-      organizationName: result.organization.name,
-      inviterName: result.inviter.member.name,
-      token: result.invite.token,
-    }));
   }
 }

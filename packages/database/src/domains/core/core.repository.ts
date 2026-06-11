@@ -1,4 +1,4 @@
-import type { CountOptions, DeleteOptions, EntityData, EntityManager, EntityName, FilterQuery, FindOneOptions, FindOneOrFailOptions, FindOptions, Primary, RequiredEntityData, UpdateOptions, WithUsingOptions } from '@mikro-orm/core';
+import type { CountOptions, DeleteOptions, EntityData, EntityManager, EntityName, FilterQuery, FindOneOptions, FindOneOrFailOptions, FindOptions, Loaded, Primary, RequiredEntityData, UpdateOptions } from '@mikro-orm/core';
 
 import { QueryEngine } from './core.query';
 
@@ -27,39 +27,47 @@ export abstract class CoreRepository<
     return QueryEngine.createMany(this.entityName, data);
   }
 
-  find(
-    where: FilterQuery<Entity>,
-    options?: WithUsingOptions<FindOptions<Entity>, Entity, never>,
-  ) {
-    return QueryEngine.find(this.entityName, where, options);
+  find<Hint extends string = never, Fields extends string = never, Excludes extends string = never, Using extends string = never>(
+    where: [Using] extends [never] ? FilterQuery<Entity> : never,
+    options?: FindOptions<Entity, Hint, Fields, Excludes> & { using?: Using | Using[] },
+  ): Promise<Loaded<Entity, Hint, Fields, Excludes>[]> {
+    return QueryEngine.find<Entity, Hint, Fields, Excludes, Using>(this.entityName, where, options);
   }
 
-  findOne(
-    where: FilterQuery<Entity>,
-    options?: WithUsingOptions<FindOneOptions<Entity>, Entity, never>,
-  ) {
-    return QueryEngine.findOne(this.entityName, where, options);
+  findOne<Hint extends string = never, Fields extends string = never, Excludes extends string = never, Using extends string = never>(
+    where: [Using] extends [never] ? FilterQuery<Entity> : never,
+    options?: FindOneOptions<Entity, Hint, Fields, Excludes> & { using?: Using | Using[] },
+  ): Promise<Loaded<Entity, Hint, Fields, Excludes> | null> {
+    return QueryEngine.findOne<Entity, Hint, Fields, Excludes, Using>(this.entityName, where, options);
   }
 
-  findOneOrFail(
-    where: FilterQuery<Entity>,
-    options?: WithUsingOptions<FindOneOrFailOptions<Entity>, Entity, never>,
-  ) {
-    return QueryEngine.findOneOrFail(this.entityName, where, options);
+  findOneOrFail<Hint extends string = never, Fields extends string = never, Excludes extends string = never, Using extends string = never>(
+    where: [Using] extends [never] ? FilterQuery<Entity> : never,
+    options?: FindOneOrFailOptions<Entity, Hint, Fields, Excludes> & { using?: Using | Using[] },
+  ): Promise<Loaded<Entity, Hint, Fields, Excludes>> {
+    return QueryEngine.findOneOrFail<Entity, Hint, Fields, Excludes, Using>(this.entityName, where, options);
   }
 
-  findById(
+  findById<Hint extends string = never, Fields extends string = never, Excludes extends string = never, Using extends string = never>(
     id: Primary<Entity>,
-    options?: WithUsingOptions<FindOneOptions<Entity>, Entity, never>,
-  ) {
-    return QueryEngine.findById(this.entityName, id, options);
+    options?: FindOneOptions<Entity, Hint, Fields, Excludes> & { using?: Using | Using[] },
+  ): Promise<Loaded<Entity, Hint, Fields, Excludes> | null> {
+    return QueryEngine.findById<Entity, Hint, Fields, Excludes, Using>(this.entityName, id, options);
   }
 
-  findByPage(
-    where: FilterQuery<Entity>,
-    options: Omit<WithUsingOptions<FindOptions<Entity>, Entity, never>, 'offset'> & { page?: number },
-  ) {
-    return QueryEngine.findByPage(this.entityName, where, options);
+  findByPage<Hint extends string = never, Fields extends string = never, Excludes extends string = never, Using extends string = never>(
+    where: [Using] extends [never] ? FilterQuery<Entity> : never,
+    options: Omit<FindOptions<Entity, Hint, Fields, Excludes> & { using?: Using | Using[] }, 'offset'> & { page?: number },
+  ): Promise<{
+    items: Loaded<Entity, Hint, Fields, Excludes>[];
+    totalCount: number;
+    hasNextPage: boolean;
+    hasPrevPage: boolean;
+    page: number;
+    limit: number;
+    totalPages: number;
+  }> {
+    return QueryEngine.findByPage<Entity, Hint, Fields, Excludes, Using>(this.entityName, where, options);
   }
 
   // === Update ===

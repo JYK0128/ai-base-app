@@ -1,4 +1,4 @@
-import { type BaseEntity, type CountByOptions, type CountOptions, type CreateOptions, type Cursor, type DeleteOptions, type Dictionary, type EntityData, type EntityKey, type EntityManager, type EntityName, type FilterQuery, type FindByCursorOptions, type FindOneOptions, type FindOneOrFailOptions, type FindOptions, type FromEntityType, type Primary, RequestContext, type RequiredEntityData, type UpdateOptions, type WithUsingOptions } from '@mikro-orm/core';
+import { type BaseEntity, type CountByOptions, type CountOptions, type CreateOptions, type Cursor, type DeleteOptions, type Dictionary, type EntityData, type EntityKey, type EntityManager, type EntityName, type FilterQuery, type FindByCursorOptions, type FindOneOptions, type FindOneOrFailOptions, type FindOptions, type FromEntityType, type Loaded, type Primary, RequestContext, type RequiredEntityData, type UpdateOptions, type WithUsingOptions } from '@mikro-orm/core';
 import type { ServerContext } from '@pkg/shared/server';
 
 export const QueryEngine = {
@@ -60,63 +60,87 @@ export const QueryEngine = {
   },
 
   // === READ ===
-  find<Entity extends object>(
+  find<Entity extends object, Hint extends string = never, Fields extends string = never, Excludes extends string = never, Using extends string = never>(
     clz: EntityName<Entity>,
-    where: FilterQuery<Entity>,
-    options?: WithUsingOptions<FindOptions<Entity>, Entity, never>,
-  ) {
-    return this.em.find(clz, where, options);
+    where: [Using] extends [never] ? FilterQuery<Entity> : never,
+    options?: FindOptions<Entity, Hint, Fields, Excludes> & { using?: Using | Using[] },
+  ): Promise<Loaded<Entity, Hint, Fields, Excludes>[]> {
+    return this.em.find<Entity, Hint, Fields, Excludes, Using>(
+      clz,
+      where as never,
+      options as never,
+    );
   },
-  findAndCount<Entity extends object>(
+  findAndCount<Entity extends object, Hint extends string = never, Fields extends string = never, Excludes extends string = never, Using extends string = never>(
     clz: EntityName<Entity>,
-    where: FilterQuery<Entity>,
-    options?: WithUsingOptions<FindOptions<Entity>, Entity, never>,
-  ) {
-    return this.em.findAndCount(clz, where, options);
+    where: [Using] extends [never] ? FilterQuery<Entity> : never,
+    options?: FindOptions<Entity, Hint, Fields, Excludes> & { using?: Using | Using[] },
+  ): Promise<[Loaded<Entity, Hint, Fields, Excludes>[], number]> {
+    return this.em.findAndCount<Entity, Hint, Fields, Excludes, Using>(
+      clz,
+      where as never,
+      options as never,
+    );
   },
-  findByCursor<Entity extends object>(
+  findByCursor<Entity extends object, Hint extends string = never, Fields extends string = never, Excludes extends string = never, IncludeCount extends boolean = true, Using extends string = never>(
     clz: EntityName<Entity>,
-    options: WithUsingOptions<FindByCursorOptions<Entity>, Entity, never>,
-  ): Promise<Cursor<Entity>> {
-    return this.em.findByCursor(clz, options);
+    options: WithUsingOptions<FindByCursorOptions<Entity, Hint, Fields, Excludes, IncludeCount>, Entity, Using>,
+  ): Promise<Cursor<Entity, Hint, Fields, Excludes, IncludeCount>> {
+    return this.em.findByCursor<Entity, Hint, Fields, Excludes, IncludeCount, Using>(clz, options as never);
   },
-  findById<Entity extends object>(
+  findById<Entity extends object, Hint extends string = never, Fields extends string = never, Excludes extends string = never, Using extends string = never>(
     clz: EntityName<Entity>,
     id: Primary<Entity>,
-    options?: WithUsingOptions<FindOneOptions<Entity>, Entity, never>,
-  ) {
+    options?: FindOneOptions<Entity, Hint, Fields, Excludes> & { using?: Using | Using[] },
+  ): Promise<Loaded<Entity, Hint, Fields, Excludes> | null> {
     const where = this.em.getReference(clz, id);
-    return this.em.findOne(clz, where, options);
+    return this.em.findOne<Entity, Hint, Fields, Excludes, Using>(clz, where, options as never);
   },
-  findOne<Entity extends object>(
+  findOne<Entity extends object, Hint extends string = never, Fields extends string = never, Excludes extends string = never, Using extends string = never>(
     clz: EntityName<Entity>,
-    where: FilterQuery<Entity>,
-    options?: WithUsingOptions<FindOneOptions<Entity>, Entity, never>,
-  ) {
-    return this.em.findOne(clz, where, options);
+    where: [Using] extends [never] ? FilterQuery<Entity> : never,
+    options?: FindOneOptions<Entity, Hint, Fields, Excludes> & { using?: Using | Using[] },
+  ): Promise<Loaded<Entity, Hint, Fields, Excludes> | null> {
+    return this.em.findOne<Entity, Hint, Fields, Excludes, Using>(
+      clz,
+      where as never,
+      options as never,
+    );
   },
-  findOneOrFail<Entity extends object>(
+  findOneOrFail<Entity extends object, Hint extends string = never, Fields extends string = never, Excludes extends string = never, Using extends string = never>(
     clz: EntityName<Entity>,
-    where: FilterQuery<Entity>,
-    options?: WithUsingOptions<FindOneOrFailOptions<Entity>, Entity, never>,
-  ) {
-    return this.em.findOneOrFail(clz, where, options);
+    where: [Using] extends [never] ? FilterQuery<Entity> : never,
+    options?: FindOneOrFailOptions<Entity, Hint, Fields, Excludes> & { using?: Using | Using[] },
+  ): Promise<Loaded<Entity, Hint, Fields, Excludes>> {
+    return this.em.findOneOrFail<Entity, Hint, Fields, Excludes, Using>(
+      clz,
+      where as never,
+      options as never,
+    );
   },
-  async findByPage<Entity extends object>(
+  async findByPage<Entity extends object, Hint extends string = never, Fields extends string = never, Excludes extends string = never, Using extends string = never>(
     clz: EntityName<Entity>,
-    where: FilterQuery<Entity>,
-    options: Omit<WithUsingOptions<FindOptions<Entity>, Entity, never>, 'offset'> & { page?: number },
-  ) {
+    where: [Using] extends [never] ? FilterQuery<Entity> : never,
+    options: Omit<FindOptions<Entity, Hint, Fields, Excludes> & { using?: Using | Using[] }, 'offset'> & { page?: number },
+  ): Promise<{
+    items: Loaded<Entity, Hint, Fields, Excludes>[]
+    totalCount: number
+    hasNextPage: boolean
+    hasPrevPage: boolean
+    page: number
+    limit: number
+    totalPages: number
+  }> {
     const { page = 1, limit = 10, ...restOptions } = options || {};
     const safePage = Math.max(1, page);
     const safeLimit = Math.max(1, limit);
     const safeOffset = (safePage - 1) * safeLimit;
 
-    const [items, totalCount] = await this.em.findAndCount<Entity>(clz, where as FilterQuery<NoInfer<Entity>>, {
+    const [items, totalCount] = await this.em.findAndCount<Entity, Hint, Fields, Excludes, Using>(clz, where as never, {
       ...restOptions,
       limit: safeLimit,
       offset: safeOffset,
-    });
+    } as never);
     const totalPages = Math.ceil(totalCount / safeLimit);
 
     return {

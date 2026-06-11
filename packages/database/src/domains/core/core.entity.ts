@@ -1,4 +1,4 @@
-import { BaseEntity, type CountByOptions, type CountOptions, type CreateOptions, type Cursor, type DeleteOptions, type Dictionary, type EntityClass, type EntityData, type EntityKey, EntityRepositoryType, type FilterQuery, type FindByCursorOptions, type FindOneOptions, type FindOneOrFailOptions, type FindOptions, type FromEntityType, OptionalProps, type Primary, type RequiredEntityData, type UpdateOptions, type WithUsingOptions } from '@mikro-orm/core';
+import { BaseEntity, type CountByOptions, type CountOptions, type CreateOptions, type Cursor, type DeleteOptions, type Dictionary, type EntityClass, type EntityData, type EntityKey, EntityRepositoryType, type FilterQuery, type FindByCursorOptions, type FindOneOptions, type FindOneOrFailOptions, type FindOptions, type FromEntityType, type Loaded, OptionalProps, type Primary, type RequiredEntityData, type UpdateOptions, type WithUsingOptions } from '@mikro-orm/core';
 import { PrimaryKey, Property } from '@mikro-orm/decorators/legacy';
 import { uuidv7 } from 'uuidv7';
 
@@ -99,59 +99,67 @@ export abstract class CoreEntity<
   }
 
   // === Read ===
-  static find<T extends CoreEntity>(
+  static find<T extends CoreEntity, Hint extends string = never, Fields extends string = never, Excludes extends string = never, Using extends string = never>(
     this: EntityClass<T>,
-    where: FilterQuery<T>,
-    options?: WithUsingOptions<FindOptions<T>, T, never>,
-  ) {
-    return QueryEngine.find(this, where, options);
+    where: [Using] extends [never] ? FilterQuery<T> : never,
+    options?: FindOptions<T, Hint, Fields, Excludes> & { using?: Using | Using[] },
+  ): Promise<Loaded<T, Hint, Fields, Excludes>[]> {
+    return QueryEngine.find<T, Hint, Fields, Excludes, Using>(this, where as never, options as never);
   }
 
-  static findAndCount<T extends CoreEntity>(
+  static findAndCount<T extends CoreEntity, Hint extends string = never, Fields extends string = never, Excludes extends string = never, Using extends string = never>(
     this: EntityClass<T>,
-    where: FilterQuery<T>,
-    options?: WithUsingOptions<FindOptions<T>, T, never>,
-  ) {
-    return QueryEngine.findAndCount(this, where, options);
+    where: [Using] extends [never] ? FilterQuery<T> : never,
+    options?: FindOptions<T, Hint, Fields, Excludes> & { using?: Using | Using[] },
+  ): Promise<[Loaded<T, Hint, Fields, Excludes>[], number]> {
+    return QueryEngine.findAndCount<T, Hint, Fields, Excludes, Using>(this, where as never, options as never);
   }
 
-  static findByCursor<T extends CoreEntity>(
+  static findByCursor<T extends CoreEntity, Hint extends string = never, Fields extends string = never, Excludes extends string = never, IncludeCount extends boolean = true, Using extends string = never>(
     this: EntityClass<T>,
-    options: WithUsingOptions<FindByCursorOptions<T>, T, never>,
-  ): Promise<Cursor<T>> {
-    return QueryEngine.findByCursor(this, options);
+    options: WithUsingOptions<FindByCursorOptions<T, Hint, Fields, Excludes, IncludeCount>, T, Using>,
+  ): Promise<Cursor<T, Hint, Fields, Excludes, IncludeCount>> {
+    return QueryEngine.findByCursor<T, Hint, Fields, Excludes, IncludeCount, Using>(this, options as never);
   }
 
-  static findById<T extends CoreEntity>(
+  static findById<T extends CoreEntity, Hint extends string = never, Fields extends string = never, Excludes extends string = never, Using extends string = never>(
     this: EntityClass<T>,
     id: Primary<T>,
-    options?: WithUsingOptions<FindOneOptions<T>, T, never>,
-  ) {
-    return QueryEngine.findById(this, id, options);
+    options?: FindOneOptions<T, Hint, Fields, Excludes> & { using?: Using | Using[] },
+  ): Promise<Loaded<T, Hint, Fields, Excludes> | null> {
+    return QueryEngine.findById<T, Hint, Fields, Excludes, Using>(this, id, options as never);
   }
 
-  static findOne<T extends CoreEntity>(
+  static findOne<T extends CoreEntity, Hint extends string = never, Fields extends string = never, Excludes extends string = never, Using extends string = never>(
     this: EntityClass<T>,
-    where: FilterQuery<T>,
-    options?: WithUsingOptions<FindOneOptions<T>, T, never>,
-  ) {
-    return QueryEngine.findOne(this, where, options);
+    where: [Using] extends [never] ? FilterQuery<T> : never,
+    options?: FindOneOptions<T, Hint, Fields, Excludes> & { using?: Using | Using[] },
+  ): Promise<Loaded<T, Hint, Fields, Excludes> | null> {
+    return QueryEngine.findOne<T, Hint, Fields, Excludes, Using>(this, where as never, options as never);
   }
 
-  static findOneOrFail<T extends CoreEntity>(
+  static findOneOrFail<T extends CoreEntity, Hint extends string = never, Fields extends string = never, Excludes extends string = never, Using extends string = never>(
     this: EntityClass<T>,
-    where: FilterQuery<T>,
-    options?: WithUsingOptions<FindOneOrFailOptions<T>, T, never>,
-  ) {
-    return QueryEngine.findOneOrFail(this, where, options);
+    where: [Using] extends [never] ? FilterQuery<T> : never,
+    options?: FindOneOrFailOptions<T, Hint, Fields, Excludes> & { using?: Using | Using[] },
+  ): Promise<Loaded<T, Hint, Fields, Excludes>> {
+    return QueryEngine.findOneOrFail<T, Hint, Fields, Excludes, Using>(this, where as never, options as never);
   }
 
-  static findByPage<T extends CoreEntity>(
+  static findByPage<T extends CoreEntity, Hint extends string = never, Fields extends string = never, Excludes extends string = never, Using extends string = never>(
     this: EntityClass<T>,
-    where: FilterQuery<T>,
-    options: Omit<WithUsingOptions<FindOptions<T>, T, never>, 'offset'> & { page?: number },
-  ) {
-    return QueryEngine.findByPage(this, where, options);
+    where: [Using] extends [never] ? FilterQuery<T> : never,
+    options: Omit<FindOptions<T, Hint, Fields, Excludes> & { using?: Using | Using[] }, 'offset'> & { page?: number },
+  ): Promise<{
+    items: Loaded<T, Hint, Fields, Excludes>[]
+    totalCount: number
+    hasNextPage: boolean
+    hasPrevPage: boolean
+    page: number
+    limit: number
+    totalPages: number
+  }> {
+    return QueryEngine.findByPage<T, Hint, Fields, Excludes, Using>(this, where as never, options as never);
   }
 
   // === Update ===

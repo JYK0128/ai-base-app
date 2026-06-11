@@ -6,10 +6,6 @@ export function getMailDelivery(metadata: MemberInviteMetadata | undefined): Mem
   return metadata?.mailDelivery;
 }
 
-function toIsoString(value: Date | undefined): string | undefined {
-  return value?.toISOString();
-}
-
 export function markMailDeliverySent(
   metadata: MemberInviteMetadata | undefined,
   attemptId: string,
@@ -73,9 +69,9 @@ export function resolveMailDeliveryStatusView(
     return undefined;
   }
 
-  const queuedAt = toIsoString(delivery.queuedAt);
-  const sentAt = toIsoString(delivery.sentAt);
-  const failedAt = toIsoString(delivery.failedAt);
+  const queuedAt = delivery.queuedAt.toISOString();
+  const sentAt = delivery.sentAt?.toISOString();
+  const failedAt = delivery.failedAt?.toISOString();
 
   if (invite?.isMailDeliveryTimeout) {
     const queuedAtTime = delivery.queuedAt.getTime();
