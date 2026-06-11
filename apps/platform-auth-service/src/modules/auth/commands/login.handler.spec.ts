@@ -3,7 +3,7 @@ import 'reflect-metadata';
 import { RequestContext } from '@mikro-orm/core';
 import { UnauthorizedException } from '@nestjs/common';
 import { AccountStatus, MemberStatus, OrganizationStatus } from '@pkg/database';
-import * as CommonUtils from '@pkg/shared/common';
+import * as CommonUtils from '@pkg/shared';
 import * as ServerUtils from '@pkg/shared/server';
 import { afterEach, beforeEach, describe, expect, it, type MockInstance, vi } from 'vitest';
 

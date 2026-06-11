@@ -1,7 +1,7 @@
 import { Transactional } from '@mikro-orm/decorators/legacy';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { MemberAccount, MemberAccountRepository } from '@pkg/database';
-import { JwtUtil } from '@pkg/shared/common';
+import { JwtUtil } from '@pkg/shared';
 
 import { ENV } from '@/env';
 import { RedisService } from '@/modules/redis/redis.service';

@@ -4,16 +4,10 @@
   "type": "module",
   "private": true,
   "sideEffects": false,
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
+  "main": "./dist/common/index.cjs",
+  "types": "./dist/common/index.d.ts",
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js",
-      "require": "./dist/index.cjs",
-      "default": "./dist/index.js"
-    },
-    "./common": {
       "types": "./dist/common/index.d.ts",
       "import": "./dist/common/index.js",
       "require": "./dist/common/index.cjs",

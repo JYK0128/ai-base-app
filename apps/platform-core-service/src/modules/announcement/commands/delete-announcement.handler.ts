@@ -1,5 +1,5 @@
 import { Transactional } from '@mikro-orm/decorators/legacy';
-import type { EntityManager } from '@mikro-orm/postgresql';
+import { EntityManager } from '@mikro-orm/postgresql';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { Announcement } from '@pkg/database';
 
