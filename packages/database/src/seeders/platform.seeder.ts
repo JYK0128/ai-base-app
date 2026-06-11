@@ -8,11 +8,11 @@ import type { BaseEntity, EntityManager, EntityName, FilterQuery, RequiredEntity
 import { Seeder } from '@mikro-orm/seeder';
 import bcrypt from 'bcrypt';
 
-import { MemberAccount } from '@/domains/platform/member/member.account.entity';
-import { Member, MemberStatus } from '@/domains/platform/member/member.entity';
-import { Organization, OrganizationStatus } from '@/domains/platform/organization/organization.entity';
-import { OrganizationRole } from '@/domains/platform/organization/organization.role.entity';
-import { OrganizationRoleAssignment } from '@/domains/platform/organization/organization.role-assignment.entity';
+import { MemberAccount } from '../domains/platform/member/member.account.entity';
+import { Member, MemberStatus } from '../domains/platform/member/member.entity';
+import { Organization, OrganizationStatus } from '../domains/platform/organization/organization.entity';
+import { OrganizationRole } from '../domains/platform/organization/organization.role.entity';
+import { OrganizationRoleAssignment } from '../domains/platform/organization/organization.role-assignment.entity';
 
 type CodedEntityData<TEntity extends BaseEntity> = RequiredEntityData<TEntity> & { code: string };
 type InitialMemberAccountData = Omit<RequiredEntityData<MemberAccount>, 'email' | 'member' | 'password' | 'passwordExpiresAt'> & {

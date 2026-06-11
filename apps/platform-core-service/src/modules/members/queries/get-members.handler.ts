@@ -44,7 +44,6 @@ export class GetMembersHandler implements IQueryHandler<GetMembersQuery> {
     );
   }
 
-
   private async identifyOrganization(): Promise<Organization> {
     const organizationId = this.cls.get('organizationId');
 
@@ -94,4 +93,3 @@ export class GetMembersHandler implements IQueryHandler<GetMembersQuery> {
     );
   }
 }
-

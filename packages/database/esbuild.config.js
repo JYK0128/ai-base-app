@@ -12,6 +12,7 @@ const isWatch = process.argv.includes('--watch');
 const sharedOptions = {
   entryPoints: [
     'src/index.ts',
+    'src/domains/index.ts',
   ],
   bundle: true,
   sourcemap: true,
@@ -47,10 +48,8 @@ function generateTypes() {
   console.log('[dts] rolling up type declarations...');
 
   const entries = [
-    {
-      filePath: './src/index.ts',
-      outFile: 'index.d.ts',
-    },
+    { filePath: './src/index.ts', outFile: 'index.d.ts' },
+    { filePath: './src/domains/index.ts', outFile: 'domains/index.d.ts' },
   ];
 
   try {
@@ -60,7 +59,7 @@ function generateTypes() {
         output: {
           inlineDeclareGlobals: true,
           inlineDeclareExternals: true,
-
+          sourceMap: true,
           noCheck: true,
         },
       })),

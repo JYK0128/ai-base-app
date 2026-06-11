@@ -1,8 +1,8 @@
 import { EntityManager } from '@mikro-orm/core';
 import { Seeder } from '@mikro-orm/seeder';
 
-import { I18nTranslation } from '@/domains/platform/i18n/i18n.translation.entity';
-import { Resource, ResourceScope, ResourceType } from '@/domains/platform/resource/resource.entity';
+import { I18nTranslation } from '../domains/platform/i18n/i18n.translation.entity';
+import { Resource, ResourceScope, ResourceType } from '../domains/platform/resource/resource.entity';
 
 interface ResourceSeedDto {
   code: string

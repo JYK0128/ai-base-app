@@ -6,11 +6,10 @@ import { CancelInviteCommand,
          CreateInviteCommand,
          ResendInviteCommand,
          ReviveInviteCommand,
-         UpdateMemberStatusCommand,
-         UpdateMemberRoleCommand } from './commands';
+         UpdateMemberRoleCommand, UpdateMemberStatusCommand } from './commands';
 import { InviteEmailEvent } from './events';
 import { MEMBERS_SERVICE_PATTERNS } from './members.contract';
-import type { CancelInviteInput, CreateInviteInput, GetInvitesInput, GetMemberInput, GetMembersInput, InviteOutputResult, ResendInviteInput, ReviveInviteInput, UpdateMemberStatusInput, UpdateMemberRoleInput } from './members.types';
+import type { CancelInviteInput, CreateInviteInput, GetInvitesInput, GetMemberInput, GetMembersInput, InviteOutputResult, ResendInviteInput, ReviveInviteInput, UpdateMemberRoleInput, UpdateMemberStatusInput } from './members.types';
 import { GetInvitesQuery, GetMemberQuery, GetMembersQuery } from './queries';
 
 @Controller()
@@ -111,4 +110,3 @@ export class MembersController {
     }));
   }
 }
-

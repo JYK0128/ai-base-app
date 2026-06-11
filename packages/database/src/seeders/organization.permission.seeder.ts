@@ -7,10 +7,10 @@
 import { EntityManager } from '@mikro-orm/core';
 import { Seeder } from '@mikro-orm/seeder';
 
-import { Organization } from '@/domains/platform/organization/organization.entity';
-import { OrganizationPermission } from '@/domains/platform/organization/organization.permission.entity';
-import { OrganizationRole } from '@/domains/platform/organization/organization.role.entity';
-import { Resource } from '@/domains/platform/resource/resource.entity';
+import { Organization } from '../domains/platform/organization/organization.entity';
+import { OrganizationPermission } from '../domains/platform/organization/organization.permission.entity';
+import { OrganizationRole } from '../domains/platform/organization/organization.role.entity';
+import { Resource } from '../domains/platform/resource/resource.entity';
 
 type RolePermissionSeed = {
   roleCode: string

@@ -567,6 +567,9 @@ importers:
       unplugin-isolated-decl:
         specifier: 0.15.7
         version: 0.15.7(@swc/core@1.15.24(@swc/helpers@0.5.21))(typescript@5.9.3)
+      unplugin-swc:
+        specifier: 1.5.9
+        version: 1.5.9(@swc/core@1.15.24(@swc/helpers@0.5.21))(rollup@4.60.1)
       vitest:
         specifier: 4.1.4
         version: 4.1.4(@types/node@25.6.0)(@vitest/browser-playwright@4.1.4)(@vitest/coverage-v8@4.1.4)(msw@2.13.3(@types/node@25.6.0)(typescript@5.9.3))(vite@8.0.11(@types/node@25.6.0)(esbuild@0.27.7)(jiti@2.7.0)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3))
@@ -1473,6 +1476,7 @@ packages:
   '@esbuild/linux-x64@0.28.0':
     resolution: {integrity: sha512-us0dSb9iFxIi8srnpl931Nvs65it/Jd2a2K3qs7fz2WfGPHqzfzZTfec7oxZJRNPXPnNYZtanmRc4AL/JwVzHQ==}
     engines: {node: '>=18'}
+    cpu: [x64]
     os: [linux]
 
   '@esbuild/netbsd-arm64@0.27.7':
@@ -7073,6 +7077,10 @@ packages:
   linkify-it@5.0.0:
     resolution: {integrity: sha512-5aHCbzQRADcdP+ATqnDuhhJ/MRIqDkZX5pyjFHRRysS8vZ5AbqGEoFIb6pYHPZ+L/OC2Lc+xT8uHVVR5CAK/wQ==}
 
+  load-tsconfig@0.2.5:
+    resolution: {integrity: sha512-IXO6OCs9yg8tMKzfPZ1YmheJbZCiEsnBdcB03l0OcfK9prKnJb96siuHCr5Fl37/yo9DnKU+TLpxzTUspw9shg==}
+    engines: {node: ^12.20.0 || ^14.13.1 || >=16.0.0}
+
   loader-runner@4.3.1:
     resolution: {integrity: sha512-IWqP2SCPhyVFTBtRcgMHdzlf9ul25NwaFx4wCEH/KjAXuuHY4yNjvPXsBokp8jCB936PyWRaPKUNh8NvylLp2Q==}
     engines: {node: '>=6.11.5'}
@@ -8967,6 +8975,11 @@ packages:
         optional: true
       typescript:
         optional: true
+
+  unplugin-swc@1.5.9:
+    resolution: {integrity: sha512-RKwK3yf0M+MN17xZfF14bdKqfx0zMXYdtOdxLiE6jHAoidupKq3jGdJYANyIM1X/VmABhh1WpdO+/f4+Ol89+g==}
+    peerDependencies:
+      '@swc/core': ^1.2.108
 
   unplugin-utils@0.3.1:
     resolution: {integrity: sha512-5lWVjgi6vuHhJ526bI4nlCOmkCIF3nnfXkCMDeMJrtdvxTs6ZFCM8oNufGTsDbKv/tJ/xj8RpvXjRuPBZJuJog==}
@@ -13272,9 +13285,9 @@ snapshots:
       obug: 2.1.1
       std-env: 4.0.0
       tinyrainbow: 3.1.0
-      vitest: 4.1.4(@types/node@22.13.9)(@vitest/browser-playwright@4.1.4)(@vitest/coverage-v8@4.1.4)(msw@2.13.3(@types/node@22.13.9)(typescript@5.9.3))(vite@8.0.11(@types/node@22.13.9)(esbuild@0.27.7)(jiti@2.7.0)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3))
+      vitest: 4.1.4(@types/node@25.6.0)(@vitest/browser-playwright@4.1.4)(@vitest/coverage-v8@4.1.4)(msw@2.13.3(@types/node@25.6.0)(typescript@5.9.3))(vite@8.0.11(@types/node@25.6.0)(esbuild@0.27.7)(jiti@2.7.0)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3))
     optionalDependencies:
-      '@vitest/browser': 4.1.4(msw@2.13.3(@types/node@22.13.9)(typescript@5.9.3))(vite@8.0.11(@types/node@22.13.9)(esbuild@0.27.7)(jiti@2.7.0)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3))(vitest@4.1.4)
+      '@vitest/browser': 4.1.4(msw@2.13.3(@types/node@25.6.0)(typescript@5.9.3))(vite@8.0.11(@types/node@25.6.0)(esbuild@0.27.7)(jiti@2.7.0)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3))(vitest@4.1.4)
 
   '@vitest/expect@3.2.4':
     dependencies:
@@ -15842,6 +15855,8 @@ snapshots:
     dependencies:
       uc.micro: 2.1.0
 
+  load-tsconfig@0.2.5: {}
+
   loader-runner@4.3.1: {}
 
   local-pkg@1.1.2:
@@ -18134,6 +18149,15 @@ snapshots:
     optionalDependencies:
       '@swc/core': 1.15.24(@swc/helpers@0.5.21)
       typescript: 5.9.3
+
+  unplugin-swc@1.5.9(@swc/core@1.15.24(@swc/helpers@0.5.21))(rollup@4.60.1):
+    dependencies:
+      '@rollup/pluginutils': 5.3.0(rollup@4.60.1)
+      '@swc/core': 1.15.24(@swc/helpers@0.5.21)
+      load-tsconfig: 0.2.5
+      unplugin: 2.3.11
+    transitivePeerDependencies:
+      - rollup
 
   unplugin-utils@0.3.1:
     dependencies:

@@ -1,10 +1,10 @@
 import { MikroORM } from '@mikro-orm/postgresql';
 
-import { DatabaseSeeder } from '@/seeders/DatabaseSeeder';
-
 import ormConfig from '../mikro-orm.config';
+import { DatabaseSeeder } from '../seeders/DatabaseSeeder';
 
-export async function setup() {
+export default async function setup() {
+  console.log('start setup');
   let orm: MikroORM | null = null;
   try {
     orm = await MikroORM.init(ormConfig);
@@ -12,6 +12,7 @@ export async function setup() {
     await orm.seeder.seed(DatabaseSeeder);
   }
   finally {
+    console.log('close setup');
     await orm?.close(true);
   }
 }

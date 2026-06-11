@@ -149,7 +149,7 @@ export class BulkTranslationsHandler implements ICommandHandler<BulkTranslations
         return;
       case 'UPDATE':
         translation!.value = operation.value!;
-        translationMap.set(translationKey, translation!);
+        translationMap.set(translationKey, translation);
         return;
       case 'DELETE':
         translation!.remove();

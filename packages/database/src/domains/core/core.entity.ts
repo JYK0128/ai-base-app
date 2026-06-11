@@ -10,7 +10,7 @@ export abstract class CoreEntity<
   Optional extends keyof Entity = never,
 > extends BaseEntity {
   [EntityRepositoryType]?: CoreRepository<Entity>;
-  [OptionalProps]?: 'createdAt' | 'updatedAt' | Optional;
+  [OptionalProps]?: 'createdAt' | 'updatedAt' | 'isDeleted' | Optional;
 
   @PrimaryKey()
   id: string = uuidv7();

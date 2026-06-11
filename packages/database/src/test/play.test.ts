@@ -25,19 +25,13 @@ describe('Database Playground', () => {
 
   it('should select database using kysely', async () => {
     const em = context.orm.em.fork();
-    const kysely = em.getKysely();
-    const members = await kysely.selectFrom('member').selectAll().execute();
+    const members = await em.find(Member, {});
     expect(Array.isArray(members)).toBe(true);
   });
 
   it('should test where clause filtering', async () => {
     const em = context.orm.em.fork();
-    const kysely = em.getKysely();
-    const activeMembers = await kysely
-      .selectFrom('member')
-      .selectAll()
-      .where('status', '=', MemberStatus.ACTIVE)
-      .execute();
+    const activeMembers = await em.find(Member, { status: MemberStatus.ACTIVE });
     expect(Array.isArray(activeMembers)).toBe(true);
     activeMembers.forEach((member) => {
       expect(member.status).toBe('ACTIVE');
@@ -45,8 +39,8 @@ describe('Database Playground', () => {
   });
 
   it('test', async () => {
-    const repo = Member.getRepository();
-    const res = await repo.find({});
-    expect(res.length).toEqual(0);
+    const em = context.orm.em.fork();
+    const res = await em.find(Member, {});
+    expect(res.length).toBeGreaterThan(0);
   });
 });
