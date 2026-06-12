@@ -2,7 +2,7 @@
 
 - [x] `announcement` - 공지사항 목록 조회를 `platform-service`로 이관
 - [x] `i18n/locales` - 활성 로케일 목록 조회를 `platform-service`로 이관
-- [ ] `resource` - 리소스 조회 기능을 `platform-service`로 이관
+- [x] `resource` - 리소스 조회 기능을 `platform-service`로 이관
 - [ ] `members` - 멤버 조회 기능을 `platform-service`로 이관
 - [x] `organization` - 조직 조회 기능을 `platform-service`로 이관
 - [ ] `support` - 티켓 조회 기능을 `platform-service`로 이관
