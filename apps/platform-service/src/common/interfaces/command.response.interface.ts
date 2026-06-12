@@ -2,12 +2,12 @@ import type { DtoInterface } from './dto.interface';
 
 export type CommandIdResponse<T extends object>
   = 'id' extends keyof T
-    ? { id: string }
+    ? { id: T['id'] }
     : never;
 
 export type CommandIdsResponse<T extends object>
   = 'id' extends keyof T
-    ? { ids: string[] }
+    ? { ids: T['id'][] }
     : never;
 
 export type CommandDataResponse<T extends object>
