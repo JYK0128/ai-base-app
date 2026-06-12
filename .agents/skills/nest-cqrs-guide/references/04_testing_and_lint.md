@@ -1,16 +1,16 @@
 # CQRS 테스트 및 린트 가이드
 
-본 문서는 Vitest 기반의 NestJS CQRS 핸들러 테스트 구현 방법 및 코드 퀄리티를 유지하기 위한 정적 분석/빌드 검증 프로세스를 규정합니다.
+Vitest 기반의 NestJS CQRS 핸들러 테스트 구현 방법 및 코드 퀄리티 유지를 위한 정적 분석/빌드 검증 프로세스 정의.
 
 ---
 
 ## 🧪 1. CQRS 핸들러 단위 테스트 구현 패턴
 
-핸들러 테스트는 NestJS 의존성 주입 컨테이너 기동 오버헤드를 배제하기 위해, 생성자를 통해 의존성을 수동으로 모킹 주입(Manual Mocking)하는 순수 단위 테스트 형태로 작성하는 것을 권장합니다.
+NestJS 의존성 주입 컨테이너 기동 오버헤드를 제거하기 위해, 생성자를 통해 의존성을 수동으로 모킹 주입(Manual Mocking)하는 순수 단위 테스트 형태로 작성할 것을 권장함.
 
-* **ClsService 모킹**: `cls.get` 메서드가 특정 테스팅 컨텍스트(ID 등)를 반환하도록 Mock을 정의합니다.
-* **비동기 예외 검증**: `ExceptionGuard`를 통한 실패 케이스는 `expect(...).rejects.toThrow()` 구조를 사용하여 특정 예외 클래스(예: `NotFoundException`)가 안전하게 던져지는지 검증합니다.
-* **이벤트 발행 검증**: 비동기 사이드 이펙트를 주입받는 Publisher의 emit 메서드가 규격에 맞춰 정상 호출되었는지 `vitest` 스파이(spy) 기능을 사용해 확인합니다.
+* **ClsService 모킹**: `cls.get` 메서드가 특정 테스팅 컨텍스트(ID 등)를 반환하도록 Mock을 정의함.
+* **비동기 예외 검증**: `ExceptionGuard`를 통한 실패 케이스는 `expect(...).rejects.toThrow()` 구조를 활용하여 정의된 예외 클래스(예: `NotFoundException`)가 안정적으로 반환되는지 확인함.
+* **이벤트 발행 검증**: 비동기 사이드 이펙트를 주입받는 Publisher의 emit 메서드가 규격에 맞춰 호출되었는지 `vitest` 스파이(spy) 기능으로 검증함.
 
 ### 💻 구현 예시 (`create-invite.handler.test.ts`)
 
@@ -102,11 +102,11 @@ describe('CreateInviteHandler', () => {
 
 ## 🧹 2. 린트 및 품질 유지 (Linting & Clean Code)
 
-CQRS 레이어의 응답 가독성과 컴파일 오류 방지를 위해 아래 정적 분석 룰을 준수해야 합니다.
+CQRS 레이어의 응답 가독성과 컴파일 오류 방지를 위해 아래 정적 분석 규칙을 적용함.
 
-* **타입 명시(Explicit Return Types)**: 핸들러의 `execute` 메서드 선언부에는 `Promise<ResponseDto>` 형태로 최종 응답 DTO 타입을 항상 생략 없이 명시해야 타입 안전성이 깨지지 않습니다.
-* **불필요한 import 제거**: 파일 리팩터링 완료 후, 미사용 import 구문이 남아있지 않도록 사용 중인 IDE 혹은 CLI `lint` 도구를 실행하여 깔끔하게 정리합니다.
-* **컴파일 오류 사전 검출**: 메시지 규격(Contract)이나 DTO 필드 정의를 수정했을 때는 반드시 로컬 패키지 수준에서 TypeScript 컴파일 검증을 실행합니다.
+* **타입 명시(Explicit Return Types)**: 핸들러의 `execute` 메서드 선언부에는 `Promise<ResponseDto>` 형태로 최종 응답 DTO 타입을 상시 명시하여 타입 무결성을 유지함.
+* **불필요한 import 제거**: 파일 리팩터링 완료 후 미사용 import 구문이 잔존하지 않도록 린터(Linter) 규칙을 적용함.
+* **컴파일 오류 사전 검출**: 메시지 규격(Contract)이나 DTO 필드 정의를 수정했을 때는 로컬 패키지 빌드 검증을 선제적으로 수행함.
 
 ### 🔍 로컬 패키지 수동 검증 명령어
 
