@@ -1,4 +1,4 @@
-import { MemberInviteMetadata, type MemberInvite } from '@pkg/database';
+import { type MemberInvite, MemberInviteMetadata } from '@pkg/database';
 
 import type { MailDeliveryStatus, MailDeliveryStatusView } from './mail.types';
 
@@ -22,7 +22,7 @@ export function getMailDelivery(metadata: MemberInviteMetadata | undefined): Mai
     queuedAt: metadata.queuedAt,
     sentAt: metadata.sentAt,
     failedAt: metadata.failedAt,
-    expiredAt: metadata.expiredAt as Date | null | undefined,
+    expiredAt: metadata.expiredAt,
   };
 }
 

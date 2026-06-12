@@ -1,6 +1,6 @@
 import { InjectRepository } from '@mikro-orm/nestjs';
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
-import { CoreRepository, Announcement } from '@pkg/database';
+import { Announcement, CoreRepository } from '@pkg/database';
 
 import { AnnouncementRecord } from '../announcement.contract';
 import { buildAnnouncementOutput } from '../announcement.helper';

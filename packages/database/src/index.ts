@@ -1,5 +1,5 @@
 import 'reflect-metadata';
-import './types/mikro-orm';
+import './ambients/mikro-orm';
 
 export * from './domains';
 export * from './entities.generated';

@@ -1,0 +1,7 @@
+{
+  "extends": "@pkg/config/typescript/node",
+  "files": [
+    "eslint.config.mjs",
+    "vitest.config.ts"
+  ]
+}

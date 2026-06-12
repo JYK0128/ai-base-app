@@ -420,6 +420,124 @@ importers:
         specifier: 4.1.4
         version: 4.1.4(@types/node@22.13.9)(@vitest/browser-playwright@4.1.4)(@vitest/coverage-v8@4.1.4)(msw@2.13.3(@types/node@22.13.9)(typescript@5.9.3))(vite@8.0.11(@types/node@22.13.9)(esbuild@0.27.7)(jiti@2.7.0)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3))
 
+  apps/platform-service:
+    dependencies:
+      '@mikro-orm/nestjs':
+        specifier: 7.0.2
+        version: 7.0.2(@mikro-orm/core@7.1.4)(@nestjs/common@11.0.11(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.0.11)(reflect-metadata@0.2.2)
+      '@mikro-orm/postgresql':
+        specifier: 7.1.4
+        version: 7.1.4(@mikro-orm/core@7.1.4)
+      '@nestjs/common':
+        specifier: 11.0.11
+        version: 11.0.11(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2)
+      '@nestjs/core':
+        specifier: 11.0.11
+        version: 11.0.11(@nestjs/common@11.0.11(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/microservices@11.0.11)(@nestjs/platform-express@11.0.11)(reflect-metadata@0.2.2)(rxjs@7.8.2)
+      '@nestjs/jwt':
+        specifier: 11.0.2
+        version: 11.0.2(@nestjs/common@11.0.11(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))
+      '@nestjs/microservices':
+        specifier: 11.0.11
+        version: 11.0.11(@grpc/grpc-js@1.14.3)(@nestjs/common@11.0.11(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.0.11)(amqp-connection-manager@4.1.14(amqplib@0.10.9))(amqplib@0.10.9)(ioredis@5.10.1)(reflect-metadata@0.2.2)(rxjs@7.8.2)
+      '@nestjs/platform-express':
+        specifier: 11.0.11
+        version: 11.0.11(@nestjs/common@11.0.11(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.0.11)
+      '@nestjs/swagger':
+        specifier: 11.3.0
+        version: 11.3.0(@nestjs/common@11.0.11(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.0.11)(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)
+      '@nestjs/terminus':
+        specifier: 11.1.1
+        version: 11.1.1(@grpc/grpc-js@1.14.3)(@grpc/proto-loader@0.8.0)(@mikro-orm/core@7.1.4)(@mikro-orm/nestjs@7.0.2(@mikro-orm/core@7.1.4)(@nestjs/common@11.0.11(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.0.11)(reflect-metadata@0.2.2))(@nestjs/axios@4.0.1(@nestjs/common@11.0.11(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(axios@1.16.0)(rxjs@7.8.2))(@nestjs/common@11.0.11(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.0.11)(@nestjs/microservices@11.0.11)(reflect-metadata@0.2.2)(rxjs@7.8.2)
+      '@nestjs/throttler':
+        specifier: 6.5.0
+        version: 6.5.0(@nestjs/common@11.0.11(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.0.11)(reflect-metadata@0.2.2)
+      '@pkg/config':
+        specifier: workspace:*
+        version: link:../../packages/config
+      '@pkg/database':
+        specifier: workspace:*
+        version: link:../../packages/database
+      '@pkg/shared':
+        specifier: workspace:*
+        version: link:../../packages/shared
+      class-transformer:
+        specifier: 0.5.1
+        version: 0.5.1
+      class-validator:
+        specifier: 0.15.1
+        version: 0.15.1
+      cookie-parser:
+        specifier: 1.4.7
+        version: 1.4.7
+      express:
+        specifier: 5.2.1
+        version: 5.2.1
+      helmet:
+        specifier: 8.1.0
+        version: 8.1.0
+      jose:
+        specifier: 6.2.3
+        version: 6.2.3
+      nestjs-cls:
+        specifier: 6.2.0
+        version: 6.2.0(@nestjs/common@11.0.11(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.0.11)(reflect-metadata@0.2.2)(rxjs@7.8.2)
+      nestjs-pino:
+        specifier: 4.6.1
+        version: 4.6.1(@nestjs/common@11.0.11(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(pino-http@11.0.0)(pino@10.3.1)(rxjs@7.8.2)
+      pino-http:
+        specifier: 11.0.0
+        version: 11.0.0
+      pino-pretty:
+        specifier: 13.1.3
+        version: 13.1.3
+      reflect-metadata:
+        specifier: 0.2.2
+        version: 0.2.2
+      rxjs:
+        specifier: 7.8.2
+        version: 7.8.2
+      swagger-ui-express:
+        specifier: 5.0.1
+        version: 5.0.1(express@5.2.1)
+      zod:
+        specifier: 4.4.3
+        version: 4.4.3
+    devDependencies:
+      '@dotenvx/dotenvx':
+        specifier: 1.61.0
+        version: 1.61.0
+      '@nestjs/cli':
+        specifier: 11.0.5
+        version: 11.0.5(@swc/cli@0.6.0(@swc/core@1.15.24(@swc/helpers@0.5.21))(chokidar@4.0.3))(@swc/core@1.15.24(@swc/helpers@0.5.21))(@types/node@22.13.9)(esbuild@0.27.7)
+      '@nestjs/schematics':
+        specifier: 11.0.2
+        version: 11.0.2(chokidar@4.0.3)(typescript@5.9.3)
+      '@swc/cli':
+        specifier: 0.6.0
+        version: 0.6.0(@swc/core@1.15.24(@swc/helpers@0.5.21))(chokidar@4.0.3)
+      '@swc/core':
+        specifier: 1.15.24
+        version: 1.15.24(@swc/helpers@0.5.21)
+      '@types/cookie-parser':
+        specifier: 1.4.10
+        version: 1.4.10(@types/express@5.0.6)
+      '@types/express':
+        specifier: 5.0.6
+        version: 5.0.6
+      '@types/node':
+        specifier: 22.13.9
+        version: 22.13.9
+      eslint:
+        specifier: 9.39.4
+        version: 9.39.4(jiti@2.7.0)
+      typescript:
+        specifier: 5.9.3
+        version: 5.9.3
+      vitest:
+        specifier: 4.1.4
+        version: 4.1.4(@types/node@22.13.9)(@vitest/browser-playwright@4.1.4)(@vitest/coverage-v8@4.1.4)(msw@2.13.3(@types/node@22.13.9)(typescript@5.9.3))(vite@8.0.11(@types/node@22.13.9)(esbuild@0.27.7)(jiti@2.7.0)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3))
+
   packages/config:
     devDependencies:
       '@stylistic/eslint-plugin':
@@ -1476,7 +1594,6 @@ packages:
   '@esbuild/linux-x64@0.28.0':
     resolution: {integrity: sha512-us0dSb9iFxIi8srnpl931Nvs65it/Jd2a2K3qs7fz2WfGPHqzfzZTfec7oxZJRNPXPnNYZtanmRc4AL/JwVzHQ==}
     engines: {node: '>=18'}
-    cpu: [x64]
     os: [linux]
 
   '@esbuild/netbsd-arm64@0.27.7':
@@ -13285,9 +13402,9 @@ snapshots:
       obug: 2.1.1
       std-env: 4.0.0
       tinyrainbow: 3.1.0
-      vitest: 4.1.4(@types/node@25.6.0)(@vitest/browser-playwright@4.1.4)(@vitest/coverage-v8@4.1.4)(msw@2.13.3(@types/node@25.6.0)(typescript@5.9.3))(vite@8.0.11(@types/node@25.6.0)(esbuild@0.27.7)(jiti@2.7.0)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3))
+      vitest: 4.1.4(@types/node@22.13.9)(@vitest/browser-playwright@4.1.4)(@vitest/coverage-v8@4.1.4)(msw@2.13.3(@types/node@22.13.9)(typescript@5.9.3))(vite@8.0.11(@types/node@22.13.9)(esbuild@0.27.7)(jiti@2.7.0)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3))
     optionalDependencies:
-      '@vitest/browser': 4.1.4(msw@2.13.3(@types/node@25.6.0)(typescript@5.9.3))(vite@8.0.11(@types/node@25.6.0)(esbuild@0.27.7)(jiti@2.7.0)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3))(vitest@4.1.4)
+      '@vitest/browser': 4.1.4(msw@2.13.3(@types/node@22.13.9)(typescript@5.9.3))(vite@8.0.11(@types/node@22.13.9)(esbuild@0.27.7)(jiti@2.7.0)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3))(vitest@4.1.4)
 
   '@vitest/expect@3.2.4':
     dependencies:
