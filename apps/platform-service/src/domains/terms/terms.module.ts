@@ -1,17 +1,18 @@
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import { Module } from '@nestjs/common';
 import { CqrsModule } from '@nestjs/cqrs';
-import { TermsDocument } from '@pkg/database';
+import { TermsDocument, TermsVersion } from '@pkg/database';
 
 import { GetActiveTermsHandler } from './queries/get-active-terms.handler';
+import { GetTermsDocumentHandler } from './queries/get-terms-document.handler';
 import { TermsController } from './terms.controller';
 
 @Module({
   imports: [
     CqrsModule,
-    MikroOrmModule.forFeature([TermsDocument]),
+    MikroOrmModule.forFeature([TermsDocument, TermsVersion]),
   ],
   controllers: [TermsController],
-  providers: [GetActiveTermsHandler],
+  providers: [GetActiveTermsHandler, GetTermsDocumentHandler],
 })
 export class TermsModule {}

@@ -1,6 +1,7 @@
 import type { TermsDocument, TermsVersion } from '@pkg/database';
 
 import { TermsDocumentResponseDto } from './queries/get-active-terms.response.dto';
+import { TermsDocumentDetailResponseDto, TermsVersionResponseDto } from './queries/get-terms-document.response.dto';
 
 export function getCurrentPublishedVersion(
   versions: TermsVersion[],
@@ -12,4 +13,21 @@ export function getCurrentPublishedVersion(
 
 export function mapTermsDocumentResponse(document: TermsDocument): TermsDocumentResponseDto {
   return new TermsDocumentResponseDto(document);
+}
+
+export function mapTermsVersionResponse(version: TermsVersion): TermsVersionResponseDto {
+  return new TermsVersionResponseDto(version);
+}
+
+export function mapTermsDocumentDetailResponse(
+  document: TermsDocument,
+  versions: TermsVersion[],
+): TermsDocumentDetailResponseDto {
+  const currentVersion = getCurrentPublishedVersion(versions);
+
+  return new TermsDocumentDetailResponseDto(
+    mapTermsDocumentResponse(document),
+    versions.map(mapTermsVersionResponse),
+    currentVersion ? mapTermsVersionResponse(currentVersion) : null,
+  );
 }
