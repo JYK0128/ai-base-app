@@ -1,12 +1,13 @@
-import { Command } from '@nestjs/cqrs';
+import { Announcement } from '@pkg/database';
 
-import type { AnnouncementIdRecord, CreateAnnouncementInput } from '../announcement.contract';
+import { InsertCommand } from '../../../../../platform-service/src/common/interfaces/contract';
+import type { CreateAnnouncementInput } from '../announcement.contract';
 
 /**
  * 공지사항 생성 커맨드
  */
-export class CreateAnnouncementCommand extends Command<AnnouncementIdRecord> {
+export class CreateAnnouncementCommand extends InsertCommand<Announcement> {
   constructor(readonly payload: CreateAnnouncementInput) {
-    super();
+    super(payload.data);
   }
 }
