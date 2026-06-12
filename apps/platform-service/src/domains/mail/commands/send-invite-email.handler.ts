@@ -1,7 +1,6 @@
 import { Logger } from '@nestjs/common';
 import { CommandHandler, type ICommandHandler } from '@nestjs/cqrs';
 
-import { describeMailError } from '../mail.helper';
 import { MailService } from '../mail.service';
 import type { SendInviteEmailFailureContext } from '../mail.types';
 import { SendInviteEmailCommand } from './send-invite-email.command';
@@ -36,8 +35,28 @@ export class SendInviteEmailHandler implements ICommandHandler<SendInviteEmailCo
         },
       },
     ).catch((error: unknown) => {
-      this.logger.error(`Invitation email send failed: ${describeMailError(error)}`);
+      this.logger.error(`Invitation email send failed: ${this.describeMailError(error)}`);
       throw error;
     });
+  }
+
+  private describeMailError(error: unknown): string {
+    if (error instanceof Error) {
+      return error.message;
+    }
+
+    if (typeof error === 'string') {
+      return error;
+    }
+
+    if (error && typeof error === 'object') {
+      const { message } = error as { message?: unknown };
+
+      if (typeof message === 'string') {
+        return message;
+      }
+    }
+
+    return 'Unknown error';
   }
 }
