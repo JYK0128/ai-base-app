@@ -3,3 +3,8 @@ export * from './create-invite.error';
 export * from './create-invite.handler';
 export * from './create-invite.request.dto';
 export * from './create-invite.response.dto';
+export * from './update-member-status.contract';
+export * from './update-member-status.error';
+export * from './update-member-status.handler';
+export * from './update-member-status.request.dto';
+export * from './update-member-status.response.dto';

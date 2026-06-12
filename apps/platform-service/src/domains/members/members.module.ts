@@ -4,6 +4,7 @@ import { CqrsModule } from '@nestjs/cqrs';
 import { Member, MemberInvite, Organization, OrganizationRole } from '@pkg/database';
 
 import { CreateInviteHandler } from './commands/create-invite.handler';
+import { UpdateMemberStatusHandler } from './commands/update-member-status.handler';
 import { InviteEmailPublisher } from './events/invite-email.publisher';
 import { MembersController } from './members.controller';
 import { GetMemberHandler } from './queries/get-member.handler';
@@ -15,6 +16,6 @@ import { GetMembersHandler } from './queries/get-members.handler';
     MikroOrmModule.forFeature([Member, MemberInvite, Organization, OrganizationRole]),
   ],
   controllers: [MembersController],
-  providers: [GetMemberHandler, GetMembersHandler, CreateInviteHandler, InviteEmailPublisher],
+  providers: [GetMemberHandler, GetMembersHandler, CreateInviteHandler, UpdateMemberStatusHandler, InviteEmailPublisher],
 })
 export class MembersModule {}
