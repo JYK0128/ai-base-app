@@ -5,6 +5,8 @@ import { DiskHealthIndicator, HealthCheck, HealthCheckService, MemoryHealthIndic
 import { Public } from '@/common/decorators/public.decorator';
 import { ENV } from '@/env';
 
+const redisUrl = new URL(ENV.REDIS_URL);
+
 @Controller({
   path: 'health',
   version: VERSION_NEUTRAL,
@@ -35,7 +37,8 @@ export class HealthController {
       () => this.microservice.pingCheck('redis', {
         transport: Transport.REDIS,
         options: {
-          url: ENV.REDIS_URL,
+          host: redisUrl.hostname,
+          port: Number(redisUrl.port),
         },
       }),
       () => this.microservice.pingCheck('rabbitmq', {
