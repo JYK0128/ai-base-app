@@ -5,3 +5,4 @@ export * from './i18n.module';
 export * from './organization.module';
 export * from './resource.module';
 export * from './support.module';
+export * from './terms.module';
