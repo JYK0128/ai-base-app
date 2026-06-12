@@ -1,16 +1,16 @@
 import type { Type } from '@nestjs/common';
 
-import type { CommandDataRequest } from './request/data.interface';
-import type { CommandAffectedRowsResponse } from './response/affected-rows.interface';
-import type { CommandDataResponse } from './response/data.interface';
-import type { CommandIdResponse } from './response/id.interface';
-import type { CommandIdsResponse } from './response/ids.interface';
+import type { CommandDataRequest } from './request/data.dto';
+import type { CommandAffectedRowsResponse } from './response/affected-rows.dto';
+import type { CommandDataResponse } from './response/data.dto';
+import type { CommandIdResponse } from './response/id.dto';
+import type { CommandIdsResponse } from './response/ids.dto';
 
 export interface ICommandHandler<TEntity extends Type> {
   /** 생성 - 단일 */
-  insert(data: CommandDataRequest<TEntity>): Promise<CommandIdResponse>
+  insert(data: Omit<CommandDataRequest<TEntity>, 'id'>): Promise<CommandIdResponse>
   /** 생성 - 복수 */
-  insertMany(data: CommandDataRequest<TEntity>[]): Promise<CommandIdsResponse>
+  insertMany(data: Omit<CommandDataRequest<TEntity>, 'id'>[]): Promise<CommandIdsResponse>
 
   /** 생성 및 갱신 - 단일 */
   upsert(data: CommandDataRequest<TEntity>): Promise<CommandDataResponse<TEntity>>

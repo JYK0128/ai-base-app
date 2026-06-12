@@ -1,18 +1,18 @@
 import type { Type } from '@nestjs/common';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 
-import { withQuerySort } from './sort.interface';
+import { withQuerySort } from './sort.dto';
 
-export function withQueryList<TBase extends Type>(Base: TBase) {
+export function withQueryPage<TBase extends Type>(Base: TBase) {
   abstract class MixinClass extends withQuerySort(Base) {
     [key: string]: unknown
 
     @ApiPropertyOptional({
-      description: '오프셋',
-      minimum: 0,
-      example: 0,
+      description: '페이지 번호',
+      minimum: 1,
+      example: 1,
     })
-    offset?: number;
+    page?: number;
 
     @ApiPropertyOptional({
       description: '페이지 크기',
@@ -25,5 +25,5 @@ export function withQueryList<TBase extends Type>(Base: TBase) {
   return MixinClass;
 }
 
-export type QueryListRequest<TBase extends Type>
-  = Partial<InstanceType<TBase>> & InstanceType<ReturnType<typeof withQueryList<TBase>>>;
+export type QueryPageRequest<TBase extends Type>
+  = Partial<InstanceType<TBase>> & InstanceType<ReturnType<typeof withQueryPage<TBase>>>;

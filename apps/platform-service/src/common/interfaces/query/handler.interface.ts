@@ -1,13 +1,13 @@
 import type { Type } from '@nestjs/common';
 
-import type { QueryCursorRequest } from './request/cursor.interface';
-import type { QueryListRequest } from './request/list.interface';
-import type { QueryPageRequest } from './request/page.interface';
-import type { QuerySortRequest } from './request/sort.interface';
-import type { QueryCursorResponse } from './response/cursor.interface';
-import type { QueryDataResponse } from './response/data.interface';
-import type { QueryListResponse } from './response/list.interface';
-import type { QueryPageResponse } from './response/page.interface';
+import type { QueryCursorRequest } from './request/cursor.dto';
+import type { QueryListRequest } from './request/list.dto';
+import type { QueryPageRequest } from './request/page.dto';
+import type { QuerySortRequest } from './request/sort.dto';
+import type { QueryCursorResponse } from './response/cursor.dto';
+import type { QueryDataResponse } from './response/data.dto';
+import type { QueryListResponse } from './response/list.dto';
+import type { QueryPageResponse } from './response/page.dto';
 
 export interface IQueryHandler<TEntity extends Type> {
   /** 페이지 조회 */

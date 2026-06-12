@@ -1,7 +1,7 @@
 import type { Type } from '@nestjs/common';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 
-import { withQuerySort } from './sort.interface';
+import { withQuerySort } from './sort.dto';
 
 export function withQueryCursor<TBase extends Type>(Base: TBase) {
   abstract class MixinClass extends withQuerySort(Base) {

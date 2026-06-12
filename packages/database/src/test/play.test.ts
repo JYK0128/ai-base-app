@@ -1,3 +1,4 @@
+import { wrap } from '@mikro-orm/core';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 import { Member, MemberStatus } from '@/domains';
@@ -40,6 +41,11 @@ describe('Database Playground', () => {
 
   it('test', async () => {
     const em = context.orm.em.fork();
+    Member.create({
+      name: '1',
+      organization: '1',
+    });
+    wrap(Member);
     const res = await em.find(Member, {});
     expect(res.length).toBeGreaterThan(0);
   });
