@@ -5,6 +5,7 @@ import { TermsDocument, TermsVersion } from '@pkg/database';
 
 import { GetActiveTermsHandler } from './queries/get-active-terms.handler';
 import { GetTermsDocumentHandler } from './queries/get-terms-document.handler';
+import { GetTermsDocumentVersionsHandler } from './queries/get-terms-document-versions.handler';
 import { TermsController } from './terms.controller';
 
 @Module({
@@ -13,6 +14,6 @@ import { TermsController } from './terms.controller';
     MikroOrmModule.forFeature([TermsDocument, TermsVersion]),
   ],
   controllers: [TermsController],
-  providers: [GetActiveTermsHandler, GetTermsDocumentHandler],
+  providers: [GetActiveTermsHandler, GetTermsDocumentHandler, GetTermsDocumentVersionsHandler],
 })
 export class TermsModule {}
