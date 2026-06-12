@@ -9,8 +9,8 @@ import { AuthCacheService } from '../auth.cache';
 import { extractPermissions } from '../auth.helper';
 import { LoginCommand } from './login.command';
 import { LoginAsserter } from './login.error';
-import type { LoginRequestDto } from './login.request';
-import type { LoginResponseDto } from './login.response';
+import type { LoginRequestDto } from './login.request.dto';
+import type { LoginResponseDto } from './login.response.dto';
 
 type LoginMetadata = {
   attempts?: number

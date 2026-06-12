@@ -1,27 +1,27 @@
 import type { Type } from '@nestjs/common';
 
-import type { CommandAffectedRowsResponse } from './command/command-affected-rows.response';
-import type { CommandEntityRequest } from './command/command-entity.request';
-import type { CommandEntityResponse } from './command/command-entity.response';
-import type { CommandIdRequest } from './command/command-id.request';
-import type { CommandIdResponse } from './command/command-id.response';
-import type { CommandIdListResponse } from './command/command-id-list.response';
+import type { EntityRequestDto } from './request/entity.request.dto';
+import type { IdRequestDto } from './request/id.request.dto';
+import type { AffectedRowsResponseDto } from './response/affected-rows.response.dto';
+import type { EntityResponseDto } from './response/entity.response.dto';
+import type { IdResponseDto } from './response/id.response.dto';
+import type { IdListResponseDto } from './response/id-list.response.dto';
 
 export interface ICommandHandler<TEntity extends Type> {
   /** 생성 - 단일 */
-  insert(data: CommandEntityRequest<TEntity>): Promise<CommandIdResponse<TEntity>>
+  insert(data: EntityRequestDto<TEntity>): Promise<IdResponseDto<TEntity>>
   /** 생성 - 복수 */
-  insertMany(data: CommandEntityRequest<TEntity>[]): Promise<CommandIdListResponse<TEntity>>
+  insertMany(data: EntityRequestDto<TEntity>[]): Promise<IdListResponseDto<TEntity>>
 
   /** 생성 및 갱신 - 단일 */
 
-  upsert(data: CommandEntityRequest<TEntity>): Promise<CommandEntityResponse<TEntity>>
+  upsert(data: EntityRequestDto<TEntity>): Promise<EntityResponseDto<TEntity>>
   /** 생성 및 갱신 - 복수 */
-  upsertMany(data: CommandEntityRequest<TEntity>[]): Promise<CommandEntityResponse<TEntity>[]>
+  upsertMany(data: EntityRequestDto<TEntity>[]): Promise<EntityResponseDto<TEntity>[]>
 
   /** 갱신 */
-  update(condition: CommandIdRequest<TEntity>, data: CommandEntityRequest<TEntity>): Promise<CommandAffectedRowsResponse<TEntity>>
+  update(condition: IdRequestDto<TEntity>, data: EntityRequestDto<TEntity>): Promise<AffectedRowsResponseDto<TEntity>>
 
   /** 삭제 */
-  delete(condition: CommandIdRequest<TEntity>): Promise<CommandAffectedRowsResponse<TEntity>>
+  delete(condition: IdRequestDto<TEntity>): Promise<AffectedRowsResponseDto<TEntity>>
 }

@@ -1,7 +1,7 @@
 import { Command } from '@nestjs/cqrs';
 
-import type { ChangePasswordRequestDto } from './change-password.request';
-import type { ChangePasswordResponseDto } from './change-password.response';
+import type { ChangePasswordRequestDto } from './change-password.request.dto';
+import type { ChangePasswordResponseDto } from './change-password.response.dto';
 
 export class ChangePasswordCommand extends Command<ChangePasswordResponseDto> {
   constructor(public readonly data: ChangePasswordRequestDto) {

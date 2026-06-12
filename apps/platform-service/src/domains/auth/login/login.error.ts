@@ -1,7 +1,7 @@
 import { ForbiddenException, UnauthorizedException } from '@nestjs/common';
 import { defineErrors, ExceptionGuard } from '@pkg/shared/server';
 
-import type { LoginRequestDto } from './login.request';
+import type { LoginRequestDto } from './login.request.dto';
 
 type LoginMetadata = {
   attempts?: number

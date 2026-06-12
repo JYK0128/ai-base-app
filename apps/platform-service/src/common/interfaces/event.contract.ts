@@ -1,7 +1,7 @@
 import type { Type } from '@nestjs/common';
 
-import type { EventEntityDataRequest } from './event/event-entity.request';
+import type { EntityRequestDto } from './request/entity.request.dto';
 
 export interface IEventHandler<TEvent extends Type> {
-  handle(event: EventEntityDataRequest<TEvent>): void | Promise<void>
+  handle(event: EntityRequestDto<TEvent>): void | Promise<void>
 }

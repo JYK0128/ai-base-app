@@ -6,7 +6,7 @@ import { ENV } from '@/env';
 
 import { ChangePasswordCommand } from './change-password.command';
 import { ChangePasswordAsserter } from './change-password.error';
-import { ChangePasswordResponseDto } from './change-password.response';
+import { ChangePasswordResponseDto } from './change-password.response.dto';
 
 @CommandHandler(ChangePasswordCommand)
 export class ChangePasswordHandler implements ICommandHandler<ChangePasswordCommand> {

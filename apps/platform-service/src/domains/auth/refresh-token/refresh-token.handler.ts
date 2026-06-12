@@ -8,7 +8,7 @@ import { AuthCacheService } from '../auth.cache';
 import { extractPermissions } from '../auth.helper';
 import { RefreshTokenCommand } from './refresh-token.command';
 import { RefreshTokenAsserter } from './refresh-token.error';
-import type { RefreshTokenResponseDto } from './refresh-token.response';
+import type { RefreshTokenResponseDto } from './refresh-token.response.dto';
 
 @CommandHandler(RefreshTokenCommand)
 export class RefreshTokenHandler implements ICommandHandler<RefreshTokenCommand> {

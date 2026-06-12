@@ -7,13 +7,13 @@ import { MemberAccount } from '@pkg/database';
 
 import { ENV } from '@/env';
 
-import { AuthController } from '../auth/auth.controller';
 import { AuthCacheService } from '../auth/auth.cache';
+import { AuthController } from '../auth/auth.controller';
 import { LoginHandler } from '../auth/login/login.handler';
-import { RefreshTokenHandler } from '../auth/refresh-token/refresh-token.handler';
+import { GetMeHandler } from '../auth/me/get-me.handler';
 import { ChangePasswordHandler } from '../auth/password/change-password.handler';
 import { DeferPasswordChangeHandler } from '../auth/password/defer-password-change.handler';
-import { GetMeHandler } from '../auth/me/get-me.handler';
+import { RefreshTokenHandler } from '../auth/refresh-token/refresh-token.handler';
 
 @Module({
   imports: [

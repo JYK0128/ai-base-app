@@ -6,7 +6,7 @@ import { ENV } from '@/env';
 
 import { DeferPasswordChangeCommand } from './defer-password-change.command';
 import { DeferPasswordChangeAsserter } from './defer-password-change.error';
-import { DeferPasswordChangeResponseDto } from './defer-password-change.response';
+import { DeferPasswordChangeResponseDto } from './defer-password-change.response.dto';
 
 @CommandHandler(DeferPasswordChangeCommand)
 export class DeferPasswordChangeHandler implements ICommandHandler<DeferPasswordChangeCommand> {

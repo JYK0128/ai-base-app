@@ -1,7 +1,7 @@
 import { Command } from '@nestjs/cqrs';
 
-import type { RefreshTokenRequestDto } from './refresh-token.request';
-import type { RefreshTokenResponseDto } from './refresh-token.response';
+import type { RefreshTokenRequestDto } from './refresh-token.request.dto';
+import type { RefreshTokenResponseDto } from './refresh-token.response.dto';
 
 export class RefreshTokenCommand extends Command<RefreshTokenResponseDto> {
   constructor(public readonly data: RefreshTokenRequestDto) {

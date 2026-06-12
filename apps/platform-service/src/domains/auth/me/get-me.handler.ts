@@ -6,7 +6,7 @@ import { ClsService } from 'nestjs-cls';
 import { extractPermissions } from '../auth.helper';
 import { GetMeAsserter } from './get-me.error';
 import { GetMeQuery } from './get-me.query';
-import { GetMeResponsePayload } from './get-me.response';
+import { GetMeResponseDto } from './get-me.response.dto';
 
 @QueryHandler(GetMeQuery)
 export class GetMeHandler implements IQueryHandler<GetMeQuery> {
@@ -18,13 +18,13 @@ export class GetMeHandler implements IQueryHandler<GetMeQuery> {
     private readonly cls: ClsService,
   ) {}
 
-  async execute(_query: GetMeQuery): Promise<GetMeResponsePayload> {
+  async execute(_query: GetMeQuery): Promise<GetMeResponseDto> {
     const accountId = await this.identifyAccountId();
     const account = await this.identifyAccount(accountId);
     const organizationId = account.member.organization?.id;
     const { permissions } = extractPermissions(account.member, organizationId);
 
-    return new GetMeResponsePayload({
+    return new GetMeResponseDto({
       account,
       permissions,
     });

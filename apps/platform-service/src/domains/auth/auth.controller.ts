@@ -10,17 +10,17 @@ import { createCookieOptions } from '@/common/utils/cookie';
 import { ENV } from '@/env';
 
 import { LoginCommand } from './login/login.command';
-import type { LoginRequestDto } from './login/login.request';
-import type { LoginResponseDto } from './login/login.response';
+import type { LoginRequestDto } from './login/login.request.dto';
+import type { LoginResponseDto } from './login/login.response.dto';
 import { GetMeQuery } from './me/get-me.query';
-import { GetMeResponsePayload } from './me/get-me.response';
+import { GetMeResponseDto } from './me/get-me.response.dto';
 import { ChangePasswordCommand } from './password/change-password.command';
-import type { ChangePasswordRequestDto } from './password/change-password.request';
+import type { ChangePasswordRequestDto } from './password/change-password.request.dto';
 import { DeferPasswordChangeCommand } from './password/defer-password-change.command';
-import type { DeferPasswordChangeRequestDto } from './password/defer-password-change.request';
+import type { DeferPasswordChangeRequestDto } from './password/defer-password-change.request.dto';
 import { RefreshTokenCommand } from './refresh-token/refresh-token.command';
-import type { RefreshTokenRequestDto } from './refresh-token/refresh-token.request';
-import type { RefreshTokenResponseDto } from './refresh-token/refresh-token.response';
+import type { RefreshTokenRequestDto } from './refresh-token/refresh-token.request.dto';
+import type { RefreshTokenResponseDto } from './refresh-token/refresh-token.response.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -72,8 +72,8 @@ export class AuthController {
   }
 
   @Get('me')
-  async me(): Promise<GetMeResponsePayload> {
-    return this.queryBus.execute<GetMeQuery, GetMeResponsePayload>(new GetMeQuery());
+  async me(): Promise<GetMeResponseDto> {
+    return this.queryBus.execute<GetMeQuery, GetMeResponseDto>(new GetMeQuery());
   }
 
   @Bypass(BYPASS_POLICIES.PASSWORD)
