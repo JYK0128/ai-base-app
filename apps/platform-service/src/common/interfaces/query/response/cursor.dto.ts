@@ -40,5 +40,5 @@ export function withQueryCursorResponse<TBase extends Type>(_Base: TBase) {
   return MixinClass;
 }
 
-export type QueryCursorResponse<TBase extends Type>
-  = InstanceType<ReturnType<typeof withQueryCursorResponse<TBase>>>;
+export type QueryCursorResponse<TEntity extends Type>
+  = ReturnType<typeof withQueryCursorResponse<TEntity>>;

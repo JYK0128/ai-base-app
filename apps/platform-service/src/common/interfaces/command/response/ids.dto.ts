@@ -14,5 +14,5 @@ export function withCommandIdsResponse<TBase extends Type>(_Base: TBase) {
   return MixinClass;
 }
 
-export type CommandIdsResponse<TBase extends Type = Type>
-  = InstanceType<ReturnType<typeof withCommandIdsResponse<TBase>>>;
+export type CommandIdsResponse<TEntity extends Type>
+  = ReturnType<typeof withCommandIdsResponse<TEntity>>;

@@ -5,8 +5,6 @@ import { withQuerySort } from './sort.dto';
 
 export function withQueryCursor<TBase extends Type>(Base: TBase) {
   abstract class MixinClass extends withQuerySort(Base) {
-    [key: string]: unknown
-
     @ApiPropertyOptional({
       description: '이전 페이지 커서',
     })
@@ -23,5 +21,5 @@ export function withQueryCursor<TBase extends Type>(Base: TBase) {
   return MixinClass;
 }
 
-export type QueryCursorRequest<TBase extends Type>
-  = Partial<InstanceType<TBase>> & InstanceType<ReturnType<typeof withQueryCursor<TBase>>>;
+export type QueryCursorRequest<TEntity extends Type>
+  = ReturnType<typeof withQueryCursor<TEntity>>;

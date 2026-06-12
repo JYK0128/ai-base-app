@@ -5,8 +5,6 @@ import { withQuerySort } from './sort.dto';
 
 export function withQueryPage<TBase extends Type>(Base: TBase) {
   abstract class MixinClass extends withQuerySort(Base) {
-    [key: string]: unknown
-
     @ApiPropertyOptional({
       description: '페이지 번호',
       minimum: 1,
@@ -25,5 +23,5 @@ export function withQueryPage<TBase extends Type>(Base: TBase) {
   return MixinClass;
 }
 
-export type QueryPageRequest<TBase extends Type>
-  = Partial<InstanceType<TBase>> & InstanceType<ReturnType<typeof withQueryPage<TBase>>>;
+export type QueryPageRequest<TEntity extends Type>
+  = ReturnType<typeof withQueryPage<TEntity>>;

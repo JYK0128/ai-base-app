@@ -3,8 +3,6 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export function withCommandIdRequest<TBase extends Type>(_Base: TBase) {
   abstract class MixinClass {
-    [key: string]: unknown
-
     @ApiProperty({
       description: '식별자',
     })
@@ -14,6 +12,5 @@ export function withCommandIdRequest<TBase extends Type>(_Base: TBase) {
   return MixinClass;
 }
 
-export type CommandIdRequest<TBase extends Type> = InstanceType<
-  ReturnType<typeof withCommandIdRequest<TBase>>
->;
+export type CommandIdRequest<TEntity extends Type>
+  = ReturnType<typeof withCommandIdRequest<TEntity>>;

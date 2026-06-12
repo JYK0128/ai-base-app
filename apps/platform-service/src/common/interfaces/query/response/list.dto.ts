@@ -14,5 +14,5 @@ export function withQueryListResponse<TBase extends Type>(_Base: TBase) {
   return MixinClass;
 }
 
-export type QueryListResponse<TBase extends Type>
-  = InstanceType<ReturnType<typeof withQueryListResponse<TBase>>>;
+export type QueryListResponse<TEntity extends Type>
+  = ReturnType<typeof withQueryListResponse<TEntity>>;

@@ -13,5 +13,5 @@ export function withCommandAffectedRowsResponse<TBase extends Type>(_Base: TBase
   return MixinClass;
 }
 
-export type CommandAffectedRowsResponse<TBase extends Type = Type>
-  = InstanceType<ReturnType<typeof withCommandAffectedRowsResponse<TBase>>>;
+export type CommandAffectedRowsResponse<TEntity extends Type>
+  = ReturnType<typeof withCommandAffectedRowsResponse<TEntity>>;

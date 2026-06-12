@@ -5,8 +5,6 @@ import { withQuerySort } from './sort.dto';
 
 export function withQueryList<TBase extends Type>(Base: TBase) {
   abstract class MixinClass extends withQuerySort(Base) {
-    [key: string]: unknown
-
     @ApiPropertyOptional({
       description: '오프셋',
       minimum: 0,
@@ -25,5 +23,5 @@ export function withQueryList<TBase extends Type>(Base: TBase) {
   return MixinClass;
 }
 
-export type QueryListRequest<TBase extends Type>
-  = Partial<InstanceType<TBase>> & InstanceType<ReturnType<typeof withQueryList<TBase>>>;
+export type QueryListRequest<TEntity extends Type>
+  = ReturnType<typeof withQueryList<TEntity>>;

@@ -7,5 +7,5 @@ export function withQueryDataResponse<TBase extends Type>(Base: TBase) {
   return MixinClass;
 }
 
-export type QueryDataResponse<TBase extends Type>
-  = InstanceType<ReturnType<typeof withQueryDataResponse<TBase>>>;
+export type QueryDataResponse<TEntity extends Type>
+  = ReturnType<typeof withQueryDataResponse<TEntity>>;

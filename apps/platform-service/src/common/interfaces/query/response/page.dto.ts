@@ -48,5 +48,5 @@ export function withQueryPageResponse<TBase extends Type>(_Base: TBase) {
   return MixinClass;
 }
 
-export type QueryPageResponse<TBase extends Type>
-  = InstanceType<ReturnType<typeof withQueryPageResponse<TBase>>>;
+export type QueryPageResponse<TEntity extends Type>
+  = ReturnType<typeof withQueryPageResponse<TEntity>>;
