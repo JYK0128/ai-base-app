@@ -2,7 +2,6 @@ import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
 import { Member, Organization } from '@pkg/database';
 import { ClsService } from 'nestjs-cls';
 
-import { buildMemberResponse } from '../members.helper';
 import { GetMemberContract } from './get-member.contract';
 import { GetMemberAsserter } from './get-member.error';
 import type { MemberResponseDto } from './get-member.response.dto';
@@ -19,7 +18,7 @@ export class GetMemberHandler implements IQueryHandler<GetMemberContract> {
     const organization = await this.identifyOrganization();
     const member = await this.identifyMember(organization, data.id);
 
-    return buildMemberResponse(member);
+    return new MemberResponseDto(member);
   }
 
   private async identifyOrganization(): Promise<Organization> {
