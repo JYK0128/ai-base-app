@@ -8,6 +8,7 @@
   - [x] `members/list` - 멤버 목록 조회를 `platform-service`로 이관
   - [x] `members/invite-create` - 멤버 초대 생성 및 메일 발송을 `platform-service`로 이관
   - [x] `members/status` - 멤버 상태 변경을 `platform-service`로 이관
+  - [x] `members/role` - 멤버 역할 변경을 `platform-service`로 이관
 - [x] `organization` - 조직 조회 기능을 `platform-service`로 이관
 - [x] `support` - 티켓 조회 기능을 `platform-service`로 이관
 - [ ] `terms` - 약관 조회 기능을 `platform-service`로 이관

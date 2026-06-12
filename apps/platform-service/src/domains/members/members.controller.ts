@@ -4,6 +4,8 @@ import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { CreateInviteContract } from './commands/create-invite.contract';
 import type { CreateInviteRequestDto } from './commands/create-invite.request.dto';
 import type { CreateInviteResponseDto } from './commands/create-invite.response.dto';
+import { UpdateMemberRoleContract } from './commands/update-member-role.contract';
+import type { UpdateMemberRoleRequestDto } from './commands/update-member-role.request.dto';
 import { UpdateMemberStatusContract } from './commands/update-member-status.contract';
 import type { UpdateMemberStatusRequestDto } from './commands/update-member-status.request.dto';
 import type { MemberIdResponseDto } from './commands/update-member-status.response.dto';
@@ -32,6 +34,13 @@ export class MembersController {
     @Body() body: UpdateMemberStatusRequestDto,
   ): Promise<MemberIdResponseDto> {
     return this.commandBus.execute(new UpdateMemberStatusContract(body));
+  }
+
+  @Post('role')
+  async updateMemberRole(
+    @Body() body: UpdateMemberRoleRequestDto,
+  ): Promise<MemberIdResponseDto> {
+    return this.commandBus.execute(new UpdateMemberRoleContract(body));
   }
 
   @Get()
