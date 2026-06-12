@@ -257,3 +257,26 @@ export class InviteEmailPublisher {
   }
 }
 ```
+
+---
+
+## 📦 6. 피처별 DTO 독립성 원칙
+
+유스케이스(Feature) 간에 DTO(Data Transfer Object)를 공유하는 것을 **엄격히 금지**합니다.
+
+* **동일한 구조의 DTO라도 분리**: 예를 들어 `UpdateMemberStatus`와 `UpdateMemberRole`이 둘 다 동일하게 멤버의 `id`값만 응답(`{ id: string }`)하더라도, 공통 `MemberIdResponseDto`를 공유하지 않고 각각 `UpdateMemberStatusResponseDto`, `UpdateMemberRoleResponseDto`로 독립적으로 생성해야 합니다.
+* **이유**: 향후 특정 피처의 요구사항이 변경되어 응답에 필드가 추가되거나 제거될 때, 공유 DTO를 사용하고 있으면 다른 피처에 원치 않는 사이드 이펙트(API 스펙 변동 및 깨짐)를 유발하기 때문입니다.
+
+### 💻 구현 예시 (독립적인 DTO 작성)
+
+```typescript
+// domains/members/update-member-status/update-member-status.response.dto.ts
+export class UpdateMemberStatusResponseDto {
+  constructor(public readonly id: string) {}
+}
+
+// domains/members/update-member-role/update-member-role.response.dto.ts
+export class UpdateMemberRoleResponseDto {
+  constructor(public readonly id: string) {}
+}
+```

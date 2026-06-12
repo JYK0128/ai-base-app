@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-export class MemberIdResponseDto {
+export class UpdateMemberRoleResponseDto {
   constructor(id: string) {
     this.id = id;
   }

@@ -10,11 +10,12 @@ import type { MemberResponseDto } from './get-member/get-member.response.dto';
 import { GetMembersContract } from './get-members/get-members.contract';
 import type { GetMembersRequestDto } from './get-members/get-members.request.dto';
 import type { GetMembersResponseDto } from './get-members/get-members.response.dto';
-import type { MemberIdResponseDto } from './member-id.response.dto';
 import { UpdateMemberRoleContract } from './update-member-role/update-member-role.contract';
 import type { UpdateMemberRoleRequestDto } from './update-member-role/update-member-role.request.dto';
+import type { UpdateMemberRoleResponseDto } from './update-member-role/update-member-role.response.dto';
 import { UpdateMemberStatusContract } from './update-member-status/update-member-status.contract';
 import type { UpdateMemberStatusRequestDto } from './update-member-status/update-member-status.request.dto';
+import type { UpdateMemberStatusResponseDto } from './update-member-status/update-member-status.response.dto';
 
 @Controller('members')
 export class MembersController {
@@ -33,14 +34,14 @@ export class MembersController {
   @Post('status')
   async toggleMemberStatus(
     @Body() body: UpdateMemberStatusRequestDto,
-  ): Promise<MemberIdResponseDto> {
+  ): Promise<UpdateMemberStatusResponseDto> {
     return this.commandBus.execute(new UpdateMemberStatusContract(body));
   }
 
   @Post('role')
   async updateMemberRole(
     @Body() body: UpdateMemberRoleRequestDto,
-  ): Promise<MemberIdResponseDto> {
+  ): Promise<UpdateMemberRoleResponseDto> {
     return this.commandBus.execute(new UpdateMemberRoleContract(body));
   }
 

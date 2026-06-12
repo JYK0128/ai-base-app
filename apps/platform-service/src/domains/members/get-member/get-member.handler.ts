@@ -4,7 +4,7 @@ import { ClsService } from 'nestjs-cls';
 
 import { GetMemberContract } from './get-member.contract';
 import { GetMemberAsserter } from './get-member.error';
-import type { MemberResponseDto } from './get-member.response.dto';
+import { MemberResponseDto } from './get-member.response.dto';
 
 @QueryHandler(GetMemberContract)
 export class GetMemberHandler implements IQueryHandler<GetMemberContract> {

@@ -3,7 +3,7 @@ import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
 import { Announcement, CoreRepository } from '@pkg/database';
 
 import { GetAnnouncementsContract } from './get-announcements.contract';
-import type { AnnouncementResponseDto } from './get-announcements.response.dto';
+import { AnnouncementResponseDto } from './get-announcements.response.dto';
 
 @QueryHandler(GetAnnouncementsContract)
 export class GetAnnouncementsHandler implements IQueryHandler<GetAnnouncementsContract> {

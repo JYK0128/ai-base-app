@@ -4,9 +4,9 @@ import { CommandHandler, type ICommandHandler } from '@nestjs/cqrs';
 import { EntityManager, Member, MemberStatus, Organization, OrganizationRole, OrganizationRoleAssignment } from '@pkg/database';
 import { ClsService } from 'nestjs-cls';
 
-import { MemberIdResponseDto } from '../member-id.response.dto';
 import { UpdateMemberRoleContract } from './update-member-role.contract';
 import { UpdateMemberRoleAsserter } from './update-member-role.error';
+import { UpdateMemberRoleResponseDto } from './update-member-role.response.dto';
 
 @CommandHandler(UpdateMemberRoleContract)
 export class UpdateMemberRoleHandler implements ICommandHandler<UpdateMemberRoleContract> {
@@ -18,7 +18,7 @@ export class UpdateMemberRoleHandler implements ICommandHandler<UpdateMemberRole
   ) {}
 
   @Transactional()
-  async execute({ data }: UpdateMemberRoleContract): Promise<MemberIdResponseDto> {
+  async execute({ data }: UpdateMemberRoleContract): Promise<UpdateMemberRoleResponseDto> {
     const organization = await this.identifyOrganization();
     const member = await this.identifyMember(organization, data.id);
     const requestMember = await this.identifyRequestMember();
@@ -27,7 +27,7 @@ export class UpdateMemberRoleHandler implements ICommandHandler<UpdateMemberRole
     await this.validateSelfMutation(member, requestMember);
     await this.processRoleUpdate(member, requestMember, organization, role);
 
-    return new MemberIdResponseDto(member.id);
+    return new UpdateMemberRoleResponseDto(member.id);
   }
 
   private async identifyOrganization(): Promise<Organization> {

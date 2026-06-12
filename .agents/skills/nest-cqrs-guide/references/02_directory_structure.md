@@ -28,10 +28,12 @@ domains/members/
 │   ├── get-member.response.dto.ts
 │   ├── get-member.error.ts
 │   └── get-member.handler.ts            # Query 핸들러 (조회 전용)
-├── member-id.response.dto.ts            # 여러 피처가 공유하는 DTO (필요 시)
 ├── members.controller.ts                # HTTP 진입점 (모든 Member 관련 피처 조율)
 └── members.module.ts                    # NestJS 모듈 정의 및 의존성 주입(Wiring)
 ```
+
+> [!IMPORTANT]
+> **피처별 독립 DTO 규칙**: 피처(Feature) 간에 DTO를 절대 공유하지 않습니다. 아무리 구조가 단순하거나 필드가 겹치더라도, 각 피처의 변경이 서로에게 영향을 미치지 않도록 반드시 피처별 고유 DTO(`*.request.dto.ts`, `*.response.dto.ts`)를 각각 작성해야 합니다.
 
 ---
 
