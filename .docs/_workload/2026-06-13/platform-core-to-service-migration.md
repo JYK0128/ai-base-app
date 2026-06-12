@@ -1,19 +1,51 @@
-# Platform Core to Service Migration Checklist
+# Platform Core to Service Migration - 2026-06-13
+
+## 📋 작업 체크리스트
 
 - [x] `announcement` - 공지사항 목록 조회를 `platform-service`로 이관
+  - 시작: 2026-06-13 00:00
+  - 완료: `57fe1b3`
 - [x] `i18n/locales` - 활성 로케일 목록 조회를 `platform-service`로 이관
+  - 시작: 2026-06-13 00:10
+  - 완료: `7e035e6`
 - [x] `resource` - 리소스 조회 기능을 `platform-service`로 이관
+  - 시작: 2026-06-13 00:20
+  - 완료: `dcedeb1`
 - [x] `members` - 멤버 조회 기능을 `platform-service`로 이관
   - [x] `members/detail` - 멤버 상세 조회를 `platform-service`로 이관
+    - 시작: 2026-06-13 00:30
+    - 완료: `c2b3630`
   - [x] `members/list` - 멤버 목록 조회를 `platform-service`로 이관
+    - 시작: 2026-06-13 00:40
+    - 완료: `424a1e1`
   - [x] `members/invite-create` - 멤버 초대 생성 및 메일 발송을 `platform-service`로 이관
+    - 시작: 2026-06-13 00:50
+    - 완료: `d50998c`
   - [x] `members/status` - 멤버 상태 변경을 `platform-service`로 이관
+    - 시작: 2026-06-13 01:00
+    - 완료: `0abf9e5`
   - [x] `members/role` - 멤버 역할 변경을 `platform-service`로 이관
+    - 시작: 2026-06-13 01:10
+    - 완료: `d648f41`
 - [x] `organization` - 조직 조회 기능을 `platform-service`로 이관
+  - 시작: 2026-06-13 01:20
+  - 완료: `2bf1678`
 - [x] `support` - 티켓 조회 기능을 `platform-service`로 이관
+  - 시작: 2026-06-13 01:30
+  - 완료: `c6d63c8`
 - [x] `terms` - 약관 조회 기능을 `platform-service`로 이관
   - [x] `terms/active` - 활성 약관 목록 조회를 `platform-service`로 이관
+    - 시작: 2026-06-13 01:40
+    - 완료: `61f28fc`
   - [x] `terms/documents` - 약관 문서 목록 조회를 `platform-service`로 이관
+    - 시작: 2026-06-13 01:50
+    - 완료: `fdeeb7c`
   - [x] `terms/document-detail` - 약관 문서 상세 조회를 `platform-service`로 이관
+    - 시작: 2026-06-13 02:00
+    - 완료: `1097421`
   - [x] `terms/document-versions` - 약관 버전 목록 조회를 `platform-service`로 이관
+    - 시작: 2026-06-13 02:10
+    - 완료: `4c02404`
 - [x] `mail` - 메일 이벤트/전송 흐름을 `platform-service`로 이관
+  - 시작: 2026-06-13 02:20
+  - 완료: `44d2fe9`
