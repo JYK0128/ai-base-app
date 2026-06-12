@@ -2,7 +2,6 @@ import { InjectRepository } from '@mikro-orm/nestjs';
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
 import { Announcement, CoreRepository } from '@pkg/database';
 
-import { buildAnnouncementResponse } from '../announcement.helper';
 import { GetAnnouncementsContract } from './get-announcements.contract';
 import type { AnnouncementResponseDto } from './get-announcements.response.dto';
 
@@ -19,6 +18,6 @@ export class GetAnnouncementsHandler implements IQueryHandler<GetAnnouncementsCo
       { orderBy: { createdAt: 'DESC' } },
     );
 
-    return announcements.map(buildAnnouncementResponse);
+    return announcements.map((announcement) => new AnnouncementResponseDto(announcement));
   }
 }
