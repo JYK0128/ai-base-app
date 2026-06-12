@@ -2,10 +2,9 @@ import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
 import { Member, Organization } from '@pkg/database';
 import { ClsService } from 'nestjs-cls';
 
-import { buildMemberResponse } from '../members.helper';
-import type { MemberResponseDto } from './get-member.response.dto';
 import { GetMembersContract } from './get-members.contract';
 import { GetMembersAsserter } from './get-members.error';
+import type { GetMembersResponseDto } from './get-members.response.dto';
 
 @QueryHandler(GetMembersContract)
 export class GetMembersHandler implements IQueryHandler<GetMembersContract> {
@@ -15,7 +14,7 @@ export class GetMembersHandler implements IQueryHandler<GetMembersContract> {
     private readonly cls: ClsService,
   ) {}
 
-  async execute({ data }: GetMembersContract): Promise<MemberResponseDto[]> {
+  async execute({ data }: GetMembersContract): Promise<GetMembersResponseDto[]> {
     const organization = await this.identifyOrganization();
     const members = await this.identifyMembers(organization);
 
@@ -24,7 +23,7 @@ export class GetMembersHandler implements IQueryHandler<GetMembersContract> {
       .filter((member) => this.matchRole(member, data.role))
       .filter((member) => this.matchSearch(member, data.search))
       .sort((left, right) => right.createdAt.getTime() - left.createdAt.getTime())
-      .map((member) => buildMemberResponse(member));
+      .map((member) => new GetMembersResponseDto(member));
   }
 
   private async identifyOrganization(): Promise<Organization> {

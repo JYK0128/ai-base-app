@@ -5,10 +5,10 @@ import { CommandHandler, type ICommandHandler } from '@nestjs/cqrs';
 import { Member, MemberInvite, MemberInviteMetadata, Organization, OrganizationRole } from '@pkg/database';
 import { ClsService } from 'nestjs-cls';
 
-import { InviteEmailPublisher } from '../events/invite-email.publisher';
 import { CreateInviteContract } from './create-invite.contract';
 import { CreateInviteAsserter } from './create-invite.error';
 import type { CreateInviteResponseDto } from './create-invite.response.dto';
+import { InviteEmailPublisher } from './invite-email.publisher';
 
 @CommandHandler(CreateInviteContract)
 export class CreateInviteHandler implements ICommandHandler<CreateInviteContract> {

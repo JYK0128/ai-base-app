@@ -4,9 +4,9 @@ import { CommandHandler, type ICommandHandler } from '@nestjs/cqrs';
 import { EntityManager, Member, MemberStatus, Organization, OrganizationRole, OrganizationRoleAssignment } from '@pkg/database';
 import { ClsService } from 'nestjs-cls';
 
+import { MemberIdResponseDto } from '../member-id.response.dto';
 import { UpdateMemberRoleContract } from './update-member-role.contract';
 import { UpdateMemberRoleAsserter } from './update-member-role.error';
-import { MemberIdResponseDto } from './update-member-status.response.dto';
 
 @CommandHandler(UpdateMemberRoleContract)
 export class UpdateMemberRoleHandler implements ICommandHandler<UpdateMemberRoleContract> {
