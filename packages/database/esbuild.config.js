@@ -1,5 +1,5 @@
-import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
-import { dirname, join } from 'node:path';
+import { existsSync, rmSync, writeFileSync } from 'node:fs';
+import { join } from 'node:path';
 
 import { generateDtsBundle } from 'dts-bundle-generator';
 import { build, context } from 'esbuild';
@@ -29,7 +29,9 @@ function resolveSourceJsImportsPlugin() {
 
 /** @type {import('esbuild').BuildOptions} */
 const sharedOptions = {
-  entryPoints: ['src/index.ts'],
+  entryPoints: [
+    'src/index.ts',
+  ],
   bundle: true,
   sourcemap: true,
   platform: 'node',
@@ -67,7 +69,6 @@ function generateTypes() {
   const entries = [
     { filePath: './src/index.ts', outFile: 'index.d.ts' },
   ];
-
   try {
     const bundles = generateDtsBundle(
       entries.map((entry) => ({
@@ -95,25 +96,12 @@ function generateTypes() {
   }
 }
 
-function writeOutputFiles(result) {
-  for (const outputFile of result.outputFiles ?? []) {
-    mkdirSync(dirname(outputFile.path), { recursive: true });
-    writeFileSync(outputFile.path, outputFile.contents);
-  }
-}
-
-function patchJsonImportAttributes() {
-  const filePath = join(OUTDIR, 'index.js');
-  const code = readFileSync(filePath, 'utf-8');
-  const nextCode = code.replace(
-    'import metadataJson from "./metadata.json";',
-    'import metadataJson from "./metadata.json" with { type: "json" };',
-  );
-
-  if (nextCode !== code) {
-    writeFileSync(filePath, nextCode);
-  }
-}
+// function writeOutputFiles(result) {
+//   for (const outputFile of result.outputFiles ?? []) {
+//     mkdirSync(dirname(outputFile.path), { recursive: true });
+//     writeFileSync(outputFile.path, outputFile.contents);
+//   }
+// }
 
 async function main() {
   if (!isWatch) {
@@ -126,7 +114,7 @@ async function main() {
     format: 'esm',
     outExtension: { '.js': '.js' },
     splitting: false,
-    write: false,
+    write: true,
   };
 
   const cjsOptions = {
@@ -135,7 +123,7 @@ async function main() {
     format: 'cjs',
     outExtension: { '.js': '.cjs' },
     splitting: false,
-    write: false,
+    write: true,
   };
 
   if (isWatch) {
@@ -147,13 +135,12 @@ async function main() {
   }
 
   console.log('[esbuild] building...');
-  const [esmResult, cjsResult] = await Promise.all([
+  const [_esmResult, _cjsResult] = await Promise.all([
     build(esmOptions),
     build(cjsOptions),
   ]);
-  writeOutputFiles(esmResult);
-  writeOutputFiles(cjsResult);
-  patchJsonImportAttributes();
+  // writeOutputFiles(esmResult);
+  // writeOutputFiles(cjsResult);
   generateTypes();
   console.log('[build] all tasks complete.');
 }

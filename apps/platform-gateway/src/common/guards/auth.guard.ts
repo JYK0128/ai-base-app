@@ -4,18 +4,7 @@ import { JwtService } from '@nestjs/jwt';
 import { Request } from 'express';
 import type { JWTPayload } from 'jose';
 
-import { BYPASS_KEY, BYPASS_POLICIES } from '@/common/decorators/bypass.decorator';
-import { PERMISSIONS_KEY } from '@/common/decorators/permissions.decorator';
-import { IS_PERSONAL_KEY } from '@/common/decorators/personal.decorator';
-import { IS_PUBLIC_KEY } from '@/common/decorators/public.decorator';
-
-type AuthPayload = JWTPayload & {
-  accountId?: string
-  memberId?: string
-  organizationId?: string
-  permissions?: string[]
-  mustChangePassword?: boolean
-};
+import { BYPASS_KEY, BYPASS_POLICIES, IS_PERSONAL_KEY, IS_PUBLIC_KEY, PERMISSIONS_KEY } from '@/common/decorators';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
@@ -26,7 +15,7 @@ export class AuthGuard implements CanActivate {
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     if (!this.checkPublic(context)) {
-      const request = context.switchToHttp().getRequest<Request & { user?: AuthPayload }>();
+      const request = context.switchToHttp().getRequest<Request & { user?: JWTPayload }>();
       const payload = this.verifyToken(request);
       request.user = payload;
 
@@ -38,7 +27,7 @@ export class AuthGuard implements CanActivate {
     return true;
   }
 
-  private verifyToken(request: Request): AuthPayload {
+  private verifyToken(request: Request): JWTPayload {
     const authorizationHeader = request.headers['authorization'];
 
     if (typeof authorizationHeader !== 'string') {
@@ -56,7 +45,7 @@ export class AuthGuard implements CanActivate {
     }
 
     try {
-      return this.jwtService.verify<AuthPayload>(token);
+      return this.jwtService.verify<JWTPayload>(token);
     }
     catch {
       throw new UnauthorizedException('Invalid or expired token');
@@ -70,7 +59,7 @@ export class AuthGuard implements CanActivate {
     ]);
   }
 
-  private handleBypass(context: ExecutionContext, payload: AuthPayload) {
+  private handleBypass(context: ExecutionContext, payload: JWTPayload) {
     const bypassPolicies = this.reflector.getAllAndOverride<string[]>(BYPASS_KEY, [
       context.getHandler(),
       context.getClass(),
@@ -86,7 +75,7 @@ export class AuthGuard implements CanActivate {
     // MFA, 약관 동의 등 추가 정책도 여기서 확장 가능
   }
 
-  private handlePersonal(context: ExecutionContext, request: Request, payload: AuthPayload) {
+  private handlePersonal(context: ExecutionContext, request: Request, payload: JWTPayload) {
     const isPersonal = this.reflector.getAllAndOverride<boolean>(IS_PERSONAL_KEY, [
       context.getHandler(),
       context.getClass(),
@@ -130,7 +119,7 @@ export class AuthGuard implements CanActivate {
     }
   }
 
-  private handlePermissions(context: ExecutionContext, payload: AuthPayload) {
+  private handlePermissions(context: ExecutionContext, payload: JWTPayload) {
     const requiredPermissions = this.reflector.getAllAndOverride<string[]>(PERMISSIONS_KEY, [
       context.getHandler(),
       context.getClass(),

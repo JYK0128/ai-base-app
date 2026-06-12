@@ -1,7 +1,7 @@
 import type { Type } from '@nestjs/common';
 import { ApiProperty } from '@nestjs/swagger';
 
-export function withCommandIdsResponse<TBase extends Type>(_Base: TBase) {
+export function withCommandIdListRequest<TBase extends Type>(_Base: TBase) {
   abstract class MixinClass {
     @ApiProperty({
       description: '식별자 목록',
@@ -14,5 +14,5 @@ export function withCommandIdsResponse<TBase extends Type>(_Base: TBase) {
   return MixinClass;
 }
 
-export type CommandIdsResponse<TEntity extends Type>
-  = InstanceType<ReturnType<typeof withCommandIdsResponse<TEntity>>>;
+export type CommandIdListRequest<TEntity extends Type>
+  = InstanceType<ReturnType<typeof withCommandIdListRequest<TEntity>>>;

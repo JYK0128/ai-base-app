@@ -5,6 +5,7 @@ export function withCommandIdRequest<TBase extends Type>(_Base: TBase) {
   abstract class MixinClass {
     @ApiProperty({
       description: '식별자',
+      type: String,
     })
     id!: string;
   }

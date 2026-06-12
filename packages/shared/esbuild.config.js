@@ -1,5 +1,5 @@
-import { copyFileSync, mkdirSync, rmSync, writeFileSync } from 'node:fs';
-import { dirname, join, relative } from 'node:path';
+import { existsSync, rmSync, writeFileSync } from 'node:fs';
+import { join } from 'node:path';
 
 import { generateDtsBundle } from 'dts-bundle-generator';
 import { build, context } from 'esbuild';
@@ -7,6 +7,25 @@ import { swcPlugin } from 'esbuild-plugin-swc';
 
 const OUTDIR = 'dist';
 const isWatch = process.argv.includes('--watch');
+
+function resolveSourceJsImportsPlugin() {
+  return {
+    name: 'resolveSourceJsImportsPlugin',
+    setup(build) {
+      build.onResolve({ filter: /\.js$/ }, (args) => {
+        const sourcePath = join(args.resolveDir, args.path.replace(/\.js$/, '.ts'));
+
+        if (existsSync(sourcePath)) {
+          return {
+            path: sourcePath,
+          };
+        }
+
+        return undefined;
+      });
+    },
+  };
+}
 
 /** @type {import('esbuild').BuildOptions} */
 const sharedOptions = {
@@ -24,6 +43,7 @@ const sharedOptions = {
   outbase: 'src',
   logLevel: 'info',
   plugins: [
+    resolveSourceJsImportsPlugin(),
     swcPlugin({
       jsc: {
         parser: {
@@ -43,73 +63,35 @@ const sharedOptions = {
   ],
 };
 
+/**
+ * DTS Rolling using Programmatic API
+ */
 function generateTypes() {
   console.log('[dts] rolling up type declarations...');
 
   const entries = [
-    {
-      filePath: './src/index.ts',
-      bundleOutFile: 'index.bundle.d.ts',
-      wrapperOutFile: 'index.d.ts',
-      references: ['./common/ambient/jose.d.ts', './server/ambient/nestjs-cls.d.ts'],
-    },
-    {
-      filePath: './src/common/index.ts',
-      bundleOutFile: 'common/index.bundle.d.ts',
-      wrapperOutFile: 'common/index.d.ts',
-      references: ['./ambient/jose.d.ts'],
-    },
-    {
-      filePath: './src/server/index.ts',
-      bundleOutFile: 'server/index.bundle.d.ts',
-      wrapperOutFile: 'server/index.d.ts',
-      references: ['./ambient/nestjs-cls.d.ts'],
-    },
-    {
-      filePath: './src/web/index.ts',
-      bundleOutFile: 'web/index.d.ts',
-    },
+    { filePath: './src/index.ts', outFile: 'index.bundle.d.ts' },
+    { filePath: './src/common/index.ts', outFile: 'common/index.bundle.d.ts' },
+    { filePath: './src/server/index.ts', outFile: 'server/index.bundle.d.ts' },
+    { filePath: './src/web/index.ts', outFile: 'web/index.d.ts' },
   ];
-  const ambientFiles = [
-    { source: 'src/common/ambient/jose.d.ts', output: 'common/ambient/jose.d.ts' },
-    { source: 'src/server/ambient/nestjs-cls.d.ts', output: 'server/ambient/nestjs-cls.d.ts' },
-  ];
-
   try {
     const bundles = generateDtsBundle(
       entries.map((entry) => ({
         filePath: entry.filePath,
-        output: { noCheck: true },
+        output: {
+          inlineDeclareGlobals: true,
+          inlineDeclareExternals: true,
+          sourceMap: true,
+          noCheck: true,
+        },
       })),
       { preferredConfigPath: './tsconfig.app.json' },
     );
 
     bundles.forEach((content, index) => {
-      const outputPath = join(OUTDIR, entries[index].bundleOutFile);
+      const outputPath = join(OUTDIR, entries[index].outFile);
       writeFileSync(outputPath, content);
-    });
-
-    ambientFiles.forEach(({ source, output }) => {
-      const outputPath = join(OUTDIR, output);
-      mkdirSync(dirname(outputPath), { recursive: true });
-      copyFileSync(source, outputPath);
-    });
-
-    entries.forEach((entry) => {
-      if (!entry.wrapperOutFile) {
-        return;
-      }
-
-      const wrapperPath = join(OUTDIR, entry.wrapperOutFile);
-      const importPath = relative(dirname(wrapperPath), join(OUTDIR, entry.bundleOutFile))
-        .replace(/\\/g, '/')
-        .replace(/\.d\.ts$/, '');
-      const exportPath = importPath.startsWith('.') ? importPath : `./${importPath}`;
-      const header = entry.references
-        .map((reference) => `/// <reference path="${reference}" />`)
-        .join('\n');
-      const wrapper = `${header}\nexport * from '${exportPath}';\n`;
-      writeFileSync(wrapperPath, wrapper);
     });
 
     console.log('[dts] types generated successfully.');

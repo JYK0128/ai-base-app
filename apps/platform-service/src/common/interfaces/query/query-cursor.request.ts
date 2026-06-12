@@ -1,10 +1,10 @@
 import type { Type } from '@nestjs/common';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 
-import { withQuerySort } from './sort.dto';
+import { withQuerySortPairRequest } from './query-sort-pair.request';
 
-export function withQueryCursor<TBase extends Type>(Base: TBase) {
-  abstract class MixinClass extends withQuerySort(Base) {
+export function withQueryCursorRequest<TBase extends Type>(Base: TBase) {
+  abstract class MixinClass extends withQuerySortPairRequest(Base) {
     @ApiPropertyOptional({
       description: '이전 페이지 커서',
     })
@@ -23,4 +23,4 @@ export function withQueryCursor<TBase extends Type>(Base: TBase) {
 }
 
 export type QueryCursorRequest<TEntity extends Type>
-  = InstanceType<ReturnType<typeof withQueryCursor<TEntity>>>;
+  = InstanceType<ReturnType<typeof withQueryCursorRequest<TEntity>>>;

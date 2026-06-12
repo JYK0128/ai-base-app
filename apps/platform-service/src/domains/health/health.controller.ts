@@ -1,3 +1,4 @@
+import KeyvRedis from '@keyv/redis';
 import { Controller, Get, VERSION_NEUTRAL } from '@nestjs/common';
 import { Transport } from '@nestjs/microservices';
 import { DiskHealthIndicator, HealthCheck, HealthCheckService, MemoryHealthIndicator, MicroserviceHealthIndicator, MikroOrmHealthIndicator } from '@nestjs/terminus';
@@ -5,7 +6,9 @@ import { DiskHealthIndicator, HealthCheck, HealthCheckService, MemoryHealthIndic
 import { Public } from '@/common/decorators/public.decorator';
 import { ENV } from '@/env';
 
-const redisUrl = new URL(ENV.REDIS_URL);
+const redisStore = new KeyvRedis(ENV.REDIS_URL, {
+  namespace: 'health-check',
+});
 
 @Controller({
   path: 'health',
@@ -34,13 +37,11 @@ export class HealthController {
   ready() {
     return this.health.check([
       () => this.db.pingCheck('database', { timeout: 1500 }),
-      () => this.microservice.pingCheck('redis', {
-        transport: Transport.REDIS,
-        options: {
-          host: redisUrl.hostname,
-          port: Number(redisUrl.port),
-        },
-      }),
+      async () => {
+        const client = await redisStore.getClient();
+        await client.ping();
+        return { redis: { status: 'up' } };
+      },
       () => this.microservice.pingCheck('rabbitmq', {
         transport: Transport.RMQ,
         options: {

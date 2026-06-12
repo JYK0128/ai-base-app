@@ -30,28 +30,28 @@ export abstract class CoreRepository<
   nativeInsert(
     data: RequiredEntityData<Entity>,
     options?: NativeInsertUpdateOptions<Entity>,
-  ) {
+  ): Promise<Primary<Entity>> {
     return QueryEngine.nativeInsert(this.entityName, data, options);
   }
 
   nativeInsertMany(
     data: RequiredEntityData<Entity>[],
     options?: NativeInsertUpdateOptions<Entity>,
-  ) {
+  ): Promise<Primary<Entity>[]> {
     return QueryEngine.nativeInsertMany(this.entityName, data, options);
   }
 
   nativeUpsert<Fields extends string = never>(
     data: EntityData<Entity> | Entity,
     options?: UpsertOptions<Entity, Fields>,
-  ) {
+  ): Promise<Entity> {
     return QueryEngine.nativeUpsert<Entity, Fields>(this.entityName, data, options);
   }
 
   nativeUpsertMany<Fields extends string = never>(
     data: (EntityData<Entity> | Entity)[],
     options?: UpsertManyOptions<Entity, Fields>,
-  ) {
+  ): Promise<Entity[]> {
     return QueryEngine.nativeUpsertMany<Entity, Fields>(this.entityName, data, options);
   }
 

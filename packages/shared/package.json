@@ -5,16 +5,16 @@
   "private": true,
   "sideEffects": false,
   "main": "./dist/common/index.cjs",
-  "types": "./dist/common/index.d.ts",
+  "types": "./dist/common/index.bundle.d.ts",
   "exports": {
     ".": {
-      "types": "./dist/common/index.d.ts",
+      "types": "./dist/common/index.bundle.d.ts",
       "import": "./dist/common/index.js",
       "require": "./dist/common/index.cjs",
       "default": "./dist/common/index.js"
     },
     "./server": {
-      "types": "./dist/server/index.d.ts",
+      "types": "./dist/server/index.bundle.d.ts",
       "import": "./dist/server/index.js",
       "require": "./dist/server/index.cjs",
       "default": "./dist/server/index.js"

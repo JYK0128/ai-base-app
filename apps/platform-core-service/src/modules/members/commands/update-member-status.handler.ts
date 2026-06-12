@@ -76,6 +76,7 @@ export class ToggleMemberStatusHandler implements ICommandHandler<UpdateMemberSt
     const qb2 = this.em.createQueryBuilder(OrganizationRoleAssignment);
 
     const kysely = this.em.getKysely();
+    kysely.selectFrom('announcement');
 
     const subquery = qb2
       .count()

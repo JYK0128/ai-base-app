@@ -17,8 +17,6 @@ import { ContextMiddleware } from '@/common/middlewares/context.middleware';
 import * as modules from '@/domains/modules';
 import { ENV } from '@/env';
 
-const redisUrl = new URL(ENV.REDIS_URL);
-
 @Module({
   imports: [
     MikroOrmModule.forRoot({
@@ -61,14 +59,6 @@ const redisUrl = new URL(ENV.REDIS_URL);
       signOptions: { expiresIn: ENV.JWT_ACCESS_EXPIRES_IN },
     }),
     ClientsModule.register([
-      {
-        name: 'REDIS_CLIENT',
-        transport: Transport.REDIS,
-        options: {
-          host: redisUrl.hostname,
-          port: Number(redisUrl.port),
-        },
-      },
       {
         name: 'RABBITMQ_CLIENT',
         transport: Transport.RMQ,

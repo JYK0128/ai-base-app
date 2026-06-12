@@ -7,7 +7,7 @@ export enum SortDirection {
   DESC = 'desc',
 }
 
-export function withQuerySort<TBase extends Type>(_Base: TBase) {
+export function withQuerySortPairRequest<TBase extends Type>(_Base: TBase) {
   abstract class MixinClass {
     @ApiPropertyOptional({
       description: '정렬 필드 목록',
@@ -28,5 +28,5 @@ export function withQuerySort<TBase extends Type>(_Base: TBase) {
   return MixinClass;
 }
 
-export type QuerySortRequest<TEntity extends Type>
-  = InstanceType<ReturnType<typeof withQuerySort<TEntity>>>;
+export type QuerySortPairRequest<TEntity extends Type>
+  = InstanceType<ReturnType<typeof withQuerySortPairRequest<TEntity>>>;
