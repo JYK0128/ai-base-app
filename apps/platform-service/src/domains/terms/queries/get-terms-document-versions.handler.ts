@@ -2,7 +2,6 @@ import { InjectRepository } from '@mikro-orm/nestjs';
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
 import { CoreRepository, TermsDocument, TermsVersion } from '@pkg/database';
 
-import { mapTermsVersionResponse } from '../terms.helper';
 import { TermsVersionResponseDto } from './get-terms-document.response.dto';
 import { GetTermsDocumentVersionsContract } from './get-terms-document-versions.contract';
 import { GetTermsDocumentVersionsAsserter } from './get-terms-document-versions.error';
@@ -40,7 +39,7 @@ export class GetTermsDocumentVersionsHandler implements IQueryHandler<GetTermsDo
         const haystack = `${version.label} ${version.content} ${version.status}`.toLowerCase();
         return haystack.includes(keyword);
       })
-      .map((version) => mapTermsVersionResponse(version));
+      .map((version) => new TermsVersionResponseDto(version));
   }
 
   private async identifyDocument(id: string): Promise<TermsDocument> {

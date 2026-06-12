@@ -1,11 +1,16 @@
 import { InjectRepository } from '@mikro-orm/nestjs';
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
-import { CoreRepository, TermsDocument, TermsDocumentStatus } from '@pkg/database';
+import { CoreRepository, TermsDocument, TermsDocumentStatus, TermsVersion } from '@pkg/database';
 import { ClsService } from 'nestjs-cls';
 
-import { getCurrentPublishedVersion, mapTermsDocumentResponse } from '../terms.helper';
 import { GetActiveTermsContract } from './get-active-terms.contract';
 import { TermsDocumentResponseDto } from './get-active-terms.response.dto';
+
+const getCurrentPublishedVersion = (versions: TermsVersion[]) => (
+  [...versions]
+    .filter((version) => version.isCurrentlyEffective)
+    .sort((left, right) => right.effectiveAt.getTime() - left.effectiveAt.getTime())[0]
+);
 
 @QueryHandler(GetActiveTermsContract)
 export class GetActiveTermsHandler implements IQueryHandler<GetActiveTermsContract> {
@@ -40,6 +45,6 @@ export class GetActiveTermsHandler implements IQueryHandler<GetActiveTermsContra
     return documents
       .filter((document) => !!getCurrentPublishedVersion(document.versions.getItems()))
       .filter((document) => !document.isDeprecated)
-      .map((document) => mapTermsDocumentResponse(document));
+      .map((document) => new TermsDocumentResponseDto(document));
   }
 }

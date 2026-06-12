@@ -2,10 +2,9 @@ import { InjectRepository } from '@mikro-orm/nestjs';
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
 import { CoreRepository, TermsDocument, TermsVersion } from '@pkg/database';
 
-import { mapTermsDocumentDetailResponse } from '../terms.helper';
 import { GetTermsDocumentContract } from './get-terms-document.contract';
 import { GetTermsDocumentAsserter } from './get-terms-document.error';
-import type { TermsDocumentDetailResponseDto } from './get-terms-document.response.dto';
+import { TermsDocumentDetailResponseDto, TermsDocumentResponseDto, TermsVersionResponseDto } from './get-terms-document.response.dto';
 
 @QueryHandler(GetTermsDocumentContract)
 export class GetTermsDocumentHandler implements IQueryHandler<GetTermsDocumentContract> {
@@ -28,7 +27,13 @@ export class GetTermsDocumentHandler implements IQueryHandler<GetTermsDocumentCo
       },
     );
 
-    return mapTermsDocumentDetailResponse(termsDocument, versions);
+    const currentVersion = versions.find((version) => version.isCurrentlyEffective);
+
+    return new TermsDocumentDetailResponseDto(
+      new TermsDocumentResponseDto(termsDocument),
+      versions.map((version) => new TermsVersionResponseDto(version)),
+      currentVersion ? new TermsVersionResponseDto(currentVersion) : null,
+    );
   }
 
   private async identifyDocument(id: string): Promise<TermsDocument> {

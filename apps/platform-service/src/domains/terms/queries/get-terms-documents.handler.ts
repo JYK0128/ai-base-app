@@ -3,7 +3,6 @@ import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
 import { CoreRepository, TermsDocument } from '@pkg/database';
 import { ClsService } from 'nestjs-cls';
 
-import { mapTermsDocumentResponse } from '../terms.helper';
 import { TermsDocumentResponseDto } from './get-active-terms.response.dto';
 import { GetTermsDocumentsContract } from './get-terms-documents.contract';
 import type { GetTermsDocumentsRequestDto } from './get-terms-documents.request.dto';
@@ -98,6 +97,6 @@ export class GetTermsDocumentsHandler implements IQueryHandler<GetTermsDocuments
             return true;
         }
       })
-      .map((document) => mapTermsDocumentResponse(document));
+      .map((document) => new TermsDocumentResponseDto(document));
   }
 }
