@@ -7,7 +7,7 @@ import { map } from 'rxjs/operators';
 import { ApiResponse } from '@/common/types/response.type';
 
 @Injectable()
-export class HttpResponseInterceptor<T> implements NestInterceptor<T, ApiResponse<T>> {
+export class HttpInterceptor<T> implements NestInterceptor<T, ApiResponse<T>> {
   constructor(private readonly cls: ClsService) {}
 
   intercept(context: ExecutionContext, next: CallHandler): Observable<ApiResponse<T>> {

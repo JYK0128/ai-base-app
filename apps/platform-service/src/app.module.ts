@@ -12,7 +12,7 @@ import { LoggerModule } from 'nestjs-pino';
 
 import { ExceptionFilter } from '@/common/filters/exception.filter';
 import { AuthGuard } from '@/common/guards/auth.guard';
-import { HttpResponseInterceptor } from '@/common/interceptors/http.response.interceptor';
+import { HttpInterceptor } from '@/common/interceptors/http.interceptor';
 import { ContextMiddleware } from '@/common/middlewares/context.middleware';
 import * as modules from '@/domains/modules';
 import { ENV } from '@/env';
@@ -113,7 +113,7 @@ const redisUrl = new URL(ENV.REDIS_URL);
     },
     {
       provide: APP_INTERCEPTOR,
-      useClass: HttpResponseInterceptor,
+      useClass: HttpInterceptor,
     },
     {
       provide: ContextMiddleware,
