@@ -1,18 +1,27 @@
 import { Transactional } from '@mikro-orm/decorators/legacy';
+import { CommandHandler, type ICommandHandler } from '@nestjs/cqrs';
 import { CoreRepository, MemberAccount } from '@pkg/database';
 import { JwtUtil } from '@pkg/shared';
 
 import { ENV } from '@/env';
 
-import { AuthService, extractPermissions } from '../auth.service';
-import type { LoginContext, LoginInput, LoginMetadata } from '../auth.types';
-import { LoginAsserter } from '../auth.errors';
+import { AuthCacheService } from '../auth.cache';
+import { extractPermissions } from '../auth.helper';
+import { LoginCommand } from './login.command';
+import { LoginAsserter } from './login.error';
+import type { LoginRequestDto } from './login.request';
+import type { LoginResponseDto } from './login.response';
 
-/**
- * 로그인 처리 유스케이스
- */
-export class LoginUseCase {
-  private readonly loginKeys = AuthService.for('login');
+type LoginMetadata = {
+  attempts?: number
+  maxAttempts?: number
+  retryAfterSeconds?: number
+  accessToken?: string
+};
+
+@CommandHandler(LoginCommand)
+export class LoginHandler implements ICommandHandler<LoginCommand> {
+  private readonly loginKeys = AuthCacheService.for('login');
   private readonly Asserter = LoginAsserter.onFail(async ({ code, metadata, context }) => {
     if (code === 'INVALID_CREDENTIALS' && context) {
       await this.handleLoginFailure(context, metadata);
@@ -21,11 +30,12 @@ export class LoginUseCase {
 
   constructor(
     private readonly memberAccountRepository: CoreRepository<MemberAccount>,
-    private readonly authService: AuthService,
+    private readonly authService: AuthCacheService,
   ) {}
 
   @Transactional()
-  async execute({ email, password, clientIp }: LoginInput) {
+  async execute(command: LoginCommand): Promise<LoginResponseDto> {
+    const { email, password, clientIp } = command.data;
     const account = await this.identifyAccount(email);
     await this.validatePolicies(account);
     await this.verifyCredentials(account, password);
@@ -33,9 +43,6 @@ export class LoginUseCase {
     return this.processLoginSuccess(account, clientIp);
   }
 
-  /**
-   * STEP 1: 식별 및 계정 확보
-   */
   private async identifyAccount(email: string) {
     const lockUntil = await this.authService.get<number>(this.loginKeys.build('lock', email));
     const retryAfterSeconds = lockUntil
@@ -62,9 +69,6 @@ export class LoginUseCase {
     return account;
   }
 
-  /**
-   * STEP 2: 정책 검증
-   */
   private async validatePolicies(account: MemberAccount) {
     await this.Asserter.throwIf(!account.isActive, 'INACTIVE_ACCOUNT');
     await this.Asserter.throwIf(!account.member.isActive, 'INACTIVE_MEMBER');
@@ -74,13 +78,9 @@ export class LoginUseCase {
       await this.Asserter.throwIf(!organization.isActive, 'INACTIVE_ORGANIZATION');
     }
 
-    // 휴면 계정 확인
     await this.Asserter.throwIf(account.isDormant, 'DORMANT_ACCOUNT');
   }
 
-  /**
-   * STEP 3: 자격 증명 확인
-   */
   private async verifyCredentials(account: MemberAccount, password: string) {
     const isPasswordValid = account.verifyPassword(password);
     await this.Asserter.assert(isPasswordValid, 'INVALID_CREDENTIALS', {
@@ -89,33 +89,23 @@ export class LoginUseCase {
     });
   }
 
-  /**
-   * STEP 4: 성공 처리 및 응답
-   */
   private async processLoginSuccess(account: MemberAccount, clientIp: string) {
-    // 실패 이력 초기화
     await Promise.all([
       this.authService.del(this.loginKeys.build('attempt', account.email)),
       this.authService.del(this.loginKeys.build('lock', account.email)),
     ]);
 
-    // 접속 정보 업데이트
     account.lastLoginAt = new Date();
     account.lastLoginIp = clientIp;
 
-    // 비밀번호 만료 확인
     const isPasswordExpired = account.isPasswordExpired;
-
     const organizationId = account.member.organization?.id;
     const memberId = account.member.id;
     const accessExpiresAt = Math.floor(Date.now() / 1000) + ENV.JWT_ACCESS_EXPIRES_IN;
     const refreshExpiresAt = Math.floor(Date.now() / 1000) + ENV.JWT_REFRESH_EXPIRES_IN;
-
-    // 권한 정보 조회
     const { permissions } = extractPermissions(account.member, organizationId);
     const accountId = account.id;
 
-    // 토큰 생성
     const tokens = await JwtUtil.issuePair(
       {
         sub: accountId,
@@ -146,10 +136,7 @@ export class LoginUseCase {
     return tokens;
   }
 
-  /**
-   * STEP 5: 실패 처리 부수 효과
-   */
-  private async handleLoginFailure(context: LoginContext, metadata: LoginMetadata = {}) {
+  private async handleLoginFailure(context: Pick<LoginRequestDto, 'email'>, metadata: LoginMetadata = {}) {
     const attemptKey = this.loginKeys.build('attempt', context.email);
     const attempts = await this.authService.incr(attemptKey, ENV.LOGIN_ATTEMPT_TTL);
 

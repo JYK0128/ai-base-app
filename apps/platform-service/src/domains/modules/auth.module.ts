@@ -2,20 +2,22 @@ import { createKeyv } from '@keyv/redis';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import { CacheModule } from '@nestjs/cache-manager';
 import { Module } from '@nestjs/common';
+import { CqrsModule } from '@nestjs/cqrs';
 import { MemberAccount } from '@pkg/database';
 
 import { ENV } from '@/env';
 
 import { AuthController } from '../auth/auth.controller';
-import { AuthService } from '../auth/auth.service';
-import { GetMeUseCase } from '../auth/me/get-me.use-case';
-import { LoginUseCase } from '../auth/login/login.use-case';
-import { ChangePasswordUseCase } from '../auth/password/change-password.use-case';
-import { DeferPasswordChangeUseCase } from '../auth/password/defer-password-change.use-case';
-import { RefreshTokenUseCase } from '../auth/refresh-token/refresh-token.use-case';
+import { AuthCacheService } from '../auth/auth.cache';
+import { LoginHandler } from '../auth/login/login.handler';
+import { RefreshTokenHandler } from '../auth/refresh-token/refresh-token.handler';
+import { ChangePasswordHandler } from '../auth/password/change-password.handler';
+import { DeferPasswordChangeHandler } from '../auth/password/defer-password-change.handler';
+import { GetMeHandler } from '../auth/me/get-me.handler';
 
 @Module({
   imports: [
+    CqrsModule,
     MikroOrmModule.forFeature([MemberAccount]),
     CacheModule.register({
       ttl: 60000,
@@ -28,12 +30,12 @@ import { RefreshTokenUseCase } from '../auth/refresh-token/refresh-token.use-cas
   ],
   controllers: [AuthController],
   providers: [
-    AuthService,
-    LoginUseCase,
-    RefreshTokenUseCase,
-    ChangePasswordUseCase,
-    DeferPasswordChangeUseCase,
-    GetMeUseCase,
+    AuthCacheService,
+    LoginHandler,
+    RefreshTokenHandler,
+    ChangePasswordHandler,
+    DeferPasswordChangeHandler,
+    GetMeHandler,
   ],
 })
 export class AuthModule {}

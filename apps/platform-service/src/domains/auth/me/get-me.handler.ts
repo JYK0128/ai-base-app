@@ -1,15 +1,15 @@
 import { InjectRepository } from '@mikro-orm/nestjs';
+import { type IQueryHandler, QueryHandler } from '@nestjs/cqrs';
 import { CoreRepository, MemberAccount } from '@pkg/database';
 import { ClsService } from 'nestjs-cls';
 
-import { GetMeAsserter } from '../auth.errors';
-import { extractPermissions } from '../auth.service';
-import { type AuthMeUserInfo, mapAuthMeUserInfo } from '../auth.types';
+import { extractPermissions } from '../auth.helper';
+import { GetMeAsserter } from './get-me.error';
+import { GetMeQuery } from './get-me.query';
+import { GetMeResponsePayload } from './get-me.response';
 
-/**
- * 내 정보 조회 유스케이스
- */
-export class GetMeUseCase {
+@QueryHandler(GetMeQuery)
+export class GetMeHandler implements IQueryHandler<GetMeQuery> {
   private readonly Asserter = GetMeAsserter;
 
   constructor(
@@ -18,13 +18,16 @@ export class GetMeUseCase {
     private readonly cls: ClsService,
   ) {}
 
-  async execute(): Promise<AuthMeUserInfo> {
+  async execute(_query: GetMeQuery): Promise<GetMeResponsePayload> {
     const accountId = await this.identifyAccountId();
     const account = await this.identifyAccount(accountId);
     const organizationId = account.member.organization?.id;
     const { permissions } = extractPermissions(account.member, organizationId);
 
-    return mapAuthMeUserInfo(account, permissions);
+    return new GetMeResponsePayload({
+      account,
+      permissions,
+    });
   }
 
   private async identifyAccountId(): Promise<string> {
