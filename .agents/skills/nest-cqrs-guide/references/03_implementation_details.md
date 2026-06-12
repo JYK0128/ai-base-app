@@ -262,10 +262,10 @@ export class InviteEmailPublisher {
 
 ## 📦 6. 피처별 DTO 독립성 원칙
 
-유스케이스(Feature) 간에 DTO(Data Transfer Object)를 공유하는 것을 **엄격히 금지**합니다.
+모든 유스케이스(Feature)는 격리된 API 사양과 독립적인 진화 방향을 유지하기 위해 자신만의 전용 DTO(Data Transfer Object)를 갖습니다.
 
-* **동일한 구조의 DTO라도 분리**: 예를 들어 `UpdateMemberStatus`와 `UpdateMemberRole`이 둘 다 동일하게 멤버의 `id`값만 응답(`{ id: string }`)하더라도, 공통 `MemberIdResponseDto`를 공유하지 않고 각각 `UpdateMemberStatusResponseDto`, `UpdateMemberRoleResponseDto`로 독립적으로 생성해야 합니다.
-* **이유**: 향후 특정 피처의 요구사항이 변경되어 응답에 필드가 추가되거나 제거될 때, 공유 DTO를 사용하고 있으면 다른 피처에 원치 않는 사이드 이펙트(API 스펙 변동 및 깨짐)를 유발하기 때문입니다.
+* **피처별 전용 DTO 생성**: 예를 들어 `UpdateMemberStatus`와 `UpdateMemberRole`이 둘 다 동일하게 멤버의 `id`값만 응답(`{ id: string }`)하는 구조를 가지더라도, 각 피처의 디렉토리 하위에 각각 `UpdateMemberStatusResponseDto`, `UpdateMemberRoleResponseDto` 클래스를 독립적으로 생성하여 정의합니다.
+* **이유**: 특정 피처의 기능 개편으로 인해 API 필드 사양이 달라질 때, DTO가 독립적으로 격리되어 있어야만 다른 피처에 영향을 주지 않고 안전하게 변경을 전파할 수 있기 때문입니다.
 
 ### 💻 구현 예시 (독립적인 DTO 작성)
 

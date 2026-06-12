@@ -33,7 +33,7 @@ domains/members/
 ```
 
 > [!IMPORTANT]
-> **피처별 독립 DTO 규칙**: 피처(Feature) 간에 DTO를 절대 공유하지 않습니다. 아무리 구조가 단순하거나 필드가 겹치더라도, 각 피처의 변경이 서로에게 영향을 미치지 않도록 반드시 피처별 고유 DTO(`*.request.dto.ts`, `*.response.dto.ts`)를 각각 작성해야 합니다.
+> **피처별 전용 DTO 작성 원칙**: 모든 피처(Feature)는 변경 영향도를 격리하고 독립성을 높이기 위해, 각 피처 폴더 내에 전용 DTO(`*.request.dto.ts`, `*.response.dto.ts`)를 개별적으로 작성하여 사용합니다. 이는 구조나 필드가 서로 유사하더라도 각 유스케이스가 독립적으로 진화하도록 돕습니다.
 
 ---
 
@@ -56,7 +56,7 @@ domains/members/
 
 * **로컬 우선 참조**: Feature 폴더 내부의 파일 간에는 상대 경로(예: `./create-invite.contract`)를 사용하여 강한 결합 관계를 나타냅니다.
 * **별칭(Alias) 활용**: 타 도메인이나 공통 모듈 참조 시에는 tsconfig 별칭(예: `@/domains/mail/mail.contract`)을 명시하여 경로 가독성을 높입니다.
-* **Barrel Export (`index.ts`) 지양**: 파일의 실제 위치를 감추는 Barrel Export는 순환 참조(Circular Dependency) 문제를 야기할 수 있으므로, CQRS 피처 디렉토리 내에서는 원칙적으로 금지합니다.
+* **명시적 개별 Import 지향**: 순환 참조(Circular Dependency) 문제를 예방하고 파일의 실제 물리적 위치를 직관적으로 파악할 수 있도록, Barrel Export(`index.ts`)를 통한 우회 참조 대신 개별 파일 경로를 직접 지정하여 명시적으로 Import합니다.
 
 ---
 
