@@ -3,7 +3,6 @@ import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
 import { CoreRepository, Organization, OrganizationRole } from '@pkg/database';
 import { ClsService } from 'nestjs-cls';
 
-import { buildPermissionSetResponse } from '../resource.helper';
 import { GetPermissionSetsContract } from './get-permission-sets.contract';
 import { GetPermissionSetsAsserter } from './get-permission-sets.error';
 import { PermissionSetResponseDto } from './get-permission-sets.response.dto';
@@ -23,7 +22,7 @@ export class GetPermissionSetsHandler implements IQueryHandler<GetPermissionSets
   async execute(): Promise<PermissionSetResponseDto[]> {
     const organization = await this.identifyOrganization();
     const roles = await this.loadRoles(organization);
-    return roles.map((role) => buildPermissionSetResponse(role));
+    return roles.map((role) => new PermissionSetResponseDto(role));
   }
 
   private async identifyOrganization(): Promise<Organization> {
