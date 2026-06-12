@@ -5,7 +5,7 @@ import { JwtUtil } from '@pkg/shared';
 import { ENV } from '@/env';
 
 import { AuthCacheService } from '../auth.cache';
-import { extractPermissions } from '../auth.helper';
+import { extractPermissions } from '../auth-permissions';
 import { RefreshTokenContract } from './refresh-token.contract';
 import { RefreshTokenAsserter } from './refresh-token.error';
 import type { RefreshTokenResponseDto } from './refresh-token.response.dto';

@@ -6,7 +6,7 @@ import { JwtUtil } from '@pkg/shared';
 import { ENV } from '@/env';
 
 import { AuthCacheService } from '../auth.cache';
-import { extractPermissions } from '../auth.helper';
+import { extractPermissions } from '../auth-permissions';
 import { LoginContract } from './login.contract';
 import { LoginAsserter } from './login.error';
 import type { LoginRequestDto } from './login.request.dto';

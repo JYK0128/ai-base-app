@@ -3,7 +3,7 @@ import { type IQueryHandler, QueryHandler } from '@nestjs/cqrs';
 import { CoreRepository, MemberAccount } from '@pkg/database';
 import { ClsService } from 'nestjs-cls';
 
-import { extractPermissions } from '../auth.helper';
+import { extractPermissions } from '../auth-permissions';
 import { GetMeContract } from './get-me.contract';
 import { GetMeAsserter } from './get-me.error';
 import { GetMeResponseDto } from './get-me.response.dto';

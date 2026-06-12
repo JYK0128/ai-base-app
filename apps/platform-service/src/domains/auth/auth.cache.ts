@@ -1,7 +1,7 @@
 import { type Cache, CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Inject, Injectable } from '@nestjs/common';
 
-import { AuthKeyBuilder } from './auth.helper';
+import { AuthKeyBuilder } from './auth-key.builder';
 
 @Injectable()
 export class AuthCacheService {
