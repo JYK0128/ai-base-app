@@ -10,4 +10,4 @@ export function withCommandCreateRequest<TBase extends Type>(Base: TBase) {
 }
 
 export type CommandCreateRequest<TEntity extends Type>
-  = ReturnType<typeof withCommandCreateRequest<TEntity>>;
+  = InstanceType<ReturnType<typeof withCommandCreateRequest<TEntity>>>;

@@ -14,12 +14,13 @@ export function withQueryCursor<TBase extends Type>(Base: TBase) {
       description: '페이지 크기',
       minimum: 1,
       example: 20,
+      default: 20,
     })
-    limit?: number;
+    limit: number = 20;
   }
 
   return MixinClass;
 }
 
 export type QueryCursorRequest<TEntity extends Type>
-  = ReturnType<typeof withQueryCursor<TEntity>>;
+  = InstanceType<ReturnType<typeof withQueryCursor<TEntity>>>;

@@ -1,3 +1,4 @@
+import type { EntityData } from '@mikro-orm/core';
 import type { Type } from '@nestjs/common';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
@@ -8,7 +9,7 @@ export function withQueryCursorResponse<TBase extends Type>(_Base: TBase) {
       type: Object,
       isArray: true,
     })
-    items!: Partial<InstanceType<TBase>>[];
+    items!: EntityData<InstanceType<TBase>>[];
 
     @ApiPropertyOptional({
       description: '다음 커서',
@@ -41,4 +42,4 @@ export function withQueryCursorResponse<TBase extends Type>(_Base: TBase) {
 }
 
 export type QueryCursorResponse<TEntity extends Type>
-  = ReturnType<typeof withQueryCursorResponse<TEntity>>;
+  = InstanceType<ReturnType<typeof withQueryCursorResponse<TEntity>>>;

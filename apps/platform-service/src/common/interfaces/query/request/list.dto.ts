@@ -9,19 +9,21 @@ export function withQueryList<TBase extends Type>(Base: TBase) {
       description: '오프셋',
       minimum: 0,
       example: 0,
+      default: 0,
     })
-    offset?: number;
+    offset: number = 0;
 
     @ApiPropertyOptional({
       description: '페이지 크기',
       minimum: 1,
       example: 20,
+      default: 20,
     })
-    limit?: number;
+    limit: number = 20;
   }
 
   return MixinClass;
 }
 
 export type QueryListRequest<TEntity extends Type>
-  = ReturnType<typeof withQueryList<TEntity>>;
+  = InstanceType<ReturnType<typeof withQueryList<TEntity>>>;

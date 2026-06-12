@@ -15,4 +15,4 @@ export function withQueryListResponse<TBase extends Type>(_Base: TBase) {
 }
 
 export type QueryListResponse<TEntity extends Type>
-  = ReturnType<typeof withQueryListResponse<TEntity>>;
+  = InstanceType<ReturnType<typeof withQueryListResponse<TEntity>>>;

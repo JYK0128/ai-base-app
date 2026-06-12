@@ -9,19 +9,21 @@ export function withQueryPage<TBase extends Type>(Base: TBase) {
       description: '페이지 번호',
       minimum: 1,
       example: 1,
+      default: 1,
     })
-    page?: number;
+    page: number = 1;
 
     @ApiPropertyOptional({
       description: '페이지 크기',
       minimum: 1,
       example: 20,
+      default: 20,
     })
-    limit?: number;
+    limit: number = 20;
   }
 
   return MixinClass;
 }
 
 export type QueryPageRequest<TEntity extends Type>
-  = ReturnType<typeof withQueryPage<TEntity>>;
+  = InstanceType<ReturnType<typeof withQueryPage<TEntity>>>;

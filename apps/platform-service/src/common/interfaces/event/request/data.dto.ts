@@ -1,13 +1,11 @@
 import type { Type } from '@nestjs/common';
-import { OmitType, PartialType } from '@nestjs/swagger';
+import { PartialType } from '@nestjs/swagger';
 
 export function withEventDataRequest<TBase extends Type>(Base: TBase) {
-  abstract class MixinClass extends PartialType(OmitType(Base, ['id'] as const)) {
-    [key: string]: unknown
-  }
+  abstract class MixinClass extends PartialType(Base) {}
 
   return MixinClass;
 }
 
-export type EventDataRequest<TBase extends Type> = Partial<Omit<InstanceType<TBase>, 'id'>>
-  & InstanceType<ReturnType<typeof withEventDataRequest<TBase>>>;
+export type EventDataRequest<TEntity extends Type>
+  = InstanceType<ReturnType<typeof withEventDataRequest<TEntity>>>;

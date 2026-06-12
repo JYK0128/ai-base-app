@@ -49,4 +49,4 @@ export function withQueryPageResponse<TBase extends Type>(_Base: TBase) {
 }
 
 export type QueryPageResponse<TEntity extends Type>
-  = ReturnType<typeof withQueryPageResponse<TEntity>>;
+  = InstanceType<ReturnType<typeof withQueryPageResponse<TEntity>>>;

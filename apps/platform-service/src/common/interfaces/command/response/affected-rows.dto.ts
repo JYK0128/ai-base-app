@@ -14,4 +14,4 @@ export function withCommandAffectedRowsResponse<TBase extends Type>(_Base: TBase
 }
 
 export type CommandAffectedRowsResponse<TEntity extends Type>
-  = ReturnType<typeof withCommandAffectedRowsResponse<TEntity>>;
+  = InstanceType<ReturnType<typeof withCommandAffectedRowsResponse<TEntity>>>;

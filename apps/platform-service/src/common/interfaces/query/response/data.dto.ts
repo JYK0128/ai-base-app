@@ -8,4 +8,4 @@ export function withQueryDataResponse<TBase extends Type>(Base: TBase) {
 }
 
 export type QueryDataResponse<TEntity extends Type>
-  = ReturnType<typeof withQueryDataResponse<TEntity>>;
+  = InstanceType<ReturnType<typeof withQueryDataResponse<TEntity>>>;

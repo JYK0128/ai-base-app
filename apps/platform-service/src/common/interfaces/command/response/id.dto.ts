@@ -14,4 +14,4 @@ export function withCommandIdResponse<TBase extends Type>(_Base: TBase) {
 }
 
 export type CommandIdResponse<TEntity extends Type>
-  = ReturnType<typeof withCommandIdResponse<TEntity>>;
+  = InstanceType<ReturnType<typeof withCommandIdResponse<TEntity>>>;
