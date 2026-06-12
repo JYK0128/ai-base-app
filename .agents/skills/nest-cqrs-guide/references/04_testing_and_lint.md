@@ -18,6 +18,22 @@
 - 유스케이스 로직은 핸들러를 직접 호출해 검증함
 - 실제로 필요한 협력자만 모킹함
 
+### 예시
+
+```ts
+describe('LoginHandler', () => {
+  it('로그인 성공 시 토큰을 반환해야 함', async () => {
+    const handler = new LoginHandler(...);
+
+    const result = await handler.execute(
+      new LoginContract({ email: 'test@example.com', password: 'pw' }),
+    );
+
+    expect(result.accessToken).toBeDefined();
+  });
+});
+```
+
 ## 3. 린트와 import 정리
 
 - import는 정렬하고 최소화함
@@ -30,3 +46,10 @@
 - 메시지 shape나 핸들러 시그니처를 바꿨다면 타입체크를 실행함
 - 파일명, export, import를 바꿨다면 린트를 실행함
 - event나 DTO shape가 바뀌면 관련 테스트도 함께 갱신함
+
+### 일반적인 검증 예시
+
+```bash
+pnpm --filter platform-service build
+pnpm --filter platform-service lint
+```

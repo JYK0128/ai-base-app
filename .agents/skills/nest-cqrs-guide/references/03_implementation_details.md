@@ -12,6 +12,19 @@
 - 생성자는 단순하고 명시적으로 작성함
 - payload가 없으면 코드베이스의 기존 빈 메시지 스타일을 따름
 
+```ts
+import { Command } from '@nestjs/cqrs';
+
+import type { LoginRequestDto } from './login.request.dto';
+import type { LoginResponseDto } from './login.response.dto';
+
+export class LoginContract extends Command<LoginResponseDto> {
+  constructor(public readonly data: LoginRequestDto) {
+    super();
+  }
+}
+```
+
 ## 2. 핸들러
 
 - 핸들러는 유스케이스를 조율함
@@ -19,11 +32,37 @@
 - 반복되거나 도메인 비중이 큰 로직은 private 메서드, 헬퍼, 도메인 서비스로 옮김
 - private 메서드 이름은 수행하는 도메인 동작이 드러나게 작성함
 
+```ts
+@CommandHandler(LoginContract)
+export class LoginHandler implements ICommandHandler<LoginContract> {
+  async execute(command: LoginContract): Promise<LoginResponseDto> {
+    const { email, password } = command.data;
+    const account = await this.identifyAccount(email);
+
+    await this.validatePolicies(account);
+    await this.verifyCredentials(account, password);
+
+    return this.processLoginSuccess(account);
+  }
+}
+```
+
 ## 3. 에러와 어서터
 
 - 예상 가능한 실패는 명시적으로 정의함
 - 구조화된 검증이 필요하면 에러 매핑을 별도 파일로 분리함
 - 비즈니스 규칙은 assertion/guard helper로 빠르게 실패시키는 편이 좋음
+
+```ts
+const ERROR_MESSAGES = defineErrors({
+  ACCOUNT_NOT_FOUND: {
+    message: '계정을 찾을 수 없습니다.',
+    exception: NotFoundException,
+  },
+});
+
+export const LoginAsserter = ExceptionGuard.setMessages(ERROR_MESSAGES);
+```
 
 ## 4. 이벤트
 
@@ -31,8 +70,31 @@
 - 이벤트 payload는 작고 사실 기반이어야 함
 - 후속 사이드 이펙트는 이벤트 핸들러에서 처리함
 
+```ts
+import type { IEvent } from '@nestjs/cqrs';
+
+export class InviteEmailSentEvent implements IEvent {
+  constructor(
+    public readonly memberId: string,
+    public readonly email: string,
+  ) {}
+}
+```
+
 ## 5. DTO와 계약
 
 - transport/request 형태와 domain result 형태를 분리함
 - 같은 feature 안에서는 이름 규칙을 일관되게 유지함
 - 한 파일에 서로 다른 역할의 타입을 과도하게 섞지 않음
+
+```ts
+export class GetMeRequestDto {
+  /**
+   * Intentionally empty payload.
+   */
+}
+
+export class GetMeResponseDto {
+  constructor(readonly data: { accountId: string }) {}
+}
+```

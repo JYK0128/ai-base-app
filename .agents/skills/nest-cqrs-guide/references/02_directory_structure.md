@@ -11,6 +11,22 @@
 - 경로만 봐도 기능 경계가 보이도록 유지함
 - 한 유스케이스에 속한 파일은 가까이 배치함
 
+```text
+domains/auth/
+├── login/
+│   ├── login.contract.ts
+│   ├── login.error.ts
+│   ├── login.handler.ts
+│   ├── login.request.dto.ts
+│   └── login.response.dto.ts
+├── me/
+│   ├── get-me.contract.ts
+│   ├── get-me.error.ts
+│   ├── get-me.handler.ts
+│   ├── get-me.request.dto.ts
+│   └── get-me.response.dto.ts
+```
+
 ## 2. 공통 파일 역할
 
 - `*.contract.ts`: 유스케이스용 메시지 또는 계약 클래스
@@ -35,3 +51,21 @@
 
 - 핸들러는 모듈에서 명시적으로 등록함
 - 모듈 파일에는 wiring만 두고 비즈니스 로직은 넣지 않음
+
+### 모듈 예시
+
+```ts
+@Module({
+  imports: [CqrsModule],
+  controllers: [AuthController],
+  providers: [
+    AuthCacheService,
+    LoginHandler,
+    RefreshTokenHandler,
+    ChangePasswordHandler,
+    DeferPasswordChangeHandler,
+    GetMeHandler,
+  ],
+})
+export class AuthModule {}
+```
