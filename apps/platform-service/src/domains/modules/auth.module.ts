@@ -11,8 +11,8 @@ import { AuthCacheService } from '../auth/auth.cache';
 import { AuthController } from '../auth/auth.controller';
 import { LoginHandler } from '../auth/login/login.handler';
 import { GetMeHandler } from '../auth/me/get-me.handler';
-import { ChangePasswordHandler } from '../auth/password/change-password.handler';
-import { DeferPasswordChangeHandler } from '../auth/password/defer-password-change.handler';
+import { ChangePasswordHandler } from '../auth/password/change-password/change-password.handler';
+import { DeferPasswordChangeHandler } from '../auth/password/defer-password-change/defer-password-change.handler';
 import { RefreshTokenHandler } from '../auth/refresh-token/refresh-token.handler';
 
 @Module({

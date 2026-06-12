@@ -4,18 +4,18 @@ import { CoreRepository, MemberAccount } from '@pkg/database';
 
 import { ENV } from '@/env';
 
-import { DeferPasswordChangeCommand } from './defer-password-change.command';
+import { DeferPasswordChangeContract } from './defer-password-change.contract';
 import { DeferPasswordChangeAsserter } from './defer-password-change.error';
 import { DeferPasswordChangeResponseDto } from './defer-password-change.response.dto';
 
-@CommandHandler(DeferPasswordChangeCommand)
-export class DeferPasswordChangeHandler implements ICommandHandler<DeferPasswordChangeCommand> {
+@CommandHandler(DeferPasswordChangeContract)
+export class DeferPasswordChangeHandler implements ICommandHandler<DeferPasswordChangeContract> {
   private readonly Asserter = DeferPasswordChangeAsserter;
 
   constructor(private readonly memberAccountRepository: CoreRepository<MemberAccount>) {}
 
   @Transactional()
-  async execute(command: DeferPasswordChangeCommand): Promise<DeferPasswordChangeResponseDto> {
+  async execute(command: DeferPasswordChangeContract): Promise<DeferPasswordChangeResponseDto> {
     const { accountId } = command.data;
 
     const account = await this.identifyAccount(accountId);

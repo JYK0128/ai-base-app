@@ -6,12 +6,12 @@ import { ENV } from '@/env';
 
 import { AuthCacheService } from '../auth.cache';
 import { extractPermissions } from '../auth.helper';
-import { RefreshTokenCommand } from './refresh-token.command';
+import { RefreshTokenContract } from './refresh-token.contract';
 import { RefreshTokenAsserter } from './refresh-token.error';
 import type { RefreshTokenResponseDto } from './refresh-token.response.dto';
 
-@CommandHandler(RefreshTokenCommand)
-export class RefreshTokenHandler implements ICommandHandler<RefreshTokenCommand> {
+@CommandHandler(RefreshTokenContract)
+export class RefreshTokenHandler implements ICommandHandler<RefreshTokenContract> {
   private readonly Asserter = RefreshTokenAsserter;
 
   constructor(
@@ -19,7 +19,7 @@ export class RefreshTokenHandler implements ICommandHandler<RefreshTokenCommand>
     private readonly memberAccountRepository: CoreRepository<MemberAccount>,
   ) {}
 
-  async execute(command: RefreshTokenCommand): Promise<RefreshTokenResponseDto> {
+  async execute(command: RefreshTokenContract): Promise<RefreshTokenResponseDto> {
     const { refreshToken } = command.data;
 
     const payload = await this.verifyToken(refreshToken);

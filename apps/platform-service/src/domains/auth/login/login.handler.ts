@@ -7,7 +7,7 @@ import { ENV } from '@/env';
 
 import { AuthCacheService } from '../auth.cache';
 import { extractPermissions } from '../auth.helper';
-import { LoginCommand } from './login.command';
+import { LoginContract } from './login.contract';
 import { LoginAsserter } from './login.error';
 import type { LoginRequestDto } from './login.request.dto';
 import type { LoginResponseDto } from './login.response.dto';
@@ -19,8 +19,8 @@ type LoginMetadata = {
   accessToken?: string
 };
 
-@CommandHandler(LoginCommand)
-export class LoginHandler implements ICommandHandler<LoginCommand> {
+@CommandHandler(LoginContract)
+export class LoginHandler implements ICommandHandler<LoginContract> {
   private readonly loginKeys = AuthCacheService.for('login');
   private readonly Asserter = LoginAsserter.onFail(async ({ code, metadata, context }) => {
     if (code === 'INVALID_CREDENTIALS' && context) {
@@ -34,7 +34,7 @@ export class LoginHandler implements ICommandHandler<LoginCommand> {
   ) {}
 
   @Transactional()
-  async execute(command: LoginCommand): Promise<LoginResponseDto> {
+  async execute(command: LoginContract): Promise<LoginResponseDto> {
     const { email, password, clientIp } = command.data;
     const account = await this.identifyAccount(email);
     await this.validatePolicies(account);

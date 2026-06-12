@@ -4,12 +4,12 @@ import { CoreRepository, MemberAccount } from '@pkg/database';
 
 import { ENV } from '@/env';
 
-import { ChangePasswordCommand } from './change-password.command';
+import { ChangePasswordContract } from './change-password.contract';
 import { ChangePasswordAsserter } from './change-password.error';
 import { ChangePasswordResponseDto } from './change-password.response.dto';
 
-@CommandHandler(ChangePasswordCommand)
-export class ChangePasswordHandler implements ICommandHandler<ChangePasswordCommand> {
+@CommandHandler(ChangePasswordContract)
+export class ChangePasswordHandler implements ICommandHandler<ChangePasswordContract> {
   private readonly Asserter = ChangePasswordAsserter;
 
   constructor(
@@ -17,7 +17,7 @@ export class ChangePasswordHandler implements ICommandHandler<ChangePasswordComm
   ) {}
 
   @Transactional()
-  async execute(command: ChangePasswordCommand): Promise<ChangePasswordResponseDto> {
+  async execute(command: ChangePasswordContract): Promise<ChangePasswordResponseDto> {
     const { accountId, currentPassword, newPassword } = command.data;
 
     const account = await this.identifyAccount(accountId);

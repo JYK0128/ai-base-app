@@ -9,16 +9,16 @@ import { Public } from '@/common/decorators/public.decorator';
 import { createCookieOptions } from '@/common/utils/cookie';
 import { ENV } from '@/env';
 
-import { LoginCommand } from './login/login.command';
+import { LoginContract } from './login/login.contract';
 import type { LoginRequestDto } from './login/login.request.dto';
 import type { LoginResponseDto } from './login/login.response.dto';
-import { GetMeQuery } from './me/get-me.query';
+import { GetMeContract } from './me/get-me.contract';
 import { GetMeResponseDto } from './me/get-me.response.dto';
-import { ChangePasswordCommand } from './password/change-password.command';
-import type { ChangePasswordRequestDto } from './password/change-password.request.dto';
-import { DeferPasswordChangeCommand } from './password/defer-password-change.command';
-import type { DeferPasswordChangeRequestDto } from './password/defer-password-change.request.dto';
-import { RefreshTokenCommand } from './refresh-token/refresh-token.command';
+import { ChangePasswordContract } from './password/change-password/change-password.contract';
+import type { ChangePasswordRequestDto } from './password/change-password/change-password.request.dto';
+import { DeferPasswordChangeContract } from './password/defer-password-change/defer-password-change.contract';
+import type { DeferPasswordChangeRequestDto } from './password/defer-password-change/defer-password-change.request.dto';
+import { RefreshTokenContract } from './refresh-token/refresh-token.contract';
 import type { RefreshTokenRequestDto } from './refresh-token/refresh-token.request.dto';
 import type { RefreshTokenResponseDto } from './refresh-token/refresh-token.response.dto';
 
@@ -38,7 +38,7 @@ export class AuthController {
     @Res({ passthrough: true }) res: Response,
   ): Promise<Pick<LoginResponseDto, 'accessToken'>> {
     const clientIp = this.cls.get('clientIp') ?? request.ip ?? '0.0.0.0';
-    const tokens = await this.commandBus.execute<LoginCommand, LoginResponseDto>(new LoginCommand({
+    const tokens = await this.commandBus.execute<LoginContract, LoginResponseDto>(new LoginContract({
       ...body,
       clientIp,
     }));
@@ -58,7 +58,7 @@ export class AuthController {
     @Cookies('refreshToken') refreshToken: string,
     @Res({ passthrough: true }) res: Response,
   ): Promise<Pick<RefreshTokenResponseDto, 'accessToken'>> {
-    const { accessToken, refreshToken: newRefreshToken } = await this.commandBus.execute<RefreshTokenCommand, RefreshTokenResponseDto>(new RefreshTokenCommand({
+    const { accessToken, refreshToken: newRefreshToken } = await this.commandBus.execute<RefreshTokenContract, RefreshTokenResponseDto>(new RefreshTokenContract({
       refreshToken,
     } satisfies RefreshTokenRequestDto));
 
@@ -73,7 +73,7 @@ export class AuthController {
 
   @Get('me')
   async me(): Promise<GetMeResponseDto> {
-    return this.queryBus.execute<GetMeQuery, GetMeResponseDto>(new GetMeQuery());
+    return this.queryBus.execute<GetMeContract, GetMeResponseDto>(new GetMeContract());
   }
 
   @Bypass(BYPASS_POLICIES.PASSWORD)
@@ -81,7 +81,7 @@ export class AuthController {
   async changePassword(
     @Body() body: Omit<ChangePasswordRequestDto, 'accountId'>,
   ): Promise<void> {
-    await this.commandBus.execute(new ChangePasswordCommand({
+    await this.commandBus.execute(new ChangePasswordContract({
       accountId: this.cls.get('accountId'),
       ...body,
     } satisfies ChangePasswordRequestDto));
@@ -90,7 +90,7 @@ export class AuthController {
   @Bypass(BYPASS_POLICIES.PASSWORD)
   @Post('password/defer')
   async deferPasswordChange(): Promise<void> {
-    await this.commandBus.execute(new DeferPasswordChangeCommand({
+    await this.commandBus.execute(new DeferPasswordChangeContract({
       accountId: this.cls.get('accountId'),
     } satisfies DeferPasswordChangeRequestDto));
   }

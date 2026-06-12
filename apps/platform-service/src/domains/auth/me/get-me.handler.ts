@@ -4,12 +4,12 @@ import { CoreRepository, MemberAccount } from '@pkg/database';
 import { ClsService } from 'nestjs-cls';
 
 import { extractPermissions } from '../auth.helper';
+import { GetMeContract } from './get-me.contract';
 import { GetMeAsserter } from './get-me.error';
-import { GetMeQuery } from './get-me.query';
 import { GetMeResponseDto } from './get-me.response.dto';
 
-@QueryHandler(GetMeQuery)
-export class GetMeHandler implements IQueryHandler<GetMeQuery> {
+@QueryHandler(GetMeContract)
+export class GetMeHandler implements IQueryHandler<GetMeContract> {
   private readonly Asserter = GetMeAsserter;
 
   constructor(
@@ -18,7 +18,7 @@ export class GetMeHandler implements IQueryHandler<GetMeQuery> {
     private readonly cls: ClsService,
   ) {}
 
-  async execute(_query: GetMeQuery): Promise<GetMeResponseDto> {
+  async execute(_query: GetMeContract): Promise<GetMeResponseDto> {
     const accountId = await this.identifyAccountId();
     const account = await this.identifyAccount(accountId);
     const organizationId = account.member.organization?.id;
