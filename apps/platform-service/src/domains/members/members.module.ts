@@ -5,6 +5,7 @@ import { Member, Organization } from '@pkg/database';
 
 import { MembersController } from './members.controller';
 import { GetMemberHandler } from './queries/get-member.handler';
+import { GetMembersHandler } from './queries/get-members.handler';
 
 @Module({
   imports: [
@@ -12,6 +13,6 @@ import { GetMemberHandler } from './queries/get-member.handler';
     MikroOrmModule.forFeature([Member, Organization]),
   ],
   controllers: [MembersController],
-  providers: [GetMemberHandler],
+  providers: [GetMemberHandler, GetMembersHandler],
 })
 export class MembersModule {}

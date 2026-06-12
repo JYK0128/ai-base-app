@@ -5,7 +5,7 @@
 - [x] `resource` - 리소스 조회 기능을 `platform-service`로 이관
 - [ ] `members` - 멤버 조회 기능을 `platform-service`로 이관
   - [x] `members/detail` - 멤버 상세 조회를 `platform-service`로 이관
-  - [ ] `members/list` - 멤버 목록 조회를 `platform-service`로 이관
+  - [x] `members/list` - 멤버 목록 조회를 `platform-service`로 이관
 - [x] `organization` - 조직 조회 기능을 `platform-service`로 이관
 - [x] `support` - 티켓 조회 기능을 `platform-service`로 이관
 - [ ] `terms` - 약관 조회 기능을 `platform-service`로 이관

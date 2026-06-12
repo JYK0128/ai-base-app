@@ -3,3 +3,7 @@ export * from './get-member.error';
 export * from './get-member.handler';
 export * from './get-member.request.dto';
 export * from './get-member.response.dto';
+export * from './get-members.contract';
+export * from './get-members.error';
+export * from './get-members.handler';
+export * from './get-members.request.dto';
