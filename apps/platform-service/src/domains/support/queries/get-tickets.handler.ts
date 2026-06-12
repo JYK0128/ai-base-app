@@ -3,7 +3,6 @@ import { InjectRepository } from '@mikro-orm/nestjs';
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
 import { CoreRepository, SupportTicket } from '@pkg/database';
 
-import { buildTicketResponse } from '../support.helper';
 import { GetTicketsContract } from './get-tickets.contract';
 import { GetTicketsAsserter } from './get-tickets.error';
 import { TicketResponseDto } from './get-tickets.response.dto';
@@ -30,6 +29,6 @@ export class GetTicketsHandler implements IQueryHandler<GetTicketsContract> {
       'LOAD_FAILED',
     );
 
-    return tickets.map(buildTicketResponse);
+    return tickets.map((ticket) => new TicketResponseDto(ticket));
   }
 }
