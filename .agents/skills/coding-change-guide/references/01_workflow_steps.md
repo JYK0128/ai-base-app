@@ -52,6 +52,7 @@
 - **도메인 정합성**: 도메인 의미가 상이한 날짜/속성 필드는 개별 필드로 분리하여 유지함
 - **캡슐화 지향**: 필요한 비즈니스 연산은 getter 또는 helper 함수로 한정하여 노출함
 - **명명 규칙 정합성**: `*.contract.ts`는 메시지/페이로드 계약, `*.tokens.ts`는 DI 토큰, `*.helper.ts`는 순수 변환/유틸, `*.constants.ts`는 정말 공통 리터럴 상수에만 사용함
+- **신뢰 체계 및 예외 처리 준수**: 타입 계약 및 데이터 보존 시 [최소 폴백 및 단일 신뢰 원천 가이드](file:///Users/server/Documents/GitHub/ai-base-app/.agents/skills/coding-change-guide/references/03_minimal_fallback_and_trust.md)의 Fail-Fast 및 Source of Trust 원칙을 엄격히 적용함
 
 ---
 
