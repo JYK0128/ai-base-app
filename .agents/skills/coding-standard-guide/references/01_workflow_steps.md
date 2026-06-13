@@ -62,7 +62,7 @@
   - Database Entity, Schema, Metadata
   - Service Helper, Command/Query Handler, Controller
   - Contract, Token, Message Pattern, Queue/Inject Key
-  - Gateway DTO, Validation Decorator, Swagger Response
+  - platform-service DTO, Validation Decorator, Swagger Response
   - Web Generated API Model, Zod Schema, UI 컴포넌트
   - Test Code, Fixtures, Seed, Mock 데이터
   - Build Output, Generated Artifacts
@@ -92,13 +92,11 @@
   pnpm --filter=@pkg/database lint
   ```
 
-- **Core / Gateway / Web API 계약 변경 시**:
+- **platform-service / Web API 계약 변경 시**:
 
   ```bash
-  pnpm --filter=platform-core-service exec tsc -p tsconfig.app.json --noEmit
-  pnpm --filter=platform-core-service lint
-  pnpm --filter=platform-gateway exec tsc -p tsconfig.app.json --noEmit
-  pnpm --filter=platform-gateway lint
+  pnpm --filter=platform-service exec tsc -p tsconfig.app.json --noEmit
+  pnpm --filter=platform-service lint
   pnpm --filter=platform-admin-web exec tsc --noEmit
   pnpm --filter=platform-admin-web lint
   ```
