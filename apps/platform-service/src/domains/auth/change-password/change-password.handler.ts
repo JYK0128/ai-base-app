@@ -21,14 +21,9 @@ export class ChangePasswordHandler implements ICommandHandler<ChangePasswordCont
 
   @Transactional()
   async execute(command: ChangePasswordContract): Promise<ChangePasswordResponseDto> {
-    const accountId = this.cls.get<string>('accountId');
-    if (!accountId) {
-      throw new UnauthorizedException('인증 정보가 유효하지 않습니다.');
-    }
-
     const { currentPassword, newPassword } = command.data;
 
-    const account = await this.identifyAccount(accountId);
+    const account = await this.identifyAccount();
     await this.validatePolicies(account, currentPassword);
 
     this.processPasswordUpdate(account, newPassword);
@@ -36,7 +31,12 @@ export class ChangePasswordHandler implements ICommandHandler<ChangePasswordCont
     return new ChangePasswordResponseDto();
   }
 
-  private async identifyAccount(accountId: string): Promise<MemberAccount> {
+  private async identifyAccount(): Promise<MemberAccount> {
+    const accountId = this.cls.get<string>('accountId');
+    if (!accountId) {
+      throw new UnauthorizedException('인증 정보가 유효하지 않습니다.');
+    }
+
     return await this.Asserter.assert(
       this.memberAccountRepository.findOne(accountId),
       'ACCOUNT_NOT_FOUND',
