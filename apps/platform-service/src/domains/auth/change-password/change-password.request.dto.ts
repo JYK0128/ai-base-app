@@ -1,15 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsUUID, MinLength } from 'class-validator';
+import { MinLength } from 'class-validator';
 
 import { IsMatch } from '@/common/decorators/is-match.decorator';
 import { IsNotEmptyString } from '@/common/decorators/is-not-empty-string.decorator';
 import { IsNotMatch } from '@/common/decorators/is-not-match.decorator';
 
 export class ChangePasswordRequestDto {
-  @ApiProperty({ example: '019e5236-adae-70d7-a8f7-2dc90bdf7081', description: '계정 식별자' })
-  @IsUUID()
-  accountId!: string;
-
   @ApiProperty({ example: 'CurrentPassword123!', description: '현재 비밀번호' })
   @IsNotEmptyString({ message: '현재 비밀번호는 필수 입력 항목입니다.' })
   currentPassword!: string;

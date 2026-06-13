@@ -12,7 +12,6 @@ import { ENV } from '@/env';
 import { ChangePasswordContract } from './change-password/change-password.contract';
 import type { ChangePasswordRequestDto } from './change-password/change-password.request.dto';
 import { DeferPasswordChangeContract } from './defer-password-change/defer-password-change.contract';
-import type { DeferPasswordChangeRequestDto } from './defer-password-change/defer-password-change.request.dto';
 import { LoginContract } from './login/login.contract';
 import type { LoginRequestDto } from './login/login.request.dto';
 import type { LoginResponseDto } from './login/login.response.dto';
@@ -79,12 +78,12 @@ export class AuthController {
   @Bypass(BYPASS_POLICIES.PASSWORD)
   @Post('password/change')
   async changePassword(
-    @Body() body: Omit<ChangePasswordRequestDto, 'accountId'>,
+    @Body() body: ChangePasswordRequestDto,
   ): Promise<void> {
     await this.commandBus.execute(new ChangePasswordContract({
       accountId: this.cls.get('accountId'),
       ...body,
-    } satisfies ChangePasswordRequestDto));
+    }));
   }
 
   @Bypass(BYPASS_POLICIES.PASSWORD)
@@ -92,6 +91,6 @@ export class AuthController {
   async deferPasswordChange(): Promise<void> {
     await this.commandBus.execute(new DeferPasswordChangeContract({
       accountId: this.cls.get('accountId'),
-    } satisfies DeferPasswordChangeRequestDto));
+    }));
   }
 }
