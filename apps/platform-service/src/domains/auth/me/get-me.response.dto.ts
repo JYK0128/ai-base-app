@@ -1,6 +1,62 @@
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import type { MemberAccount } from '@pkg/database';
+import { AccountStatus, MemberStatus, OrganizationStatus } from '@pkg/database';
 
 import { withPayloadResponseDto } from '@/common/interfaces';
+
+export class AuthAccountInfoDto {
+  @ApiProperty({ example: '019e5236-adae-70d7-a8f7-2dc90bdf7081', description: '계정 식별자' })
+  id!: string;
+
+  @ApiProperty({ example: 'dev@example.com', description: '이메일 주소' })
+  email!: string;
+
+  @ApiProperty({ enum: AccountStatus, example: 'ACTIVE', description: '계정 상태' })
+  status!: AccountStatus;
+
+  @ApiPropertyOptional({ example: '2026-06-06T14:00:00.000Z', description: '마지막 로그인 일시' })
+  lastLoginAt?: string | null;
+
+  @ApiProperty({ example: '2026-09-06T14:00:00.000Z', description: '비밀번호 만료 일시' })
+  passwordExpiresAt!: string;
+
+  @ApiPropertyOptional({ example: '2026-06-06T15:00:00.000Z', description: '잠금 해제 일시' })
+  lockUntil?: string | null;
+
+  @ApiProperty({ example: false, description: '휴면 여부' })
+  isDormant!: boolean;
+
+  @ApiProperty({ example: false, description: '비밀번호 만료 여부' })
+  isPasswordExpired!: boolean;
+}
+
+export class AuthMemberInfoDto {
+  @ApiProperty({ example: '019e5236-adae-70d7-a8f7-2dc90bdf7082', description: '멤버 식별자' })
+  id!: string;
+
+  @ApiProperty({ example: '김개발', description: '멤버 이름' })
+  name!: string;
+
+  @ApiProperty({ enum: MemberStatus, example: 'ACTIVE', description: '멤버 상태' })
+  status!: MemberStatus;
+}
+
+export class AuthOrganizationInfoDto {
+  @ApiProperty({ example: '019e5236-adae-70d7-a8f7-2dc90bdf7083', description: '조직 식별자' })
+  id!: string;
+
+  @ApiProperty({ example: 'ORG001', description: '조직 코드' })
+  code!: string;
+
+  @ApiProperty({ example: '개발 조직', description: '조직 이름' })
+  name!: string;
+
+  @ApiProperty({ example: 'org@example.com', description: '조직 이메일' })
+  email!: string;
+
+  @ApiProperty({ enum: OrganizationStatus, example: 'ACTIVE', description: '조직 상태' })
+  status!: OrganizationStatus;
+}
 
 export class GetMeResponseDto extends withPayloadResponseDto() {
   constructor({ account, permissions }: { account: MemberAccount, permissions: string[] }) {
@@ -12,7 +68,7 @@ export class GetMeResponseDto extends withPayloadResponseDto() {
     this.account = {
       id: account.id,
       email: account.email,
-      status: account.status,
+      status: account.status as AccountStatus,
       lastLoginAt: account.lastLoginAt ? account.lastLoginAt.toISOString() : null,
       passwordExpiresAt: account.passwordExpiresAt.toISOString(),
       lockUntil: account.lockUntil ? account.lockUntil.toISOString() : null,
@@ -23,7 +79,7 @@ export class GetMeResponseDto extends withPayloadResponseDto() {
     this.member = {
       id: member.id,
       name: member.name,
-      status: member.status,
+      status: member.status as MemberStatus,
     };
 
     this.organization = organization
@@ -32,7 +88,7 @@ export class GetMeResponseDto extends withPayloadResponseDto() {
         code: organization.code,
         name: organization.name,
         email: organization.email,
-        status: organization.status,
+        status: organization.status as OrganizationStatus,
       }
       : null;
 
@@ -40,32 +96,18 @@ export class GetMeResponseDto extends withPayloadResponseDto() {
     this.mustChangePassword = account.isPasswordExpired;
   }
 
-  account: {
-    id: string
-    email: string
-    status: MemberAccount['status']
-    lastLoginAt: string | null
-    passwordExpiresAt: string
-    lockUntil: string | null
-    isDormant: boolean
-    isPasswordExpired: boolean
-  };
+  @ApiProperty({ type: AuthAccountInfoDto, description: '계정 정보' })
+  account!: AuthAccountInfoDto;
 
-  member: {
-    id: string
-    name: string
-    status: MemberAccount['member']['status']
-  };
+  @ApiProperty({ type: AuthMemberInfoDto, description: '멤버 정보' })
+  member!: AuthMemberInfoDto;
 
-  organization: {
-    id: string
-    code: string
-    name: string
-    email: string
-    status: NonNullable<MemberAccount['member']['organization']>['status']
-  } | null;
+  @ApiProperty({ type: AuthOrganizationInfoDto, nullable: true, description: '조직 정보' })
+  organization!: AuthOrganizationInfoDto | null;
 
-  permissions: string[];
+  @ApiProperty({ isArray: true, type: String, description: '권한 목록' })
+  permissions!: string[];
 
-  mustChangePassword: boolean;
+  @ApiProperty({ description: '비밀번호 변경 필요 여부' })
+  mustChangePassword!: boolean;
 }

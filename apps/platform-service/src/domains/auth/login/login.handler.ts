@@ -40,7 +40,7 @@ export class LoginHandler implements ICommandHandler<LoginContract> {
     await this.validatePolicies(account);
     await this.verifyCredentials(account, password);
 
-    return this.processLoginSuccess(account, clientIp);
+    return this.processLoginSuccess(account, clientIp ?? '0.0.0.0');
   }
 
   private async identifyAccount(email: string) {
