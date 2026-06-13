@@ -25,10 +25,10 @@
 
 - **리소스 파일 명명**:
   - `[서비스명]-[리소스종류].yaml` 포맷을 강제함
-  - **올바른 예**: `mimir-cm.yaml`, `platform-gateway-svc.yaml`, `postgres-backup-pvc.yaml`
+  - **올바른 예**: `mimir-cm.yaml`, `platform-service-svc.yaml`, `postgres-backup-pvc.yaml`
 - **NetworkPolicy 파일 명명**:
   - `[방향]-[출발지]-[전치사]-[목적지].yaml` 포맷을 강제함
-  - **올바른 예**: `egress-platform-gateway-to-infra.yaml`, `ingress-redis-from-platform-services.yaml`
+  - **올바른 예**: `egress-platform-service-to-infra.yaml`, `ingress-redis-from-platform-services.yaml`
 - **리소스 이름의 환경명 배제**:
   - 리소스 이름 자체는 환경 접두사/접미사(`dev-`, `-prod` 등) 없이 순수 리소스 명칭으로 정의함
   - 개발(dev)과 운영(prod)의 물리적 환경 분리는 네임스페이스(Namespace) 지정을 통해 관리함
