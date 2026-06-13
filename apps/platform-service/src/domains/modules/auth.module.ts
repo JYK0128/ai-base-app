@@ -20,7 +20,6 @@ import { RefreshTokenHandler } from '../auth/refresh-token/refresh-token.handler
     CqrsModule,
     MikroOrmModule.forFeature([MemberAccount]),
     CacheModule.register({
-      ttl: 60000,
       stores: [
         createKeyv(ENV.REDIS_URL, {
           namespace: 'auth',

@@ -36,12 +36,17 @@ export class HealthController {
   @HealthCheck()
   ready() {
     return this.health.check([
-      () => this.db.pingCheck('database', { timeout: 1500 }),
+      // db
+      () => {
+        return this.db.pingCheck('database', { timeout: 1500 });
+      },
+      // redis
       async () => {
         const client = await redisStore.getClient();
         await client.ping();
         return { redis: { status: 'up' } };
       },
+      // rabbitMQ
       () => this.microservice.pingCheck('rabbitmq', {
         transport: Transport.RMQ,
         options: {
@@ -52,10 +57,12 @@ export class HealthController {
           },
         },
       }),
+      // disk
       () => this.disk.checkStorage('disk', {
         path: '/',
         thresholdPercent: 0.9,
       }),
+      // memory
       () => this.memory.checkRSS('memory_rss',
         512 * 1024 * 1024,
       ),
