@@ -1,3 +1,4 @@
+import { Transactional } from '@mikro-orm/decorators/legacy';
 import { Logger } from '@nestjs/common';
 import { CommandHandler, type ICommandHandler } from '@nestjs/cqrs';
 
@@ -21,16 +22,31 @@ export class SendInviteEmailHandler implements ICommandHandler<SendInviteEmailCo
     private readonly mailService: MailService,
   ) {}
 
+  @Transactional()
   async execute(command: SendInviteEmailCommand): Promise<void> {
-    const { email, organizationName, inviterName, token } = command.payload;
+    const payload = await this.identifyPayload(command);
+    await this.validatePolicies(payload);
+    await this.processEmailSending(payload);
+  }
+
+  private async identifyPayload(command: SendInviteEmailCommand): Promise<SendInviteEmailCommand['payload']> {
+    return command.payload;
+  }
+
+  private async validatePolicies(_payload: SendInviteEmailCommand['payload']): Promise<void> {
+    // 발송 정책 유효성 검사 영역
+  }
+
+  private async processEmailSending(payload: SendInviteEmailCommand['payload']): Promise<void> {
+    const { email, organizationName, inviterName, token, inviteId, attemptId } = payload;
 
     await this.Asserter.assert(
       this.mailService.sendInviteEmail(email, organizationName, inviterName, token),
       'MAIL_SEND_FAILED',
       {
         context: {
-          inviteId: command.payload.inviteId,
-          attemptId: command.payload.attemptId,
+          inviteId,
+          attemptId,
           email,
         },
       },

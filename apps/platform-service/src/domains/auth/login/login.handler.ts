@@ -37,8 +37,7 @@ export class LoginHandler implements ICommandHandler<LoginContract> {
   async execute(command: LoginContract): Promise<LoginResponseDto> {
     const { email, password, clientIp } = command.data;
     const account = await this.identifyAccount(email);
-    await this.validatePolicies(account);
-    await this.verifyCredentials(account, password);
+    await this.validatePolicies(account, password);
 
     return this.processLoginSuccess(account, clientIp ?? '0.0.0.0');
   }
@@ -69,7 +68,7 @@ export class LoginHandler implements ICommandHandler<LoginContract> {
     return account;
   }
 
-  private async validatePolicies(account: MemberAccount) {
+  private async validatePolicies(account: MemberAccount, password: string) {
     await this.Asserter.throwIf(!account.isActive, 'INACTIVE_ACCOUNT');
     await this.Asserter.throwIf(!account.member.isActive, 'INACTIVE_MEMBER');
 
@@ -79,9 +78,7 @@ export class LoginHandler implements ICommandHandler<LoginContract> {
     }
 
     await this.Asserter.throwIf(account.isDormant, 'DORMANT_ACCOUNT');
-  }
 
-  private async verifyCredentials(account: MemberAccount, password: string) {
     const isPasswordValid = account.verifyPassword(password);
     await this.Asserter.assert(isPasswordValid, 'INVALID_CREDENTIALS', {
       context: { email: account.email },

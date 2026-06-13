@@ -24,6 +24,9 @@ export class CreateInviteHandler implements ICommandHandler<CreateInviteContract
     const organization = await this.identifyOrganization();
     const inviter = await this.identifyInviter();
     const role = await this.identifyRole(data.roleId);
+
+    await this.validatePolicies(organization, data.email);
+
     const invite = await this.processCreation(organization, role, data.name, data.email, data.note);
 
     this.inviteEmailPublisher.publishInviteEmail({
@@ -36,6 +39,10 @@ export class CreateInviteHandler implements ICommandHandler<CreateInviteContract
     });
 
     return new CreateInviteResponseDto(invite.id);
+  }
+
+  private async validatePolicies(_organization: Organization, _email: string): Promise<void> {
+    // 중복 초대 여부, 조직 정원 초과 등 도메인 검증 영역
   }
 
   private async identifyOrganization(): Promise<Organization> {

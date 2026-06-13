@@ -1,3 +1,4 @@
+import { Transactional } from '@mikro-orm/decorators/legacy';
 import { CommandHandler, type ICommandHandler } from '@nestjs/cqrs';
 import { CoreRepository, MemberAccount } from '@pkg/database';
 import { JwtUtil } from '@pkg/shared';
@@ -19,14 +20,11 @@ export class RefreshTokenHandler implements ICommandHandler<RefreshTokenContract
     private readonly memberAccountRepository: CoreRepository<MemberAccount>,
   ) {}
 
+  @Transactional()
   async execute(command: RefreshTokenContract): Promise<RefreshTokenResponseDto> {
     const { refreshToken } = command.data;
 
-    const payload = await this.verifyToken(refreshToken);
-    const accountId = payload.sub;
-    await this.verifySession(accountId, refreshToken);
-
-    const account = await this.identifyAccount(accountId);
+    const account = await this.identifyAccount(refreshToken);
     await this.validatePolicies(account);
 
     return this.processTokenRotation(account);
@@ -46,7 +44,11 @@ export class RefreshTokenHandler implements ICommandHandler<RefreshTokenContract
     await this.Asserter.throwIf(!storedToken || storedToken !== token, 'SESSION_EXPIRED');
   }
 
-  private async identifyAccount(accountId: string): Promise<MemberAccount> {
+  private async identifyAccount(refreshToken: string): Promise<MemberAccount> {
+    const payload = await this.verifyToken(refreshToken);
+    const accountId = payload.sub;
+    await this.verifySession(accountId, refreshToken);
+
     const account = await this.Asserter.assert(
       this.memberAccountRepository.findOne(
         { id: accountId },

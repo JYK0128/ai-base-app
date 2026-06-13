@@ -1,3 +1,4 @@
+import { Transactional } from '@mikro-orm/decorators/legacy';
 import { InjectRepository } from '@mikro-orm/nestjs';
 import { CommandHandler, type ICommandHandler } from '@nestjs/cqrs';
 import { CoreRepository, Organization, OrganizationStatus } from '@pkg/database';
@@ -15,8 +16,10 @@ export class ApproveOrganizationHandler implements ICommandHandler<ApproveOrgani
     private readonly organizationRepository: CoreRepository<Organization>,
   ) {}
 
+  @Transactional()
   async execute(command: ApproveOrganizationContract): Promise<ApproveOrganizationResponseDto> {
     const organization = await this.identifyOrganization(command.data.id);
+    await this.validatePolicies(organization);
     this.processApproval(organization, command.data.approve);
     return new ApproveOrganizationResponseDto(organization.id);
   }
@@ -26,6 +29,10 @@ export class ApproveOrganizationHandler implements ICommandHandler<ApproveOrgani
       this.organizationRepository.findOne(organizationId),
       'ORGANIZATION_NOT_FOUND',
     );
+  }
+
+  private async validatePolicies(_organization: Organization): Promise<void> {
+    // 정책 유효성 검증 영역
   }
 
   private processApproval(organization: Organization, approve: boolean) {
