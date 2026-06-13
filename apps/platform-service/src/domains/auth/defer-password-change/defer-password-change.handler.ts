@@ -1,4 +1,5 @@
 import { Transactional } from '@mikro-orm/decorators/legacy';
+import { InjectRepository } from '@mikro-orm/nestjs';
 import { UnauthorizedException } from '@nestjs/common';
 import { CommandHandler, type ICommandHandler } from '@nestjs/cqrs';
 import { CoreRepository, MemberAccount } from '@pkg/database';
@@ -16,6 +17,7 @@ export class DeferPasswordChangeHandler implements ICommandHandler<DeferPassword
 
   constructor(
     private readonly cls: ClsService,
+    @InjectRepository(MemberAccount)
     private readonly memberAccountRepository: CoreRepository<MemberAccount>,
   ) {}
 

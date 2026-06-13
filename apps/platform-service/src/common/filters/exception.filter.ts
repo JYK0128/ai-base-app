@@ -11,7 +11,7 @@ export class ExceptionFilter implements NestExceptionFilter {
   ) {}
 
   catch(exception: unknown, host: ArgumentsHost) {
-    const { traceId, requestId } = this.cls.get() as { traceId: string, requestId: string };
+    const { traceId, requestId } = this.cls.get() || {};
 
     const ctx = host.switchToHttp();
     const originResponse = ctx.getResponse<Response>();

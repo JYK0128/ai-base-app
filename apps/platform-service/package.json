@@ -15,6 +15,7 @@
   },
   "dependencies": {
     "@keyv/redis": "5.1.6",
+    "@mikro-orm/core": "7.1.4",
     "@mikro-orm/decorators": "7.1.4",
     "@mikro-orm/nestjs": "7.0.2",
     "@mikro-orm/postgresql": "7.1.4",

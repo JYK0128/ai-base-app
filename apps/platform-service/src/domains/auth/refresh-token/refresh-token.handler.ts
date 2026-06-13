@@ -1,4 +1,5 @@
 import { Transactional } from '@mikro-orm/decorators/legacy';
+import { InjectRepository } from '@mikro-orm/nestjs';
 import { CommandHandler, type ICommandHandler } from '@nestjs/cqrs';
 import { CoreRepository, MemberAccount } from '@pkg/database';
 import { JwtUtil } from '@pkg/shared';
@@ -16,8 +17,9 @@ export class RefreshTokenHandler implements ICommandHandler<RefreshTokenContract
   private readonly Asserter = RefreshTokenAsserter;
 
   constructor(
-    private readonly authService: AuthCacheService,
+    @InjectRepository(MemberAccount)
     private readonly memberAccountRepository: CoreRepository<MemberAccount>,
+    private readonly authCacheService: AuthCacheService,
   ) {}
 
   @Transactional()
@@ -40,7 +42,7 @@ export class RefreshTokenHandler implements ICommandHandler<RefreshTokenContract
   }
 
   private async verifySession(accountId: string, token: string) {
-    const storedToken = await this.authService.get<string>(`refresh:${accountId}`);
+    const storedToken = await this.authCacheService.get<string>(`refresh:${accountId}`);
     await this.Asserter.throwIf(!storedToken || storedToken !== token, 'SESSION_EXPIRED');
   }
 
@@ -99,7 +101,7 @@ export class RefreshTokenHandler implements ICommandHandler<RefreshTokenContract
       },
     );
 
-    await this.authService.set(
+    await this.authCacheService.set(
       `refresh:${account.id}`,
       tokens.refreshToken,
       ENV.JWT_REFRESH_EXPIRES_IN,

@@ -48,7 +48,7 @@ export class HealthController {
           urls: [ENV.RABBITMQ_URL],
           queue: 'health_check',
           queueOptions: {
-            durable: false,
+            durable: true,
           },
         },
       }),

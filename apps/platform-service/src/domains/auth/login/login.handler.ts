@@ -1,4 +1,5 @@
 import { Transactional } from '@mikro-orm/decorators/legacy';
+import { InjectRepository } from '@mikro-orm/nestjs';
 import { CommandHandler, type ICommandHandler } from '@nestjs/cqrs';
 import { CoreRepository, MemberAccount } from '@pkg/database';
 import { JwtUtil } from '@pkg/shared';
@@ -29,8 +30,9 @@ export class LoginHandler implements ICommandHandler<LoginContract> {
   });
 
   constructor(
+    @InjectRepository(MemberAccount)
     private readonly memberAccountRepository: CoreRepository<MemberAccount>,
-    private readonly authService: AuthCacheService,
+    private readonly authCacheService: AuthCacheService,
   ) {}
 
   @Transactional()
@@ -43,7 +45,7 @@ export class LoginHandler implements ICommandHandler<LoginContract> {
   }
 
   private async identifyAccount(email: string) {
-    const lockUntil = await this.authService.get<number>(this.loginKeys.build('lock', email));
+    const lockUntil = await this.authCacheService.get<number>(this.loginKeys.build('lock', email));
     const retryAfterSeconds = lockUntil
       ? Math.max(1, Math.ceil((lockUntil - Date.now()) / 1000))
       : -2;
@@ -88,8 +90,8 @@ export class LoginHandler implements ICommandHandler<LoginContract> {
 
   private async processLoginSuccess(account: MemberAccount, clientIp: string) {
     await Promise.all([
-      this.authService.del(this.loginKeys.build('attempt', account.email)),
-      this.authService.del(this.loginKeys.build('lock', account.email)),
+      this.authCacheService.del(this.loginKeys.build('attempt', account.email)),
+      this.authCacheService.del(this.loginKeys.build('lock', account.email)),
     ]);
 
     account.lastLoginAt = new Date();
@@ -124,7 +126,7 @@ export class LoginHandler implements ICommandHandler<LoginContract> {
       },
     );
 
-    await this.authService.set(
+    await this.authCacheService.set(
       `refresh:${account.id}`,
       tokens.refreshToken,
       ENV.JWT_REFRESH_EXPIRES_IN,
@@ -135,15 +137,15 @@ export class LoginHandler implements ICommandHandler<LoginContract> {
 
   private async handleLoginFailure(context: Pick<LoginRequestDto, 'email'>, metadata: LoginMetadata = {}) {
     const attemptKey = this.loginKeys.build('attempt', context.email);
-    const attempts = await this.authService.incr(attemptKey, ENV.LOGIN_ATTEMPT_TTL);
+    const attempts = await this.authCacheService.incr(attemptKey, ENV.LOGIN_ATTEMPT_TTL);
 
     metadata.attempts = attempts;
     metadata.maxAttempts = ENV.LOGIN_MAX_ATTEMPTS;
 
     if (attempts >= ENV.LOGIN_MAX_ATTEMPTS) {
       const lockUntil = Date.now() + (ENV.LOGIN_LOCK_TTL * 1000);
-      await this.authService.set(this.loginKeys.build('lock', context.email), lockUntil, ENV.LOGIN_LOCK_TTL);
-      await this.authService.del(attemptKey);
+      await this.authCacheService.set(this.loginKeys.build('lock', context.email), lockUntil, ENV.LOGIN_LOCK_TTL);
+      await this.authCacheService.del(attemptKey);
 
       metadata.retryAfterSeconds = ENV.LOGIN_LOCK_TTL;
     }

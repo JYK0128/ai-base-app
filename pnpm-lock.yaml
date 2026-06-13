@@ -20,6 +20,9 @@ importers:
       '@keyv/redis':
         specifier: 5.1.6
         version: 5.1.6(keyv@5.6.0)
+      '@mikro-orm/core':
+        specifier: 7.1.4
+        version: 7.1.4
       '@mikro-orm/decorators':
         specifier: 7.1.4
         version: 7.1.4(@mikro-orm/core@7.1.4)(reflect-metadata@0.2.2)
@@ -1209,7 +1212,6 @@ packages:
   '@esbuild/linux-x64@0.28.0':
     resolution: {integrity: sha512-us0dSb9iFxIi8srnpl931Nvs65it/Jd2a2K3qs7fz2WfGPHqzfzZTfec7oxZJRNPXPnNYZtanmRc4AL/JwVzHQ==}
     engines: {node: '>=18'}
-    cpu: [x64]
     os: [linux]
 
   '@esbuild/netbsd-arm64@0.27.7':

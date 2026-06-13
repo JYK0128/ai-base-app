@@ -25,6 +25,10 @@ export class ContextMiddleware implements NestMiddleware {
   ) {}
 
   use(req: AppRequest, res: Response, next: NextFunction) {
+    if (!this.cls.isActive()) {
+      next();
+      return;
+    }
     this.setTraceContext(req, res);
     this.setClientContext(req);
     this.setUserContext(req);
