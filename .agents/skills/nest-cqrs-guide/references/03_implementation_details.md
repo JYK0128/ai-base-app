@@ -78,6 +78,10 @@ Command 핸들러는 데이터를 변경하는 역할로 데이터 일관성을 
 
 * `@CommandHandler(Contract)` 데코레이터를 클래스에 적용하고 `ICommandHandler<Contract>` 인터페이스를 구현함.
 * `execute` 메서드 상단에 `@Transactional()` 데코레이터(가져올 곳: `@mikro-orm/decorators/legacy`)를 작성하여 트랜잭션 경계를 설정함.
+* `execute` 메서드 내부의 로직 흐름은 반드시 **선형적인 3단계 흐름(3-Phase Flow)**에 따라 구현하여 핵심 비즈니스 로직을 가시화함:
+  1. **Identification (식별)**: `ClsService` 컨텍스트 정보 및 리포지토리를 통해 주 엔티티를 조회함 (가드성 널 체크 및 미존재 예외 처리는 이 단계 내부 메서드에 캡슐화).
+  2. **Verification (검증)**: 식별된 엔티티를 활용하여 비즈니스 규칙 및 도메인 정책을 검증함 (예: `validatePolicies()`).
+  3. **Process (처리)**: 검증 완료 후 엔티티 상태를 변경하거나 도메인 비즈니스 액션을 실행함 (예: `processUpdate()`).
 * `ClsService`를 통해 요청 스레드 컨텍스트(예: `organizationId`, `memberId`)를 안전하게 획득함.
 * `this.Asserter.assert` 메서드를 사용하여 데이터베이스 조회 및 비즈니스 검증을 즉시 수행함(Fail-Fast).
 * 비즈니스 핵심 로직은 가독성 증대를 위해 private 메서드로 분할하여 선형적으로 구성함.
