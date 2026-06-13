@@ -33,4 +33,4 @@ description: MikroORM 엔티티 작성 및 수정 가이드. CoreEntity 상속, 
 4. **산출물 및 타입 빌드**:
    - `packages/database` 디렉토리에서 `@pkg/database build`를 실행하여 `metadata.json` 및 `dist/index.d.ts`를 최신으로 갱신함
 5. **검증**:
-   - `coding-change-workflow` 스킬을 활용하여 영향 범위 내 의존성 타입체크 및 린트 오류를 해결함
+   - `coding-standard-guide` 스킬을 활용하여 영향 범위 내 의존성 타입체크 및 린트 오류를 해결함

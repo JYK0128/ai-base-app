@@ -6,7 +6,7 @@ description: 모노레포 내 신규 프로젝트/패키지 스캐폴딩 시 "ba
 # 모노레포 스캐폴딩 가이드 (Monorepo Scaffolding Guide)
 
 - 모노레포의 표준화된 개발 환경 구축 및 유지를 위해 `base-package` 템플릿 사용을 강제함
-- 실제 파일 생성/수정, 영향 범위 확인, 타입체크/린트/빌드 검증 시 `coding-change-workflow` 스킬을 함께 적용함
+- 실제 파일 생성/수정, 영향 범위 확인, 타입체크/린트/빌드 검증 시 `coding-standard-guide` 스킬을 함께 적용함
 
 ---
 

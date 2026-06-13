@@ -6,7 +6,7 @@ description: React/Tailwind CSS 기반 반응형 블록 UI 구축 스킬. 레이
 # Atomic Layout Guide
 
 - React 및 Tailwind CSS 기반의 유지보수가 용이하고 시각적으로 일관된 UI 구축을 위한 레이아웃/포지셔닝 규칙 정의
-- 실제 코드 수정, 영향 범위 확인, 타입체크/린트/빌드 검증 시 `coding-change-workflow` 스킬을 함께 적용함
+- 실제 코드 수정, 영향 범위 확인, 타입체크/린트/빌드 검증 시 `coding-standard-guide` 스킬을 함께 적용함
 
 ---
 
@@ -33,4 +33,4 @@ description: React/Tailwind CSS 기반 반응형 블록 UI 구축 스킬. 레이
 3. **코드 구현**:
    - `references/01_layout_guidelines.md`, `references/02_positioning_and_precautions.md`, `references/03_scroll_utility_guidelines.md`에서 세부 마크업 형태를 확인하여 구현함
 4. **검증**:
-   - `coding-change-workflow`를 적용하여 린트 및 빌드 검증을 완료함
+   - `coding-standard-guide`를 적용하여 린트 및 빌드 검증을 완료함

@@ -6,7 +6,7 @@ description: 쿠버네티스(K8s) 인프라 자원 명세 작성 및 수정 스�
 # 쿠버네티스 인프라 가이드 (Kubernetes Infrastructure Guide)
 
 - 프로젝트의 모든 쿠버네티스 인프라 자원 및 배포 명세의 일관된 관리를 보장함
-- 실제 파일 생성/수정, 영향 범위 확인, 타입체크/린트/빌드 검증 시 `coding-change-workflow` 스킬을 함께 적용함
+- 실제 파일 생성/수정, 영향 범위 확인, 타입체크/린트/빌드 검증 시 `coding-standard-guide` 스킬을 함께 적용함
 
 ---
 
