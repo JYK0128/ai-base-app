@@ -73,17 +73,6 @@ import { ENV } from '@/env';
           },
         },
       },
-      {
-        name: 'KAFKA_CLIENT',
-        transport: Transport.KAFKA,
-        options: {
-          client: {
-            brokers: [ENV.KAFKA_URL],
-            clientId: 'platform-service',
-          },
-          producerOnlyMode: true,
-        },
-      },
     ]),
     ...Object.values(modules),
   ],

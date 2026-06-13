@@ -3,6 +3,13 @@ import { getDefaultStore } from 'jotai';
 
 import { accessTokenAtom } from '../stores/auth.store';
 
+const readEnvValue = (key: keyof ImportMetaEnv): string => {
+  const value = (import.meta.env as Record<string, string | undefined>)[key];
+  return typeof value === 'string' ? value.trim() : '';
+};
+
+const API_BASE_URL = readEnvValue('VITE_URL');
+
 // 🌟 백엔드 공통 응답 구조 (내부 타입용)
 interface ApiResponse<T> {
   success: boolean
@@ -23,7 +30,7 @@ const ensureError = (error: unknown): Error => {
  * 실제 요청과 인터셉터 처리를 담당합니다.
  */
 export const axios = axiosClient.create({
-  baseURL: import.meta.env.VITE_URL as string | undefined,
+  baseURL: API_BASE_URL || undefined,
   withCredentials: true,
 });
 
@@ -59,7 +66,7 @@ axios.interceptors.response.use(
 
       try {
         const res = await axiosClient.post<ApiResponse<{ accessToken: string }>>(
-          `${import.meta.env.VITE_URL}/api/v1/auth/refresh`,
+          `${API_BASE_URL}/api/v1/auth/refresh`,
           {},
           { withCredentials: true },
         );

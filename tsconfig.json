@@ -4,9 +4,7 @@
     { "path": "packages/config" },
     { "path": "packages/database" },
     { "path": "packages/shared" },
-    { "path": "apps/platform-auth-service" },
-    { "path": "apps/platform-core-service" },
-    { "path": "apps/platform-gateway" },
+    { "path": "apps/platform-service" },
     { "path": "web/platform-admin-web" }
   ]
 }

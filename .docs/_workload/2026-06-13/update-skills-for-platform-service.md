@@ -1,6 +1,7 @@
 # Update Skills for Platform Service - 2026-06-13
 
 ## 📋 작업 체크리스트
+
 - [x] coding-standard-guide/references/01_workflow_steps.md 정정
   - 시작: 2026-06-13 09:31
   - 완료: `80f18c1`

@@ -52,15 +52,6 @@ export class HealthController {
           },
         },
       }),
-      () => this.microservice.pingCheck('kafka', {
-        transport: Transport.KAFKA,
-        options: {
-          client: {
-            brokers: [ENV.KAFKA_URL],
-            clientId: 'health-check',
-          },
-        },
-      }),
       () => this.disk.checkStorage('disk', {
         path: '/',
         thresholdPercent: 0.9,

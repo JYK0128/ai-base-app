@@ -9,4 +9,3 @@ resources:
   - egress-monitoring-to-self.yaml
   - egress-services-to-infra.yaml
   - egress-services-to-external-smtp.yaml
-  - egress-gateway-to-services.yaml

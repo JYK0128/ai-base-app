@@ -80,9 +80,9 @@ kubectl apply -k .k8s/overlays/prod
 
 1. **Naming Convention**:
     - **리소스 파일**: `[서비스명]-[리소스종류].yaml`
-      - 예: `mimir-cm.yaml`, `platform-gateway-svc.yaml`, `postgres-backup-pvc.yaml`
+      - 예: `mimir-cm.yaml`, `platform-service-svc.yaml`, `postgres-backup-pvc.yaml`
     - **NetworkPolicy 파일**: `[direction]-[source]-[preposition]-[target].yaml`
-      - 예: `egress-platform-gateway-to-infra.yaml`, `ingress-redis-from-platform-services.yaml`
+      - 예: `ingress-platform-service-from-istio-ingress.yaml`, `ingress-redis-from-platform-services.yaml`
     - 리소스 이름에 환경명(`dev-`, `prod-`)을 포함하지 않습니다. 환경 분리는 namespace로 처리합니다.
 2. **Hybrid Management**:
     - **Helm**: 제어 계층(Operators, Istio) 설치에 사용.

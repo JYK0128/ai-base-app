@@ -7,7 +7,7 @@ WORKDIR /app
 # 2. Pruner
 FROM base AS pruner
 COPY . .
-RUN npx -y turbo@latest prune platform-gateway --docker
+RUN npx -y turbo@latest prune platform-service --docker
 
 # 3. Deps
 FROM base AS deps
@@ -21,14 +21,14 @@ FROM deps AS development
 COPY --from=pruner /app/out/full/ .
 RUN pnpm --filter="@pkg/*" build
 ENV NODE_ENV=development
-CMD ["pnpm", "--filter", "platform-gateway", "run", "dev"]
+CMD ["pnpm", "--filter", "platform-service", "run", "dev"]
 
 # 5. Builder
 FROM deps AS builder
 COPY --from=pruner /app/out/full/ .
 RUN --mount=type=cache,id=turbo,target=/app/.turbo/cache \
-    npx turbo build --filter=platform-gateway
-RUN pnpm --filter platform-gateway --prod deploy /app/deploy --ignore-scripts
+    npx turbo build --filter=platform-service
+RUN pnpm --filter platform-service --prod deploy /app/deploy --ignore-scripts
 
 # 5. Runner
 FROM base AS runner

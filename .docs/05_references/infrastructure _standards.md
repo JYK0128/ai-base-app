@@ -6,9 +6,9 @@
 
 - **목적**: 인프라 자원 역할별 최상위 카테고리 분류 및 기술 단위 하위 구성
 - **구조**:
-  - `namespaces/`: 네임스페이스 선언 (`dev-api`, `dev-web`, `dev-infra`, `monitoring`)
+  - `namespaces/`: 네임스페이스 선언 (`dev-service`, `dev-web`, `dev-infra`, `monitoring`)
   - `network-policies/`: 기본 차단 및 서비스 간 허용 정책
-  - `apps/`: 비즈니스 애플리케이션 명세 (예: `platform-auth-service`, `service-gateway`)
+  - `apps/`: 비즈니스 애플리케이션 명세 (예: `platform-service`, `platform-admin-web`)
   - `database/`: 상태 저장소 기술 명세 (예: postgres, redis, mongodb)
   - `messaging/`: 메시지 브로커 및 큐 명세 (예: rabbitmq, kafka)
   - `networking/`: 네트워크 및 서비스 메쉬 설정 명세 (예: istio, ingress, dns)
@@ -30,7 +30,7 @@
   - `deployment.yaml`
   - `service.yaml`
   - `configmap.yaml`
-- **예시**: `.k8s/apps/platform-auth-service/deployment.yaml`
+- **예시**: `.k8s/apps/platform-service/platform-service-deploy.yaml`
 
 ### 2.3 네임스페이스 및 정책 (Namespaces & Policies)
 
@@ -53,4 +53,4 @@
   - 앱 코드 health endpoint와 `.k8s` probe 경로는 동일하게 유지함
 
 ---
-*최종 업데이트: 2026-04-13*
+*최종 업데이트: 2026-06-13*
