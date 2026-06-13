@@ -12,7 +12,7 @@
   - 완료: `5304d09`
 - [x] mikro-orm-entity-guide/evals/evals.json 정정
   - 시작: 2026-06-13 09:31
-  - 완료: `0f5f3fa`
-- [ ] nest-cqrs-guide/evals/evals.json 정정
+  - 완료: `99dfd40`
+- [x] nest-cqrs-guide/evals/evals.json 정정
   - 시작: 2026-06-13 09:31
-  - 완료: `[commit_hash]`
+  - 완료: `3946c1a`
