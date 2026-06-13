@@ -1,6 +1,8 @@
 import { Transactional } from '@mikro-orm/decorators/legacy';
+import { UnauthorizedException } from '@nestjs/common';
 import { CommandHandler, type ICommandHandler } from '@nestjs/cqrs';
 import { CoreRepository, MemberAccount } from '@pkg/database';
+import { ClsService } from 'nestjs-cls';
 
 import { ENV } from '@/env';
 
@@ -12,11 +14,17 @@ import { DeferPasswordChangeResponseDto } from './defer-password-change.response
 export class DeferPasswordChangeHandler implements ICommandHandler<DeferPasswordChangeContract> {
   private readonly Asserter = DeferPasswordChangeAsserter;
 
-  constructor(private readonly memberAccountRepository: CoreRepository<MemberAccount>) {}
+  constructor(
+    private readonly cls: ClsService,
+    private readonly memberAccountRepository: CoreRepository<MemberAccount>,
+  ) {}
 
   @Transactional()
-  async execute(command: DeferPasswordChangeContract): Promise<DeferPasswordChangeResponseDto> {
-    const { accountId } = command.data;
+  async execute(_command: DeferPasswordChangeContract): Promise<DeferPasswordChangeResponseDto> {
+    const accountId = this.cls.get<string>('accountId');
+    if (!accountId) {
+      throw new UnauthorizedException('인증 정보가 유효하지 않습니다.');
+    }
 
     const account = await this.identifyAccount(accountId);
     await this.validatePolicies(account);

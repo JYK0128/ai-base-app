@@ -80,17 +80,12 @@ export class AuthController {
   async changePassword(
     @Body() body: ChangePasswordRequestDto,
   ): Promise<void> {
-    await this.commandBus.execute(new ChangePasswordContract({
-      accountId: this.cls.get('accountId'),
-      ...body,
-    }));
+    await this.commandBus.execute(new ChangePasswordContract(body));
   }
 
   @Bypass(BYPASS_POLICIES.PASSWORD)
   @Post('password/defer')
   async deferPasswordChange(): Promise<void> {
-    await this.commandBus.execute(new DeferPasswordChangeContract({
-      accountId: this.cls.get('accountId'),
-    }));
+    await this.commandBus.execute(new DeferPasswordChangeContract());
   }
 }
