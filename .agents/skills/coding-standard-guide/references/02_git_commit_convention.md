@@ -42,9 +42,8 @@
 | :--- | :--- |
 | **database** | `@pkg/database` 엔티티 및 스키마 변경 |
 | **shared** | `@pkg/shared` 공유 유틸리티/타입 변경 |
-| **gateway** | `apps/platform-gateway` API 게이트웨이 및 DTO 변경 |
-| **core** | `apps/platform-core-service` 코어 서비스 비즈니스 로직 변경 |
-| **auth** | `apps/platform-auth-service` 인증 서비스 변경 |
+| **service** | `apps/platform-service` 플랫폼 서비스 비즈니스 로직 및 API 변경 |
+| **auth** | `apps/platform-service` 내 인증 도메인 관련 변경 |
 | **frontend** | 어드민 포탈 웹앱(`web/platform-admin-web`) 관련 변경 |
 | **agents** | `.agents/` AI 에이전트 스킬 및 가이드라인 파일 변경 |
 
