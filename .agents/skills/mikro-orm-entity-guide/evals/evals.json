@@ -19,7 +19,7 @@
       "expected_output": "엔티티 metadata의 publishedAt/startAt/endAt은 Date 타입이어야 하고, publishedAt과 startAt의 의미를 명확히 구분해야 하며, mapper에서 ISO string으로 변환되어야 함.",
       "files": [
         "packages/database/src/domains/platform/content/announcement.entity.ts",
-        "apps/platform-core-service/src/modules/announcement/announcement.mapper.ts"
+        "apps/platform-service/src/domains/announcement/announcement.mapper.ts"
       ]
     }
   ]
