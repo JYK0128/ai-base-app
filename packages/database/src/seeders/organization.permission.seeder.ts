@@ -179,7 +179,12 @@ export class OrganizationPermissionSeeder extends Seeder {
 
     const exists = await em.findOne(OrganizationPermission, { role, resource, action });
     if (!exists) {
-      em.persist(em.create(OrganizationPermission, { role, resource, action }));
+      em.persist(em.create(OrganizationPermission, {
+        role,
+        resource,
+        action,
+        code: `${resource.code}:${action}`,
+      }));
     }
   }
 }

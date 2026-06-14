@@ -1,4 +1,4 @@
-import { Button, Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, toast, useAppForm } from '@pkg/ui';
+import { Button, Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, Switch, toast, useAppForm } from '@pkg/ui';
 import { useStore } from '@tanstack/react-form';
 import { Loader2, Megaphone } from 'lucide-react';
 import { z } from 'zod';
@@ -25,10 +25,10 @@ const CATEGORY_ITEMS = (Object.entries(ANNOUNCEMENT_CATEGORY_LABELS) as Array<[A
   label,
 })) satisfies Array<{ value: AnnouncementCategory, label: string }>;
 
-const AUDIENCE_ITEMS = Object.entries(ANNOUNCEMENT_AUDIENCE_LABELS).map(([value, label]) => ({
-  value,
-  label,
-})) satisfies Array<{ value: string, label: string }>;
+const AUDIENCE_ITEMS = [
+  { value: 'ALL', label: ANNOUNCEMENT_AUDIENCE_LABELS.ALL },
+  { value: 'ORGANIZATION', label: ANNOUNCEMENT_AUDIENCE_LABELS.ORGANIZATION },
+] satisfies Array<{ value: string, label: string }>;
 
 const PRIORITY_ITEMS = Object.entries(ANNOUNCEMENT_PRIORITY_LABELS).map(([value, label]) => ({
   value,
@@ -40,7 +40,7 @@ const ANNOUNCEMENT_EDITOR_SCHEMA = z.object({
   category: z.enum(['NOTICE', 'MAINTENANCE', 'SECURITY', 'EVENT']),
   audience: z.enum(['ALL', 'PLATFORM', 'ORGANIZATION']),
   priority: z.enum(['LOW', 'NORMAL', 'HIGH']),
-  publishedAt: z.string().trim(),
+  isPublished: z.boolean(),
   startAt: z.string().trim().min(1, '시작일을 입력해주세요.'),
   endAt: z.string().trim().min(1, '종료일을 입력해주세요.'),
   content: z.string().trim().min(1, '본문을 입력해주세요.'),
@@ -92,7 +92,7 @@ export function AnnouncementEditorModal({
           <DialogDescription className="text-sm text-slate-500">
             {isAnnouncementEditing(announcement)
               ? '공지 내용을 수정한 뒤 저장합니다.'
-              : '새 공지의 제목, 대상, 게시 일정과 본문을 입력합니다.'}
+              : '새 공지의 제목, 대상, 게시 유무, 게시 일정과 본문을 입력합니다.'}
           </DialogDescription>
         </DialogHeader>
 
@@ -160,6 +160,24 @@ export function AnnouncementEditorModal({
                         )}
                       </form.AppField>
                     </div>
+
+                    <form.AppField name="isPublished">
+                      {(field) => (
+                        <div className="flex items-center justify-between rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-sm">
+                          <div className="space-y-1">
+                            <div className="text-sm font-medium text-slate-900">게시 유무</div>
+                            <div className="text-xs text-slate-500">
+                              토글을 켜면 저장 시 게시 상태로 반영됩니다.
+                            </div>
+                          </div>
+                          <Switch
+                            aria-label="게시 유무"
+                            checked={Boolean(field.state.value)}
+                            onCheckedChange={(checked) => field.handleChange(Boolean(checked))}
+                          />
+                        </div>
+                      )}
+                    </form.AppField>
                   </form.FieldGroup>
                 </form.FieldSet>
 
@@ -168,19 +186,7 @@ export function AnnouncementEditorModal({
                     게시 설정
                   </form.FieldLegend>
 
-                  <form.FieldGroup className="grid gap-4 lg:grid-cols-3">
-                    <form.AppField name="publishedAt">
-                      {(field) => (
-                        <field.Input
-                          label="게시 확정 일시"
-                          type="datetime-local"
-                          orientation="vertical"
-                          labelWidth="auto"
-                          step={60}
-                        />
-                      )}
-                    </form.AppField>
-
+                  <form.FieldGroup className="grid gap-4 lg:grid-cols-2">
                     <form.AppField name="startAt">
                       {(field) => (
                         <field.Input

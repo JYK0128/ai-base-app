@@ -7,7 +7,6 @@ import { JwtUtil } from '@pkg/shared';
 import { ENV } from '@/env';
 
 import { AuthCacheService } from '../auth.cache';
-import { extractPermissions } from '../auth-permissions';
 import { LoginContract } from './login.contract';
 import { LoginAsserter } from './login.error';
 import type { LoginRequestDto } from './login.request.dto';
@@ -97,22 +96,12 @@ export class LoginHandler implements ICommandHandler<LoginContract> {
     account.lastLoginAt = new Date();
     account.lastLoginIp = clientIp;
 
-    const isPasswordExpired = account.isPasswordExpired;
-    const organizationId = account.member.organization?.id;
-    const memberId = account.member.id;
     const accessExpiresAt = Math.floor(Date.now() / 1000) + ENV.JWT_ACCESS_EXPIRES_IN;
     const refreshExpiresAt = Math.floor(Date.now() / 1000) + ENV.JWT_REFRESH_EXPIRES_IN;
-    const { permissions } = extractPermissions(account.member, organizationId);
-    const accountId = account.id;
 
     const tokens = await JwtUtil.issuePair(
       {
-        sub: accountId,
-        accountId,
-        memberId,
-        organizationId,
-        mustChangePassword: isPasswordExpired,
-        permissions,
+        sub: account.id,
       },
       {
         access: {

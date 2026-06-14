@@ -1,5 +1,6 @@
 import 'reflect-metadata';
 
+import { MikroORM } from '@mikro-orm/core';
 import { RequestMethod, ValidationPipe, VersioningType } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
@@ -67,6 +68,9 @@ async function bootstrap() {
   app.disable('etag');
 
   configureApp(app);
+
+  const orm = app.get(MikroORM);
+  await orm.connect();
 
   if (ENV.NODE_ENV !== 'production') {
     const config = new DocumentBuilder()

@@ -12,6 +12,7 @@ interface RouterContext {
   auth: {
     isAuthenticated: boolean
     mustChangePassword: boolean
+    mustAcceptTerms: boolean
     permissions: string[]
   }
   queryClient: QueryClient

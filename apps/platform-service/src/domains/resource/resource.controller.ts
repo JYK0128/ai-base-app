@@ -2,12 +2,12 @@ import { Controller, Get, Param, Query } from '@nestjs/common';
 import { QueryBus } from '@nestjs/cqrs';
 
 import { GetPermissionSetsContract } from './permission-sets/get-permission-sets.contract';
-import type { PermissionSetResponseDto } from './permission-sets/get-permission-sets.response.dto';
+import { PermissionSetResponseDto } from './permission-sets/get-permission-sets.response.dto';
 import { GetResourceContract } from './queries/get-resource.contract';
-import type { ResourceDetailResponseDto } from './queries/get-resource.response.dto';
+import { ResourceDetailResponseDto } from './queries/get-resource.response.dto';
 import { GetResourcesContract } from './queries/get-resources.contract';
-import type { GetResourcesRequestDto } from './queries/get-resources.request.dto';
-import type { ResourceResponseDto } from './queries/get-resources.response.dto';
+import { GetResourcesRequestDto } from './queries/get-resources.request.dto';
+import { ResourceResponseDto } from './queries/get-resources.response.dto';
 
 @Controller('resources')
 export class ResourceController {

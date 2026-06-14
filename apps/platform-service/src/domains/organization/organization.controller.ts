@@ -2,11 +2,11 @@ import { Body, Controller, Get, Param, Patch, Query } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 
 import { ApproveOrganizationContract } from './commands/approve-organization.contract';
-import type { ApproveOrganizationRequestDto } from './commands/approve-organization.request.dto';
-import type { ApproveOrganizationResponseDto } from './commands/approve-organization.response.dto';
+import { ApproveOrganizationRequestDto } from './commands/approve-organization.request.dto';
+import { ApproveOrganizationResponseDto } from './commands/approve-organization.response.dto';
 import { GetOrganizationsContract } from './queries/get-organizations.contract';
-import type { GetOrganizationsQueryDto } from './queries/get-organizations.request.dto';
-import type { GetOrganizationsResponseDto } from './queries/get-organizations.response.dto';
+import { GetOrganizationsQueryDto } from './queries/get-organizations.request.dto';
+import { GetOrganizationsResponseDto } from './queries/get-organizations.response.dto';
 
 @Controller('organizations')
 export class OrganizationController {

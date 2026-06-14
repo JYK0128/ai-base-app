@@ -2,8 +2,8 @@ import { Controller, Get, Query } from '@nestjs/common';
 import { QueryBus } from '@nestjs/cqrs';
 
 import { GetTicketsContract } from './queries/get-tickets.contract';
-import type { GetTicketsRequestDto } from './queries/get-tickets.request.dto';
-import type { TicketResponseDto } from './queries/get-tickets.response.dto';
+import { GetTicketsRequestDto } from './queries/get-tickets.request.dto';
+import { TicketResponseDto } from './queries/get-tickets.response.dto';
 
 @Controller('support')
 export class SupportController {

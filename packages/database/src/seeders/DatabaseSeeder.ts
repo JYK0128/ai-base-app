@@ -6,6 +6,7 @@ import { OrganizationPermissionSeeder } from './organization.permission.seeder';
 import { OrganizationSeeder } from './organization.seeder';
 import { PlatformSeeder } from './platform.seeder';
 import { ResourceSeeder } from './resource.seeder';
+import { TermsSeeder } from './terms.seeder';
 
 /**
  * DatabaseSeeder
@@ -18,6 +19,7 @@ export class DatabaseSeeder extends Seeder {
     await this.call(em, [ResourceSeeder]);
     await this.call(em, [PlatformSeeder]);
     await this.call(em, [OrganizationSeeder]);
+    await this.call(em, [TermsSeeder]);
     await this.call(em, [OrganizationPermissionSeeder]);
   }
 }

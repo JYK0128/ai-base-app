@@ -1,10 +1,12 @@
-import { BaseEntity, type CountByOptions, type CountOptions, type CreateOptions, type Cursor, type DeleteOptions, type Dictionary, type EntityClass, type EntityData, type EntityKey, EntityRepositoryType, type FilterQuery, type FindByCursorOptions, type FindOneOptions, type FindOneOrFailOptions, type FindOptions, type Loaded, type NativeInsertUpdateOptions, OptionalProps, type Primary, type RequiredEntityData, type UpdateOptions, type UpsertManyOptions, type UpsertOptions, type WithUsingOptions } from '@mikro-orm/core';
+import { BaseEntity, ConnectionType, type CountByOptions, type CountOptions, type CreateOptions, type Cursor, type DeleteOptions, type Dictionary, type EntityClass, type EntityData, type EntityKey, EntityRepositoryType, type FilterQuery, type FindByCursorOptions, type FindOneOptions, type FindOneOrFailOptions, type FindOptions, type Loaded, LoggingOptions, type NativeInsertUpdateOptions, OptionalProps, type Primary, type RequiredEntityData, type UpdateOptions, type UpsertManyOptions, type UpsertOptions, type WithUsingOptions } from '@mikro-orm/core';
 import { PrimaryKey, Property } from '@mikro-orm/decorators/legacy';
+import { QueryBuilder } from '@mikro-orm/postgresql';
 import { uuidv7 } from 'uuidv7';
+
+import type { EntityManager as SqlEntityManager } from '@/entities.generated';
 
 import { QueryEngine } from './core.query';
 import { CoreRepository } from './core.repository';
-
 export abstract class CoreEntity<
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   TEntity extends object = any,
@@ -50,11 +52,30 @@ export abstract class CoreEntity<
     return this.id === entity.id;
   }
 
-  // === Repository ===
+  // === Others ===
   static getRepository<T extends CoreEntity>(
     this: EntityClass<T>,
-  ) {
+  ): CoreRepository<T> {
     return QueryEngine.em.getRepository<T>(this) as CoreRepository<T>;
+  }
+
+  // Entity extends object,
+  // RootAlias extends string = never>
+  // (entityName: EntityName<Entity> | QueryBuilder<Entity>,
+  // alias?: RootAlias,
+  // type?: ConnectionType,
+  // loggerContext?: LoggingOptions): QueryBuilder<Entity, RootAlias>;
+
+  static getQueryBuilder<
+    T extends CoreEntity,
+    RootAlias extends string = never,
+  >(
+    this: EntityClass<T>,
+    alias?: RootAlias,
+    type?: ConnectionType,
+    loggerContext?: LoggingOptions,
+  ): QueryBuilder<T, RootAlias> {
+    return (QueryEngine.em as SqlEntityManager).createQueryBuilder(this, alias, type, loggerContext);
   }
 
   // === Helper ===

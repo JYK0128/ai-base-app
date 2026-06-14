@@ -14,11 +14,13 @@ import { DeferPasswordChangeHandler } from '../auth/defer-password-change/defer-
 import { LoginHandler } from '../auth/login/login.handler';
 import { GetMeHandler } from '../auth/me/get-me.handler';
 import { RefreshTokenHandler } from '../auth/refresh-token/refresh-token.handler';
+import { TermsModule } from '../terms/terms.module';
 
 @Module({
   imports: [
     CqrsModule,
     MikroOrmModule.forFeature([MemberAccount]),
+    TermsModule,
     CacheModule.register({
       stores: [
         createKeyv(ENV.REDIS_URL, {

@@ -23,7 +23,6 @@ import { CancelDeprecationTermsDocumentDto,
          DeleteTermsDocumentDto,
          DeprecateTermsDocumentDto,
          TermsControllerGetTermsDocumentsV1Scope,
-         type TermsDocumentResponseDto,
          UpdateTermsVersionDto,
          UpdateTermsVersionDtoStatus,
          type UpdateTermsVersionDtoStatus as UpdateTermsVersionDtoStatusType } from '../../../../api/model';
@@ -354,7 +353,7 @@ export function TermsManagementTab() {
 
       try {
         const response = await createDocumentMutation.mutateAsync({ data: payload });
-        const createdDocument = response.data as TermsDocumentResponseDto | undefined;
+        const createdDocument = response.data;
         if (!createdDocument) {
           toast.error('약관 문서를 생성하지 못했습니다.');
           return;
@@ -934,7 +933,7 @@ export function TermsManagementTab() {
                 <div className="flex items-center gap-2">
                   <span className="flex items-center gap-1 rounded border border-amber-200 bg-amber-50 px-2.5 py-0.5 font-mono text-[9px] font-bold text-amber-700">
                     <AlertCircle className="h-3 w-3 animate-pulse" />
-                    {`폐기 예약 (${new Date(selectedTermsDocument.deprecatedAt!).toLocaleDateString()} 예정)`}
+                    {`폐기 예약 (${new Date(selectedTermsDocument.deprecatedAt).toLocaleDateString()} 예정)`}
                   </span>
                   <Button
                     size="sm"

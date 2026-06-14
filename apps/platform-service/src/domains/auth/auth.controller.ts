@@ -10,16 +10,16 @@ import { createCookieOptions } from '@/common/utils/cookie';
 import { ENV } from '@/env';
 
 import { ChangePasswordContract } from './change-password/change-password.contract';
-import type { ChangePasswordRequestDto } from './change-password/change-password.request.dto';
+import { ChangePasswordRequestDto } from './change-password/change-password.request.dto';
 import { DeferPasswordChangeContract } from './defer-password-change/defer-password-change.contract';
 import { LoginContract } from './login/login.contract';
-import type { LoginRequestDto } from './login/login.request.dto';
-import type { LoginResponseDto } from './login/login.response.dto';
+import { LoginRequestDto } from './login/login.request.dto';
+import { LoginResponseDto } from './login/login.response.dto';
 import { GetMeContract } from './me/get-me.contract';
 import { GetMeResponseDto } from './me/get-me.response.dto';
 import { RefreshTokenContract } from './refresh-token/refresh-token.contract';
-import type { RefreshTokenRequestDto } from './refresh-token/refresh-token.request.dto';
-import type { RefreshTokenResponseDto } from './refresh-token/refresh-token.response.dto';
+import { RefreshTokenRequestDto } from './refresh-token/refresh-token.request.dto';
+import { RefreshTokenResponseDto } from './refresh-token/refresh-token.response.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -30,6 +30,7 @@ export class AuthController {
   ) {}
 
   @Public()
+  @Bypass(BYPASS_POLICIES.TERMS)
   @Post('login')
   async login(
     @Body() body: Omit<LoginRequestDto, 'clientIp'>,
@@ -71,6 +72,7 @@ export class AuthController {
   }
 
   @Get('me')
+  @Bypass(BYPASS_POLICIES.TERMS)
   async me(): Promise<GetMeResponseDto> {
     return this.queryBus.execute<GetMeContract, GetMeResponseDto>(new GetMeContract());
   }

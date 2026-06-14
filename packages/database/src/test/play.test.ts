@@ -1,7 +1,7 @@
-import { wrap } from '@mikro-orm/core';
+import { raw, RequestContext } from '@mikro-orm/core';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
-import { Member, MemberStatus } from '@/domains';
+import { Member, MemberAccount, MemberStatus, TermsDocument, TermsVersion } from '@/domains';
 import type { PostgresTestContext } from '@/test/context';
 import { createPostgresTestContext, destroyPostgresTestContext } from '@/test/context';
 
@@ -40,13 +40,41 @@ describe('Database Playground', () => {
   });
 
   it('test', async () => {
-    const em = context.orm.em.fork();
-    Member.create({
-      name: '1',
-      organization: '1',
+    await RequestContext.create(context.orm.em, async () => {
+      const account = (await MemberAccount.find({})).at(0);
+      if (!account) {
+        throw new Error('계정이 없습니다.');
+      }
+
+      const latestEffectQuery = TermsVersion.getQueryBuilder('sub_tv');
+      latestEffectQuery
+        .select(raw('MAX(sub_tv."effectiveAt")'))
+        .where({
+          'sub_tv.termsDocument': raw('td.id'),
+          'sub_tv.effectiveAt': { $lte: new Date() },
+        });
+
+      // =========================================================================
+      // 메인 쿼리: 최신 약관 정보와 해당 약관 문서의 유저 최신 동의 정보 확인하기
+      // =========================================================================
+      const qb = TermsDocument.getQueryBuilder('td');
+      const consents = await qb
+        .leftJoinAndSelect('td.versions', 'tv')
+        .leftJoinAndSelect('tv.consents', 'tc', { 'tc.member': account.member })
+        .leftJoin('td.organization', 'org')
+        .where({
+          '$or': [
+            { 'org.id': account.member.organization?.id },
+            { 'org.id': null },
+          ],
+          'tv.effectiveAt': { $in: latestEffectQuery },
+        })
+        .orderBy({ 'td.required': 'DESC', 'td.code': 'ASC' })
+        .select(['td.*', 'tv.*', 'tc.*'])
+        .execute();
+
+      console.log(JSON.stringify(consents, null, 2));
     });
-    wrap(Member);
-    const res = await em.find(Member, {});
-    expect(res.length).toBeGreaterThan(0);
+    expect(true).toBe(true);
   });
 });

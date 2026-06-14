@@ -7,7 +7,6 @@ import { JwtUtil } from '@pkg/shared';
 import { ENV } from '@/env';
 
 import { AuthCacheService } from '../auth.cache';
-import { extractPermissions } from '../auth-permissions';
 import { RefreshTokenContract } from './refresh-token.contract';
 import { RefreshTokenAsserter } from './refresh-token.error';
 import type { RefreshTokenResponseDto } from './refresh-token.response.dto';
@@ -74,7 +73,6 @@ export class RefreshTokenHandler implements ICommandHandler<RefreshTokenContract
 
   private async processTokenRotation(account: MemberAccount) {
     const organizationId = account.member.organization?.id;
-    const { permissions } = extractPermissions(account.member, organizationId);
     const accountId = account.id;
     const memberId = account.member.id;
     const accessExpiresAt = Math.floor(Date.now() / 1000) + ENV.JWT_ACCESS_EXPIRES_IN;
@@ -83,11 +81,6 @@ export class RefreshTokenHandler implements ICommandHandler<RefreshTokenContract
     const tokens = await JwtUtil.issuePair(
       {
         sub: accountId,
-        accountId,
-        memberId,
-        organizationId,
-        mustChangePassword: account.isPasswordExpired,
-        permissions,
       },
       {
         access: {

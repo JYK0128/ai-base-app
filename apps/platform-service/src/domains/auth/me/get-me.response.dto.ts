@@ -59,7 +59,17 @@ export class AuthOrganizationInfoDto {
 }
 
 export class GetMeResponseDto extends withPayloadResponseDto() {
-  constructor({ account, permissions }: { account: MemberAccount, permissions: string[] }) {
+  constructor({
+    account,
+    permissions,
+    agreedTermsVersionIds,
+    mustAcceptTerms,
+  }: {
+    account: MemberAccount
+    permissions: string[]
+    agreedTermsVersionIds: string[]
+    mustAcceptTerms: boolean
+  }) {
     super();
 
     const member = account.member;
@@ -93,7 +103,8 @@ export class GetMeResponseDto extends withPayloadResponseDto() {
       : null;
 
     this.permissions = permissions;
-    this.mustChangePassword = account.isPasswordExpired;
+    this.agreedTermsVersionIds = agreedTermsVersionIds;
+    this.mustAcceptTerms = mustAcceptTerms;
   }
 
   @ApiProperty({ type: AuthAccountInfoDto, description: '계정 정보' })
@@ -108,6 +119,9 @@ export class GetMeResponseDto extends withPayloadResponseDto() {
   @ApiProperty({ isArray: true, type: String, description: '권한 목록' })
   permissions!: string[];
 
-  @ApiProperty({ description: '비밀번호 변경 필요 여부' })
-  mustChangePassword!: boolean;
+  @ApiProperty({ isArray: true, type: String, description: '현재 동의한 약관 버전 식별자 목록' })
+  agreedTermsVersionIds!: string[];
+
+  @ApiProperty({ description: '약관 재동의 필요 여부' })
+  mustAcceptTerms!: boolean;
 }

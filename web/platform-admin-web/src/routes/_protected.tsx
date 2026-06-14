@@ -1,4 +1,4 @@
-import { createFileRoute, Link, notFound, Outlet, redirect } from '@tanstack/react-router';
+import { createFileRoute, Link, notFound, Outlet, redirect, useLocation } from '@tanstack/react-router';
 import { Building2, FileText, Globe, Info, Key, LayoutDashboard, LifeBuoy, LogOut, type LucideIcon, Megaphone, ScrollText, Settings, Shield, Users } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -52,6 +52,26 @@ export const Route = createFileRoute('/_protected')({
       throw redirect({
         to: '/change-password',
       });
+    }
+
+    if (context.auth.mustAcceptTerms && location.pathname !== '/agreement') {
+      throw redirect({
+        to: '/agreement',
+      });
+    }
+
+    if (!context.auth.mustAcceptTerms && location.pathname === '/agreement') {
+      throw redirect({
+        to: '/dashboard',
+      });
+    }
+
+    if (location.pathname === '/agreement') {
+      return {
+        resources: [],
+        flatResources: [],
+        locales: [],
+      };
     }
 
     const queryClient = context.queryClient;
@@ -140,6 +160,7 @@ export const Route = createFileRoute('/_protected')({
 
 function ProtectedLayout() {
   const { logout: authLogout, permissions } = useAuth();
+  const location = useLocation();
   const { mutate: logoutMutate } = useAuthControllerLogoutV1({
     mutation: {
       onSettled: () => {
@@ -161,6 +182,9 @@ function ProtectedLayout() {
   };
 
   const { flatResources } = Route.useRouteContext();
+  if (location.pathname === '/agreement') {
+    return <Outlet />;
+  }
 
   // 🌟 현재 로케일의 전체 번역 목록 조회
   const { data: translationResponse } = useI18nControllerGetTranslationsV1(

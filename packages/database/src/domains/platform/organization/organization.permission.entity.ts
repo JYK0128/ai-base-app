@@ -17,4 +17,12 @@ export class OrganizationPermission extends CoreEntity<OrganizationPermission> {
 
   @Property({ type: 'string' })
   action!: string;
+
+  @Property({ persist: false })
+  get code(): string {
+    if (!this.resource.isInitialized()) {
+      throw new Error('OrganizationPermission.resource is not populated');
+    }
+    return `${this.resource.code}:${this.action}`;
+  }
 }

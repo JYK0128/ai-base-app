@@ -19,6 +19,7 @@ export interface AnnouncementEditorSeed {
   startAt: string
   endAt: string
   content: string
+  isPublished?: boolean
 }
 
 export interface AnnouncementEditorState {
@@ -26,7 +27,7 @@ export interface AnnouncementEditorState {
   category: AnnouncementCategory
   audience: AnnouncementAudience
   priority: AnnouncementPriority
-  publishedAt: string
+  isPublished: boolean
   startAt: string
   endAt: string
   content: string
@@ -40,7 +41,7 @@ export const ANNOUNCEMENT_CATEGORY_LABELS = {
 } as const satisfies Record<AnnouncementCategory, string>;
 
 export const ANNOUNCEMENT_AUDIENCE_LABELS = {
-  ALL: '전체 조직',
+  ALL: '플랫폼 조직 전체',
   PLATFORM: '플랫폼 조직',
   ORGANIZATION: '일반 조직',
 } as const satisfies Record<AnnouncementAudience, string>;
@@ -89,6 +90,10 @@ function fromDateTimeInputValue(value: string): string {
 
   const date = new Date(value);
   return isValidDate(value) ? date.toISOString() : '';
+}
+
+function normalizeEditorAudience(audience: AnnouncementAudience): AnnouncementAudience {
+  return audience === 'PLATFORM' ? 'ALL' : audience;
 }
 
 export function formatDateTime(value: string): string {
@@ -160,6 +165,7 @@ export function createBlankAnnouncement(): AnnouncementEditorSeed {
     startAt: now,
     endAt,
     content: '',
+    isPublished: false,
   };
 }
 
@@ -167,9 +173,9 @@ export function toEditorState(announcement: AnnouncementEditorSeed): Announcemen
   return {
     title: announcement.title,
     category: announcement.category,
-    audience: announcement.audience,
+    audience: normalizeEditorAudience(announcement.audience),
     priority: announcement.priority,
-    publishedAt: toDateTimeInputValue(announcement.publishedAt),
+    isPublished: announcement.isPublished ?? Boolean(announcement.publishedAt),
     startAt: toDateTimeInputValue(announcement.startAt),
     endAt: toDateTimeInputValue(announcement.endAt),
     content: announcement.content,
@@ -191,7 +197,10 @@ export function buildCreateAnnouncementDto(
     channel: original.channel,
     priority: state.priority,
     pinned: original.pinned,
-    publishedAt: fromDateTimeInputValue(state.publishedAt) || undefined,
+    isPublished: state.isPublished,
+    publishedAt: state.isPublished
+      ? (original.publishedAt || new Date().toISOString())
+      : undefined,
     startAt: fromDateTimeInputValue(state.startAt) || undefined,
     endAt: fromDateTimeInputValue(state.endAt) || undefined,
   };

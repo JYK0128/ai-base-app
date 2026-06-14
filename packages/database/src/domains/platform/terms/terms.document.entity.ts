@@ -1,5 +1,4 @@
-import { EntityName, type Opt, type Rel } from '@mikro-orm/core';
-import { Collection } from '@mikro-orm/core';
+import { Collection, EntityName, type Opt, type Rel } from '@mikro-orm/core';
 import { Entity, Enum, ManyToOne, OneToMany, Property } from '@mikro-orm/decorators/legacy';
 
 import { CoreEntity } from '../../core/core.entity';
@@ -17,9 +16,6 @@ export class TermsDocument extends CoreEntity<TermsDocument> {
 
   @ManyToOne(() => Organization, { nullable: true })
   organization?: Rel<Organization>;
-
-  @ManyToOne(() => TermsVersion, { nullable: true })
-  latestVersion?: Rel<TermsVersion>;
 
   @OneToMany(() => TermsVersion, (version) => version.termsDocument)
   versions = new Collection<TermsVersion>(this);

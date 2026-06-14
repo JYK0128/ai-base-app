@@ -17,6 +17,10 @@ spec:
           podSelector:
             matchLabels:
               istio: ingress
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: ambassador
       ports:
         - protocol: TCP
           port: 3000
+

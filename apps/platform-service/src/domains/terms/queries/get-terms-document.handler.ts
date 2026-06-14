@@ -39,7 +39,7 @@ export class GetTermsDocumentHandler implements IQueryHandler<GetTermsDocumentCo
   private async identifyDocument(id: string): Promise<TermsDocument> {
     const termsDocument = await this.termsDocumentRepo.findOne(
       { id },
-      { populate: ['organization', 'latestVersion'] },
+      { populate: ['organization'] },
     );
 
     return this.Asserter.assert(termsDocument, 'DOCUMENT_NOT_FOUND');

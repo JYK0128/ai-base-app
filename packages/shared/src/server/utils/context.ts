@@ -33,6 +33,14 @@ export interface ServerContext {
   memberId?: string
   /** 조직 ID */
   organizationId?: string
+  /** 현재 요청의 권한 목록 */
+  permissions?: string[]
+  /** 현재 요청에서 확인된 동의 약관 버전 목록 */
+  agreedTermsVersionIds?: string[]
+  /** 비밀번호 만료 여부 */
+  isPasswordExpired?: boolean
+  /** 약관 재동의 필요 여부 */
+  mustAcceptTerms?: boolean
 }
 
 export type ContextKey = keyof ServerContext;
@@ -48,5 +56,9 @@ export const CONTEXT_KEYS = defineKeys<ContextKey>()([
   'accountId',
   'memberId',
   'organizationId',
+  'permissions',
+  'agreedTermsVersionIds',
+  'isPasswordExpired',
+  'mustAcceptTerms',
   'acceptLanguage',
 ] as const);
