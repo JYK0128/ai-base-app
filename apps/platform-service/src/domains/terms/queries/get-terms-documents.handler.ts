@@ -3,22 +3,40 @@ import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
 import { CoreRepository, TermsDocument } from '@pkg/database';
 import { ClsService } from 'nestjs-cls';
 
-import { TermsDocumentResponseDto } from './get-active-terms.response.dto';
+import { GetTermsDocumentResponseDto } from './get-active-terms.response.dto';
 import { GetTermsDocumentsContract } from './get-terms-documents.contract';
 import type { GetTermsDocumentsRequestDto } from './get-terms-documents.request.dto';
-
-const normalizeKeyword = (value?: string) => value?.toLowerCase();
 
 const getDocumentLifecycle = (document: TermsDocument) => {
   if (document.isDraft) {
     return 'DRAFT';
   }
 
-  if (document.isDeprecated) {
-    return 'DEPRECATED';
+  if (document.isTerminated) {
+    return 'TERMINATED';
   }
 
-  return document.isScheduledForDeprecation ? 'SCHEDULED_DEPRECATION' : 'PUBLISHED';
+  return document.isScheduledForTermination ? 'SCHEDULED_TERMINATION' : 'PUBLISHED';
+};
+
+const matchesDocumentStatus = (document: TermsDocument, status?: GetTermsDocumentsRequestDto['status']) => {
+  if (!status) {
+    return true;
+  }
+
+  const lifecycle = getDocumentLifecycle(document);
+
+  switch (status) {
+    case 'DRAFT':
+      return lifecycle === 'DRAFT';
+    case 'PUBLISHED':
+    case 'ACTIVE':
+      return lifecycle === 'PUBLISHED';
+    case 'TERMINATED':
+      return lifecycle === 'TERMINATED';
+    default:
+      return true;
+  }
 };
 
 const buildDocumentFilter = (query: GetTermsDocumentsRequestDto, organizationId?: string) => {
@@ -27,14 +45,14 @@ const buildDocumentFilter = (query: GetTermsDocumentsRequestDto, organizationId?
   }
 
   if (query.scope === 'organization') {
-    return { organization: organizationId };
+    return { organization: organizationId as string };
   }
 
   if (organizationId) {
     return {
       $or: [
         { organization: null },
-        { organization: organizationId },
+        { organization: organizationId as string },
       ],
     };
   }
@@ -50,7 +68,7 @@ export class GetTermsDocumentsHandler implements IQueryHandler<GetTermsDocuments
     private readonly cls: ClsService,
   ) {}
 
-  async execute(query: GetTermsDocumentsContract): Promise<TermsDocumentResponseDto[]> {
+  async execute(query: GetTermsDocumentsContract): Promise<GetTermsDocumentResponseDto[]> {
     const organizationId = this.cls.get('organizationId');
 
     if (query.data.scope === 'organization' && !organizationId) {
@@ -65,38 +83,8 @@ export class GetTermsDocumentsHandler implements IQueryHandler<GetTermsDocuments
       },
     );
 
-    const keyword = normalizeKeyword(query.data.keyword);
-    const statusFilter = normalizeKeyword(query.data.status);
-
     return documents
-      .filter((document) => {
-        const lifecycle = getDocumentLifecycle(document);
-
-        if (keyword) {
-          const haystack = `${document.code} ${document.title}`.toLowerCase();
-          if (!haystack.includes(keyword)) {
-            return false;
-          }
-        }
-
-        if (!statusFilter) {
-          return true;
-        }
-
-        switch (statusFilter) {
-          case 'draft':
-            return lifecycle === 'DRAFT';
-          case 'published':
-          case 'active':
-            return lifecycle === 'PUBLISHED';
-          case 'deprecated':
-            return lifecycle === 'DEPRECATED';
-          case 'scheduled_deprecation':
-            return lifecycle === 'SCHEDULED_DEPRECATION';
-          default:
-            return true;
-        }
-      })
-      .map((document) => new TermsDocumentResponseDto(document));
+      .filter((document) => matchesDocumentStatus(document, query.data.status))
+      .map((document) => new GetTermsDocumentResponseDto(document));
   }
 }

@@ -1,9 +1,9 @@
 import { Query } from '@nestjs/cqrs';
 
 import type { GetResourcesRequestDto } from './get-resources.request.dto';
-import type { ResourceResponseDto } from './get-resources.response.dto';
+import type { GetResourceResponseDto } from './get-resources.response.dto';
 
-export class GetResourcesContract extends Query<ResourceResponseDto[]> {
+export class GetResourcesContract extends Query<GetResourceResponseDto[]> {
   constructor(public readonly data: GetResourcesRequestDto) {
     super();
   }

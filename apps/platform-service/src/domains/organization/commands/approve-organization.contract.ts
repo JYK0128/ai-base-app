@@ -1,10 +1,10 @@
 import { Command } from '@nestjs/cqrs';
 
-import type { ApproveOrganizationRequestDto } from './approve-organization.request.dto';
-import type { ApproveOrganizationResponseDto } from './approve-organization.response.dto';
+import type { UpdateOrganizationApprovalRequestDto } from './approve-organization.request.dto';
+import type { UpdateOrganizationApprovalResponseDto } from './approve-organization.response.dto';
 
-export class ApproveOrganizationContract extends Command<ApproveOrganizationResponseDto> {
-  constructor(public readonly data: Pick<ApproveOrganizationRequestDto, 'approve'> & { id: string }) {
+export class UpdateOrganizationApprovalContract extends Command<UpdateOrganizationApprovalResponseDto> {
+  constructor(public readonly data: UpdateOrganizationApprovalRequestDto) {
     super();
   }
 }

@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import { EntityManager, Member, TermsConsent, TermsDocument, TermsDocumentStatus, TermsVersion, TermsVersionStatus } from '@pkg/database';
+import { EntityManager, Member, TermsConsent, TermsDocument, TermsVersion, TermsVersionStatus } from '@pkg/database';
 
 import { AgreeTermsAsserter } from './agreements/agree-terms.error';
-import type { MemberTermsConsentResponseDto } from './queries/get-terms-document.response.dto';
+import type { CreateTermsAgreementResponseDto } from './queries/get-terms-document.response.dto';
 
 type AgreementStateInput = {
   memberId: string
@@ -16,8 +16,8 @@ type AgreementState = {
 
 function getCurrentPublishedVersion(versions: TermsVersion[]): TermsVersion | undefined {
   return [...versions]
-    .filter((version) => version.status === TermsVersionStatus.PUBLISHED && version.effectiveAt.getTime() <= Date.now())
-    .sort((left, right) => right.effectiveAt.getTime() - left.effectiveAt.getTime())[0];
+    .filter((version) => version.status === TermsVersionStatus.PUBLISHED && (version.effectiveAt?.getTime() ?? 0) <= Date.now())
+    .sort((left, right) => (right.effectiveAt?.getTime() ?? 0) - (left.effectiveAt?.getTime() ?? 0))[0];
 }
 
 @Injectable()
@@ -46,14 +46,14 @@ export class TermsAgreementService {
     };
   }
 
-  async agree(memberId: string, organizationId: string | null | undefined, termsVersionId: string): Promise<MemberTermsConsentResponseDto> {
+  async agree(memberId: string, organizationId: string | null | undefined, termsVersion: string): Promise<CreateTermsAgreementResponseDto> {
     const activeTerms = await this.loadActiveTerms(organizationId ?? null);
-    const currentTerm = activeTerms.find((term) => term.currentVersion?.id === termsVersionId);
+    const currentTerm = activeTerms.find((term) => term.currentVersion?.id === termsVersion);
     await AgreeTermsAsserter.throwIf(!currentTerm, 'TERMS_VERSION_NOT_AVAILABLE');
 
     const alreadyAgreed = await this.em.findOne(TermsConsent, {
       member: memberId,
-      termsVersion: termsVersionId,
+      termsVersion,
       agreed: true,
     }, {
       populate: ['termsVersion'],
@@ -65,7 +65,7 @@ export class TermsAgreementService {
 
     const termsConsent = this.em.create(TermsConsent, {
       member: this.em.getReference(Member, memberId),
-      termsVersion: this.em.getReference(TermsVersion, termsVersionId),
+      termsVersion: this.em.getReference(TermsVersion, termsVersion),
       agreed: true,
     });
 
@@ -77,7 +77,7 @@ export class TermsAgreementService {
 
   private async loadActiveTerms(organizationId?: string | null) {
     const documents = await this.em.find(TermsDocument, {
-      status: TermsDocumentStatus.PUBLISHED,
+      metadata: { publishedAt: { $ne: null } },
       ...(organizationId
         ? {
           $or: [
@@ -94,7 +94,7 @@ export class TermsAgreementService {
     });
 
     return documents
-      .filter((document) => !document.isDeprecated)
+      .filter((document) => !document.isTerminated)
       .map((document) => ({
         document,
         currentVersion: getCurrentPublishedVersion(document.versions.getItems()),
@@ -102,7 +102,7 @@ export class TermsAgreementService {
       .filter((term) => !!term.currentVersion);
   }
 
-  private toResponse(consent: TermsConsent): MemberTermsConsentResponseDto {
+  private toResponse(consent: TermsConsent): CreateTermsAgreementResponseDto {
     return {
       id: consent.id,
       agreed: consent.agreed,

@@ -1,14 +1,20 @@
 import { ApiProperty } from '@nestjs/swagger';
 import type { I18nLocale, I18nLocaleDirection } from '@pkg/database';
 
-export class I18nLocaleResponseDto implements Pick<I18nLocale, 'code' | 'name' | 'regionCode' | 'direction' | 'isActive' | 'sortOrder'> {
+import type { EntityResponseDto, ListResponseDto } from '@/common/interfaces';
+
+export class GetLocaleResponseDto implements EntityResponseDto<I18nLocale> {
   constructor(locale: I18nLocale) {
     this.code = locale.code;
     this.name = locale.name;
-    this.regionCode = locale.regionCode;
+    if (typeof locale.regionCode === 'string') {
+      this.regionCode = locale.regionCode;
+    }
     this.direction = locale.direction;
     this.isActive = locale.isActive;
-    this.sortOrder = locale.sortOrder;
+    if (typeof locale.sortOrder === 'number') {
+      this.sortOrder = locale.sortOrder;
+    }
   }
 
   @ApiProperty({ example: 'ko-KR', description: '로케일 코드' })
@@ -30,11 +36,11 @@ export class I18nLocaleResponseDto implements Pick<I18nLocale, 'code' | 'name' |
   sortOrder?: number;
 }
 
-export class GetLocalesResponseDto {
-  constructor(list: I18nLocaleResponseDto[]) {
-    this.list = list;
+export class GetLocalesResponseDto implements ListResponseDto<I18nLocale> {
+  constructor(items: GetLocaleResponseDto[]) {
+    this.items = items;
   }
 
-  @ApiProperty({ type: [I18nLocaleResponseDto], description: '활성 로케일 목록' })
-  list!: I18nLocaleResponseDto[];
+  @ApiProperty({ type: [GetLocaleResponseDto], description: '활성 로케일 목록' })
+  items!: GetLocaleResponseDto[];
 }

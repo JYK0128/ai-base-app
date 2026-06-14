@@ -4,7 +4,7 @@ import { ClsService } from 'nestjs-cls';
 
 import { GetMemberContract } from './get-member.contract';
 import { GetMemberAsserter } from './get-member.error';
-import { MemberResponseDto } from './get-member.response.dto';
+import { GetMemberResponseDto } from './get-member.response.dto';
 
 @QueryHandler(GetMemberContract)
 export class GetMemberHandler implements IQueryHandler<GetMemberContract> {
@@ -14,11 +14,11 @@ export class GetMemberHandler implements IQueryHandler<GetMemberContract> {
     private readonly cls: ClsService,
   ) {}
 
-  async execute({ data }: GetMemberContract): Promise<MemberResponseDto> {
+  async execute({ data }: GetMemberContract): Promise<GetMemberResponseDto> {
     const organization = await this.identifyOrganization();
     const member = await this.identifyMember(organization, data.id);
 
-    return new MemberResponseDto(member);
+    return new GetMemberResponseDto(member);
   }
 
   private async identifyOrganization(): Promise<Organization> {
@@ -36,7 +36,7 @@ export class GetMemberHandler implements IQueryHandler<GetMemberContract> {
       Member.findOne(
         { id, organization },
         {
-          populate: ['accounts', 'organizationRoles.role', 'organizationRoles.organization'],
+          populate: ['accounts', 'roles.role', 'roles.organization'],
         },
       ),
       'MEMBER_NOT_FOUND',

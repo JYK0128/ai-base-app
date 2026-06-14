@@ -4,7 +4,7 @@ import { ClsService } from 'nestjs-cls';
 
 import { GetMembersContract } from './get-members.contract';
 import { GetMembersAsserter } from './get-members.error';
-import { GetMembersResponseDto } from './get-members.response.dto';
+import { GetMemberResponseDto } from './get-members.response.dto';
 
 @QueryHandler(GetMembersContract)
 export class GetMembersHandler implements IQueryHandler<GetMembersContract> {
@@ -14,16 +14,16 @@ export class GetMembersHandler implements IQueryHandler<GetMembersContract> {
     private readonly cls: ClsService,
   ) {}
 
-  async execute({ data }: GetMembersContract): Promise<GetMembersResponseDto[]> {
+  async execute({ data }: GetMembersContract): Promise<GetMemberResponseDto[]> {
     const organization = await this.identifyOrganization();
     const members = await this.identifyMembers(organization);
 
     return members
       .filter((member) => this.matchStatus(member, data.status))
-      .filter((member) => this.matchRole(member, data.role))
+      .filter((member) => this.matchRoles(member, data.roles))
       .filter((member) => this.matchSearch(member, data.search))
       .sort((left, right) => right.createdAt.getTime() - left.createdAt.getTime())
-      .map((member) => new GetMembersResponseDto(member));
+      .map((member) => new GetMemberResponseDto(member));
   }
 
   private async identifyOrganization(): Promise<Organization> {
@@ -41,7 +41,7 @@ export class GetMembersHandler implements IQueryHandler<GetMembersContract> {
       Member.find(
         { organization },
         {
-          populate: ['accounts', 'organizationRoles.role', 'organizationRoles.organization'],
+          populate: ['accounts', 'roles.role', 'roles.organization'],
           orderBy: { createdAt: 'DESC' },
         },
       ),
@@ -53,15 +53,12 @@ export class GetMembersHandler implements IQueryHandler<GetMembersContract> {
     return !status || member.status === status;
   }
 
-  private matchRole(member: Member, role?: string) {
-    if (!role) {
+  private matchRoles(member: Member, roles?: string[]) {
+    if (!roles?.length) {
       return true;
     }
 
-    return member.organizationRoles.getItems().some((assignment) => (
-      assignment.role.id === role
-      || assignment.role.code === role
-    ));
+    return member.roles.getItems().some((assignment) => roles.includes(assignment.role.code));
   }
 
   private matchSearch(member: Member, search?: string) {
@@ -71,7 +68,7 @@ export class GetMembersHandler implements IQueryHandler<GetMembersContract> {
       return true;
     }
 
-    const organizationRoles = member.organizationRoles.getItems();
+    const organizationRoles = member.roles.getItems();
     const accountItems = member.accounts.getItems();
     const searchTargets = [
       member.name,

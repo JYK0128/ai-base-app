@@ -43,6 +43,7 @@ export * from './membersControllerGetInvitesV1Params';
 export * from './membersControllerGetMembersV1Params';
 export * from './membersControllerGetMembersV1Status';
 export * from './object';
+export * from './organizationControllerGetOrganizationRolesV1';
 export * from './organizationControllerGetOrganizationsV1Params';
 export * from './organizationControllerGetOrganizationsV1Status';
 export * from './resendInviteDto';

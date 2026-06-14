@@ -1,4 +1,4 @@
-import type { EntityDTO } from '@mikro-orm/core';
+import type { EntityData } from '@mikro-orm/core';
 
 export type EntityRequestDto<TEntity extends object> = {}
-  & Partial<EntityDTO<TEntity>>;
+  & Partial<EntityData<TEntity>>;

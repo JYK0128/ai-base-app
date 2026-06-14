@@ -1,10 +1,10 @@
 import { Command } from '@nestjs/cqrs';
 
-import type { AnnouncementResponseDto } from '../get-announcements/get-announcements.response.dto';
-import type { SaveAnnouncementRequestDto } from './save-announcement.request.dto';
+import type { CreateAnnouncementResponseDto } from '../get-announcements/get-announcements.response.dto';
+import type { CreateAnnouncementRequestDto } from './save-announcement.request.dto';
 
-export class SaveAnnouncementContract extends Command<AnnouncementResponseDto> {
-  constructor(public readonly data: SaveAnnouncementRequestDto) {
+export class CreateAnnouncementContract extends Command<CreateAnnouncementResponseDto> {
+  constructor(public readonly data: CreateAnnouncementRequestDto) {
     super();
   }
 }

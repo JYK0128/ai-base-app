@@ -9,17 +9,17 @@ import { Public } from '@/common/decorators/public.decorator';
 import { createCookieOptions } from '@/common/utils/cookie';
 import { ENV } from '@/env';
 
-import { ChangePasswordContract } from './change-password/change-password.contract';
-import { ChangePasswordRequestDto } from './change-password/change-password.request.dto';
-import { DeferPasswordChangeContract } from './defer-password-change/defer-password-change.contract';
-import { LoginContract } from './login/login.contract';
-import { LoginRequestDto } from './login/login.request.dto';
-import { LoginResponseDto } from './login/login.response.dto';
-import { GetMeContract } from './me/get-me.contract';
-import { GetMeResponseDto } from './me/get-me.response.dto';
-import { RefreshTokenContract } from './refresh-token/refresh-token.contract';
-import { RefreshTokenRequestDto } from './refresh-token/refresh-token.request.dto';
-import { RefreshTokenResponseDto } from './refresh-token/refresh-token.response.dto';
+import { AuthChangePasswordContract } from './change-password/change-password.contract';
+import { AuthChangePasswordRequestDto } from './change-password/change-password.request.dto';
+import { AuthDeferPasswordChangeContract } from './defer-password-change/defer-password-change.contract';
+import { AuthLoginContract } from './login/login.contract';
+import { AuthLoginRequestDto } from './login/login.request.dto';
+import { AuthLoginResponseDto } from './login/login.response.dto';
+import { AuthGetMeContract } from './me/get-me.contract';
+import { AuthGetMeResponseDto } from './me/get-me.response.dto';
+import { AuthRefreshTokenContract } from './refresh-token/refresh-token.contract';
+import { AuthRefreshTokenRequestDto } from './refresh-token/refresh-token.request.dto';
+import { AuthRefreshTokenResponseDto } from './refresh-token/refresh-token.response.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -33,12 +33,12 @@ export class AuthController {
   @Bypass(BYPASS_POLICIES.TERMS)
   @Post('login')
   async login(
-    @Body() body: Omit<LoginRequestDto, 'clientIp'>,
+    @Body() body: Omit<AuthLoginRequestDto, 'clientIp'>,
     @Req() request: { ip?: string },
     @Res({ passthrough: true }) res: Response,
-  ): Promise<Pick<LoginResponseDto, 'accessToken'>> {
+  ): Promise<Pick<AuthLoginResponseDto, 'accessToken'>> {
     const clientIp = this.cls.get('clientIp') ?? request.ip ?? '0.0.0.0';
-    const tokens = await this.commandBus.execute<LoginContract, LoginResponseDto>(new LoginContract({
+    const tokens = await this.commandBus.execute<AuthLoginContract, AuthLoginResponseDto>(new AuthLoginContract({
       ...body,
       clientIp,
     }));
@@ -57,10 +57,10 @@ export class AuthController {
   async refresh(
     @Cookies('refreshToken') refreshToken: string,
     @Res({ passthrough: true }) res: Response,
-  ): Promise<Pick<RefreshTokenResponseDto, 'accessToken'>> {
-    const { accessToken, refreshToken: newRefreshToken } = await this.commandBus.execute<RefreshTokenContract, RefreshTokenResponseDto>(new RefreshTokenContract({
+  ): Promise<Pick<AuthRefreshTokenResponseDto, 'accessToken'>> {
+    const { accessToken, refreshToken: newRefreshToken } = await this.commandBus.execute<AuthRefreshTokenContract, AuthRefreshTokenResponseDto>(new AuthRefreshTokenContract({
       refreshToken,
-    } satisfies RefreshTokenRequestDto));
+    } satisfies AuthRefreshTokenRequestDto));
 
     res.cookie('refreshToken', newRefreshToken, createCookieOptions({
       maxAge: ENV.JWT_REFRESH_EXPIRES_IN * 1000,
@@ -73,21 +73,21 @@ export class AuthController {
 
   @Get('me')
   @Bypass(BYPASS_POLICIES.TERMS)
-  async me(): Promise<GetMeResponseDto> {
-    return this.queryBus.execute<GetMeContract, GetMeResponseDto>(new GetMeContract());
+  async me(): Promise<AuthGetMeResponseDto> {
+    return this.queryBus.execute<AuthGetMeContract, AuthGetMeResponseDto>(new AuthGetMeContract());
   }
 
   @Bypass(BYPASS_POLICIES.PASSWORD)
   @Post('password/change')
   async changePassword(
-    @Body() body: ChangePasswordRequestDto,
+    @Body() body: AuthChangePasswordRequestDto,
   ): Promise<void> {
-    await this.commandBus.execute(new ChangePasswordContract(body));
+    await this.commandBus.execute(new AuthChangePasswordContract(body));
   }
 
   @Bypass(BYPASS_POLICIES.PASSWORD)
   @Post('password/defer')
   async deferPasswordChange(): Promise<void> {
-    await this.commandBus.execute(new DeferPasswordChangeContract());
+    await this.commandBus.execute(new AuthDeferPasswordChangeContract());
   }
 }

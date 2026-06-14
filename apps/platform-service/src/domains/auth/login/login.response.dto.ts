@@ -1,8 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-import { type PayloadRequestDto } from '@/common/interfaces';
+import type { PayloadResponseDto } from '@/common/interfaces';
 
-export class LoginResponseDto implements PayloadRequestDto {
+export class AuthLoginResponseDto implements PayloadResponseDto {
   @ApiProperty({ example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...', description: '액세스 토큰' })
   accessToken!: string;
 

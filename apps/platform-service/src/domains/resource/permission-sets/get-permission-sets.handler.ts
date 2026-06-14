@@ -5,7 +5,7 @@ import { ClsService } from 'nestjs-cls';
 
 import { GetPermissionSetsContract } from './get-permission-sets.contract';
 import { GetPermissionSetsAsserter } from './get-permission-sets.error';
-import { PermissionSetResponseDto } from './get-permission-sets.response.dto';
+import { GetPermissionSetResponseDto } from './get-permission-sets.response.dto';
 
 @QueryHandler(GetPermissionSetsContract)
 export class GetPermissionSetsHandler implements IQueryHandler<GetPermissionSetsContract> {
@@ -19,10 +19,10 @@ export class GetPermissionSetsHandler implements IQueryHandler<GetPermissionSets
     private readonly cls: ClsService,
   ) {}
 
-  async execute(): Promise<PermissionSetResponseDto[]> {
+  async execute(): Promise<GetPermissionSetResponseDto[]> {
     const organization = await this.identifyOrganization();
     const roles = await this.loadRoles(organization);
-    return roles.map((role) => new PermissionSetResponseDto(role));
+    return roles.map((role) => new GetPermissionSetResponseDto(role));
   }
 
   private async identifyOrganization(): Promise<Organization> {

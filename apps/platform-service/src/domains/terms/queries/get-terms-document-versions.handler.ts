@@ -2,11 +2,9 @@ import { InjectRepository } from '@mikro-orm/nestjs';
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
 import { CoreRepository, TermsDocument, TermsVersion } from '@pkg/database';
 
-import { TermsVersionResponseDto } from './get-terms-document.response.dto';
+import { GetTermsDocumentVersionResponseDto } from './get-terms-document.response.dto';
 import { GetTermsDocumentVersionsContract } from './get-terms-document-versions.contract';
 import { GetTermsDocumentVersionsAsserter } from './get-terms-document-versions.error';
-
-const normalizeKeyword = (value?: string) => value?.toLowerCase();
 
 @QueryHandler(GetTermsDocumentVersionsContract)
 export class GetTermsDocumentVersionsHandler implements IQueryHandler<GetTermsDocumentVersionsContract> {
@@ -19,27 +17,22 @@ export class GetTermsDocumentVersionsHandler implements IQueryHandler<GetTermsDo
     private readonly termsVersionRepo: CoreRepository<TermsVersion>,
   ) {}
 
-  async execute(query: GetTermsDocumentVersionsContract): Promise<TermsVersionResponseDto[]> {
-    await this.identifyDocument(query.data.id);
+  async execute(query: GetTermsDocumentVersionsContract): Promise<GetTermsDocumentVersionResponseDto[]> {
+    await this.identifyDocument(query.documentId);
 
     const versions = await this.termsVersionRepo.find(
-      { termsDocument: query.data.id },
+      { termsDocument: query.documentId },
       {
         populate: ['termsDocument'],
-        orderBy: { effectiveAt: 'DESC', createdAt: 'DESC' },
+        orderBy: query.data.sort.map((field, index) => ({
+          [field]: query.data.direction[index] ?? query.data.direction[0] ?? 'desc',
+        })),
+        offset: query.data.offset,
+        limit: query.data.limit,
       },
     );
 
-    const keyword = normalizeKeyword(query.data.keyword);
-
-    return versions
-      .filter((version) => {
-        if (!keyword) return true;
-
-        const haystack = `${version.label} ${version.content} ${version.status}`.toLowerCase();
-        return haystack.includes(keyword);
-      })
-      .map((version) => new TermsVersionResponseDto(version));
+    return versions.map((version) => new GetTermsDocumentVersionResponseDto(version));
   }
 
   private async identifyDocument(id: string): Promise<TermsDocument> {

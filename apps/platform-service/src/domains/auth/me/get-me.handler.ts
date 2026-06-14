@@ -3,12 +3,12 @@ import { type IQueryHandler, QueryHandler } from '@nestjs/cqrs';
 import { CoreRepository, MemberAccount } from '@pkg/database';
 import { ClsService } from 'nestjs-cls';
 
-import { GetMeContract } from './get-me.contract';
+import { AuthGetMeContract } from './get-me.contract';
 import { GetMeAsserter } from './get-me.error';
-import { GetMeResponseDto } from './get-me.response.dto';
+import { AuthGetMeResponseDto } from './get-me.response.dto';
 
-@QueryHandler(GetMeContract)
-export class GetMeHandler implements IQueryHandler<GetMeContract> {
+@QueryHandler(AuthGetMeContract)
+export class GetMeHandler implements IQueryHandler<AuthGetMeContract> {
   private readonly Asserter = GetMeAsserter;
 
   constructor(
@@ -17,14 +17,14 @@ export class GetMeHandler implements IQueryHandler<GetMeContract> {
     private readonly cls: ClsService,
   ) {}
 
-  async execute(_query: GetMeContract): Promise<GetMeResponseDto> {
+  async execute(_query: AuthGetMeContract): Promise<AuthGetMeResponseDto> {
     const accountId = await this.identifyAccountId();
     const account = await this.identifyAccount(accountId);
     const permissions = await this.identifyPermissions();
     const agreedTermsVersionIds = await this.identifyAgreedTermsVersionIds();
     const mustAcceptTerms = await this.identifyMustAcceptTerms();
 
-    return new GetMeResponseDto({
+    return new AuthGetMeResponseDto({
       account,
       permissions,
       agreedTermsVersionIds,
@@ -48,8 +48,8 @@ export class GetMeHandler implements IQueryHandler<GetMeContract> {
       {
         populate: [
           'member.organization',
-          'member.organizationRoles.organization',
-          'member.organizationRoles.role.permissions.resource',
+          'member.roles.organization',
+          'member.roles.role.permissions.resource',
         ],
       },
     );

@@ -22,7 +22,7 @@ export class UpdateMemberRoleHandler implements ICommandHandler<UpdateMemberRole
     const organization = await this.identifyOrganization();
     const member = await this.identifyMember(organization, data.id);
     const requestMember = await this.identifyRequestMember();
-    const role = await this.identifyRole(organization, data.roleId);
+    const role = await this.identifyRole(organization, data.role);
 
     await this.validateSelfMutation(member, requestMember);
     await this.processRoleUpdate(member, requestMember, organization, role);
@@ -60,9 +60,9 @@ export class UpdateMemberRoleHandler implements ICommandHandler<UpdateMemberRole
     );
   }
 
-  private async identifyRole(organization: Organization, roleId: string): Promise<OrganizationRole> {
+  private async identifyRole(organization: Organization, role: string): Promise<OrganizationRole> {
     return await this.Asserter.assert(
-      OrganizationRole.findOne({ id: roleId, organization }),
+      OrganizationRole.findOne({ id: role, organization }),
       'ROLE_NOT_FOUND',
     );
   }

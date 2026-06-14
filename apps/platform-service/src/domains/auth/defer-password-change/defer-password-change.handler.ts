@@ -7,12 +7,12 @@ import { ClsService } from 'nestjs-cls';
 
 import { ENV } from '@/env';
 
-import { DeferPasswordChangeContract } from './defer-password-change.contract';
+import { AuthDeferPasswordChangeContract } from './defer-password-change.contract';
 import { DeferPasswordChangeAsserter } from './defer-password-change.error';
-import { DeferPasswordChangeResponseDto } from './defer-password-change.response.dto';
+import { AuthDeferPasswordChangeResponseDto } from './defer-password-change.response.dto';
 
-@CommandHandler(DeferPasswordChangeContract)
-export class DeferPasswordChangeHandler implements ICommandHandler<DeferPasswordChangeContract> {
+@CommandHandler(AuthDeferPasswordChangeContract)
+export class DeferPasswordChangeHandler implements ICommandHandler<AuthDeferPasswordChangeContract> {
   private readonly Asserter = DeferPasswordChangeAsserter;
 
   constructor(
@@ -22,13 +22,13 @@ export class DeferPasswordChangeHandler implements ICommandHandler<DeferPassword
   ) {}
 
   @Transactional()
-  async execute(_command: DeferPasswordChangeContract): Promise<DeferPasswordChangeResponseDto> {
+  async execute(_command: AuthDeferPasswordChangeContract): Promise<AuthDeferPasswordChangeResponseDto> {
     const account = await this.identifyAccount();
     await this.validatePolicies(account);
 
     this.processDeferment(account);
 
-    return new DeferPasswordChangeResponseDto();
+    return new AuthDeferPasswordChangeResponseDto();
   }
 
   private async identifyAccount(): Promise<MemberAccount> {

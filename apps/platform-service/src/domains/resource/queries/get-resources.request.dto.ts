@@ -1,40 +1,43 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty } from '@nestjs/swagger';
+import type { Resource } from '@pkg/database';
 import { ResourceScope } from '@pkg/database';
-import { Transform } from 'class-transformer';
-import { IsArray, IsBoolean, IsEnum, IsOptional, IsString } from 'class-validator';
+import { IsEnum } from 'class-validator';
 
-export class GetResourcesRequestDto {
+import { type ListRequestDto, SortDirection } from '@/common/interfaces';
+
+export class GetResourcesRequestDto implements ListRequestDto<Resource> {
+  @ApiPropertyOptional({
+    description: '정렬 필드',
+    example: ['sortOrder', 'code'],
+    default: ['sortOrder', 'code'],
+    isArray: true,
+  })
+  sort!: Array<keyof Resource & string>;
+
+  @ApiPropertyOptional({
+    description: '정렬 방향',
+    enum: SortDirection,
+    example: [SortDirection.ASC, SortDirection.ASC],
+    default: [SortDirection.ASC, SortDirection.ASC],
+    isArray: true,
+  })
+  direction!: SortDirection[];
+
+  @ApiPropertyOptional({
+    description: '오프셋',
+    example: 0,
+    default: 0,
+  })
+  offset!: number;
+
+  @ApiPropertyOptional({
+    description: '페이지 크기',
+    example: 20,
+    default: 20,
+  })
+  limit!: number;
+
   @ApiProperty({ enum: ResourceScope, example: 'PLATFORM', description: '리소스 관리 범위' })
   @IsEnum(ResourceScope)
   scope!: ResourceScope;
-
-  @ApiPropertyOptional({
-    type: [String],
-    example: ['ORGANIZATION:READ', 'DASHBOARD:READ'],
-    description: '필터링에 사용할 권한 코드 목록',
-  })
-  @IsOptional()
-  @IsArray()
-  @IsString({ each: true })
-  @Transform(({ value }) => {
-    if (Array.isArray(value)) {
-      return value.filter((item) => typeof item === 'string' && item.length > 0);
-    }
-
-    if (typeof value === 'string') {
-      return value.split(',').map((item) => item.trim()).filter(Boolean);
-    }
-
-    return [];
-  })
-  permissions?: string[];
-
-  @ApiPropertyOptional({
-    example: false,
-    description: '권한 기준으로 리소스를 필터링할지 여부',
-  })
-  @IsOptional()
-  @IsBoolean()
-  @Transform(({ value }) => value === true || value === 'true')
-  filterByPermissions?: boolean;
 }

@@ -1,10 +1,9 @@
 import { randomUUID } from 'node:crypto';
 
 import { MikroORM } from '@mikro-orm/core';
-import { raw } from '@mikro-orm/postgresql';
 import { Injectable, NestMiddleware } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { MemberAccount, TermsDocument, TermsVersion } from '@pkg/database';
+import { MemberAccount } from '@pkg/database';
 import { NextFunction, Response } from 'express';
 import type { JWTPayload } from 'jose';
 import { ClsService } from 'nestjs-cls';
@@ -107,51 +106,19 @@ export class ContextMiddleware implements NestMiddleware {
       if (!account) return;
       if (account.member) {
         await Promise.all([
-          account.populate(['member.organizationRoles.role.permissions.resource']),
+          account.populate(['member.roles.role.permissions.resource']),
         ]);
       }
       // 권한 목록
-      const permissions = account.member.organizationRoles.map((role) => role.role.permissions.map((p) => p.code)).flat();
+      const permissions = account.member.roles.map((role) => role.role.permissions.map((p) => p.code)).flat();
 
-      const orgId = account.member.organization?.id ?? null;
+      const organizationId = account.member.organization?.id ?? null;
 
-      const subQb = TermsVersion.getQueryBuilder('sub_tv');
-      subQb
-        .select(raw('MAX(sub_tv."effectiveAt")'))
-        .where({
-          'sub_tv.termsDocument': raw('td.id'),
-          'sub_tv.effectiveAt': { $lte: new Date() },
-        });
-
-      // =========================================================================
-      // 메인 쿼리: 최신 약관 정보와 해당 약관 문서의 유저 최신 동의 정보 확인하기
-      // =========================================================================
-      const qb = TermsDocument.getQueryBuilder('td');
-      const consents = await qb
-        .leftJoinAndSelect('td.versions', 'tv')
-        .leftJoinAndSelect('tv.consents', 'tc', { 'tc.member': account.member.id })
-        .leftJoin('td.organization', 'org')
-        .where({
-          '$or': [
-            { 'org.id': orgId },
-            { 'org.id': null },
-          ],
-          'tv.effectiveAt': { $in: subQb },
-        })
-        .orderBy({ 'td.required': 'DESC', 'td.code': 'ASC' })
-        .getResultList();
-
-      // ID 및 권한 캐시 (하위 호환성 및 빠른 접근 목적)
+      // ID 및 권한 캐시
       this.cls.set('accountId', account.id);
       this.cls.set('memberId', account.member.id);
-      this.cls.set('organizationId', account.member.organization?.id);
+      this.cls.set('organizationId', organizationId);
       this.cls.set('permissions', permissions);
-
-      // 리졸브된 도메인 엔티티 자체를 CLS에 저장
-      this.cls.set('account', account);
-      this.cls.set('member', account.member);
-      this.cls.set('organization', account.member.organization);
-      this.cls.set('termsConsents', consents);
 
       // TODO: 상태 정보 (mustAcceptTerms, agreedTermsVersionIds, isPasswordExpired 등) 생성 및 계산 로직 분리 필요
       const agreementState = await this.termsAgreementService.resolveAgreementState({

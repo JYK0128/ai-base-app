@@ -1,15 +1,15 @@
 import { InjectRepository } from '@mikro-orm/nestjs';
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
-import { CoreRepository, TermsDocument, TermsDocumentStatus, TermsVersion } from '@pkg/database';
+import { CoreRepository, TermsDocument, TermsVersion } from '@pkg/database';
 import { ClsService } from 'nestjs-cls';
 
 import { GetActiveTermsContract } from './get-active-terms.contract';
-import { TermsDocumentResponseDto } from './get-active-terms.response.dto';
+import { GetTermsDocumentResponseDto } from './get-active-terms.response.dto';
 
 const getCurrentPublishedVersion = (versions: TermsVersion[]) => (
   [...versions]
     .filter((version) => version.isCurrentlyEffective)
-    .sort((left, right) => right.effectiveAt.getTime() - left.effectiveAt.getTime())[0]
+    .sort((left, right) => (right.effectiveAt?.getTime() ?? 0) - (left.effectiveAt?.getTime() ?? 0))[0]
 );
 
 @QueryHandler(GetActiveTermsContract)
@@ -20,11 +20,11 @@ export class GetActiveTermsHandler implements IQueryHandler<GetActiveTermsContra
     private readonly cls: ClsService,
   ) {}
 
-  async execute(): Promise<TermsDocumentResponseDto[]> {
+  async execute(): Promise<GetTermsDocumentResponseDto[]> {
     const organizationId = this.cls.get('organizationId');
     const documents = await this.termsDocumentRepo.find(
       {
-        status: TermsDocumentStatus.PUBLISHED,
+        metadata: { publishedAt: { $ne: null } },
         ...(organizationId
           ? {
             $or: [
@@ -44,7 +44,7 @@ export class GetActiveTermsHandler implements IQueryHandler<GetActiveTermsContra
 
     return documents
       .filter((document) => !!getCurrentPublishedVersion(document.versions.getItems()))
-      .filter((document) => !document.isDeprecated)
-      .map((document) => new TermsDocumentResponseDto(document));
+      .filter((document) => !document.isTerminated)
+      .map((document) => new GetTermsDocumentResponseDto(document));
   }
 }

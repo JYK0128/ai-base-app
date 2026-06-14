@@ -3,7 +3,7 @@ import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
 import { Announcement, CoreRepository } from '@pkg/database';
 
 import { GetAnnouncementsContract } from './get-announcements.contract';
-import { AnnouncementResponseDto } from './get-announcements.response.dto';
+import { GetAnnouncementResponseDto } from './get-announcements.response.dto';
 
 @QueryHandler(GetAnnouncementsContract)
 export class GetAnnouncementsHandler implements IQueryHandler<GetAnnouncementsContract> {
@@ -12,12 +12,16 @@ export class GetAnnouncementsHandler implements IQueryHandler<GetAnnouncementsCo
     private readonly announcementRepository: CoreRepository<Announcement>,
   ) {}
 
-  async execute(query: GetAnnouncementsContract): Promise<AnnouncementResponseDto[]> {
+  async execute(query: GetAnnouncementsContract): Promise<GetAnnouncementResponseDto[]> {
+    const filter = query.data.isPublished
+      ? { metadata: { publishedAt: { $ne: null } } }
+      : {};
+
     const announcements = await this.announcementRepository.find(
-      { isPublished: query.data.isPublishedOnly ? true : undefined },
+      filter,
       { orderBy: { createdAt: 'DESC' } },
     );
 
-    return announcements.map((announcement) => new AnnouncementResponseDto(announcement));
+    return announcements.map((announcement) => new GetAnnouncementResponseDto(announcement));
   }
 }

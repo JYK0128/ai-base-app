@@ -6,7 +6,7 @@ import { CommandHandler, type ICommandHandler } from '@nestjs/cqrs';
 import { Announcement, CoreRepository, Member } from '@pkg/database';
 import { ClsService } from 'nestjs-cls';
 
-import { AnnouncementResponseDto } from '../get-announcements/get-announcements.response.dto';
+import { DeleteAnnouncementResponseDto } from '../get-announcements/get-announcements.response.dto';
 import { DeleteAnnouncementContract } from './delete-announcement.contract';
 
 @CommandHandler(DeleteAnnouncementContract)
@@ -21,7 +21,7 @@ export class DeleteAnnouncementHandler implements ICommandHandler<DeleteAnnounce
   ) {}
 
   @Transactional()
-  async execute({ data }: DeleteAnnouncementContract): Promise<AnnouncementResponseDto> {
+  async execute({ data }: DeleteAnnouncementContract): Promise<DeleteAnnouncementResponseDto> {
     const announcement = await this.announcementRepository.findOne({ id: data.id });
 
     if (!announcement) {
@@ -32,7 +32,7 @@ export class DeleteAnnouncementHandler implements ICommandHandler<DeleteAnnounce
     announcement.updatedAt = new Date();
     announcement.updatedBy = author.name;
 
-    const response = new AnnouncementResponseDto(announcement);
+    const response = new DeleteAnnouncementResponseDto(announcement);
     announcement.remove();
 
     return response;

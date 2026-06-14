@@ -80,7 +80,7 @@ function generateTypes() {
           noCheck: true,
         },
       })),
-      { preferredConfigPath: './tsconfig.app.json' },
+      { preferredConfigPath: './tsconfig.build.json' },
     );
 
     bundles.forEach((content, index) => {

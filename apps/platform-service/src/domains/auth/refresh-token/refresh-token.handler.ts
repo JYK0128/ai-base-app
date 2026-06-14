@@ -7,12 +7,12 @@ import { JwtUtil } from '@pkg/shared';
 import { ENV } from '@/env';
 
 import { AuthCacheService } from '../auth.cache';
-import { RefreshTokenContract } from './refresh-token.contract';
+import { AuthRefreshTokenContract } from './refresh-token.contract';
 import { RefreshTokenAsserter } from './refresh-token.error';
-import type { RefreshTokenResponseDto } from './refresh-token.response.dto';
+import type { AuthRefreshTokenResponseDto } from './refresh-token.response.dto';
 
-@CommandHandler(RefreshTokenContract)
-export class RefreshTokenHandler implements ICommandHandler<RefreshTokenContract> {
+@CommandHandler(AuthRefreshTokenContract)
+export class RefreshTokenHandler implements ICommandHandler<AuthRefreshTokenContract> {
   private readonly Asserter = RefreshTokenAsserter;
 
   constructor(
@@ -22,7 +22,7 @@ export class RefreshTokenHandler implements ICommandHandler<RefreshTokenContract
   ) {}
 
   @Transactional()
-  async execute(command: RefreshTokenContract): Promise<RefreshTokenResponseDto> {
+  async execute(command: AuthRefreshTokenContract): Promise<AuthRefreshTokenResponseDto> {
     const { refreshToken } = command.data;
 
     const account = await this.identifyAccount(refreshToken);
@@ -53,7 +53,7 @@ export class RefreshTokenHandler implements ICommandHandler<RefreshTokenContract
     const account = await this.Asserter.assert(
       this.memberAccountRepository.findOne(
         { id: accountId },
-        { populate: ['member.organization', 'member.organizationRoles.role.permissions.resource'] },
+        { populate: ['member.organization', 'member.roles.role.permissions.resource'] },
       ),
       'ACCOUNT_NOT_FOUND',
     );

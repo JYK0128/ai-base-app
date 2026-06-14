@@ -4,7 +4,7 @@ export type ExtendedTermsDocumentResponseDto = TermsDocumentResponseDto;
 export type ExtendedTermsVersionResponseDto = TermsVersionResponseDto;
 
 export type TermsDocumentScope = 'platform' | 'organization';
-export type TermsDocumentLifecycle = 'ACTIVE' | 'DRAFT' | 'DEPRECATED' | 'SCHEDULED_DEPRECATION';
+export type TermsDocumentLifecycle = 'ACTIVE' | 'DRAFT' | 'TERMINATED' | 'SCHEDULED_TERMINATION';
 export type VersionComputedStatus = 'DRAFT' | 'ACTIVE' | 'SCHEDULED' | 'HISTORICAL';
 
 export type VersionStatusPresentation = {
@@ -72,20 +72,20 @@ export function getDocumentLifecycle(doc?: ExtendedTermsDocumentResponseDto): Te
     return 'DRAFT';
   }
 
-  const deprecatedAt = toDate(doc.deprecatedAt);
-  if (!deprecatedAt) {
+  const terminatedAt = toDate(doc.terminatedAt);
+  if (!terminatedAt) {
     return 'ACTIVE';
   }
 
-  return deprecatedAt <= new Date() ? 'DEPRECATED' : 'SCHEDULED_DEPRECATION';
+  return terminatedAt <= new Date() ? 'TERMINATED' : 'SCHEDULED_TERMINATION';
 }
 
-export function isDocumentCurrentlyDeprecated(doc?: ExtendedTermsDocumentResponseDto): boolean {
-  return getDocumentLifecycle(doc) === 'DEPRECATED';
+export function isDocumentCurrentlyTerminated(doc?: ExtendedTermsDocumentResponseDto): boolean {
+  return getDocumentLifecycle(doc) === 'TERMINATED';
 }
 
-export function isDocumentScheduledForDeprecation(doc?: ExtendedTermsDocumentResponseDto): boolean {
-  return getDocumentLifecycle(doc) === 'SCHEDULED_DEPRECATION';
+export function isDocumentScheduledForTermination(doc?: ExtendedTermsDocumentResponseDto): boolean {
+  return getDocumentLifecycle(doc) === 'SCHEDULED_TERMINATION';
 }
 
 export function getCurrentActivePublishedVersion(

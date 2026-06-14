@@ -1,7 +1,9 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { OrganizationRole } from '@pkg/database';
 
-export class PermissionSetResponseDto implements Pick<OrganizationRole, 'id' | 'code' | 'name' | 'description'> {
+import type { EntityResponseDto } from '@/common/interfaces';
+
+export class GetPermissionSetResponseDto implements EntityResponseDto<OrganizationRole>, Pick<OrganizationRole, 'id' | 'code' | 'name' | 'description'> {
   constructor(role: OrganizationRole) {
     this.id = role.id;
     this.code = role.code;

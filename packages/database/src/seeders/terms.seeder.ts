@@ -11,7 +11,7 @@ import { Seeder } from '@mikro-orm/seeder';
 
 import { MemberAccount } from '../domains/platform/member/member.account.entity';
 import { Organization } from '../domains/platform/organization/organization.entity';
-import { TermsDocument, TermsDocumentStatus } from '../domains/platform/terms/terms.document.entity';
+import { TermsDocument, TermsDocumentMetadata } from '../domains/platform/terms/terms.document.entity';
 import { TermsVersion, TermsVersionStatus } from '../domains/platform/terms/terms.version.entity';
 
 type TermsSeed = {
@@ -127,8 +127,10 @@ export class TermsSeeder extends Seeder {
     persistedDocument.organization = organization ?? undefined;
     persistedDocument.title = seed.title;
     persistedDocument.required = seed.required;
-    persistedDocument.status = TermsDocumentStatus.PUBLISHED;
-    persistedDocument.deprecatedAt = undefined;
+    persistedDocument.metadata = new TermsDocumentMetadata({
+      publishedAt: seed.effectiveAt,
+      deprecatedAt: null,
+    });
     if (creatorId && !persistedDocument.createdBy) {
       persistedDocument.createdBy = creatorId;
     }

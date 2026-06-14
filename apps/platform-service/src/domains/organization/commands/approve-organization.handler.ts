@@ -1,14 +1,14 @@
 import { Transactional } from '@mikro-orm/decorators/legacy';
 import { InjectRepository } from '@mikro-orm/nestjs';
 import { CommandHandler, type ICommandHandler } from '@nestjs/cqrs';
-import { CoreRepository, Organization, OrganizationStatus } from '@pkg/database';
+import { CoreRepository, Organization, OrganizationMetadata } from '@pkg/database';
 
-import { ApproveOrganizationContract } from './approve-organization.contract';
+import { UpdateOrganizationApprovalContract } from './approve-organization.contract';
 import { ApproveOrganizationAsserter } from './approve-organization.error';
-import { ApproveOrganizationResponseDto } from './approve-organization.response.dto';
+import { UpdateOrganizationApprovalResponseDto } from './approve-organization.response.dto';
 
-@CommandHandler(ApproveOrganizationContract)
-export class ApproveOrganizationHandler implements ICommandHandler<ApproveOrganizationContract> {
+@CommandHandler(UpdateOrganizationApprovalContract)
+export class UpdateOrganizationApprovalHandler implements ICommandHandler<UpdateOrganizationApprovalContract> {
   private readonly Asserter = ApproveOrganizationAsserter;
 
   constructor(
@@ -17,11 +17,11 @@ export class ApproveOrganizationHandler implements ICommandHandler<ApproveOrgani
   ) {}
 
   @Transactional()
-  async execute(command: ApproveOrganizationContract): Promise<ApproveOrganizationResponseDto> {
+  async execute(command: UpdateOrganizationApprovalContract): Promise<UpdateOrganizationApprovalResponseDto> {
     const organization = await this.identifyOrganization(command.data.id);
     await this.validatePolicies(organization);
     this.processApproval(organization, command.data.approve);
-    return new ApproveOrganizationResponseDto(organization.id);
+    return new UpdateOrganizationApprovalResponseDto(organization.id);
   }
 
   private async identifyOrganization(organizationId: string): Promise<Organization> {
@@ -36,8 +36,13 @@ export class ApproveOrganizationHandler implements ICommandHandler<ApproveOrgani
   }
 
   private processApproval(organization: Organization, approve: boolean) {
-    organization.status = approve
-      ? OrganizationStatus.ACTIVE
-      : OrganizationStatus.REJECTED;
+    const metadata = organization.metadata ?? new OrganizationMetadata();
+
+    organization.metadata = new OrganizationMetadata({
+      ...metadata,
+      approvedAt: approve ? new Date() : null,
+      deactivatedAt: null,
+      rejectedAt: approve ? null : new Date(),
+    });
   }
 }

@@ -2,12 +2,12 @@ import { Controller, Get, Param, Query } from '@nestjs/common';
 import { QueryBus } from '@nestjs/cqrs';
 
 import { GetPermissionSetsContract } from './permission-sets/get-permission-sets.contract';
-import { PermissionSetResponseDto } from './permission-sets/get-permission-sets.response.dto';
+import { GetPermissionSetResponseDto } from './permission-sets/get-permission-sets.response.dto';
 import { GetResourceContract } from './queries/get-resource.contract';
-import { ResourceDetailResponseDto } from './queries/get-resource.response.dto';
+import { GetResourceResponseDto } from './queries/get-resource.response.dto';
 import { GetResourcesContract } from './queries/get-resources.contract';
 import { GetResourcesRequestDto } from './queries/get-resources.request.dto';
-import { ResourceResponseDto } from './queries/get-resources.response.dto';
+import { GetResourceResponseDto as GetResourcesItemResponseDto } from './queries/get-resources.response.dto';
 
 @Controller('resources')
 export class ResourceController {
@@ -16,21 +16,21 @@ export class ResourceController {
   ) {}
 
   @Get('permission-sets')
-  async getPermissionSets(): Promise<PermissionSetResponseDto[]> {
+  async getPermissionSets(): Promise<GetPermissionSetResponseDto[]> {
     return this.queryBus.execute(new GetPermissionSetsContract());
   }
 
   @Get(':id')
   async getResource(
     @Param('id') id: string,
-  ): Promise<ResourceDetailResponseDto> {
+  ): Promise<GetResourceResponseDto> {
     return this.queryBus.execute(new GetResourceContract({ id }));
   }
 
   @Get()
   async getResources(
     @Query() query: GetResourcesRequestDto,
-  ): Promise<ResourceResponseDto[]> {
+  ): Promise<GetResourcesItemResponseDto[]> {
     return this.queryBus.execute(new GetResourcesContract(query));
   }
 }

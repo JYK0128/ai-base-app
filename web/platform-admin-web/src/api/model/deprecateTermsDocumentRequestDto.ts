@@ -9,6 +9,6 @@
 export interface DeprecateTermsDocumentRequestDto {
   /** 약관 문서 식별자 */
   id: string;
-  /** 폐기 일시 */
-  deprecatedAt: string;
+  /** 종료 일시 */
+  terminatedAt: string;
 }

@@ -68,7 +68,7 @@ export const TermsControllerAgreeTermsV1Body = zod.object({
 
 export const TermsControllerGetTermsDocumentsV1QueryParams = zod.object({
   "scope": zod.enum(['platform', 'organization']).optional().describe('조회 scope'),
-  "status": zod.enum(['DRAFT', 'PUBLISHED', 'DEPRECATED', 'ACTIVE', 'SCHEDULED_DEPRECATION']).optional().describe('상태 필터'),
+  "status": zod.enum(['DRAFT', 'PUBLISHED', 'DEPRECATED', 'ACTIVE']).optional().describe('상태 필터'),
   "keyword": zod.string().optional().describe('검색어')
 })
 
@@ -243,8 +243,6 @@ export const ResourceControllerGetResourceV1Params = zod.object({
 
 export const ResourceControllerGetResourcesV1QueryParams = zod.object({
   "scope": zod.enum(['PLATFORM', 'ORGANIZATION']).describe('리소스 관리 범위'),
-  "permissions": zod.array(zod.string()).optional().describe('필터링에 사용할 권한 코드 목록'),
-  "filterByPermissions": zod.boolean().optional().describe('권한 기준으로 리소스를 필터링할지 여부')
 })
 
 

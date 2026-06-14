@@ -1,19 +1,31 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Resource, ResourceScope, ResourceType } from '@pkg/database';
 
-export class ResourceDetailResponseDto implements Pick<Resource, 'id' | 'code' | 'name' | 'type' | 'scope' | 'path' | 'icon' | 'sortOrder' | 'actions' | 'constraint'> {
-  constructor(resource: Pick<Resource, 'id' | 'code' | 'name' | 'type' | 'scope' | 'path' | 'icon' | 'sortOrder' | 'actions' | 'constraint'> & { parentId?: string }) {
+import type { EntityResponseDto } from '@/common/interfaces';
+
+export class GetResourceResponseDto implements EntityResponseDto<Resource>, Pick<Resource, 'id' | 'code' | 'name' | 'type' | 'scope' | 'path' | 'icon' | 'sortOrder' | 'actions' | 'constraint'> {
+  constructor(resource: Pick<Resource, 'id' | 'code' | 'name' | 'type' | 'scope' | 'path' | 'icon' | 'sortOrder' | 'actions' | 'constraint'> & { parentId?: string | undefined }) {
     this.id = resource.id;
     this.code = resource.code;
     this.name = resource.name;
     this.type = resource.type;
     this.scope = resource.scope;
-    this.path = resource.path;
-    this.icon = resource.icon;
-    this.sortOrder = resource.sortOrder;
+    if (resource.path !== undefined) {
+      this.path = resource.path;
+    }
+    if (resource.icon !== undefined) {
+      this.icon = resource.icon;
+    }
+    if (resource.sortOrder !== undefined) {
+      this.sortOrder = resource.sortOrder;
+    }
     this.actions = resource.actions;
-    this.constraint = resource.constraint;
-    this.parentId = resource.parentId;
+    if (resource.constraint !== undefined) {
+      this.constraint = resource.constraint;
+    }
+    if (resource.parentId !== undefined) {
+      this.parentId = resource.parentId;
+    }
   }
 
   @ApiProperty({ example: '019e5236-adae-70d7-a8f7-2dc90bdf7098', description: '리소스 식별자' })

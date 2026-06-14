@@ -10,7 +10,7 @@ import bcrypt from 'bcrypt';
 
 import { MemberAccount } from '../domains/platform/member/member.account.entity';
 import { Member, MemberStatus } from '../domains/platform/member/member.entity';
-import { Organization, OrganizationStatus } from '../domains/platform/organization/organization.entity';
+import { Organization, OrganizationMetadata } from '../domains/platform/organization/organization.entity';
 import { OrganizationRole } from '../domains/platform/organization/organization.role.entity';
 import { OrganizationRoleAssignment } from '../domains/platform/organization/organization.role-assignment.entity';
 
@@ -32,7 +32,7 @@ const CUSTOMER_ORGANIZATIONS = [
     code: 'acme',
     name: 'Acme Corp',
     email: 'ops@acme.example',
-    status: OrganizationStatus.ACTIVE,
+    metadata: new OrganizationMetadata({ approvedAt: new Date() }),
   },
 ] satisfies readonly CodedEntityData<Organization>[];
 

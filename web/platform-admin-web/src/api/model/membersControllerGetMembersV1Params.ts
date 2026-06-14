@@ -6,7 +6,6 @@
  * OpenAPI spec version: 1.0
  */
 import type { MembersControllerGetMembersV1Status } from './membersControllerGetMembersV1Status';
-import type { Object } from './object';
 
 export type MembersControllerGetMembersV1Params = {
 /**
@@ -18,7 +17,7 @@ search?: string;
  */
 status?: MembersControllerGetMembersV1Status;
 /**
- * 조직 역할
+ * 조직 역할들
  */
-role?: Object;
+roles?: string[];
 };

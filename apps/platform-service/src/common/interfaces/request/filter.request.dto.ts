@@ -19,5 +19,7 @@ type StringKey<K> = K extends string ? K : never;
 export type FilterRequestDto<TEntity extends object> = {
   [K in StringKey<DirectFilterKeys<TEntity>>]?: FilterableAtomicValue<TEntity[K]> | Array<FilterableAtomicValue<TEntity[K]>>
 } & {
+  search?: string
+} & {
   [K in StringKey<DateFilterKeys<TEntity>> as `${K}Range`]?: [Date, Date]
 };

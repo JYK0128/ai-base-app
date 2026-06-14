@@ -45,6 +45,7 @@ import type {
   I18nControllerGetTranslationsV1Params,
   MembersControllerGetInvitesV1Params,
   MembersControllerGetMembersV1Params,
+  OrganizationControllerGetOrganizationRolesV1,
   OrganizationControllerGetOrganizationsV1Params,
   ResendInviteDto,
   ResourceControllerGetResourcesV1Params,
@@ -131,6 +132,8 @@ import membersControllerGetMemberV1Mutator from '../lib/axios';
 import type { ErrorType as MembersControllerGetMemberV1ErrorType } from '../lib/axios';
 import organizationControllerGetOrganizationsV1Mutator from '../lib/axios';
 import type { ErrorType as OrganizationControllerGetOrganizationsV1ErrorType } from '../lib/axios';
+import organizationControllerGetOrganizationRolesV1Mutator from '../lib/axios';
+import type { ErrorType as OrganizationControllerGetOrganizationRolesV1ErrorType } from '../lib/axios';
 import organizationControllerApproveOrganizationV1Mutator from '../lib/axios';
 import type { ErrorType as OrganizationControllerApproveOrganizationV1ErrorType } from '../lib/axios';
 import resourceControllerGetMyResourcesV1Mutator from '../lib/axios';
@@ -2595,6 +2598,62 @@ export function useOrganizationControllerGetOrganizationsV1<TData = Awaited<Retu
 
 
 
+export const organizationControllerGetOrganizationRolesV1 = (
+ signal?: AbortSignal
+) => {
+
+
+      return organizationControllerGetOrganizationRolesV1Mutator<OrganizationControllerGetOrganizationRolesV1>(
+      {url: `/api/v1/organizations/roles`, method: 'GET', signal
+    },
+      );
+    }
+
+
+
+export const getOrganizationControllerGetOrganizationRolesV1QueryKey = () => {
+    return [
+    `/api/v1/organizations/roles`
+    ] as const;
+    }
+
+
+export const getOrganizationControllerGetOrganizationRolesV1QueryOptions = <TData = Awaited<ReturnType<typeof organizationControllerGetOrganizationRolesV1>>, TError = OrganizationControllerGetOrganizationRolesV1ErrorType<unknown>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof organizationControllerGetOrganizationRolesV1>>, TError, TData>>, }
+) => {
+
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getOrganizationControllerGetOrganizationRolesV1QueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof organizationControllerGetOrganizationRolesV1>>> = ({ signal }) => organizationControllerGetOrganizationRolesV1(signal);
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof organizationControllerGetOrganizationRolesV1>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type OrganizationControllerGetOrganizationRolesV1QueryResult = NonNullable<Awaited<ReturnType<typeof organizationControllerGetOrganizationRolesV1>>>
+export type OrganizationControllerGetOrganizationRolesV1QueryError = OrganizationControllerGetOrganizationRolesV1ErrorType<unknown>
+
+
+export function useOrganizationControllerGetOrganizationRolesV1<TData = Awaited<ReturnType<typeof organizationControllerGetOrganizationRolesV1>>, TError = OrganizationControllerGetOrganizationRolesV1ErrorType<unknown>>(
+ options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof organizationControllerGetOrganizationRolesV1>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useOrganizationControllerGetOrganizationRolesV1<TData = Awaited<ReturnType<typeof organizationControllerGetOrganizationRolesV1>>, TError = OrganizationControllerGetOrganizationRolesV1ErrorType<unknown>>(
+ options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof organizationControllerGetOrganizationRolesV1>>, TError, TData>>, }
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getOrganizationControllerGetOrganizationRolesV1QueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
 
 
 
@@ -3377,8 +3436,6 @@ export function useSupportControllerGetTicketsV1<TData = Awaited<ReturnType<type
 
   return { ...query, queryKey: queryOptions.queryKey };
 }
-
-
 
 
 

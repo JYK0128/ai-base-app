@@ -1,18 +1,42 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Resource, ResourceScope, ResourceType } from '@pkg/database';
 
-export class ResourceResponseDto implements Pick<Resource, 'id' | 'code' | 'name' | 'type' | 'scope' | 'path' | 'icon' | 'sortOrder' | 'actions' | 'constraint'> {
-  constructor(resource: Pick<Resource, 'id' | 'code' | 'name' | 'type' | 'scope' | 'path' | 'icon' | 'sortOrder' | 'actions' | 'constraint'> & { parentId?: string }) {
+import type { EntityResponseDto } from '@/common/interfaces';
+
+type ResourceResponseSource = {
+  id: string
+  code: string
+  name: string
+  type: Resource['type']
+  scope: ResourceScope
+  path?: string | undefined
+  icon?: string | undefined
+  sortOrder?: number | undefined
+  actions: string[]
+  constraint?: string | undefined
+  parentId?: string | undefined
+};
+
+export class GetResourceResponseDto implements EntityResponseDto<Resource>, Pick<Resource, 'id' | 'code' | 'name' | 'type' | 'scope' | 'path' | 'icon' | 'sortOrder' | 'actions' | 'constraint'> {
+  constructor(resource: ResourceResponseSource) {
     this.id = resource.id;
     this.code = resource.code;
     this.name = resource.name;
     this.type = resource.type;
     this.scope = resource.scope;
-    this.path = resource.path;
-    this.icon = resource.icon;
-    this.sortOrder = resource.sortOrder;
+    if (resource.path !== undefined) {
+      this.path = resource.path;
+    }
+    if (resource.icon !== undefined) {
+      this.icon = resource.icon;
+    }
+    if (resource.sortOrder !== undefined) {
+      this.sortOrder = resource.sortOrder;
+    }
     this.actions = resource.actions;
-    this.constraint = resource.constraint;
+    if (resource.constraint !== undefined) {
+      this.constraint = resource.constraint;
+    }
     this.children = [];
   }
 
@@ -46,6 +70,6 @@ export class ResourceResponseDto implements Pick<Resource, 'id' | 'code' | 'name
   @ApiPropertyOptional({ example: 'READ', description: '제약 조건' })
   constraint?: string;
 
-  @ApiProperty({ type: () => [ResourceResponseDto], description: '하위 리소스 목록' })
-  children!: ResourceResponseDto[];
+  @ApiProperty({ type: () => [GetResourceResponseDto], description: '하위 리소스 목록' })
+  children!: GetResourceResponseDto[];
 }

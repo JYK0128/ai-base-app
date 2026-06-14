@@ -35,7 +35,7 @@ import { defaultTermsVersionEffectiveAtInput,
          getDocumentLifecycle,
          getVersionEffectiveTo,
          getVersionStatusPresentation,
-         isDocumentCurrentlyDeprecated,
+         isDocumentCurrentlyTerminated,
          isEditableVersion,
          scopeLabel,
          type TermsDocumentLifecycle,
@@ -90,9 +90,9 @@ function documentStatusTone(status: TermsDocumentLifecycle) {
       return 'border-amber-200 bg-amber-50 text-amber-700';
     case 'ACTIVE':
       return 'border-emerald-200 bg-emerald-50 text-emerald-700';
-    case 'DEPRECATED':
+    case 'TERMINATED':
       return 'border-rose-200 bg-rose-50 text-rose-700';
-    case 'SCHEDULED_DEPRECATION':
+    case 'SCHEDULED_TERMINATION':
       return 'border-amber-200 bg-amber-50 text-amber-700';
   }
 }
@@ -144,8 +144,8 @@ function buildTermsDocumentListContent(params: {
         const lifecycleLabel = {
           DRAFT: 'DRAFT',
           ACTIVE: 'PUBLISHED',
-          DEPRECATED: 'DEPRECATED',
-          SCHEDULED_DEPRECATION: '폐기 예약',
+          TERMINATED: 'TERMINATED',
+          SCHEDULED_TERMINATION: '종료 예약',
         }[lifecycle];
 
         return (
@@ -172,8 +172,8 @@ function buildTermsDocumentListContent(params: {
               {scope}
               {' '}
               약관
-              {lifecycle === 'SCHEDULED_DEPRECATION' && document.deprecatedAt && (
-                <span className="ml-1.5 text-[9px] text-amber-600 font-semibold">{`(${new Date(document.deprecatedAt).toLocaleDateString()} 폐기 예정)`}</span>
+              {lifecycle === 'SCHEDULED_TERMINATION' && document.terminatedAt && (
+                <span className="ml-1.5 text-[9px] text-amber-600 font-semibold">{`(${new Date(document.terminatedAt).toLocaleDateString()} 종료 예정)`}</span>
               )}
             </p>
 
@@ -400,8 +400,8 @@ export function TermsManagementTab() {
         return;
       }
 
-      if (isDocumentCurrentlyDeprecated(selectedTermsDocument)) {
-        toast.error('폐기된 문서는 수정할 수 없습니다.');
+      if (isDocumentCurrentlyTerminated(selectedTermsDocument)) {
+        toast.error('종료된 문서는 수정할 수 없습니다.');
         return;
       }
 
@@ -452,8 +452,8 @@ export function TermsManagementTab() {
         return;
       }
 
-      if (isDocumentCurrentlyDeprecated(selectedTermsDocument)) {
-        toast.error('폐기된 문서는 수정할 수 없습니다.');
+      if (isDocumentCurrentlyTerminated(selectedTermsDocument)) {
+        toast.error('종료된 문서는 수정할 수 없습니다.');
         return;
       }
 
@@ -496,8 +496,8 @@ export function TermsManagementTab() {
     || deleteDocumentMutation.isPending;
   const selectedScopeLabel = scopeLabel(selectedTermsDocument?.organizationId ?? null);
   const hasSelectedDocument = !!selectedTermsDocument;
-  const isSelectedDocumentDeprecated = selectedTermsDocumentLifecycle === 'DEPRECATED';
-  const versionFormDisabled = !hasSelectedDocument || isCreatingVersion || isSelectedDocumentDeprecated;
+  const isSelectedDocumentTerminated = selectedTermsDocumentLifecycle === 'TERMINATED';
+  const versionFormDisabled = !hasSelectedDocument || isCreatingVersion || isSelectedDocumentTerminated;
   const selectedVersionToUpdateResolved = useMemo(() => {
     if (!selectedVersionToUpdate) return undefined;
 
@@ -509,22 +509,22 @@ export function TermsManagementTab() {
     ? getVersionStatusPresentation(selectedVersionToUpdateResolved, selectedTermsVersionPreviews)
     : undefined;
   const selectedVersionChecksum = selectedVersionToUpdateResolved?.checksum ?? 'a1b2c3d4';
-  const editableSelectedVersion = hasSelectedDocument && !isSelectedDocumentDeprecated && isEditableVersion(selectedVersionToUpdateResolved)
+  const editableSelectedVersion = hasSelectedDocument && !isSelectedDocumentTerminated && isEditableVersion(selectedVersionToUpdateResolved)
     ? selectedVersionToUpdateResolved
     : undefined;
-  const selectedDocumentRemovalActionLabel = selectedTermsDocumentHasCurrentEffectiveVersion ? '문서 폐기' : '문서 삭제';
+  const selectedDocumentRemovalActionLabel = selectedTermsDocumentHasCurrentEffectiveVersion ? '문서 종료' : '문서 삭제';
   const selectedDocumentRemovalDialogTitle = documentRemovalMode === 'DELETE'
     ? '약관 문서 삭제 경고'
-    : '약관 문서 폐기 경고';
+    : '약관 문서 종료 경고';
   const selectedDocumentRemovalDialogDescription = documentRemovalMode === 'DELETE'
     ? '현재 효력 중인 약관이 없어 이 문서는 물리 삭제됩니다. 되돌릴 수 없으며 연결된 버전 이력도 함께 제거됩니다.'
-    : '약관 문서를 폐기하면 되돌릴 수 없으며, 모든 버전 관리가 즉시 차단(읽기 전용)됩니다.';
-  let selectedDocumentRemovalActionText = '즉시 폐기';
+    : '약관 문서를 종료하면 되돌릴 수 없으며, 모든 버전 관리가 즉시 차단(읽기 전용)됩니다.';
+  let selectedDocumentRemovalActionText = '즉시 종료';
   if (documentRemovalMode === 'DELETE') {
     selectedDocumentRemovalActionText = '물리 삭제';
   }
   else if (deprecateType === 'SCHEDULED') {
-    selectedDocumentRemovalActionText = '예약 폐기';
+    selectedDocumentRemovalActionText = '예약 종료';
   }
 
   const handleSelectDocument = (documentId: string) => {
@@ -602,17 +602,17 @@ export function TermsManagementTab() {
       }
 
       if (deprecateType === 'SCHEDULED' && !scheduledDeprecateDate) {
-        toast.error('예약 폐기 일시를 선택해 주세요.');
+        toast.error('예약 종료 일시를 선택해 주세요.');
         return;
       }
 
       const payload: DeprecateTermsDocumentDto = {
         id: documentId,
-        deprecatedAt: toIsoDateString(deprecateType === 'IMMEDIATE' ? new Date().toISOString() : scheduledDeprecateDate),
+        terminatedAt: toIsoDateString(deprecateType === 'IMMEDIATE' ? new Date().toISOString() : scheduledDeprecateDate),
       };
       const response = await deprecateDocumentMutation.mutateAsync({ data: payload });
       if (!response.data && response.success === false) {
-        toast.error('약관 문서를 폐기하지 못했습니다.');
+        toast.error('약관 문서를 종료하지 못했습니다.');
         return;
       }
 
@@ -622,8 +622,8 @@ export function TermsManagementTab() {
 
       toast.success(
         deprecateType === 'IMMEDIATE'
-          ? '약관 문서가 즉시 폐기되었습니다.'
-          : '약관 문서 폐기가 예약되었습니다.',
+          ? '약관 문서가 즉시 종료되었습니다.'
+          : '약관 문서 종료가 예약되었습니다.',
       );
     }
     catch {
@@ -638,22 +638,22 @@ export function TermsManagementTab() {
       const payload: CancelDeprecationTermsDocumentDto = { id: selectedTermsDocument.id };
       const response = await cancelDeprecationMutation.mutateAsync({ data: payload });
       if (!response.data && response.success === false) {
-        toast.error('폐기 예약을 취소하지 못했습니다.');
+        toast.error('종료 예약을 취소하지 못했습니다.');
         return;
       }
 
       await invalidateTermsDocumentList();
       await invalidateSelectedTermsDocument(selectedTermsDocument.id);
-      toast.success('폐기 예약이 취소되었습니다.');
+      toast.success('종료 예약이 취소되었습니다.');
     }
     catch {
-      toast.error('폐기 예약 취소 중 오류가 발생했습니다.');
+      toast.error('종료 예약 취소 중 오류가 발생했습니다.');
     }
   };
 
   const handleOpenVersionUpdate = (version: ExtendedTermsVersionResponseDto) => {
-    if (!selectedTermsDocument || isDocumentCurrentlyDeprecated(selectedTermsDocument)) {
-      toast.error('폐기된 문서는 수정할 수 없습니다.');
+    if (!selectedTermsDocument || isDocumentCurrentlyTerminated(selectedTermsDocument)) {
+      toast.error('종료된 문서는 수정할 수 없습니다.');
       return;
     }
 
@@ -905,7 +905,7 @@ export function TermsManagementTab() {
                   상세 불러오는 중
                 </span>
               )}
-              {hasSelectedDocument && !isSelectedDocumentLoading && !isSelectedDocumentDeprecated && getDocumentLifecycle(selectedTermsDocument) !== 'SCHEDULED_DEPRECATION' && (
+              {hasSelectedDocument && !isSelectedDocumentLoading && !isSelectedDocumentTerminated && getDocumentLifecycle(selectedTermsDocument) !== 'SCHEDULED_TERMINATION' && (
                 <>
 
                   <Button
@@ -929,11 +929,11 @@ export function TermsManagementTab() {
                   </Button>
                 </>
               )}
-              {hasSelectedDocument && !isSelectedDocumentLoading && getDocumentLifecycle(selectedTermsDocument) === 'SCHEDULED_DEPRECATION' && (
+              {hasSelectedDocument && !isSelectedDocumentLoading && getDocumentLifecycle(selectedTermsDocument) === 'SCHEDULED_TERMINATION' && (
                 <div className="flex items-center gap-2">
                   <span className="flex items-center gap-1 rounded border border-amber-200 bg-amber-50 px-2.5 py-0.5 font-mono text-[9px] font-bold text-amber-700">
                     <AlertCircle className="h-3 w-3 animate-pulse" />
-                    {`폐기 예약 (${new Date(selectedTermsDocument.deprecatedAt).toLocaleDateString()} 예정)`}
+                    {`종료 예약 (${new Date(selectedTermsDocument.terminatedAt).toLocaleDateString()} 예정)`}
                   </span>
                   <Button
                     size="sm"
@@ -955,10 +955,10 @@ export function TermsManagementTab() {
                   </Button>
                 </div>
               )}
-              {hasSelectedDocument && !isSelectedDocumentLoading && isSelectedDocumentDeprecated && (
+              {hasSelectedDocument && !isSelectedDocumentLoading && isSelectedDocumentTerminated && (
                 <span className="flex items-center gap-1 rounded border border-rose-200 bg-rose-50 px-2.5 py-0.5 font-mono text-[9px] font-bold text-rose-700">
                   <AlertCircle className="h-3 w-3 animate-pulse" />
-                  이 문서는 폐기되었습니다 (읽기 전용)
+                  이 문서는 종료되었습니다 (읽기 전용)
                 </span>
               )}
             </div>
@@ -1212,21 +1212,21 @@ export function TermsManagementTab() {
               )
               : (
                 <>
-                  <label className="block font-semibold text-slate-700">폐기 처리 방식</label>
+                  <label className="block font-semibold text-slate-700">종료 처리 방식</label>
                   <div className="grid grid-cols-2 gap-3">
                     <button
                       type="button"
                       onClick={() => setDeprecateType('IMMEDIATE')}
                       className={`flex cursor-pointer items-center justify-center rounded-lg border p-3 transition-all ${deprecateType === 'IMMEDIATE' ? 'border-rose-300 bg-rose-50 text-rose-700 font-semibold shadow-xs' : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'}`}
                     >
-                      <span>즉시 폐기</span>
+                      <span>즉시 종료</span>
                     </button>
                     <button
                       type="button"
                       onClick={() => setDeprecateType('SCHEDULED')}
                       className={`flex cursor-pointer items-center justify-center rounded-lg border p-3 transition-all ${deprecateType === 'SCHEDULED' ? 'border-amber-300 bg-amber-50/70 text-amber-800 font-semibold shadow-xs' : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'}`}
                     >
-                      <span>예약 폐기</span>
+                      <span>예약 종료</span>
                     </button>
                   </div>
 
@@ -1245,7 +1245,7 @@ export function TermsManagementTab() {
                     )
                     : (
                       <div className="rounded-xl border border-rose-100 bg-rose-50/50 p-4 text-slate-600">
-                        <p className="font-semibold text-rose-800">정말 즉시 폐기하시겠습니까?</p>
+                        <p className="font-semibold text-rose-800">정말 즉시 종료하시겠습니까?</p>
                         <p className="mt-1 text-[11px] text-slate-500">즉시 읽기 전용 상태로 잠기며 되돌릴 수 없습니다.</p>
                       </div>
                     )}
@@ -1375,8 +1375,8 @@ export function TermsManagementTab() {
                         {editableSelectedVersion ? '수정 가능' : '읽기 전용'}
                       </div>
                       <p className="mt-1 text-xs text-slate-500">
-                        {isSelectedDocumentDeprecated
-                          ? '폐기된 문서는 수정할 수 없습니다.'
+                        {isSelectedDocumentTerminated
+                          ? '종료된 문서는 수정할 수 없습니다.'
                           : '임시저장 초안과 예약 발효 전 버전은 수정할 수 있습니다.'}
                       </p>
                     </div>
@@ -1398,10 +1398,10 @@ export function TermsManagementTab() {
                     </div>
                   </section>
 
-                  {isSelectedDocumentDeprecated
+                  {isSelectedDocumentTerminated
                     ? (
                       <div className="rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-[11px] leading-5 text-rose-700">
-                        폐기된 문서는 버전을 수정할 수 없습니다.
+                        종료된 문서는 버전을 수정할 수 없습니다.
                       </div>
                     )
                     : !editableSelectedVersion && (
@@ -1438,7 +1438,7 @@ export function TermsManagementTab() {
         </DialogContent>
       </Dialog>
 
-      <Dialog open={isUpdateVersionModalOpen && !isSelectedDocumentDeprecated} onOpenChange={setIsUpdateVersionModalOpen}>
+      <Dialog open={isUpdateVersionModalOpen && !isSelectedDocumentTerminated} onOpenChange={setIsUpdateVersionModalOpen}>
         <DialogContent className="grid h-[85vh] w-full grid-rows-[auto_1fr] overflow-hidden sm:max-w-5xl!">
           <DialogHeader className="border-b border-slate-200 pb-3">
             <DialogTitle className="flex items-center gap-2 text-lg font-bold tracking-tight text-slate-950">

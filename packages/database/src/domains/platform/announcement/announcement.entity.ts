@@ -28,6 +28,13 @@ export enum AnnouncementPriority {
   HIGH = 'HIGH',
 }
 
+export enum AnnouncementStatus {
+  DRAFT = 'DRAFT',
+  SCHEDULED = 'SCHEDULED',
+  ACTIVE = 'ACTIVE',
+  EXPIRED = 'EXPIRED',
+}
+
 @Embeddable()
 export class AnnouncementMetadata {
   [key: string]: unknown;
@@ -73,6 +80,69 @@ export class Announcement extends CoreEntity<Announcement> {
 
   @Embedded({ entity: () => AnnouncementMetadata, object: true, nullable: true })
   override metadata: Opt<AnnouncementMetadata> = new AnnouncementMetadata();
+
+  @Property({ persist: false })
+  get category(): AnnouncementCategory {
+    return this.metadata.category;
+  }
+
+  @Property({ persist: false })
+  get audience(): AnnouncementAudience {
+    return this.metadata.audience;
+  }
+
+  @Property({ persist: false })
+  get channel(): AnnouncementChannel {
+    return this.metadata.channel;
+  }
+
+  @Property({ persist: false })
+  get priority(): AnnouncementPriority {
+    return this.metadata.priority;
+  }
+
+  @Property({ persist: false })
+  get pinned(): boolean {
+    return this.metadata.pinned;
+  }
+
+  @Property({ persist: false })
+  get publishedAt(): Opt<Date> {
+    return this.metadata.publishedAt;
+  }
+
+  @Property({ persist: false })
+  get startAt(): Opt<Date> {
+    return this.metadata.startAt;
+  }
+
+  @Property({ persist: false })
+  get endAt(): Opt<Date> {
+    return this.metadata.endAt;
+  }
+
+  @Property({ persist: false })
+  get status(): Opt<AnnouncementStatus> {
+    const publishedAt = this.publishedAt;
+
+    if (!publishedAt) {
+      return AnnouncementStatus.DRAFT;
+    }
+
+    const now = Date.now();
+    const startAt = this.startAt?.getTime();
+    const endAt = this.endAt?.getTime();
+
+    if (typeof startAt === 'number' && startAt > now) {
+      return AnnouncementStatus.SCHEDULED;
+    }
+
+    if (typeof endAt === 'number' && endAt < now) {
+      return AnnouncementStatus.EXPIRED;
+    }
+
+    return AnnouncementStatus.ACTIVE;
+  }
 
   @Property({ persist: false })
   get isPublished(): Opt<boolean> {

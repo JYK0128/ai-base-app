@@ -1,9 +1,13 @@
 import { Query } from '@nestjs/cqrs';
 
-import type { TermsVersionResponseDto } from './get-terms-document.response.dto';
+import type { GetTermsDocumentVersionResponseDto } from './get-terms-document.response.dto';
+import type { GetTermsDocumentVersionsRequestDto } from './get-terms-document-versions.request.dto';
 
-export class GetTermsDocumentVersionsContract extends Query<TermsVersionResponseDto[]> {
-  constructor(public readonly data: { id: string, keyword?: string }) {
+export class GetTermsDocumentVersionsContract extends Query<GetTermsDocumentVersionResponseDto[]> {
+  constructor(
+    public readonly documentId: string,
+    public readonly data: GetTermsDocumentVersionsRequestDto,
+  ) {
     super();
   }
 }

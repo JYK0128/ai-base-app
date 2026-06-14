@@ -6,10 +6,10 @@ import { CreateInviteRequestDto } from './create-invite/create-invite.request.dt
 import { CreateInviteResponseDto } from './create-invite/create-invite.response.dto';
 import { GetMemberContract } from './get-member/get-member.contract';
 import { GetMemberRequestDto } from './get-member/get-member.request.dto';
-import { MemberResponseDto } from './get-member/get-member.response.dto';
+import { GetMemberResponseDto } from './get-member/get-member.response.dto';
 import { GetMembersContract } from './get-members/get-members.contract';
 import { GetMembersRequestDto } from './get-members/get-members.request.dto';
-import { GetMembersResponseDto } from './get-members/get-members.response.dto';
+import { GetMemberResponseDto as GetMembersItemResponseDto } from './get-members/get-members.response.dto';
 import { UpdateMemberRoleContract } from './update-member-role/update-member-role.contract';
 import { UpdateMemberRoleRequestDto } from './update-member-role/update-member-role.request.dto';
 import { UpdateMemberRoleResponseDto } from './update-member-role/update-member-role.response.dto';
@@ -48,14 +48,14 @@ export class MembersController {
   @Get()
   async getMembers(
     @Query() query: GetMembersRequestDto,
-  ): Promise<GetMembersResponseDto[]> {
+  ): Promise<GetMembersItemResponseDto[]> {
     return this.queryBus.execute(new GetMembersContract(query));
   }
 
   @Get(':id')
   async getMember(
     @Param('id') id: string,
-  ): Promise<MemberResponseDto> {
+  ): Promise<GetMemberResponseDto> {
     return this.queryBus.execute(new GetMemberContract({ id } satisfies GetMemberRequestDto));
   }
 }

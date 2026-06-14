@@ -1,17 +1,20 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { type Member, MemberStatus } from '@pkg/database';
 
+import type { EntityResponseDto } from '@/common/interfaces';
 import type { MemberRoleDto } from '@/domains/members/members.types';
 
-export class GetMembersResponseDto {
+export class GetMemberResponseDto implements EntityResponseDto<Member> {
   constructor(member: Member) {
     const account = member.accounts.getItems()[0];
-    const roleAssignment = member.organizationRoles.getItems()[0];
+    const roleAssignment = member.roles.getItems()[0];
 
     this.id = member.id;
     this.name = member.name;
     this.status = member.status;
-    this.createdBy = member.createdBy;
+    if (member.createdBy) {
+      this.createdBy = member.createdBy;
+    }
     this.email = account?.email ?? '';
     this.role = (roleAssignment?.role.code ?? '') as MemberRoleDto;
     this.lastLoginAt = account?.lastLoginAt?.toISOString() ?? null;

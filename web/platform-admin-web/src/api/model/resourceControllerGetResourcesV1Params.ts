@@ -12,12 +12,4 @@ export type ResourceControllerGetResourcesV1Params = {
  * 리소스 관리 범위
  */
 scope: ResourceControllerGetResourcesV1Scope;
-/**
- * 필터링에 사용할 권한 코드 목록
- */
-permissions?: string[];
-/**
- * 권한 기준으로 리소스를 필터링할지 여부
- */
-filterByPermissions?: boolean;
 };

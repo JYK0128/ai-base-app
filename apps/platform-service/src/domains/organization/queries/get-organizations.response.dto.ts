@@ -1,12 +1,14 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Organization, OrganizationStatus } from '@pkg/database';
 
-export class OrganizationResponseDto implements Pick<Organization, 'id' | 'name' | 'createdAt'> {
+import type { EntityResponseDto, ListResponseDto } from '@/common/interfaces';
+
+export class GetOrganizationResponseDto implements EntityResponseDto<Organization> {
   constructor(organization: Organization) {
     this.id = organization.id;
     this.name = organization.name;
     this.createdAt = organization.createdAt;
-    this.subdomain = organization.code;
+    this.code = organization.code;
     this.status = organization.status;
   }
 
@@ -19,18 +21,18 @@ export class OrganizationResponseDto implements Pick<Organization, 'id' | 'name'
   @ApiProperty({ example: '2026-06-06T14:00:00.000Z', description: '생성 일시' })
   createdAt!: Date;
 
-  @ApiProperty({ example: 'platform', description: '서브도메인' })
-  subdomain!: string;
+  @ApiProperty({ example: 'platform', description: '조직 코드' })
+  code!: string;
 
   @ApiProperty({ enum: OrganizationStatus, example: 'ACTIVE', description: '조직 상태' })
   status!: OrganizationStatus;
 }
 
-export class GetOrganizationsResponseDto {
-  constructor(list: OrganizationResponseDto[]) {
-    this.list = list;
+export class GetOrganizationsResponseDto implements ListResponseDto<Organization> {
+  constructor(items: GetOrganizationResponseDto[]) {
+    this.items = items;
   }
 
-  @ApiProperty({ type: [OrganizationResponseDto], description: '조직 목록' })
-  list!: OrganizationResponseDto[];
+  @ApiProperty({ type: [GetOrganizationResponseDto], description: '조직 목록' })
+  items!: GetOrganizationResponseDto[];
 }

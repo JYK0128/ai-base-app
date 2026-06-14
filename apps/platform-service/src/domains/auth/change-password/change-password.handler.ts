@@ -7,12 +7,12 @@ import { ClsService } from 'nestjs-cls';
 
 import { ENV } from '@/env';
 
-import { ChangePasswordContract } from './change-password.contract';
+import { AuthChangePasswordContract } from './change-password.contract';
 import { ChangePasswordAsserter } from './change-password.error';
-import { ChangePasswordResponseDto } from './change-password.response.dto';
+import { AuthChangePasswordResponseDto } from './change-password.response.dto';
 
-@CommandHandler(ChangePasswordContract)
-export class ChangePasswordHandler implements ICommandHandler<ChangePasswordContract> {
+@CommandHandler(AuthChangePasswordContract)
+export class ChangePasswordHandler implements ICommandHandler<AuthChangePasswordContract> {
   private readonly Asserter = ChangePasswordAsserter;
 
   constructor(
@@ -22,7 +22,7 @@ export class ChangePasswordHandler implements ICommandHandler<ChangePasswordCont
   ) {}
 
   @Transactional()
-  async execute(command: ChangePasswordContract): Promise<ChangePasswordResponseDto> {
+  async execute(command: AuthChangePasswordContract): Promise<AuthChangePasswordResponseDto> {
     const { currentPassword, newPassword } = command.data;
 
     const account = await this.identifyAccount();
@@ -30,7 +30,7 @@ export class ChangePasswordHandler implements ICommandHandler<ChangePasswordCont
 
     this.processPasswordUpdate(account, newPassword);
 
-    return new ChangePasswordResponseDto();
+    return new AuthChangePasswordResponseDto();
   }
 
   private async identifyAccount(): Promise<MemberAccount> {

@@ -3,7 +3,7 @@ import { Organization } from '@pkg/database';
 
 import type { IdResponseDto } from '@/common/interfaces';
 
-export class ApproveOrganizationResponseDto implements IdResponseDto<Organization> {
+export class UpdateOrganizationApprovalResponseDto implements IdResponseDto<Organization> {
   constructor(id: string) {
     this.id = id;
   }

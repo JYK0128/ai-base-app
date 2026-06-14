@@ -5,7 +5,7 @@ import { ClsService } from 'nestjs-cls';
 
 import { GetResourcesContract } from './get-resources.contract';
 import { GetResourcesAsserter } from './get-resources.error';
-import { ResourceResponseDto } from './get-resources.response.dto';
+import { GetResourceResponseDto } from './get-resources.response.dto';
 
 interface ResourceNodeSource {
   id: string
@@ -13,12 +13,12 @@ interface ResourceNodeSource {
   name: string
   type: Resource['type']
   scope: ResourceScope
-  path?: string
-  icon?: string
-  sortOrder?: number
+  path?: string | undefined
+  icon?: string | undefined
+  sortOrder?: number | undefined
   actions: string[]
-  constraint?: string
-  parentId?: string
+  constraint?: string | undefined
+  parentId?: string | undefined
 }
 
 @QueryHandler(GetResourcesContract)
@@ -30,41 +30,10 @@ export class GetResourcesHandler implements IQueryHandler<GetResourcesContract> 
     private readonly cls: ClsService,
   ) {}
 
-  async execute(query: GetResourcesContract): Promise<ResourceResponseDto[]> {
+  async execute(query: GetResourcesContract): Promise<GetResourceResponseDto[]> {
     const resources = await this.identifyResources(query.data.scope);
     const tree = this.buildResourceTreeResponse(resources);
-
-    if (query.data.filterByPermissions) {
-      return this.filterAllowedResources(tree, query.data.permissions ?? []);
-    }
-
     return tree;
-  }
-
-  private filterAllowedResources(
-    nodes: ResourceResponseDto[],
-    userPermissions: string[],
-  ): ResourceResponseDto[] {
-    return nodes
-      .map((node) => {
-        const filteredChildren = node.children.length > 0
-          ? this.filterAllowedResources(node.children, userPermissions)
-          : [];
-
-        const requiredPermission = `${node.code}:READ`;
-        const hasPermission = userPermissions.some((owned) => owned === requiredPermission);
-        const hasReadAction = node.actions.includes('READ');
-
-        if ((hasPermission && hasReadAction) || filteredChildren.length > 0) {
-          return {
-            ...node,
-            children: filteredChildren,
-          };
-        }
-
-        return null;
-      })
-      .filter((node): node is ResourceResponseDto => node !== null);
   }
 
   private async identifyResources(scope: ResourceScope): Promise<Resource[]> {
@@ -86,32 +55,32 @@ export class GetResourcesHandler implements IQueryHandler<GetResourcesContract> 
     );
   }
 
-  private buildResourceTreeResponse(resources: Resource[]): ResourceResponseDto[] {
+  private buildResourceTreeResponse(resources: Resource[]): GetResourceResponseDto[] {
     const sources = resources.map((resource) => ({
       id: resource.id,
       code: resource.code,
       name: resource.name,
       type: resource.type,
       scope: resource.scope,
-      path: resource.path,
-      icon: resource.icon,
-      sortOrder: resource.sortOrder,
+      ...(resource.path !== undefined ? { path: resource.path } : {}),
+      ...(resource.icon !== undefined ? { icon: resource.icon } : {}),
+      ...(resource.sortOrder !== undefined ? { sortOrder: resource.sortOrder } : {}),
       actions: resource.actions,
-      constraint: resource.constraint,
-      parentId: resource.parent?.id,
+      ...(resource.constraint !== undefined ? { constraint: resource.constraint } : {}),
+      ...(resource.parent?.id !== undefined ? { parentId: resource.parent.id } : {}),
     }));
 
     return this.buildResourceTreeFromSources(sources);
   }
 
-  private buildResourceTreeFromSources(resources: ResourceNodeSource[]): ResourceResponseDto[] {
-    const map = new Map<string, ResourceResponseDto>();
+  private buildResourceTreeFromSources(resources: ResourceNodeSource[]): GetResourceResponseDto[] {
+    const map = new Map<string, GetResourceResponseDto>();
 
     for (const resource of resources) {
-      map.set(resource.id, new ResourceResponseDto(resource));
+      map.set(resource.id, new GetResourceResponseDto(resource));
     }
 
-    const roots: ResourceResponseDto[] = [];
+    const roots: GetResourceResponseDto[] = [];
 
     for (const resource of resources) {
       const node = map.get(resource.id);
@@ -132,7 +101,7 @@ export class GetResourcesHandler implements IQueryHandler<GetResourcesContract> 
     return roots;
   }
 
-  private sortResourceNodes(nodes: ResourceResponseDto[]) {
+  private sortResourceNodes(nodes: GetResourceResponseDto[]) {
     nodes.sort((left, right) => {
       if (left.sortOrder === undefined && right.sortOrder === undefined) {
         return left.code.localeCompare(right.code);

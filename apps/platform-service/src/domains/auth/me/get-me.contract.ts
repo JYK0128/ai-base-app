@@ -1,8 +1,8 @@
 import { Query } from '@nestjs/cqrs';
 
-import type { GetMeResponseDto } from './get-me.response.dto';
+import type { AuthGetMeResponseDto } from './get-me.response.dto';
 
-export class GetMeContract extends Query<GetMeResponseDto> {
+export class AuthGetMeContract extends Query<AuthGetMeResponseDto> {
   constructor() {
     super();
   }

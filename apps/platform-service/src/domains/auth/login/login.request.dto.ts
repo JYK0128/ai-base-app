@@ -4,7 +4,7 @@ import { IsEmail, IsIP, IsOptional, MinLength } from 'class-validator';
 import { IsNotEmptyString } from '@/common/decorators/is-not-empty-string.decorator';
 import type { PayloadRequestDto } from '@/common/interfaces';
 
-export class LoginRequestDto implements PayloadRequestDto {
+export class AuthLoginRequestDto implements PayloadRequestDto {
   @ApiProperty({ example: 'dev@example.com', description: '이메일 주소' })
   @IsEmail({}, { message: '유효한 이메일 형식이 아닙니다.' })
   email!: string;

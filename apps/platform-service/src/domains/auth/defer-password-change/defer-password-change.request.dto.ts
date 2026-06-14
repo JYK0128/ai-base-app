@@ -1,3 +1,3 @@
 import type { PayloadRequestDto } from '@/common/interfaces';
 
-export class DeferPasswordChangeRequestDto implements PayloadRequestDto {}
+export class AuthDeferPasswordChangeRequestDto implements PayloadRequestDto {}

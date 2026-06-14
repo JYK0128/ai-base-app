@@ -1,7 +1,9 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { SupportTicket, TicketPriority, TicketStatus } from '@pkg/database';
 
-export class TicketResponseDto implements Pick<SupportTicket, 'id' | 'title' | 'content' | 'status' | 'priority' | 'createdAt'> {
+import type { EntityResponseDto } from '@/common/interfaces';
+
+export class GetTicketResponseDto implements EntityResponseDto<SupportTicket>, Pick<SupportTicket, 'id' | 'title' | 'content' | 'status' | 'priority' | 'createdAt'> {
   constructor(ticket: SupportTicket) {
     this.id = ticket.id;
     this.title = ticket.title;

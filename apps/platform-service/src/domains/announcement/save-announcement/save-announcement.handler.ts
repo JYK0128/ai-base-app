@@ -1,17 +1,17 @@
 import { EntityManager } from '@mikro-orm/core';
 import { Transactional } from '@mikro-orm/decorators/legacy';
 import { InjectRepository } from '@mikro-orm/nestjs';
-import { BadRequestException, NotFoundException } from '@nestjs/common';
+import { BadRequestException } from '@nestjs/common';
 import { CommandHandler, type ICommandHandler } from '@nestjs/cqrs';
 import { Announcement, AnnouncementAudience, AnnouncementCategory, AnnouncementChannel, AnnouncementMetadata, AnnouncementPriority, CoreRepository, Member } from '@pkg/database';
 import { ClsService } from 'nestjs-cls';
 
-import { AnnouncementResponseDto } from '../get-announcements/get-announcements.response.dto';
-import { SaveAnnouncementContract } from './save-announcement.contract';
-import type { SaveAnnouncementRequestDto } from './save-announcement.request.dto';
+import { CreateAnnouncementResponseDto } from '../get-announcements/get-announcements.response.dto';
+import { CreateAnnouncementContract } from './save-announcement.contract';
+import type { CreateAnnouncementRequestDto } from './save-announcement.request.dto';
 
-@CommandHandler(SaveAnnouncementContract)
-export class SaveAnnouncementHandler implements ICommandHandler<SaveAnnouncementContract> {
+@CommandHandler(CreateAnnouncementContract)
+export class CreateAnnouncementHandler implements ICommandHandler<CreateAnnouncementContract> {
   constructor(
     private readonly em: EntityManager,
     @InjectRepository(Announcement)
@@ -22,19 +22,17 @@ export class SaveAnnouncementHandler implements ICommandHandler<SaveAnnouncement
   ) {}
 
   @Transactional()
-  async execute({ data }: SaveAnnouncementContract): Promise<AnnouncementResponseDto> {
+  async execute({ data }: CreateAnnouncementContract): Promise<CreateAnnouncementResponseDto> {
     const author = await this.identifyAuthor();
-    const announcement = data.id
-      ? await this.identifyAnnouncement(data.id)
-      : this.announcementRepository.create({
-        title: data.title.trim(),
-        content: data.content.trim(),
-        metadata: new AnnouncementMetadata(),
-      });
+    const announcement = this.announcementRepository.create({
+      title: data.title.trim(),
+      content: data.content.trim(),
+      metadata: new AnnouncementMetadata(),
+    });
 
     this.applyMutation(announcement, data, author);
 
-    return new AnnouncementResponseDto(announcement);
+    return new CreateAnnouncementResponseDto(announcement);
   }
 
   private async identifyAuthor(): Promise<Member> {
@@ -47,25 +45,15 @@ export class SaveAnnouncementHandler implements ICommandHandler<SaveAnnouncement
     const member = await this.memberRepository.findOne({ id: memberId });
 
     if (!member) {
-      throw new NotFoundException('MEMBER_NOT_FOUND');
+      throw new Error('MEMBER_NOT_FOUND');
     }
 
     return member;
   }
 
-  private async identifyAnnouncement(id: string): Promise<Announcement> {
-    const announcement = await this.announcementRepository.findOne({ id });
-
-    if (!announcement) {
-      throw new NotFoundException('ANNOUNCEMENT_NOT_FOUND');
-    }
-
-    return announcement;
-  }
-
   private applyMutation(
     announcement: Announcement,
-    data: SaveAnnouncementRequestDto,
+    data: CreateAnnouncementRequestDto,
     author: Member,
   ): void {
     const now = new Date();
@@ -84,9 +72,9 @@ export class SaveAnnouncementHandler implements ICommandHandler<SaveAnnouncement
     metadata.pinned = Boolean(data.pinned ?? metadata.pinned ?? false);
 
     const isPublished = data.isPublished ?? (data.publishedAt ? true : Boolean(metadata.publishedAt));
-    metadata.publishedAt = isPublished
-      ? this.resolvePublishedAt(data, metadata, now)
-      : undefined;
+    if (isPublished) {
+      metadata.publishedAt = this.resolvePublishedAt(data, metadata, now);
+    }
 
     metadata.startAt = data.startAt ? new Date(data.startAt) : metadata.startAt;
     metadata.endAt = data.endAt ? new Date(data.endAt) : metadata.endAt;
@@ -95,7 +83,7 @@ export class SaveAnnouncementHandler implements ICommandHandler<SaveAnnouncement
   }
 
   private resolvePublishedAt(
-    data: SaveAnnouncementRequestDto,
+    data: CreateAnnouncementRequestDto,
     metadata: AnnouncementMetadata,
     fallback: Date,
   ): Date {

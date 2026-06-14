@@ -1,8 +1,8 @@
 import { Query } from '@nestjs/cqrs';
 
-import type { PermissionSetResponseDto } from './get-permission-sets.response.dto';
+import type { GetPermissionSetResponseDto } from './get-permission-sets.response.dto';
 
-export class GetPermissionSetsContract extends Query<PermissionSetResponseDto[]> {
+export class GetPermissionSetsContract extends Query<GetPermissionSetResponseDto[]> {
   constructor() {
     super();
   }

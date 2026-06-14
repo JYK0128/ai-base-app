@@ -24,10 +24,10 @@ export class Member extends CoreEntity<Member> {
   accounts = new Collection<MemberAccount>(this);
 
   @OneToMany(() => OrganizationRoleAssignment, (organizationRole) => organizationRole.member)
-  organizationRoles = new Collection<OrganizationRoleAssignment>(this);
+  roles = new Collection<OrganizationRoleAssignment>(this);
 
   @OneToMany(() => TermsConsent, (consent) => consent.member)
-  termsConsents = new Collection<TermsConsent>(this);
+  consents = new Collection<TermsConsent>(this);
 
   @Property({ type: 'string' })
   name!: string;

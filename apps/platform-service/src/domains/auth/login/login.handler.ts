@@ -7,10 +7,10 @@ import { JwtUtil } from '@pkg/shared';
 import { ENV } from '@/env';
 
 import { AuthCacheService } from '../auth.cache';
-import { LoginContract } from './login.contract';
+import { AuthLoginContract } from './login.contract';
 import { LoginAsserter } from './login.error';
-import type { LoginRequestDto } from './login.request.dto';
-import type { LoginResponseDto } from './login.response.dto';
+import type { AuthLoginRequestDto } from './login.request.dto';
+import type { AuthLoginResponseDto } from './login.response.dto';
 
 type LoginMetadata = {
   attempts?: number
@@ -19,8 +19,8 @@ type LoginMetadata = {
   accessToken?: string
 };
 
-@CommandHandler(LoginContract)
-export class LoginHandler implements ICommandHandler<LoginContract> {
+@CommandHandler(AuthLoginContract)
+export class LoginHandler implements ICommandHandler<AuthLoginContract> {
   private readonly loginKeys = AuthCacheService.for('login');
   private readonly Asserter = LoginAsserter.onFail(async ({ code, metadata, context }) => {
     if (code === 'INVALID_CREDENTIALS' && context) {
@@ -35,7 +35,7 @@ export class LoginHandler implements ICommandHandler<LoginContract> {
   ) {}
 
   @Transactional()
-  async execute(command: LoginContract): Promise<LoginResponseDto> {
+  async execute(command: AuthLoginContract): Promise<AuthLoginResponseDto> {
     const { email, password, clientIp } = command.data;
     const account = await this.identifyAccount(email);
     await this.validatePolicies(account, password);
@@ -60,7 +60,7 @@ export class LoginHandler implements ICommandHandler<LoginContract> {
     const account = await this.Asserter.assert(
       this.memberAccountRepository.findOne(
         { email },
-        { populate: ['member.organization', 'member.organizationRoles.role.permissions.resource'] },
+        { populate: ['member.organization', 'member.roles.role.permissions.resource'] },
       ),
       'INVALID_CREDENTIALS',
       { context: { email } },
@@ -124,7 +124,7 @@ export class LoginHandler implements ICommandHandler<LoginContract> {
     return tokens;
   }
 
-  private async handleLoginFailure(context: Pick<LoginRequestDto, 'email'>, metadata: LoginMetadata = {}) {
+  private async handleLoginFailure(context: Pick<AuthLoginRequestDto, 'email'>, metadata: LoginMetadata = {}) {
     const attemptKey = this.loginKeys.build('attempt', context.email);
     const attempts = await this.authCacheService.incr(attemptKey, ENV.LOGIN_ATTEMPT_TTL);
 

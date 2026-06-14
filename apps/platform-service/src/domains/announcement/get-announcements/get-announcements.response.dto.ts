@@ -1,9 +1,9 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { Announcement, AnnouncementMetadata } from '@pkg/database';
+import { Announcement, AnnouncementMetadata, AnnouncementStatus } from '@pkg/database';
 
 import type { EntityResponseDto } from '@/common/interfaces';
 
-export class AnnouncementResponseDto implements EntityResponseDto<Announcement>,
+export class GetAnnouncementResponseDto implements EntityResponseDto<Announcement>,
   Pick<Announcement, 'id' | 'title' | 'content' | 'createdAt' | 'updatedAt'>,
   Pick<AnnouncementMetadata, 'category' | 'audience' | 'channel' | 'priority' | 'pinned' | 'publishedAt' | 'startAt' | 'endAt'> {
   constructor(announcement: Announcement) {
@@ -22,7 +22,7 @@ export class AnnouncementResponseDto implements EntityResponseDto<Announcement>,
     this.publishedAt = metadata.publishedAt;
     this.startAt = metadata.startAt;
     this.endAt = metadata.endAt;
-    this.status = announcement.isPublished ? 'PUBLISHED' : 'DRAFT';
+    this.status = announcement.status;
     this.isPublished = Boolean(announcement.isPublished);
     this.author = announcement.createdBy ?? announcement.updatedBy ?? '';
   }
@@ -66,8 +66,8 @@ export class AnnouncementResponseDto implements EntityResponseDto<Announcement>,
   @ApiPropertyOptional({ description: '게시 종료일' })
   endAt!: Date;
 
-  @ApiProperty({ enum: ['DRAFT', 'PUBLISHED'], description: '게시 상태' })
-  status!: 'DRAFT' | 'PUBLISHED';
+  @ApiProperty({ enum: ['DRAFT', 'SCHEDULED', 'ACTIVE', 'EXPIRED'], description: '게시 상태' })
+  status!: AnnouncementStatus;
 
   @ApiProperty({ description: '게시 확정 여부' })
   isPublished!: boolean;
@@ -75,3 +75,9 @@ export class AnnouncementResponseDto implements EntityResponseDto<Announcement>,
   @ApiProperty({ description: '작성자' })
   author!: string;
 }
+
+export class CreateAnnouncementResponseDto extends GetAnnouncementResponseDto {}
+
+export class UpdateAnnouncementResponseDto extends GetAnnouncementResponseDto {}
+
+export class DeleteAnnouncementResponseDto extends GetAnnouncementResponseDto {}

@@ -2,8 +2,6 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import type { MemberAccount } from '@pkg/database';
 import { AccountStatus, MemberStatus, OrganizationStatus } from '@pkg/database';
 
-import { withPayloadResponseDto } from '@/common/interfaces';
-
 export class AuthAccountInfoDto {
   @ApiProperty({ example: '019e5236-adae-70d7-a8f7-2dc90bdf7081', description: '계정 식별자' })
   id!: string;
@@ -58,7 +56,7 @@ export class AuthOrganizationInfoDto {
   status!: OrganizationStatus;
 }
 
-export class GetMeResponseDto extends withPayloadResponseDto() {
+export class AuthGetMeResponseDto {
   constructor({
     account,
     permissions,
@@ -70,8 +68,6 @@ export class GetMeResponseDto extends withPayloadResponseDto() {
     agreedTermsVersionIds: string[]
     mustAcceptTerms: boolean
   }) {
-    super();
-
     const member = account.member;
     const organization = member.organization ?? null;
 

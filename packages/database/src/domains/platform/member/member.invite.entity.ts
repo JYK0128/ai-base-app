@@ -71,6 +71,11 @@ export class MemberInvite extends CoreEntity<MemberInvite> {
   email!: string;
 
   @Property({ persist: false })
+  get note(): string | undefined {
+    return this.metadata?.note;
+  }
+
+  @Property({ persist: false })
   get status(): Opt<MemberInviteStatus> {
     const metadata = this.metadata;
 

@@ -4,7 +4,7 @@ import { CoreRepository, TermsDocument, TermsVersion } from '@pkg/database';
 
 import { GetTermsDocumentContract } from './get-terms-document.contract';
 import { GetTermsDocumentAsserter } from './get-terms-document.error';
-import { TermsDocumentDetailResponseDto, TermsDocumentResponseDto, TermsVersionResponseDto } from './get-terms-document.response.dto';
+import { GetTermsDocumentDetailResponseDto, GetTermsDocumentResponseDto, GetTermsDocumentVersionResponseDto } from './get-terms-document.response.dto';
 
 @QueryHandler(GetTermsDocumentContract)
 export class GetTermsDocumentHandler implements IQueryHandler<GetTermsDocumentContract> {
@@ -17,8 +17,8 @@ export class GetTermsDocumentHandler implements IQueryHandler<GetTermsDocumentCo
     private readonly termsVersionRepo: CoreRepository<TermsVersion>,
   ) {}
 
-  async execute(query: GetTermsDocumentContract): Promise<TermsDocumentDetailResponseDto> {
-    const termsDocument = await this.identifyDocument(query.id);
+  async execute(query: GetTermsDocumentContract): Promise<GetTermsDocumentDetailResponseDto> {
+    const termsDocument = await this.identifyDocument(query.data.id);
     const versions = await this.termsVersionRepo.find(
       { termsDocument: termsDocument.id },
       {
@@ -29,10 +29,10 @@ export class GetTermsDocumentHandler implements IQueryHandler<GetTermsDocumentCo
 
     const currentVersion = versions.find((version) => version.isCurrentlyEffective);
 
-    return new TermsDocumentDetailResponseDto(
-      new TermsDocumentResponseDto(termsDocument),
-      versions.map((version) => new TermsVersionResponseDto(version)),
-      currentVersion ? new TermsVersionResponseDto(currentVersion) : null,
+    return new GetTermsDocumentDetailResponseDto(
+      new GetTermsDocumentResponseDto(termsDocument),
+      versions.map((version) => new GetTermsDocumentVersionResponseDto(version)),
+      currentVersion ? new GetTermsDocumentVersionResponseDto(currentVersion) : null,
     );
   }
 
