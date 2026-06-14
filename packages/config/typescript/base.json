@@ -24,7 +24,8 @@
     "noUnusedLocals": false,
     "noUnusedParameters": false,
     "noFallthroughCasesInSwitch": true,
-    "noUncheckedSideEffectImports": true
+    "noUncheckedSideEffectImports": true,
+    "exactOptionalPropertyTypes": true
   },
   "references": [
     { "path": "../../config" },

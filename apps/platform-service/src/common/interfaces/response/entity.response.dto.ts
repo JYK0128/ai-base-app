@@ -1,14 +1,4 @@
-import type { EntityData } from '@mikro-orm/core';
-import type { Type } from '@nestjs/common';
-import { DeepPartialType } from '@nestjs/swagger';
+import type { EntityDTO } from '@mikro-orm/core';
 
-export function withEntityResponseDto<TBase extends Type>(Base: TBase) {
-  abstract class MixinClass extends DeepPartialType(Base) {}
-
-  return MixinClass as abstract new (
-    ...args: ConstructorParameters<TBase>
-  ) => EntityData<InstanceType<TBase>>;
-}
-
-export type EntityResponseDto<TEntity extends Type>
-  = InstanceType<ReturnType<typeof withEntityResponseDto<TEntity>>>;
+export type EntityResponseDto<TEntity extends object> = {}
+  & Partial<EntityDTO<TEntity>>;

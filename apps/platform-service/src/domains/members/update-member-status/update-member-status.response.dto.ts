@@ -1,6 +1,9 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { Member } from '@pkg/database';
 
-export class UpdateMemberStatusResponseDto {
+import type { IdResponseDto } from '@/common/interfaces';
+
+export class UpdateMemberStatusResponseDto implements IdResponseDto<Member> {
   constructor(id: string) {
     this.id = id;
   }

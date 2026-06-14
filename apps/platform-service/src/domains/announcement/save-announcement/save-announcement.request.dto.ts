@@ -1,10 +1,12 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import type { Announcement } from '@pkg/database';
 import { AnnouncementAudience, AnnouncementCategory, AnnouncementChannel, AnnouncementPriority } from '@pkg/database';
 import { IsBoolean, IsEnum, IsOptional, IsString, IsUUID } from 'class-validator';
 
 import { IsNotEmptyString } from '@/common/decorators/is-not-empty-string.decorator';
+import type { EntityRequestDto } from '@/common/interfaces';
 
-export class SaveAnnouncementRequestDto {
+export class SaveAnnouncementRequestDto implements EntityRequestDto<Announcement> {
   @ApiPropertyOptional({ example: '019e5236-adae-70d7-a8f7-2dc90bdf7091', description: '공지사항 식별자' })
   @IsOptional()
   @IsUUID()
@@ -42,6 +44,11 @@ export class SaveAnnouncementRequestDto {
   @IsOptional()
   @IsBoolean()
   isPublished?: boolean;
+
+  @ApiPropertyOptional({ example: true, description: '상단 고정 여부' })
+  @IsOptional()
+  @IsBoolean()
+  pinned?: boolean;
 
   @ApiPropertyOptional({ example: '2026-06-13T03:11:56.000Z', description: '게시 확정 일시' })
   @IsOptional()

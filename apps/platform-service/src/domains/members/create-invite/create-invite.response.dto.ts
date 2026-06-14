@@ -1,6 +1,9 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { MemberInvite } from '@pkg/database';
 
-export class CreateInviteResponseDto {
+import type { IdResponseDto } from '@/common/interfaces';
+
+export class CreateInviteResponseDto implements IdResponseDto<MemberInvite> {
   constructor(id: string) {
     this.id = id;
   }

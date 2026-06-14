@@ -1,6 +1,9 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { Organization } from '@pkg/database';
 
-export class ApproveOrganizationResponseDto {
+import type { IdResponseDto } from '@/common/interfaces';
+
+export class ApproveOrganizationResponseDto implements IdResponseDto<Organization> {
   constructor(id: string) {
     this.id = id;
   }

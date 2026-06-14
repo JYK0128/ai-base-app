@@ -1,7 +1,9 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Announcement, AnnouncementMetadata } from '@pkg/database';
 
-export class AnnouncementResponseDto implements
+import type { EntityResponseDto } from '@/common/interfaces';
+
+export class AnnouncementResponseDto implements EntityResponseDto<Announcement>,
   Pick<Announcement, 'id' | 'title' | 'content' | 'createdAt' | 'updatedAt'>,
   Pick<AnnouncementMetadata, 'category' | 'audience' | 'channel' | 'priority' | 'pinned' | 'publishedAt' | 'startAt' | 'endAt'> {
   constructor(announcement: Announcement) {

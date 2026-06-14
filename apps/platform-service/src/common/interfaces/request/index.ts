@@ -1,5 +1,6 @@
 export * from './cursor.request.dto';
 export * from './entity.request.dto';
+export * from './filter.request.dto';
 export * from './id.request.dto';
 export * from './id-list.request.dto';
 export * from './list.request.dto';

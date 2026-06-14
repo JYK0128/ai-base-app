@@ -1,17 +1,2 @@
-import type { Type } from '@nestjs/common';
-import { ApiProperty } from '@nestjs/swagger';
-
-export function withIdRequestDto<TBase extends Type>(_Base: TBase) {
-  abstract class MixinClass {
-    @ApiProperty({
-      description: '식별자',
-      type: String,
-    })
-    id!: string;
-  }
-
-  return MixinClass;
-}
-
-export type IdRequestDto<TEntity extends Type>
-  = InstanceType<ReturnType<typeof withIdRequestDto<TEntity>>>;
+export type IdRequestDto<_TEntity extends object>
+  = { id: string };
