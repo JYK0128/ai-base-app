@@ -3,16 +3,11 @@ import { Embeddable, Embedded, Entity, OneToMany, Property } from '@mikro-orm/de
 
 import { CoreEntity } from '../../core/core.entity';
 import { Member } from '../member/member.entity';
-import { MemberInvite } from '../member/member.invite.entity';
-import { TermsDocument } from '../terms/terms.document.entity';
-import { OrganizationRole } from './organization.role.entity';
-
-export enum OrganizationStatus {
-  PENDING = 'PENDING',
-  ACTIVE = 'ACTIVE',
-  INACTIVE = 'INACTIVE',
-  REJECTED = 'REJECTED',
-}
+import { MemberInvite } from '../member/member-invite.entity';
+import { TermsDocument } from '../terms/terms-document.entity';
+import { OrganizationStatus } from './organization.constants';
+import { getOrganizationStatus, isOrganizationActive } from './organization.policy-status';
+import { OrganizationRole } from './organization-role.entity';
 
 @Embeddable()
 export class OrganizationMetadata {
@@ -59,26 +54,12 @@ export class Organization extends CoreEntity<Organization> {
 
   @Property({ persist: false })
   get status(): Opt<OrganizationStatus> {
-    const metadata = this.metadata;
-
-    if (metadata?.rejectedAt) {
-      return OrganizationStatus.REJECTED;
-    }
-
-    if (metadata?.deactivatedAt) {
-      return OrganizationStatus.INACTIVE;
-    }
-
-    if (metadata?.approvedAt) {
-      return OrganizationStatus.ACTIVE;
-    }
-
-    return OrganizationStatus.PENDING;
+    return getOrganizationStatus(this.metadata);
   }
 
   @Property({ persist: false })
   get isActive(): Opt<boolean> {
-    return this.status === OrganizationStatus.ACTIVE;
+    return isOrganizationActive(this.status);
   }
 
   @Embedded({ entity: () => OrganizationMetadata, object: true })

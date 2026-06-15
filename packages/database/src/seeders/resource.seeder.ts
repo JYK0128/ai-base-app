@@ -1,8 +1,9 @@
 import { EntityManager } from '@mikro-orm/core';
 import { Seeder } from '@mikro-orm/seeder';
 
-import { I18nTranslation } from '../domains/platform/i18n/i18n.translation.entity';
-import { Resource, ResourceScope, ResourceType } from '../domains/platform/resource/resource.entity';
+import { I18nTranslation } from '../domains/platform/i18n/i18n-translation.entity';
+import { ResourceScope, ResourceType } from '../domains/platform/resource/resource.constants';
+import { Resource } from '../domains/platform/resource/resource.entity';
 
 interface ResourceSeedDto {
   code: string
@@ -188,12 +189,12 @@ export class ResourceSeeder extends Seeder {
         name: seed.alias,
         type: seed.type,
         scope: seed.scope,
-        parent,
-        path: seed.path,
-        icon: seed.icon,
-        sortOrder: seed.sortOrder,
+        ...(parent ? { parent } : {}),
+        ...(seed.path === undefined ? {} : { path: seed.path }),
+        ...(seed.icon === undefined ? {} : { icon: seed.icon }),
+        ...(seed.sortOrder === undefined ? {} : { sortOrder: seed.sortOrder }),
         actions: seed.actions,
-        constraint: seed.constraint,
+        ...(seed.constraint === undefined ? {} : { constraint: seed.constraint }),
       });
       em.persist(resource);
       return resource;
@@ -211,14 +212,40 @@ export class ResourceSeeder extends Seeder {
     resource.name = seed.alias;
     resource.type = seed.type;
     resource.scope = seed.scope;
-    resource.path = seed.path;
-    resource.icon = seed.icon;
-    resource.sortOrder = seed.sortOrder;
+    if (seed.path === undefined) {
+      delete resource.path;
+    }
+    else {
+      resource.path = seed.path;
+    }
+
+    if (seed.icon === undefined) {
+      delete resource.icon;
+    }
+    else {
+      resource.icon = seed.icon;
+    }
+
+    if (seed.sortOrder === undefined) {
+      delete resource.sortOrder;
+    }
+    else {
+      resource.sortOrder = seed.sortOrder;
+    }
+
     resource.actions = seed.actions;
-    resource.constraint = seed.constraint;
+    if (seed.constraint === undefined) {
+      delete resource.constraint;
+    }
+    else {
+      resource.constraint = seed.constraint;
+    }
 
     if (parent !== undefined) {
       resource.parent = parent;
+    }
+    else {
+      delete resource.parent;
     }
   }
 

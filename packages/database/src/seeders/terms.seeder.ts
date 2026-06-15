@@ -9,10 +9,11 @@ import { createHash } from 'node:crypto';
 import type { EntityManager } from '@mikro-orm/core';
 import { Seeder } from '@mikro-orm/seeder';
 
-import { MemberAccount } from '../domains/platform/member/member.account.entity';
+import { MemberAccount } from '../domains/platform/member/member-account.entity';
 import { Organization } from '../domains/platform/organization/organization.entity';
-import { TermsDocument, TermsDocumentMetadata } from '../domains/platform/terms/terms.document.entity';
-import { TermsVersion, TermsVersionStatus } from '../domains/platform/terms/terms.version.entity';
+import { TermsDocument, TermsDocumentMetadata } from '../domains/platform/terms/terms-document.entity';
+import { TermsVersionStatus } from '../domains/platform/terms/terms-version.constants';
+import { TermsVersion } from '../domains/platform/terms/terms-version.entity';
 
 type TermsSeed = {
   code: string
@@ -121,15 +122,21 @@ export class TermsSeeder extends Seeder {
       code: seed.code,
       title: seed.title,
       required: seed.required,
-      createdBy: creatorId,
+      ...(creatorId === undefined ? {} : { createdBy: creatorId }),
     });
 
-    persistedDocument.organization = organization ?? undefined;
+    if (organization) {
+      persistedDocument.organization = organization;
+    }
+    else {
+      delete persistedDocument.organization;
+    }
+
     persistedDocument.title = seed.title;
     persistedDocument.required = seed.required;
     persistedDocument.metadata = new TermsDocumentMetadata({
       publishedAt: seed.effectiveAt,
-      deprecatedAt: null,
+      terminatedAt: null,
     });
     if (creatorId && !persistedDocument.createdBy) {
       persistedDocument.createdBy = creatorId;
@@ -146,7 +153,7 @@ export class TermsSeeder extends Seeder {
       content: seed.content,
       checksum,
       effectiveAt: seed.effectiveAt,
-      createdBy: creatorId,
+      ...(creatorId === undefined ? {} : { createdBy: creatorId }),
     });
 
     persistedVersion.termsDocument = persistedDocument;

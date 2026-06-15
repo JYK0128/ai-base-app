@@ -58,17 +58,22 @@
 
 ## 4. Enum 정의 규칙
 
-- **Enum 선언**: 고정된 값 집합은 반드시 엔티티 enum으로 명시하고 `@Enum` 데코레이터를 사용하여 선언함
-- **중복 방지**: `@pkg/database`에 정의된 공통 enum 타입을 각 서비스 레이어에서 임포트하여 일관성 있게 활용함
+- **Enum 선언**: 고정된 값 집합은 엔티티 파일 내부에 선언하지 않고, 도메인 단위의 상수 파일 `[domain].constants.ts` (예: `announcement.constants.ts`)로 분리 정의함
+- **중복 방지 및 활용**: `@pkg/database`에 정의된 공통 enum 타입을 각 서비스 레이어에서 임포트하여 일관성 있게 활용함
 - **예시 코드**:
+  - `announcement.constants.ts`:
+    ```typescript
+    export enum AnnouncementPriority {
+      LOW = 'LOW',
+      NORMAL = 'NORMAL',
+      HIGH = 'HIGH',
+    }
+    ```
+  - `announcement.entity.ts`:
+    ```typescript
+    import { AnnouncementPriority } from './announcement.constants';
 
-  ```typescript
-  export enum AnnouncementPriority {
-    LOW = 'LOW',
-    NORMAL = 'NORMAL',
-    HIGH = 'HIGH',
-  }
+    @Enum({ items: () => AnnouncementPriority, nullable: true })
+    priority?: AnnouncementPriority;
+    ```
 
-  @Enum({ items: () => AnnouncementPriority, nullable: true })
-  priority?: AnnouncementPriority;
-  ```

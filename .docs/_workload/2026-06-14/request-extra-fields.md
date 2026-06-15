@@ -9,6 +9,7 @@
 
 | 도메인 | 기능 | 기능상세 | DTO | 필드명 | 참조변수 | 설명 |
 |---|---|---|---|---|---|---|
+| 공지 | 조회 | 복수 | `GetAnnouncementsRequestDto` | `status` | `metadata.publishedAt`, `metadata.startAt`, `metadata.endAt` | 게시 상태로 조회할지 여부이다. |
 | 공지 | 조회 | 복수 | `GetAnnouncementsRequestDto` | `isPublished` | `metadata.publishedAt` | 게시된 공지만 조회할지 여부이다. |
 | 공지 | 조회 | 복수 | `GetAnnouncementResponseDto` | `status` | `metadata.publishedAt`, `metadata.startAt`, `metadata.endAt` | 게시 상태이다. |
 | 공지 | 조회 | 복수 | `GetAnnouncementResponseDto` | `isPublished` | `metadata.publishedAt` | 게시 여부이다. |

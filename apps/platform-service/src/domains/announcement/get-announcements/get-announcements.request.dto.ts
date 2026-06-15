@@ -1,5 +1,6 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import type { Announcement } from '@pkg/database';
+import { AnnouncementStatus } from '@pkg/database';
 import { Transform } from 'class-transformer';
 import { IsBoolean, IsOptional } from 'class-validator';
 
@@ -46,4 +47,12 @@ export class GetAnnouncementsRequestDto implements ListRequestDto<Announcement> 
   @IsBoolean()
   @Transform(({ value }) => value === true || value === 'true')
   isPublished?: boolean;
+
+  @ApiPropertyOptional({
+    enum: AnnouncementStatus,
+    description: '게시 상태',
+    example: AnnouncementStatus.ACTIVE,
+  })
+  @IsOptional()
+  status?: AnnouncementStatus;
 }

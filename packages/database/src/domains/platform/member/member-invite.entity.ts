@@ -4,16 +4,9 @@ import { randomUUID } from 'crypto';
 
 import { CoreEntity } from '../../core/core.entity';
 import { Organization } from '../organization/organization.entity';
-import { OrganizationRole } from '../organization/organization.role.entity';
-
-export enum MemberInviteStatus {
-  QUEUED = 'QUEUED',
-  PENDING = 'PENDING',
-  EXPIRED = 'EXPIRED',
-  CANCELED = 'CANCELED',
-  ACCEPTED = 'ACCEPTED',
-  REJECTED = 'REJECTED',
-}
+import { OrganizationRole } from '../organization/organization-role.entity';
+import { MemberInviteStatus } from './member.constants';
+import { getMemberInviteStatus } from './member-invite.policy-status';
 
 @Embeddable()
 export class MemberInviteMetadata {
@@ -77,29 +70,7 @@ export class MemberInvite extends CoreEntity<MemberInvite> {
 
   @Property({ persist: false })
   get status(): Opt<MemberInviteStatus> {
-    const metadata = this.metadata;
-
-    if (metadata?.acceptedAt) {
-      return MemberInviteStatus.ACCEPTED;
-    }
-
-    if (metadata?.rejectedAt) {
-      return MemberInviteStatus.REJECTED;
-    }
-
-    if (metadata?.cancelAt) {
-      return MemberInviteStatus.CANCELED;
-    }
-
-    if (metadata?.expiredAt) {
-      return MemberInviteStatus.EXPIRED;
-    }
-
-    if (metadata?.sentAt) {
-      return MemberInviteStatus.PENDING;
-    }
-
-    return MemberInviteStatus.QUEUED;
+    return getMemberInviteStatus(this.metadata);
   }
 
   @Property({ persist: false })

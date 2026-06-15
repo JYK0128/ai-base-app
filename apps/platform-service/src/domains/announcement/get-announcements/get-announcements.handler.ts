@@ -1,6 +1,11 @@
 import { InjectRepository } from '@mikro-orm/nestjs';
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
-import { Announcement, CoreRepository } from '@pkg/database';
+import {
+  Announcement,
+  buildAnnouncementPublishedFilter,
+  buildAnnouncementStatusFilter,
+  CoreRepository,
+} from '@pkg/database';
 
 import { GetAnnouncementsContract } from './get-announcements.contract';
 import { GetAnnouncementResponseDto } from './get-announcements.response.dto';
@@ -13,9 +18,9 @@ export class GetAnnouncementsHandler implements IQueryHandler<GetAnnouncementsCo
   ) {}
 
   async execute(query: GetAnnouncementsContract): Promise<GetAnnouncementResponseDto[]> {
-    const filter = query.data.isPublished
-      ? { metadata: { publishedAt: { $ne: null } } }
-      : {};
+    const filter = query.data.status
+      ? buildAnnouncementStatusFilter(query.data.status)
+      : buildAnnouncementPublishedFilter(query.data.isPublished);
 
     const announcements = await this.announcementRepository.find(
       filter,

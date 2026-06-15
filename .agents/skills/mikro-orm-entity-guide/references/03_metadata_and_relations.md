@@ -20,30 +20,51 @@
       Object.assign(this, data);
     }
 
-    @Property({ type: Date, nullable: true })
-    publishedAt?: Date;
+    @Property({ type: Date })
+    publishedAt!: Date;
   }
 
-  @Embedded({ entity: () => AnnouncementMetadata, object: true, nullable: true })
-  override metadata: Opt<AnnouncementMetadata> = new AnnouncementMetadata();
+  @Entity({ schema: 'platform' })
+  export class Announcement extends CoreEntity<Announcement> {
+    [EntityName]?: 'Announcement';
+
+    @Embedded({ entity: () => AnnouncementMetadata, object: true, nullable: true })
+    override metadata: Opt<AnnouncementMetadata> = new AnnouncementMetadata();
+  }
   ```
 
 ---
 
-## 2. Getter / Setter 규칙
+## 2. Getter / Setter 및 Policy 분리 규칙
 
-- **메서드 제약**:
-  - 비즈니스 연산 또는 동적 계산이 수반되는 상태를 readonly getter로 노출하여 정의함
-- **상태의 산출**:
-  - 계산 로직의 기준이 하위 객체(metadata)에 있더라도, 엔티티 전체의 상태를 대표하는 값은 Aggregate Root 엔티티에 getter로 정의함
-  - 하위 embeddable은 상태 연산 로직을 최소화하고 순수 데이터 컨테이너 역할을 수행하도록 함
+- **비즈니스 상태 분리**:
+  - 비즈니스 연산, 동적 계산 또는 상태(Status) 판별 로직은 엔티티 내부 getter에 직접 코딩하지 않고, `[domain]-[name].policy-status.ts` 등 **순수 함수 형태의 정책 파일로 분리**하여 개발함
+- **readonly getter 노출**:
+  - 분리된 정책 함수를 Aggregate Root 엔티티에서 readonly getter로 호출하여 외부 인터페이스에 일관되게 노출함
 - **예시 코드**:
+  - `member-invite.policy-status.ts`:
+    ```typescript
+    import { MemberInviteStatus } from './member.constants';
+    import type { MemberInviteMetadata } from './member-invite.entity';
 
-  ```typescript
-  get isActive(): Opt<boolean> {
-    return this.status === MemberStatus.ACTIVE;
-  }
-  ```
+    export function getMemberInviteStatus(
+      metadata: Pick<MemberInviteMetadata, 'acceptedAt' | 'cancelAt' | 'sentAt'> | undefined,
+    ): MemberInviteStatus {
+      if (metadata?.acceptedAt) return MemberInviteStatus.ACCEPTED;
+      if (metadata?.cancelAt) return MemberInviteStatus.CANCELED;
+      if (metadata?.sentAt) return MemberInviteStatus.PENDING;
+      return MemberInviteStatus.QUEUED;
+    }
+    ```
+  - `member-invite.entity.ts`:
+    ```typescript
+    import { getMemberInviteStatus } from './member-invite.policy-status';
+
+    @Property({ persist: false })
+    get status(): Opt<MemberInviteStatus> {
+      return getMemberInviteStatus(this.metadata);
+    }
+    ```
 
 ---
 
@@ -57,7 +78,7 @@
 
   ```typescript
   import { Organization } from '../organization/organization.entity';
-  import { MemberAccount } from './member.account.entity';
+  import { MemberAccount } from './member-account.entity';
 
   @ManyToOne(() => Organization)
   organization!: Rel<Organization>;
@@ -71,28 +92,20 @@
 
 ---
 
-## 4. Repository 구성 규칙
+## 4. 스키마 바인딩 규칙 (Repository 미사용)
 
-- **리포지토리 정의**:
-  - 모든 엔티티는 개별 파일 단위의 전용 repository 클래스를 정의함
-- **데코레이터 바인딩**:
-  - 엔티티 클래스 선언부 데코레이터 내에 데이터베이스 `schema` 명과 바인딩할 `repository` 클래스를 명시적으로 지정함
+- **리포지토리 파일 제거**:
+  - 개편된 스키마 설계에 따라 개별 엔티티별 리포지토리 파일(`*.repository.ts`)은 기본적으로 **생성하지 않음**
+- **스키마 바인딩**:
+  - `@Entity({ schema: '...' })` 형태로 엔티티가 소속된 데이터베이스 스키마(예: `platform`, `organization` 등)만 명시적으로 설정함
 - **예시 코드**:
-  - 리포지토리 파일 (`*.repository.ts`):
 
-    ```typescript
-    import { EntityRepository } from '@mikro-orm/postgresql';
-    import { MyEntity } from './my.entity';
-
-    export class MyEntityRepository extends EntityRepository<MyEntity> {}
-    ```
-
-  - 엔티티 파일 (`*.entity.ts`):
-
-    ```typescript
-    @Entity({ schema: 'platform', repository: () => MyEntityRepository })
-    export class MyEntity extends CoreEntity<MyEntity> {}
-    ```
+  ```typescript
+  @Entity({ schema: 'platform' })
+  export class Member extends CoreEntity<Member> {
+    [EntityName]?: 'Member';
+  }
+  ```
 
 ---
 

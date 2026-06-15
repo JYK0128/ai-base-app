@@ -4,20 +4,7 @@ import { Entity, Enum, ManyToOne, Property } from '@mikro-orm/decorators/legacy'
 import { CoreEntity } from '../../core/core.entity';
 import { Member } from '../member/member.entity';
 import { Organization } from '../organization/organization.entity';
-
-export enum TicketStatus {
-  OPEN = 'OPEN',
-  IN_PROGRESS = 'IN_PROGRESS',
-  RESOLVED = 'RESOLVED',
-  CLOSED = 'CLOSED',
-}
-
-export enum TicketPriority {
-  LOW = 'LOW',
-  MEDIUM = 'MEDIUM',
-  HIGH = 'HIGH',
-  URGENT = 'URGENT',
-}
+import { TicketPriority, TicketStatus } from './support.constants';
 
 @Entity({ schema: 'platform' })
 export class SupportTicket extends CoreEntity<SupportTicket> {

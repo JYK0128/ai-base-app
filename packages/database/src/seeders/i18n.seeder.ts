@@ -1,7 +1,8 @@
 import type { EntityManager } from '@mikro-orm/core';
 import { Seeder } from '@mikro-orm/seeder';
 
-import { I18nLocale, I18nLocaleDirection } from '../domains/platform/i18n/i18n.locale.entity';
+import { I18nLocaleDirection } from '../domains/platform/i18n/i18n-locale.constants';
+import { I18nLocale } from '../domains/platform/i18n/i18n-locale.entity';
 
 const LOCALES = [
   {

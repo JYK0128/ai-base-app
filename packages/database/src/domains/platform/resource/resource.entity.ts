@@ -2,16 +2,7 @@ import { Collection, EntityName, type Opt, type Rel } from '@mikro-orm/core';
 import { Entity, Enum, ManyToOne, OneToMany, Property } from '@mikro-orm/decorators/legacy';
 
 import { CoreEntity } from '../../core/core.entity';
-
-export enum ResourceType {
-  MENU = 'MENU',
-  COMPONENT = 'COMPONENT',
-}
-
-export enum ResourceScope {
-  PLATFORM = 'PLATFORM',
-  ORGANIZATION = 'ORGANIZATION',
-}
+import { ResourceScope, ResourceType } from './resource.constants';
 
 @Entity({ schema: 'platform' })
 export class Resource extends CoreEntity<Resource> {

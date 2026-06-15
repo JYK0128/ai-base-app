@@ -2,38 +2,9 @@ import { EntityName, type Opt } from '@mikro-orm/core';
 import { Embeddable, Embedded, Entity, Enum, Property } from '@mikro-orm/decorators/legacy';
 
 import { CoreEntity } from '../../core/core.entity';
-
-export enum AnnouncementCategory {
-  NOTICE = 'NOTICE',
-  MAINTENANCE = 'MAINTENANCE',
-  SECURITY = 'SECURITY',
-  EVENT = 'EVENT',
-}
-
-export enum AnnouncementAudience {
-  ALL = 'ALL',
-  PLATFORM = 'PLATFORM',
-  ORGANIZATION = 'ORGANIZATION',
-}
-
-export enum AnnouncementChannel {
-  IN_APP = 'IN_APP',
-  EMAIL = 'EMAIL',
-  PUSH = 'PUSH',
-}
-
-export enum AnnouncementPriority {
-  LOW = 'LOW',
-  NORMAL = 'NORMAL',
-  HIGH = 'HIGH',
-}
-
-export enum AnnouncementStatus {
-  DRAFT = 'DRAFT',
-  SCHEDULED = 'SCHEDULED',
-  ACTIVE = 'ACTIVE',
-  EXPIRED = 'EXPIRED',
-}
+import { AnnouncementAudience, AnnouncementCategory, AnnouncementChannel, AnnouncementPriority, AnnouncementStatus } from './announcement.constants';
+import { isAnnouncementPublished } from './announcement.policy-publication';
+import { getAnnouncementStatus } from './announcement.policy-status';
 
 @Embeddable()
 export class AnnouncementMetadata {
@@ -123,36 +94,11 @@ export class Announcement extends CoreEntity<Announcement> {
 
   @Property({ persist: false })
   get status(): Opt<AnnouncementStatus> {
-    const publishedAt = this.publishedAt;
-
-    if (!publishedAt) {
-      return AnnouncementStatus.DRAFT;
-    }
-
-    const now = Date.now();
-    const startAt = this.startAt?.getTime();
-    const endAt = this.endAt?.getTime();
-
-    if (typeof startAt === 'number' && startAt > now) {
-      return AnnouncementStatus.SCHEDULED;
-    }
-
-    if (typeof endAt === 'number' && endAt < now) {
-      return AnnouncementStatus.EXPIRED;
-    }
-
-    return AnnouncementStatus.ACTIVE;
+    return getAnnouncementStatus(this.metadata);
   }
 
   @Property({ persist: false })
   get isPublished(): Opt<boolean> {
-    const publishedAt = this.metadata.publishedAt;
-
-    if (!publishedAt) {
-      return false;
-    }
-
-    const publishedAtTime = publishedAt.getTime();
-    return Number.isFinite(publishedAtTime);
+    return isAnnouncementPublished(this.metadata.publishedAt);
   }
 }

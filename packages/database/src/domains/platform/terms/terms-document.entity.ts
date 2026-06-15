@@ -3,13 +3,13 @@ import { Embeddable, Embedded, Entity, ManyToOne, OneToMany, Property } from '@m
 
 import { CoreEntity } from '../../core/core.entity';
 import { Organization } from '../organization/organization.entity';
-import { TermsVersion } from './terms.version.entity';
-
-export enum TermsDocumentStatus {
-  DRAFT = 'DRAFT',
-  PUBLISHED = 'PUBLISHED',
-  TERMINATED = 'TERMINATED',
-}
+import { TermsDocumentStatus } from './terms-document.constants';
+import { getTermsDocumentStatus,
+         isTermsDocumentDraft,
+         isTermsDocumentPublished,
+         isTermsDocumentScheduledForTermination,
+         isTermsDocumentTerminated } from './terms-document.policy-status';
+import { TermsVersion } from './terms-version.entity';
 
 @Embeddable()
 export class TermsDocumentMetadata {
@@ -55,25 +55,17 @@ export class TermsDocument extends CoreEntity<TermsDocument> {
 
   @Property({ persist: false })
   get isDraft(): Opt<boolean> {
-    return this.status === TermsDocumentStatus.DRAFT;
+    return isTermsDocumentDraft(this.status);
   }
 
   @Property({ persist: false })
   get isPublished(): Opt<boolean> {
-    return this.status === TermsDocumentStatus.PUBLISHED;
+    return isTermsDocumentPublished(this.status);
   }
 
   @Property({ persist: false })
   get status(): Opt<TermsDocumentStatus> {
-    if (!this.publishedAt) {
-      return TermsDocumentStatus.DRAFT;
-    }
-
-    if (this.terminatedAt && this.terminatedAt.getTime() <= Date.now()) {
-      return TermsDocumentStatus.TERMINATED;
-    }
-
-    return TermsDocumentStatus.PUBLISHED;
+    return getTermsDocumentStatus(this.metadata);
   }
 
   @Property({ persist: false })
@@ -88,11 +80,11 @@ export class TermsDocument extends CoreEntity<TermsDocument> {
 
   @Property({ persist: false })
   get isTerminated(): Opt<boolean> {
-    return this.status === TermsDocumentStatus.TERMINATED;
+    return isTermsDocumentTerminated(this.status);
   }
 
   @Property({ persist: false })
   get isScheduledForTermination(): Opt<boolean> {
-    return !!this.publishedAt && !!this.deprecatedAt && this.deprecatedAt.getTime() > Date.now();
+    return isTermsDocumentScheduledForTermination(this.metadata);
   }
 }

@@ -3,8 +3,8 @@ import { Entity, ManyToOne, OneToMany, Property } from '@mikro-orm/decorators/le
 
 import { CoreEntity } from '../../core/core.entity';
 import { Organization } from './organization.entity';
-import { OrganizationPermission } from './organization.permission.entity';
-import { OrganizationRoleAssignment } from './organization.role-assignment.entity';
+import { OrganizationPermission } from './organization-permission.entity';
+import { OrganizationRoleAssignment } from './organization-role-assignment.entity';
 
 @Entity({ schema: 'platform' })
 export class OrganizationRole extends CoreEntity<OrganizationRole> {

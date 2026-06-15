@@ -1,7 +1,7 @@
 import { MikroORM } from '@mikro-orm/postgresql';
 
 import ormConfig from '../mikro-orm.config';
-import { DatabaseSeeder } from '../seeders/DatabaseSeeder';
+import { DatabaseSeeder } from '../seeders/database.seeder';
 
 export default async function setup() {
   console.log('start setup');

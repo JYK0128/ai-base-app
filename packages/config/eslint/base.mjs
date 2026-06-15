@@ -91,7 +91,7 @@ export default defineConfig([
       'sonarjs/todo-tag': 'warn',
       'sonarjs/no-small-switch': 'warn',
       'sonarjs/no-nested-functions': 'warn',
-      'sonarjs/no-unused-vars': 'warn',
+      'sonarjs/no-unused-vars': 'off',
       'sonarjs/no-dead-store': 'warn',
       'sonarjs/no-nested-conditional': 'warn',
       'sonarjs/table-header': 'warn',

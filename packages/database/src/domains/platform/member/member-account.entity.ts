@@ -3,12 +3,12 @@ import { Entity, Enum, ManyToOne, Property } from '@mikro-orm/decorators/legacy'
 import bcrypt from 'bcrypt';
 
 import { CoreEntity } from '../../core/core.entity';
+import { AccountStatus } from './member.constants';
 import { Member } from './member.entity';
-
-export enum AccountStatus {
-  ACTIVE = 'ACTIVE',
-  INACTIVE = 'INACTIVE',
-}
+import { isMemberAccountActive,
+         isMemberAccountDormant,
+         isMemberAccountLocked,
+         isMemberAccountPasswordExpired } from './member-account.policy-status';
 
 @Entity({ schema: 'platform' })
 export class MemberAccount extends CoreEntity<MemberAccount> {
@@ -43,7 +43,7 @@ export class MemberAccount extends CoreEntity<MemberAccount> {
    */
   @Property({ persist: false })
   get isPasswordExpired(): Opt<boolean> {
-    return !this.passwordExpiresAt || this.passwordExpiresAt.getTime() < Date.now();
+    return isMemberAccountPasswordExpired(this.passwordExpiresAt);
   }
 
   /**
@@ -51,7 +51,7 @@ export class MemberAccount extends CoreEntity<MemberAccount> {
    */
   @Property({ persist: false })
   get isLocked(): Opt<boolean> {
-    return !!this.lockUntil && this.lockUntil.getTime() > Date.now();
+    return isMemberAccountLocked(this.lockUntil);
   }
 
   /**
@@ -59,7 +59,7 @@ export class MemberAccount extends CoreEntity<MemberAccount> {
    */
   @Property({ persist: false })
   get isActive(): Opt<boolean> {
-    return this.status === AccountStatus.ACTIVE;
+    return isMemberAccountActive(this.status);
   }
 
   /**
@@ -67,9 +67,7 @@ export class MemberAccount extends CoreEntity<MemberAccount> {
    */
   @Property({ persist: false })
   get isDormant(): Opt<boolean> {
-    if (!this.lastLoginAt) return false;
-    const dormancyPeriodMs = 90 * 24 * 60 * 60 * 1000;
-    return Date.now() - this.lastLoginAt.getTime() > dormancyPeriodMs;
+    return isMemberAccountDormant(this.lastLoginAt);
   }
 
   /**

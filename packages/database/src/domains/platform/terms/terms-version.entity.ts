@@ -2,13 +2,13 @@ import { Collection, EntityName, type Opt, type Rel } from '@mikro-orm/core';
 import { Entity, Enum, ManyToOne, OneToMany, Property } from '@mikro-orm/decorators/legacy';
 
 import { CoreEntity } from '../../core/core.entity';
-import { TermsConsent } from './terms.consent.entity';
-import { TermsDocument } from './terms.document.entity';
-
-export enum TermsVersionStatus {
-  DRAFT = 'DRAFT',
-  PUBLISHED = 'PUBLISHED',
-}
+import { TermsConsent } from './terms-consent.entity';
+import { TermsDocument } from './terms-document.entity';
+import { TermsVersionStatus } from './terms-version.constants';
+import { isTermsVersionCurrentlyEffective,
+         isTermsVersionDraft,
+         isTermsVersionPublished,
+         isTermsVersionScheduledForActivation } from './terms-version.policy-status';
 
 @Entity({ schema: 'platform' })
 export class TermsVersion extends CoreEntity<TermsVersion> {
@@ -37,21 +37,21 @@ export class TermsVersion extends CoreEntity<TermsVersion> {
 
   @Property({ persist: false })
   get isDraft(): Opt<boolean> {
-    return this.status === TermsVersionStatus.DRAFT;
+    return isTermsVersionDraft(this.status);
   }
 
   @Property({ persist: false })
   get isPublished(): Opt<boolean> {
-    return this.status === TermsVersionStatus.PUBLISHED;
+    return isTermsVersionPublished(this.status);
   }
 
   @Property({ persist: false })
   get isCurrentlyEffective(): Opt<boolean> {
-    return this.isPublished && this.effectiveAt.getTime() <= Date.now();
+    return isTermsVersionCurrentlyEffective(this.status, this.effectiveAt);
   }
 
   @Property({ persist: false })
   get isScheduledForActivation(): Opt<boolean> {
-    return this.isPublished && this.effectiveAt.getTime() > Date.now();
+    return isTermsVersionScheduledForActivation(this.status, this.effectiveAt);
   }
 }

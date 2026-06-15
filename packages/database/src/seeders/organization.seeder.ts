@@ -8,11 +8,12 @@ import type { BaseEntity, EntityManager, EntityName, FilterQuery, RequiredEntity
 import { Seeder } from '@mikro-orm/seeder';
 import bcrypt from 'bcrypt';
 
-import { MemberAccount } from '../domains/platform/member/member.account.entity';
-import { Member, MemberStatus } from '../domains/platform/member/member.entity';
+import { MemberStatus } from '../domains/platform/member/member.constants';
+import { Member } from '../domains/platform/member/member.entity';
+import { MemberAccount } from '../domains/platform/member/member-account.entity';
 import { Organization, OrganizationMetadata } from '../domains/platform/organization/organization.entity';
-import { OrganizationRole } from '../domains/platform/organization/organization.role.entity';
-import { OrganizationRoleAssignment } from '../domains/platform/organization/organization.role-assignment.entity';
+import { OrganizationRole } from '../domains/platform/organization/organization-role.entity';
+import { OrganizationRoleAssignment } from '../domains/platform/organization/organization-role-assignment.entity';
 
 type CodedEntityData<TEntity extends BaseEntity> = RequiredEntityData<TEntity> & { code: string };
 type InitialMemberAccountData = Omit<RequiredEntityData<MemberAccount>, 'email' | 'member' | 'password' | 'passwordExpiresAt'> & {
@@ -137,7 +138,7 @@ export class OrganizationSeeder extends Seeder {
         organization,
         code: seed.code,
         name: seed.name,
-        description: seed.description,
+        ...(seed.description === undefined ? {} : { description: seed.description }),
       });
       em.persist(created);
       record[seed.code] = created;
