@@ -25,3 +25,10 @@
 
 - metadata 파생 항목은 이 문서에 넣지 않는다.
 - getter를 직접 참조하는 항목만 이 문서에 남긴다.
+
+## 적용 현황
+
+- `GetAnnouncementsHandler`에 공지 상태 policy를 반영했다.
+- `GetOrganizationsHandler`에 조직 상태 policy를 반영했다.
+- `GetTermsDocumentsHandler`에 약관 문서 상태 policy를 반영했다.
+- `GetActiveTermsHandler`에 활성 약관 조회 policy를 반영했다.

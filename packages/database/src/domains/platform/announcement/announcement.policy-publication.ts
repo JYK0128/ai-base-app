@@ -13,5 +13,11 @@ export function isAnnouncementPublished(publishedAt?: Date | null): boolean {
 export function buildAnnouncementPublishedFilter(
   isPublished: boolean | undefined,
 ): FilterQuery<Announcement> {
-  return isPublished ? { metadata: { publishedAt: { $ne: null } } } : {};
+  if (typeof isPublished !== 'boolean') {
+    return {};
+  }
+
+  return isPublished
+    ? { metadata: { publishedAt: { $ne: null } } }
+    : { metadata: { publishedAt: null } };
 }

@@ -118,6 +118,8 @@
 | 기능 | Method | Endpoint | DTO | 비고 |
 | --- | --- | --- | --- | --- |
 | 로그인 시도 | `POST` | `/api/v1/auth/login` | `LoginRequestDto` | 성공 시 Access Token 수령 |
+| 활성 약관 조회 | `GET` | `/api/v1/auth/terms` | 없음 | 로그인 및 동의 흐름에서 활성 약관 조회 |
+| 약관 동의 저장 | `POST` | `/api/v1/auth/terms/agreements` | `CreateTermsAgreementRequestDto` | 현재 로그인한 사용자 기준 동의 이력 저장 |
 | 비밀번호 변경 | `POST` | `/api/v1/auth/change-password` | `ChangePasswordRequestDto` | 변경 완료 즉시 로그아웃 트리거 |
 | 세션 무효화 로그아웃 | `POST` | `/api/v1/auth/logout` | 없음 | 쿠키 및 토큰 소멸 수행 |
 

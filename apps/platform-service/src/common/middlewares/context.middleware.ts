@@ -112,18 +112,16 @@ export class ContextMiddleware implements NestMiddleware {
       // 권한 목록
       const permissions = account.member.roles.map((role) => role.role.permissions.map((p) => p.code)).flat();
 
-      const organizationId = account.member.organization?.id ?? null;
-
       // ID 및 권한 캐시
       this.cls.set('accountId', account.id);
       this.cls.set('memberId', account.member.id);
-      this.cls.set('organizationId', organizationId);
+      this.cls.set('organizationId', account.member.organization.id);
       this.cls.set('permissions', permissions);
 
       // TODO: 상태 정보 (mustAcceptTerms, agreedTermsVersionIds, isPasswordExpired 등) 생성 및 계산 로직 분리 필요
       const agreementState = await this.termsAgreementService.resolveAgreementState({
         memberId: account.member.id,
-        organizationId,
+        organizationId: account.member.organization.id,
       });
 
       this.cls.set('agreedTermsVersionIds', agreementState.agreedTermsVersionIds);

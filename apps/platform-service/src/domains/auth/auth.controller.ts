@@ -9,6 +9,9 @@ import { Public } from '@/common/decorators/public.decorator';
 import { createCookieOptions } from '@/common/utils/cookie';
 import { ENV } from '@/env';
 
+import { CreateTermsAgreementContract } from '../terms/agreements/agree-terms.contract';
+import { CreateTermsAgreementRequestDto } from '../terms/agreements/agree-terms.request.dto';
+import type { CreateTermsAgreementResponseDto, GetTermsDocumentResponseDto } from '../terms/queries/get-terms-document.response.dto';
 import { AuthChangePasswordContract } from './change-password/change-password.contract';
 import { AuthChangePasswordRequestDto } from './change-password/change-password.request.dto';
 import { AuthDeferPasswordChangeContract } from './defer-password-change/defer-password-change.contract';
@@ -20,6 +23,7 @@ import { AuthGetMeResponseDto } from './me/get-me.response.dto';
 import { AuthRefreshTokenContract } from './refresh-token/refresh-token.contract';
 import { AuthRefreshTokenRequestDto } from './refresh-token/refresh-token.request.dto';
 import { AuthRefreshTokenResponseDto } from './refresh-token/refresh-token.response.dto';
+import { GetActiveTermsContract } from './terms/get-active-terms.contract';
 
 @Controller('auth')
 export class AuthController {
@@ -75,6 +79,20 @@ export class AuthController {
   @Bypass(BYPASS_POLICIES.TERMS)
   async me(): Promise<AuthGetMeResponseDto> {
     return this.queryBus.execute<AuthGetMeContract, AuthGetMeResponseDto>(new AuthGetMeContract());
+  }
+
+  @Get('terms')
+  @Bypass(BYPASS_POLICIES.TERMS)
+  async getTerms(): Promise<GetTermsDocumentResponseDto[]> {
+    return this.queryBus.execute<GetActiveTermsContract, GetTermsDocumentResponseDto[]>(new GetActiveTermsContract());
+  }
+
+  @Bypass(BYPASS_POLICIES.TERMS)
+  @Post('terms/agreements')
+  async agreeTerms(
+    @Body() body: CreateTermsAgreementRequestDto,
+  ): Promise<CreateTermsAgreementResponseDto> {
+    return this.commandBus.execute(new CreateTermsAgreementContract(body));
   }
 
   @Bypass(BYPASS_POLICIES.PASSWORD)

@@ -1,4 +1,7 @@
+import type { FilterQuery } from '@mikro-orm/core';
+
 import { OrganizationStatus } from './organization.constants';
+import type { Organization } from './organization.entity';
 import type { OrganizationMetadata } from './organization.entity';
 
 export function getOrganizationStatus(
@@ -21,4 +24,21 @@ export function getOrganizationStatus(
 
 export function isOrganizationActive(status: OrganizationStatus | undefined): boolean {
   return status === OrganizationStatus.ACTIVE;
+}
+
+export function buildOrganizationStatusFilter(
+  status: OrganizationStatus | undefined,
+): FilterQuery<Organization> {
+  switch (status) {
+    case OrganizationStatus.PENDING:
+      return { metadata: { approvedAt: null, deactivatedAt: null, rejectedAt: null } };
+    case OrganizationStatus.ACTIVE:
+      return { metadata: { approvedAt: { $ne: null }, deactivatedAt: null, rejectedAt: null } };
+    case OrganizationStatus.INACTIVE:
+      return { metadata: { deactivatedAt: { $ne: null } } };
+    case OrganizationStatus.REJECTED:
+      return { metadata: { rejectedAt: { $ne: null } } };
+    default:
+      return {};
+  }
 }

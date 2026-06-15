@@ -1,6 +1,6 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import type { TermsDocument } from '@pkg/database';
-import { IsIn, IsOptional } from 'class-validator';
+import { TermsDocument, TermsDocumentScope, TermsDocumentStatus } from '@pkg/database';
+import { IsEnum, IsOptional } from 'class-validator';
 
 import { type ListRequestDto, SortDirection } from '@/common/interfaces';
 
@@ -36,18 +36,21 @@ export class GetTermsDocumentsRequestDto implements ListRequestDto<TermsDocument
   })
   limit!: number;
 
-  @ApiPropertyOptional({ example: 'platform', enum: ['platform', 'organization'], description: '조회 scope' })
+  @ApiPropertyOptional({
+    example: 'platform',
+    enum: TermsDocumentScope,
+    description: '조회 scope',
+  })
   @IsOptional()
-  @IsIn(['platform', 'organization'])
-  scope?: 'platform' | 'organization';
+  @IsEnum(TermsDocumentScope)
+  scope?: TermsDocumentScope;
 
   @ApiPropertyOptional({
     example: 'PUBLISHED',
-    enum: ['DRAFT', 'PUBLISHED', 'TERMINATED', 'ACTIVE'],
+    enum: TermsDocumentStatus,
     description: '약관 상태 필터',
   })
   @IsOptional()
-  @IsIn(['DRAFT', 'PUBLISHED', 'TERMINATED', 'ACTIVE'])
-  status?: 'DRAFT' | 'PUBLISHED' | 'TERMINATED' | 'ACTIVE';
-
+  @IsEnum(TermsDocumentStatus)
+  status?: TermsDocumentStatus;
 }

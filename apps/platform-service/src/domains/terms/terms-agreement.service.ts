@@ -1,12 +1,13 @@
+import type { FilterQuery } from '@mikro-orm/core';
 import { Injectable } from '@nestjs/common';
-import { EntityManager, Member, TermsConsent, TermsDocument, TermsVersion, TermsVersionStatus } from '@pkg/database';
+import { buildTermsDocumentScopeFilter, EntityManager, Member, TermsConsent, TermsDocument, TermsVersion, TermsVersionStatus } from '@pkg/database';
 
 import { AgreeTermsAsserter } from './agreements/agree-terms.error';
 import type { CreateTermsAgreementResponseDto } from './queries/get-terms-document.response.dto';
 
 type AgreementStateInput = {
   memberId: string
-  organizationId?: string | null
+  organizationId: string
 };
 
 type AgreementState = {
@@ -46,8 +47,8 @@ export class TermsAgreementService {
     };
   }
 
-  async agree(memberId: string, organizationId: string | null | undefined, termsVersion: string): Promise<CreateTermsAgreementResponseDto> {
-    const activeTerms = await this.loadActiveTerms(organizationId ?? null);
+  async agree(memberId: string, organizationId: string, termsVersion: string): Promise<CreateTermsAgreementResponseDto> {
+    const activeTerms = await this.loadActiveTerms(organizationId);
     const currentTerm = activeTerms.find((term) => term.currentVersion?.id === termsVersion);
     await AgreeTermsAsserter.throwIf(!currentTerm, 'TERMS_VERSION_NOT_AVAILABLE');
 
@@ -75,26 +76,33 @@ export class TermsAgreementService {
     return this.toResponse(termsConsent);
   }
 
-  private async loadActiveTerms(organizationId?: string | null) {
-    const documents = await this.em.find(TermsDocument, {
-      metadata: { publishedAt: { $ne: null } },
-      ...(organizationId
-        ? {
-          $or: [
-            { organization: null },
-            { organization: organizationId },
-          ],
-        }
-        : {
-          organization: null,
-        }),
-    }, {
-      populate: ['organization', 'versions'],
-      orderBy: { createdAt: 'DESC' },
-    });
+  private async loadActiveTerms(organizationId: string) {
+    const scopeFilter: FilterQuery<TermsDocument> = buildTermsDocumentScopeFilter(organizationId);
+    const currentPublishedVersionFilter: FilterQuery<TermsDocument> = {
+      versions: {
+        $some: {
+          status: TermsVersionStatus.PUBLISHED,
+          effectiveAt: { $lte: new Date() },
+        },
+      },
+    };
+
+    const documents = await this.em.find(
+      TermsDocument,
+      {
+        $and: [
+          { metadata: { publishedAt: { $ne: null } } },
+          scopeFilter,
+          currentPublishedVersionFilter,
+        ],
+      },
+      {
+        populate: ['organization', 'versions'],
+        orderBy: { createdAt: 'DESC' },
+      },
+    );
 
     return documents
-      .filter((document) => !document.isTerminated)
       .map((document) => ({
         document,
         currentVersion: getCurrentPublishedVersion(document.versions.getItems()),

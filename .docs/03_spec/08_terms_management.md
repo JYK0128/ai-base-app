@@ -138,7 +138,7 @@
 
 | 기능 | Method | Endpoint | DTO | 비고 |
 | --- | --- | --- | --- | --- |
-| 활성 약관 조회 | `GET` | `/api/v1/terms` | 없음 | 사용자 가입 동의 흐름용 |
+| 활성 약관 조회 | `GET` | `/api/v1/auth/terms` | 없음 | 인증/동의 흐름용 |
 | 약관 문서 목록 조회 | `GET` | `/api/v1/terms/documents` | `GetTermsQueryDto` | 필터링 및 키워드 검색 지원 |
 | 약관 문서 상세 조회 | `GET` | `/api/v1/terms/documents/{id}` | `IdParamDto` | 대표 버전 포함 상세 조회 |
 | 약관 버전 목록 조회 | `GET` | `/api/v1/terms/documents/{id}/versions` | `IdParamDto` | 해당 문서의 전체 버전 목록 조회 |
