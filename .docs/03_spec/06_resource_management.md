@@ -56,7 +56,8 @@
 | `sortOrder` | 노드의 렌더링 가중치 정렬 순서 |
 | `actions` | 정의된 액션 모음 (`['CREATE', 'READ', 'UPDATE', 'DELETE']`) |
 | `constraint` | 추가 제약 조건 문자열 |
-| `parentId` | 부모 노드 리소스 식별자 (루트 노드는 `null`) |
+| `parent` | 부모 노드 리소스 식별자 |
+| `children` | 하위 리소스 목록 |
 
 ### 5.2 권한 세트 (PermissionSet)
 
@@ -71,6 +72,8 @@
 ## 6. 기능 상세
 
 ### 6.1 리소스 드래그 앤 드롭 정렬 (Drag & Drop)
+* 리소스 트리 조회 응답은 `parent` 관계가 있는 노드를 상위 노드의 `children` 배열에 배치하고, 상위 노드가 없는 항목을 루트 노드로 구성함.
+* 리소스 트리는 `sortOrder` 오름차순과 `code` 오름차순 기준으로 정렬되어 제공됨.
 * 사용자가 자원 트리 상의 노드를 직접 위/아래로 드래그 앤 드롭하여 배치 가능.
 * 정렬 변경 이벤트 발생 시, 클라이언트는 변경된 모든 인접 노드들의 새로운 `sortOrder` 값을 계산하여 순서 정정 API (`POST /api/v1/resources/update-sort`)로 일괄 호출 수행.
 
@@ -114,7 +117,7 @@
 
 | 기능 | Method | Endpoint | DTO | 비고 |
 | --- | --- | --- | --- | --- |
-| 리소스 트리 조회 | `GET` | `/api/v1/resources` | `GetResourcesQueryDto` | `scope` 필터 필수 포함 |
+| 리소스 트리 조회 | `GET` | `/api/v1/resources` | `GetResourcesRequestDto` | `scope` 필터 기준 트리 응답 제공 |
 | 내 권한 리소스 조회 | `GET` | `/api/v1/resources/my-resources` | 없음 | 로그인한 사용자의 가시 자원 목록 조회 |
 | 권한 세트 목록 조회 | `GET` | `/api/v1/resources/permission-sets` | 없음 | 배정된 역할/권한 세트 일체 조회 |
 | 리소스 상세 조회 | `GET` | `/api/v1/resources/{id}` | `IdParamDto` | 자원 상세 명세 조회 |
@@ -127,4 +130,4 @@
 | 권한 세트 퍼미션 수정 | `POST` | `/api/v1/resources/permission-sets/update-permissions` | `UpdatePermissionSetPermissionsDto` | 권한 코드 배열 매핑 수정 수행 |
 
 ---
-*최종 업데이트: 2026-06-07*
+*최종 업데이트: 2026-06-15*
