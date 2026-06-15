@@ -7,20 +7,6 @@ import { GetResourcesContract } from './get-resources.contract';
 import { GetResourcesAsserter } from './get-resources.error';
 import { GetResourceResponseDto } from './get-resources.response.dto';
 
-interface ResourceNodeSource {
-  id: string
-  code: string
-  name: string
-  type: Resource['type']
-  scope: ResourceScope
-  path?: string | undefined
-  icon?: string | undefined
-  sortOrder?: number | undefined
-  actions: string[]
-  constraint?: string | undefined
-  parentId?: string | undefined
-}
-
 @QueryHandler(GetResourcesContract)
 export class GetResourcesHandler implements IQueryHandler<GetResourcesContract> {
   private readonly Asserter = GetResourcesAsserter;
@@ -56,24 +42,6 @@ export class GetResourcesHandler implements IQueryHandler<GetResourcesContract> 
   }
 
   private buildResourceTreeResponse(resources: Resource[]): GetResourceResponseDto[] {
-    const sources = resources.map((resource) => ({
-      id: resource.id,
-      code: resource.code,
-      name: resource.name,
-      type: resource.type,
-      scope: resource.scope,
-      ...(resource.path !== undefined ? { path: resource.path } : {}),
-      ...(resource.icon !== undefined ? { icon: resource.icon } : {}),
-      ...(resource.sortOrder !== undefined ? { sortOrder: resource.sortOrder } : {}),
-      actions: resource.actions,
-      ...(resource.constraint !== undefined ? { constraint: resource.constraint } : {}),
-      ...(resource.parent?.id !== undefined ? { parentId: resource.parent.id } : {}),
-    }));
-
-    return this.buildResourceTreeFromSources(sources);
-  }
-
-  private buildResourceTreeFromSources(resources: ResourceNodeSource[]): GetResourceResponseDto[] {
     const map = new Map<string, GetResourceResponseDto>();
 
     for (const resource of resources) {
@@ -86,8 +54,8 @@ export class GetResourcesHandler implements IQueryHandler<GetResourcesContract> 
       const node = map.get(resource.id);
       if (!node) continue;
 
-      if (resource.parentId) {
-        const parentNode = map.get(resource.parentId);
+      if (resource.parent?.id) {
+        const parentNode = map.get(resource.parent.id);
         if (parentNode) {
           parentNode.children.push(node);
           continue;

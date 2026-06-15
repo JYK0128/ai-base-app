@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsEmail, IsIP, IsOptional, MinLength } from 'class-validator';
+import { IsEmail, IsIP, MinLength } from 'class-validator';
 
 import { IsNotEmptyString } from '@/common/decorators/is-not-empty-string.decorator';
 import type { PayloadRequestDto } from '@/common/interfaces';
@@ -15,7 +15,6 @@ export class AuthLoginRequestDto implements PayloadRequestDto {
   password!: string;
 
   @ApiPropertyOptional({ example: '127.0.0.1', description: '클라이언트 IP' })
-  @IsOptional()
   @IsIP()
-  clientIp?: string;
+  clientIp!: string;
 }

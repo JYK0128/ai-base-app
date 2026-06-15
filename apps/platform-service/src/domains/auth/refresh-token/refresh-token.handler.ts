@@ -72,9 +72,7 @@ export class RefreshTokenHandler implements ICommandHandler<AuthRefreshTokenCont
   }
 
   private async processTokenRotation(account: MemberAccount) {
-    const organizationId = account.member.organization?.id;
     const accountId = account.id;
-    const memberId = account.member.id;
     const accessExpiresAt = Math.floor(Date.now() / 1000) + ENV.JWT_ACCESS_EXPIRES_IN;
     const refreshExpiresAt = Math.floor(Date.now() / 1000) + ENV.JWT_REFRESH_EXPIRES_IN;
 

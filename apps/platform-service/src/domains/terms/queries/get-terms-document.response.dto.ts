@@ -3,15 +3,13 @@ import { TermsConsent, TermsDocument, TermsDocumentStatus, TermsVersion, TermsVe
 
 import type { EntityResponseDto } from '@/common/interfaces';
 
-export class GetTermsDocumentResponseDto implements EntityResponseDto<TermsDocument>, Pick<TermsDocument, 'id' | 'code' | 'title' | 'required' | 'terminatedAt' | 'status'> {
+export class GetTermsDocumentResponseDto implements EntityResponseDto<TermsDocument> {
   constructor(document: TermsDocument) {
     this.id = document.id;
     this.code = document.code;
     this.title = document.title;
     this.required = document.required;
-    if (document.terminatedAt) {
-      this.terminatedAt = document.terminatedAt;
-    }
+    this.terminatedAt = document.terminatedAt;
     this.status = document.status;
     this.organizationId = document.organization ? document.organization.id : null;
   }
@@ -29,7 +27,7 @@ export class GetTermsDocumentResponseDto implements EntityResponseDto<TermsDocum
   required!: boolean;
 
   @ApiPropertyOptional({ example: '2026-06-06T14:00:00.000Z', description: '종료 일시' })
-  terminatedAt?: Date;
+  terminatedAt?: Date | null;
 
   @ApiProperty({ enum: TermsDocumentStatus, example: 'PUBLISHED', description: '약관 상태' })
   status!: TermsDocumentStatus;
@@ -93,7 +91,7 @@ export class GetTermsDocumentDetailResponseDto {
   currentVersion?: GetTermsDocumentVersionResponseDto | null;
 }
 
-export class CreateTermsAgreementResponseDto implements EntityResponseDto<TermsConsent>, Pick<TermsConsent, 'id' | 'agreed'> {
+export class CreateTermsAgreementResponseDto implements EntityResponseDto<TermsConsent> {
   @ApiProperty({ example: '019e5236-adae-70d7-a8f7-2dc90bdf7083', description: '동의 식별자' })
   id!: string;
 

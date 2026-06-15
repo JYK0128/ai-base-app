@@ -3,22 +3,8 @@ import { Resource, ResourceScope, ResourceType } from '@pkg/database';
 
 import type { EntityResponseDto } from '@/common/interfaces';
 
-type ResourceResponseSource = {
-  id: string
-  code: string
-  name: string
-  type: Resource['type']
-  scope: ResourceScope
-  path?: string | undefined
-  icon?: string | undefined
-  sortOrder?: number | undefined
-  actions: string[]
-  constraint?: string | undefined
-  parentId?: string | undefined
-};
-
-export class GetResourceResponseDto implements EntityResponseDto<Resource>, Pick<Resource, 'id' | 'code' | 'name' | 'type' | 'scope' | 'path' | 'icon' | 'sortOrder' | 'actions' | 'constraint'> {
-  constructor(resource: ResourceResponseSource) {
+export class GetResourceResponseDto implements EntityResponseDto<Resource> {
+  constructor(resource: Resource) {
     this.id = resource.id;
     this.code = resource.code;
     this.name = resource.name;
@@ -38,6 +24,9 @@ export class GetResourceResponseDto implements EntityResponseDto<Resource>, Pick
       this.constraint = resource.constraint;
     }
     this.children = [];
+    if (resource.parent?.id !== undefined) {
+      this.parent = resource.parent.id;
+    }
   }
 
   @ApiProperty({ example: '019e5236-adae-70d7-a8f7-2dc90bdf7098', description: '리소스 식별자' })
@@ -69,6 +58,9 @@ export class GetResourceResponseDto implements EntityResponseDto<Resource>, Pick
 
   @ApiPropertyOptional({ example: 'READ', description: '제약 조건' })
   constraint?: string;
+
+  @ApiPropertyOptional({ example: '019e5236-adae-70d7-a8f7-2dc90bdf7100', description: '부모 리소스 식별자' })
+  parent?: string;
 
   @ApiProperty({ type: () => [GetResourceResponseDto], description: '하위 리소스 목록' })
   children!: GetResourceResponseDto[];

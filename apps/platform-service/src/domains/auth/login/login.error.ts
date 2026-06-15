@@ -71,5 +71,5 @@ const LOGIN_ERROR_MESSAGES = defineErrors({
 
 export const LoginAsserter = ExceptionGuard
   .withMetadata<LoginMetadata>()
-  .withContext<Pick<AuthLoginRequestDto, 'email'>>()
+  .withContext<AuthLoginRequestDto>()
   .setMessages(LOGIN_ERROR_MESSAGES);

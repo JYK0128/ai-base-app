@@ -3,7 +3,7 @@ import { OrganizationRole } from '@pkg/database';
 
 import type { EntityResponseDto } from '@/common/interfaces';
 
-export class GetPermissionSetResponseDto implements EntityResponseDto<OrganizationRole>, Pick<OrganizationRole, 'id' | 'code' | 'name' | 'description'> {
+export class GetPermissionSetResponseDto implements EntityResponseDto<OrganizationRole> {
   constructor(role: OrganizationRole) {
     this.id = role.id;
     this.code = role.code;

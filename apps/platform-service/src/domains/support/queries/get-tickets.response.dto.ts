@@ -3,7 +3,7 @@ import { SupportTicket, TicketPriority, TicketStatus } from '@pkg/database';
 
 import type { EntityResponseDto } from '@/common/interfaces';
 
-export class GetTicketResponseDto implements EntityResponseDto<SupportTicket>, Pick<SupportTicket, 'id' | 'title' | 'content' | 'status' | 'priority' | 'createdAt'> {
+export class GetTicketResponseDto implements EntityResponseDto<SupportTicket> {
   constructor(ticket: SupportTicket) {
     this.id = ticket.id;
     this.title = ticket.title;

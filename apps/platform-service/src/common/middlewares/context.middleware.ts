@@ -71,7 +71,7 @@ export class ContextMiddleware implements NestMiddleware {
     if (acceptLanguageHeader) {
       acceptLanguage = acceptLanguageHeader.split(',')[0]?.trim().toLowerCase();
     }
-    const clientIp = req.headers['x-real-ip'];
+    const clientIp = req.headers['x-real-ip'] ?? req.ip ?? '0.0.0.0';
 
     this.cls.set('clientIp', clientIp);
     this.cls.set('userAgent', req.headers['user-agent']);

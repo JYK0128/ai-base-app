@@ -40,16 +40,18 @@ export class AuthController {
     @Body() body: Omit<AuthLoginRequestDto, 'clientIp'>,
     @Req() request: { ip?: string },
     @Res({ passthrough: true }) res: Response,
-  ): Promise<Pick<AuthLoginResponseDto, 'accessToken'>> {
+  ): Promise<AuthLoginResponseDto> {
     const clientIp = this.cls.get('clientIp') ?? request.ip ?? '0.0.0.0';
     const tokens = await this.commandBus.execute<AuthLoginContract, AuthLoginResponseDto>(new AuthLoginContract({
       ...body,
       clientIp,
     }));
 
-    res.cookie('refreshToken', tokens.refreshToken, createCookieOptions({
-      maxAge: ENV.JWT_REFRESH_EXPIRES_IN * 1000,
-    }));
+    if (tokens.refreshToken) {
+      res.cookie('refreshToken', tokens.refreshToken, createCookieOptions({
+        maxAge: ENV.JWT_REFRESH_EXPIRES_IN * 1000,
+      }));
+    }
 
     return {
       accessToken: tokens.accessToken,
@@ -61,7 +63,7 @@ export class AuthController {
   async refresh(
     @Cookies('refreshToken') refreshToken: string,
     @Res({ passthrough: true }) res: Response,
-  ): Promise<Pick<AuthRefreshTokenResponseDto, 'accessToken'>> {
+  ): Promise<AuthRefreshTokenResponseDto> {
     const { accessToken, refreshToken: newRefreshToken } = await this.commandBus.execute<AuthRefreshTokenContract, AuthRefreshTokenResponseDto>(new AuthRefreshTokenContract({
       refreshToken,
     } satisfies AuthRefreshTokenRequestDto));

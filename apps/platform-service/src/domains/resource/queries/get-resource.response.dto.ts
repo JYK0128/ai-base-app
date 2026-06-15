@@ -3,8 +3,8 @@ import { Resource, ResourceScope, ResourceType } from '@pkg/database';
 
 import type { EntityResponseDto } from '@/common/interfaces';
 
-export class GetResourceResponseDto implements EntityResponseDto<Resource>, Pick<Resource, 'id' | 'code' | 'name' | 'type' | 'scope' | 'path' | 'icon' | 'sortOrder' | 'actions' | 'constraint'> {
-  constructor(resource: Pick<Resource, 'id' | 'code' | 'name' | 'type' | 'scope' | 'path' | 'icon' | 'sortOrder' | 'actions' | 'constraint'> & { parentId?: string | undefined }) {
+export class GetResourceResponseDto implements EntityResponseDto<Resource> {
+  constructor(resource: Resource) {
     this.id = resource.id;
     this.code = resource.code;
     this.name = resource.name;
@@ -23,8 +23,8 @@ export class GetResourceResponseDto implements EntityResponseDto<Resource>, Pick
     if (resource.constraint !== undefined) {
       this.constraint = resource.constraint;
     }
-    if (resource.parentId !== undefined) {
-      this.parentId = resource.parentId;
+    if (resource.parent?.id !== undefined) {
+      this.parent = resource.parent.id;
     }
   }
 
@@ -59,5 +59,5 @@ export class GetResourceResponseDto implements EntityResponseDto<Resource>, Pick
   constraint?: string;
 
   @ApiPropertyOptional({ example: '019e5236-adae-70d7-a8f7-2dc90bdf7100', description: '부모 리소스 식별자' })
-  parentId?: string;
+  parent?: string;
 }

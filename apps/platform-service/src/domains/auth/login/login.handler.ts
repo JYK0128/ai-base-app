@@ -36,14 +36,15 @@ export class LoginHandler implements ICommandHandler<AuthLoginContract> {
 
   @Transactional()
   async execute(command: AuthLoginContract): Promise<AuthLoginResponseDto> {
-    const { email, password, clientIp } = command.data;
-    const account = await this.identifyAccount(email);
-    await this.validatePolicies(account, password);
+    const { clientIp } = command.data;
+    const account = await this.identifyAccount(command.data);
+    await this.validatePolicies(account, command.data);
 
-    return this.processLoginSuccess(account, clientIp ?? '0.0.0.0');
+    return this.processLoginSuccess(account, clientIp);
   }
 
-  private async identifyAccount(email: string) {
+  private async identifyAccount(request: AuthLoginRequestDto) {
+    const { email } = request;
     const lockUntil = await this.authCacheService.get<number>(this.loginKeys.build('lock', email));
     const retryAfterSeconds = lockUntil
       ? Math.max(1, Math.ceil((lockUntil - Date.now()) / 1000))
@@ -63,13 +64,14 @@ export class LoginHandler implements ICommandHandler<AuthLoginContract> {
         { populate: ['member.organization', 'member.roles.role.permissions.resource'] },
       ),
       'INVALID_CREDENTIALS',
-      { context: { email } },
+      { context: request },
     );
 
     return account;
   }
 
-  private async validatePolicies(account: MemberAccount, password: string) {
+  private async validatePolicies(account: MemberAccount, request: AuthLoginRequestDto) {
+    const { password } = request;
     await this.Asserter.throwIf(!account.isActive, 'INACTIVE_ACCOUNT');
     await this.Asserter.throwIf(!account.member.isActive, 'INACTIVE_MEMBER');
 
@@ -82,7 +84,7 @@ export class LoginHandler implements ICommandHandler<AuthLoginContract> {
 
     const isPasswordValid = account.verifyPassword(password);
     await this.Asserter.assert(isPasswordValid, 'INVALID_CREDENTIALS', {
-      context: { email: account.email },
+      context: request,
       metadata: {},
     });
   }
@@ -124,7 +126,7 @@ export class LoginHandler implements ICommandHandler<AuthLoginContract> {
     return tokens;
   }
 
-  private async handleLoginFailure(context: Pick<AuthLoginRequestDto, 'email'>, metadata: LoginMetadata = {}) {
+  private async handleLoginFailure(context: AuthLoginRequestDto, metadata: LoginMetadata = {}) {
     const attemptKey = this.loginKeys.build('attempt', context.email);
     const attempts = await this.authCacheService.incr(attemptKey, ENV.LOGIN_ATTEMPT_TTL);
 

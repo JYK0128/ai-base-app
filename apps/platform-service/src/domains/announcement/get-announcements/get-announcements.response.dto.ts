@@ -3,9 +3,7 @@ import { Announcement, AnnouncementMetadata, AnnouncementStatus } from '@pkg/dat
 
 import type { EntityResponseDto } from '@/common/interfaces';
 
-export class GetAnnouncementResponseDto implements EntityResponseDto<Announcement>,
-  Pick<Announcement, 'id' | 'title' | 'content' | 'createdAt' | 'updatedAt'>,
-  Pick<AnnouncementMetadata, 'category' | 'audience' | 'channel' | 'priority' | 'pinned' | 'publishedAt' | 'startAt' | 'endAt'> {
+export class GetAnnouncementResponseDto implements EntityResponseDto<Announcement> {
   constructor(announcement: Announcement) {
     const metadata = announcement.metadata ?? new AnnouncementMetadata();
 

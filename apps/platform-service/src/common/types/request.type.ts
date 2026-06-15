@@ -8,8 +8,8 @@ export interface CustomCookies {
 }
 
 export interface CustomHeader extends IncomingHttpHeaders {
-  'x-trace-id': string
-  'x-real-ip': string
+  'x-trace-id'?: string
+  'x-real-ip'?: string
 }
 export interface AppRequest extends Request {
   cookies: CustomCookies

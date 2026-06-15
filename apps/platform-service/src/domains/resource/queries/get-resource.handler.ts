@@ -14,21 +14,7 @@ export class GetResourceHandler implements IQueryHandler<GetResourceContract> {
 
   async execute(query: GetResourceContract): Promise<GetResourceResponseDto> {
     const resource = await this.identifyResource(query.data.id);
-    const data = {
-      id: resource.id,
-      code: resource.code,
-      name: resource.name,
-      type: resource.type,
-      scope: resource.scope,
-      actions: resource.actions,
-      ...(resource.path !== undefined ? { path: resource.path } : {}),
-      ...(resource.icon !== undefined ? { icon: resource.icon } : {}),
-      ...(resource.sortOrder !== undefined ? { sortOrder: resource.sortOrder } : {}),
-      ...(resource.constraint !== undefined ? { constraint: resource.constraint } : {}),
-      ...(resource.parent?.id !== undefined ? { parentId: resource.parent.id } : {}),
-    };
-
-    return new GetResourceResponseDto(data);
+    return new GetResourceResponseDto(resource);
   }
 
   private async identifyResource(id: string): Promise<Resource> {

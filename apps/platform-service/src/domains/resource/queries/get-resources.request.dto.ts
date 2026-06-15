@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import type { Resource } from '@pkg/database';
 import { ResourceScope } from '@pkg/database';
 import { IsEnum } from 'class-validator';
