@@ -1,12 +1,14 @@
 import { Body, Controller, Get, Param, Patch, Query } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 
-import { ApproveOrganizationContract } from './commands/approve-organization.contract';
-import type { ApproveOrganizationRequestDto } from './commands/approve-organization.request.dto';
-import type { ApproveOrganizationResponseDto } from './commands/approve-organization.response.dto';
-import { GetOrganizationsContract } from './queries/get-organizations.contract';
-import type { GetOrganizationsQueryDto } from './queries/get-organizations.request.dto';
-import type { GetOrganizationsResponseDto } from './queries/get-organizations.response.dto';
+import { ApproveOrganizationContract } from './approve-organization/approve-organization.contract';
+import { ApproveOrganizationRequestDto } from './approve-organization/approve-organization.request.dto';
+import { ApproveOrganizationResponseDto } from './approve-organization/approve-organization.response.dto';
+import { GetOrganizationPageContract } from './get-organization-page/get-organization-page.contract';
+import { GetOrganizationPageRequestDto } from './get-organization-page/get-organization-page.request.dto';
+import { GetOrganizationPageResponseDto } from './get-organization-page/get-organization-page.response.dto';
+import { GetOrganizationRolesContract } from './get-organization-roles/get-organization-roles.contract';
+import { GetOrganizationRoleResponseDto } from './get-organization-roles/get-organization-roles.response.dto';
 
 @Controller('organizations')
 export class OrganizationController {
@@ -16,10 +18,15 @@ export class OrganizationController {
   ) {}
 
   @Get()
-  async getOrganizations(
-    @Query() query: GetOrganizationsQueryDto,
-  ): Promise<GetOrganizationsResponseDto> {
-    return this.queryBus.execute(new GetOrganizationsContract(query));
+  async getOrganizationPage(
+    @Query() query: GetOrganizationPageRequestDto,
+  ): Promise<GetOrganizationPageResponseDto> {
+    return this.queryBus.execute(new GetOrganizationPageContract(query));
+  }
+
+  @Get('roles')
+  async getOrganizationRoles(): Promise<GetOrganizationRoleResponseDto[]> {
+    return this.queryBus.execute(new GetOrganizationRolesContract());
   }
 
   @Patch(':id/approve')
@@ -30,6 +37,6 @@ export class OrganizationController {
     return this.commandBus.execute(new ApproveOrganizationContract({
       id,
       approve: body.approve,
-    }));
+    } satisfies ApproveOrganizationRequestDto));
   }
 }
