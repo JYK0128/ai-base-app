@@ -3,7 +3,7 @@ import { Module } from '@nestjs/common';
 import { CqrsModule } from '@nestjs/cqrs';
 import { SupportTicket } from '@pkg/database';
 
-import { GetTicketsHandler } from './queries/get-tickets.handler';
+import { GetTicketPageHandler } from './get-ticket-page/get-ticket-page.handler';
 import { SupportController } from './support.controller';
 
 @Module({
@@ -12,6 +12,6 @@ import { SupportController } from './support.controller';
     MikroOrmModule.forFeature([SupportTicket]),
   ],
   controllers: [SupportController],
-  providers: [GetTicketsHandler],
+  providers: [GetTicketPageHandler],
 })
 export class SupportModule {}
