@@ -1,6 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Resource,
-         ResourceMetadata,
+         ResourceAction,
          ResourceScope,
          ResourceType } from '@pkg/database';
 
@@ -8,7 +8,7 @@ import type { EntityResponseDto } from '@/common/interfaces';
 
 export class GetResourceResponseDto implements Omit<
   EntityResponseDto<Resource>,
-  'parent' | 'children'
+  'metadata' | 'parent' | 'children'
 > {
   constructor(resource: Resource) {
     this.id = resource.id;
@@ -25,8 +25,7 @@ export class GetResourceResponseDto implements Omit<
     if (resource.sortOrder !== undefined) {
       this.sortOrder = resource.sortOrder;
     }
-    this.metadata = new ResourceMetadata(resource.metadata);
-    this.actions = resource.actions ?? [];
+    this.actions = (resource.actions ?? []) as ResourceAction[];
     if (resource.parent?.id !== undefined) {
       this.parent = resource.parent.id;
     }
@@ -68,24 +67,12 @@ export class GetResourceResponseDto implements Omit<
   sortOrder?: number;
 
   @ApiProperty({
-    type: () => ResourceMetadata,
-    example: {
-      creatable: true,
-      readable: true,
-      updatable: false,
-      deletable: false,
-    },
-    description: '리소스 메타데이터',
-  })
-  metadata!: ResourceMetadata;
-
-  @ApiProperty({
-    type: [String],
-    example: ['CREATE', 'READ'],
+    enum: ResourceAction,
+    isArray: true,
+    example: [ResourceAction.CREATE, ResourceAction.READ],
     description: '리소스 액션 목록',
-    deprecated: true,
   })
-  actions!: string[];
+  actions!: ResourceAction[];
 
   @ApiPropertyOptional({
     example: '019e5236-adae-70d7-a8f7-2dc90bdf7100',

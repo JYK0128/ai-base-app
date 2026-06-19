@@ -23,19 +23,19 @@ export class AuthAccountInfoDto {
     example: '2026-06-06T14:00:00.000Z',
     description: '마지막 로그인 일시',
   })
-  lastLoginAt?: string | null;
+  lastLoginAt?: Date | null;
 
   @ApiProperty({
     example: '2026-09-06T14:00:00.000Z',
     description: '비밀번호 만료 일시',
   })
-  passwordExpiresAt!: string;
+  passwordExpiresAt!: Date;
 
   @ApiPropertyOptional({
     example: '2026-06-06T15:00:00.000Z',
     description: '잠금 해제 일시',
   })
-  lockUntil?: string | null;
+  lockUntil?: Date | null;
 
   @ApiProperty({ example: false, description: '휴면 여부' })
   isDormant!: boolean;
@@ -106,10 +106,10 @@ export class AuthGetMeResponseDto {
       email: account.email,
       status: account.status as AccountStatus,
       lastLoginAt: account.lastLoginAt
-        ? account.lastLoginAt.toISOString()
+        ? account.lastLoginAt
         : null,
-      passwordExpiresAt: account.passwordExpiresAt.toISOString(),
-      lockUntil: account.lockUntil ? account.lockUntil.toISOString() : null,
+      passwordExpiresAt: account.passwordExpiresAt,
+      lockUntil: account.lockUntil ?? null,
       isDormant: account.isDormant,
       isPasswordExpired: account.isPasswordExpired,
     };
@@ -136,7 +136,7 @@ export class AuthGetMeResponseDto {
   }
 
   @ApiProperty({
-    type: AuthAccountInfoDto,
+    type: () => AuthAccountInfoDto,
     example: {
       id: '019e5236-adae-70d7-a8f7-2dc90bdf7081',
       email: 'dev@example.com',
@@ -152,7 +152,7 @@ export class AuthGetMeResponseDto {
   account!: AuthAccountInfoDto;
 
   @ApiProperty({
-    type: AuthMemberInfoDto,
+    type: () => AuthMemberInfoDto,
     example: {
       id: '019e5236-adae-70d7-a8f7-2dc90bdf7082',
       name: '김개발',
@@ -163,7 +163,7 @@ export class AuthGetMeResponseDto {
   member!: AuthMemberInfoDto;
 
   @ApiProperty({
-    type: AuthOrganizationInfoDto,
+    type: () => AuthOrganizationInfoDto,
     example: {
       id: '019e5236-adae-70d7-a8f7-2dc90bdf7083',
       code: 'ORG001',

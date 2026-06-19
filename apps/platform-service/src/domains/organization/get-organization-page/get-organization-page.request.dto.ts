@@ -28,7 +28,7 @@ export class GetOrganizationPageRequestDto implements ListRequestDto<Organizatio
   @ApiPropertyOptional({ description: '페이지 크기', example: 20, default: 20 })
   limit!: number;
 
-  @ApiPropertyOptional({ type: GetOrganizationPageFiltersDto, description: '필터 조건' })
+  @ApiPropertyOptional({ type: () => GetOrganizationPageFiltersDto, description: '필터 조건' })
   @IsOptional()
   @ValidateNested()
   @Type(() => GetOrganizationPageFiltersDto)

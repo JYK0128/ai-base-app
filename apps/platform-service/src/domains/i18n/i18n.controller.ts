@@ -1,6 +1,8 @@
 import { Controller, Get } from '@nestjs/common';
 import { QueryBus } from '@nestjs/cqrs';
 
+import { SwaggerResponse } from '@/common/decorators';
+
 import { GetLocalesContract } from './locales/get-locales.contract';
 import { GetLocalesResponseDto } from './locales/get-locales.response.dto';
 
@@ -11,6 +13,7 @@ export class I18nController {
   ) {}
 
   @Get('locales')
+  @SwaggerResponse(GetLocalesResponseDto)
   async getLocales(): Promise<GetLocalesResponseDto> {
     return this.queryBus.execute(new GetLocalesContract());
   }

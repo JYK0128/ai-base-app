@@ -1,6 +1,8 @@
 import { Body, Controller, Delete, Get, Param, Post, Put, Query } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 
+import { SwaggerResponse } from '@/common/decorators';
+
 import { CreateAnnouncementContract } from './create-announcement/create-announcement.contract';
 import { CreateAnnouncementRequestDto } from './create-announcement/create-announcement.request.dto';
 import { CreateAnnouncementResponseDto } from './create-announcement/create-announcement.response.dto';
@@ -25,6 +27,7 @@ export class AnnouncementController {
   ) {}
 
   @Get()
+  @SwaggerResponse(GetAnnouncementPageResponseDto)
   async getAnnouncementPage(
     @Query() query: GetAnnouncementPageRequestDto,
   ): Promise<GetAnnouncementPageResponseDto> {
@@ -32,6 +35,7 @@ export class AnnouncementController {
   }
 
   @Get(':id')
+  @SwaggerResponse(GetAnnouncementResponseDto)
   async getAnnouncement(
     @Param('id') id: string,
   ): Promise<GetAnnouncementResponseDto> {
@@ -39,6 +43,7 @@ export class AnnouncementController {
   }
 
   @Post()
+  @SwaggerResponse(CreateAnnouncementResponseDto)
   async createAnnouncement(
     @Body() body: CreateAnnouncementRequestDto,
   ): Promise<CreateAnnouncementResponseDto> {
@@ -46,13 +51,17 @@ export class AnnouncementController {
   }
 
   @Put(':id')
+  @SwaggerResponse(UpdateAnnouncementResponseDto)
   async updateAnnouncement(
+    @Param('id') id: string,
     @Body() body: UpdateAnnouncementRequestDto,
   ): Promise<UpdateAnnouncementResponseDto> {
+    body.id = id;
     return this.commandBus.execute(new UpdateAnnouncementContract(body));
   }
 
   @Delete(':id')
+  @SwaggerResponse(DeleteAnnouncementResponseDto)
   async deleteAnnouncement(
     @Param('id') id: string,
   ): Promise<DeleteAnnouncementResponseDto> {

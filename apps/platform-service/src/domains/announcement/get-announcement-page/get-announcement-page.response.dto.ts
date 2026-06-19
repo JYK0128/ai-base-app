@@ -85,7 +85,7 @@ export class GetAnnouncementPageResponseDto implements PageResponseDto<Announcem
     this.hasPrevPage = hasPrevPage;
   }
 
-  @ApiProperty({ type: [GetAnnouncementPageItemResponseDto], example: [], description: '공지사항 목록' })
+  @ApiProperty({ type: () => [GetAnnouncementPageItemResponseDto], example: [], description: '공지사항 목록' })
   items!: GetAnnouncementPageItemResponseDto[];
 
   @ApiProperty({ example: 25, description: '전체 개수' })

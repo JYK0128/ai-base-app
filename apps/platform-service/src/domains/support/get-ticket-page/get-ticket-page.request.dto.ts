@@ -34,7 +34,7 @@ export class GetTicketPageRequestDto implements PageRequestDto<SupportTicket> {
   @ApiPropertyOptional({ description: '페이지 크기', example: 20, default: 20 })
   limit!: number;
 
-  @ApiPropertyOptional({ type: GetTicketPageFiltersDto, description: '필터 조건' })
+  @ApiPropertyOptional({ type: () => GetTicketPageFiltersDto, description: '필터 조건' })
   @IsOptional()
   @ValidateNested()
   @Type(() => GetTicketPageFiltersDto)

@@ -21,7 +21,7 @@ export class GetMemberPageItemResponseDto implements EntityResponseDto<Member> {
       this.roles = roleCodes;
     }
     if (lastLoginAt) {
-      this.lastLoginAt = lastLoginAt.toISOString();
+      this.lastLoginAt = lastLoginAt;
     }
     this.createdAt = member.createdAt;
   }
@@ -42,7 +42,7 @@ export class GetMemberPageItemResponseDto implements EntityResponseDto<Member> {
   roles?: string[];
 
   @ApiPropertyOptional({ example: '2026-05-23T10:11:12.000Z', description: '최근 로그인' })
-  lastLoginAt?: string;
+  lastLoginAt?: Date;
 
   @ApiProperty({ example: '2026-05-23T08:30:00.000Z', description: '생성 일시' })
   createdAt!: Date;
@@ -59,7 +59,7 @@ export class GetMemberPageResponseDto implements PageResponseDto<Member> {
     this.hasPrevPage = hasPrevPage;
   }
 
-  @ApiProperty({ type: [GetMemberPageItemResponseDto], example: [], description: '멤버 목록' })
+  @ApiProperty({ type: () => [GetMemberPageItemResponseDto], example: [], description: '멤버 목록' })
   items!: GetMemberPageItemResponseDto[];
 
   @ApiProperty({ example: 42, description: '전체 개수' })

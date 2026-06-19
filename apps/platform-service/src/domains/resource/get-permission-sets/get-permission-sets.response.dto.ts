@@ -40,7 +40,8 @@ export class GetPermissionSetResponseDto implements EntityResponseDto<Organizati
   description?: string;
 
   @ApiProperty({
-    type: [String],
+    type: String,
+    isArray: true,
     example: ['DASHBOARD:READ', 'RESOURCE:READ'],
     description: '권한 코드 목록',
   })

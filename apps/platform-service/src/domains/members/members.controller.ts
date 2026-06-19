@@ -1,6 +1,8 @@
 import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 
+import { SwaggerResponse } from '@/common/decorators';
+
 import { CreateInviteContract } from './create-invite/create-invite.contract';
 import { CreateInviteRequestDto } from './create-invite/create-invite.request.dto';
 import { CreateInviteResponseDto } from './create-invite/create-invite.response.dto';
@@ -25,6 +27,7 @@ export class MembersController {
   ) {}
 
   @Post('invites')
+  @SwaggerResponse(CreateInviteResponseDto)
   async createInvite(
     @Body() body: CreateInviteRequestDto,
   ): Promise<CreateInviteResponseDto> {
@@ -32,6 +35,7 @@ export class MembersController {
   }
 
   @Post('status')
+  @SwaggerResponse(UpdateMemberStatusResponseDto)
   async toggleMemberStatus(
     @Body() body: UpdateMemberStatusRequestDto,
   ): Promise<UpdateMemberStatusResponseDto> {
@@ -39,6 +43,7 @@ export class MembersController {
   }
 
   @Post('role')
+  @SwaggerResponse(UpdateMemberRoleResponseDto)
   async updateMemberRole(
     @Body() body: UpdateMemberRoleRequestDto,
   ): Promise<UpdateMemberRoleResponseDto> {
@@ -46,6 +51,7 @@ export class MembersController {
   }
 
   @Get()
+  @SwaggerResponse(GetMemberPageResponseDto)
   async getMemberPage(
     @Query() query: GetMemberPageRequestDto,
   ): Promise<GetMemberPageResponseDto> {
@@ -53,6 +59,7 @@ export class MembersController {
   }
 
   @Get(':id')
+  @SwaggerResponse(GetMemberResponseDto)
   async getMember(
     @Param('id') id: string,
   ): Promise<GetMemberResponseDto> {

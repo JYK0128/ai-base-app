@@ -1,6 +1,8 @@
 import { Controller, Get, Query } from '@nestjs/common';
 import { QueryBus } from '@nestjs/cqrs';
 
+import { SwaggerResponse } from '@/common/decorators';
+
 import { GetTicketPageContract } from './get-ticket-page/get-ticket-page.contract';
 import { GetTicketPageRequestDto } from './get-ticket-page/get-ticket-page.request.dto';
 import { GetTicketResponseDto } from './get-ticket-page/get-ticket-page.response.dto';
@@ -12,6 +14,7 @@ export class SupportController {
   ) {}
 
   @Get('tickets')
+  @SwaggerResponse([GetTicketResponseDto])
   async getTicketPage(
     @Query() query: GetTicketPageRequestDto,
   ): Promise<GetTicketResponseDto[]> {

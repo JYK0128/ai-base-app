@@ -16,10 +16,22 @@ class GetResourcePageFiltersDto {
 export class GetResourcePageRequestDto implements ListRequestDto<Resource> {
   filter: FilterRequestDto<Resource> = {};
 
-  @ApiPropertyOptional({ description: '정렬 필드', example: ['sortOrder', 'code'], default: ['sortOrder', 'code'], isArray: true })
+  @ApiPropertyOptional({
+    type: String,
+    description: '정렬 필드',
+    example: ['sortOrder', 'code'],
+    default: ['sortOrder', 'code'],
+    isArray: true,
+  })
   sort!: Array<SortKey<Resource>>;
 
-  @ApiPropertyOptional({ description: '정렬 방향', enum: SortDirection, example: [SortDirection.ASC, SortDirection.ASC], default: [SortDirection.ASC, SortDirection.ASC], isArray: true })
+  @ApiPropertyOptional({
+    enum: SortDirection,
+    description: '정렬 방향',
+    example: [SortDirection.ASC, SortDirection.ASC],
+    default: [SortDirection.ASC, SortDirection.ASC],
+    isArray: true,
+  })
   direction!: SortDirection[];
 
   @ApiPropertyOptional({ description: '오프셋', example: 0, default: 0 })
@@ -28,7 +40,7 @@ export class GetResourcePageRequestDto implements ListRequestDto<Resource> {
   @ApiPropertyOptional({ description: '페이지 크기', example: 20, default: 20 })
   limit!: number;
 
-  @ApiProperty({ type: GetResourcePageFiltersDto, description: '필터 조건' })
+  @ApiProperty({ type: () => GetResourcePageFiltersDto, description: '필터 조건' })
   @ValidateNested()
   @Type(() => GetResourcePageFiltersDto)
   filters!: GetResourcePageFiltersDto;

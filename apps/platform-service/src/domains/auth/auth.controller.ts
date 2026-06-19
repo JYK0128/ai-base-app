@@ -3,6 +3,7 @@ import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import type { Response } from 'express';
 import { ClsService } from 'nestjs-cls';
 
+import { SwaggerResponse } from '@/common/decorators';
 import { Bypass, BYPASS_POLICIES } from '@/common/decorators/bypass.decorator';
 import { Cookies } from '@/common/decorators/cookies.decorator';
 import { Public } from '@/common/decorators/public.decorator';
@@ -11,8 +12,8 @@ import { ENV } from '@/env';
 
 import { CreateTermsAgreementContract } from '../terms/agree-terms/agree-terms.contract';
 import { CreateTermsAgreementRequestDto } from '../terms/agree-terms/agree-terms.request.dto';
-import type { CreateTermsAgreementResponseDto } from '../terms/agree-terms/agree-terms.response.dto';
-import type { GetTermsDocumentResponseDto } from '../terms/get-terms-document/get-terms-document.response.dto';
+import { CreateTermsAgreementResponseDto } from '../terms/agree-terms/agree-terms.response.dto';
+import { GetTermsDocumentResponseDto } from '../terms/get-terms-document/get-terms-document.response.dto';
 import { AuthChangePasswordContract } from './change-password/change-password.contract';
 import { AuthChangePasswordRequestDto } from './change-password/change-password.request.dto';
 import { AuthDeferPasswordChangeContract } from './defer-password-change/defer-password-change.contract';
@@ -36,6 +37,7 @@ export class AuthController {
   @Public()
   @Bypass(BYPASS_POLICIES.TERMS)
   @Post('login')
+  @SwaggerResponse(AuthLoginResponseDto)
   async login(
     @Body() body: Omit<AuthLoginRequestDto, 'clientIp'>,
     @Req() request: { ip?: string },
@@ -60,6 +62,7 @@ export class AuthController {
 
   @Public()
   @Post('refresh')
+  @SwaggerResponse(AuthRefreshTokenResponseDto)
   async refresh(
     @Cookies('refreshToken') refreshToken: string,
     @Res({ passthrough: true }) res: Response,
@@ -76,18 +79,21 @@ export class AuthController {
 
   @Get('me')
   @Bypass(BYPASS_POLICIES.TERMS)
+  @SwaggerResponse(AuthGetMeResponseDto)
   async me(): Promise<AuthGetMeResponseDto> {
     return this.queryBus.execute(new AuthGetMeContract());
   }
 
   @Get('terms')
   @Bypass(BYPASS_POLICIES.TERMS)
+  @SwaggerResponse([GetTermsDocumentResponseDto])
   async getTerms(): Promise<GetTermsDocumentResponseDto[]> {
     return this.queryBus.execute(new GetActiveTermsContract());
   }
 
   @Bypass(BYPASS_POLICIES.TERMS)
   @Post('terms/agreements')
+  @SwaggerResponse(CreateTermsAgreementResponseDto)
   async agreeTerms(
     @Body() body: CreateTermsAgreementRequestDto,
   ): Promise<CreateTermsAgreementResponseDto> {
@@ -96,6 +102,7 @@ export class AuthController {
 
   @Bypass(BYPASS_POLICIES.PASSWORD)
   @Post('password/change')
+  @SwaggerResponse()
   async changePassword(
     @Body() body: AuthChangePasswordRequestDto,
   ): Promise<void> {
@@ -104,6 +111,7 @@ export class AuthController {
 
   @Bypass(BYPASS_POLICIES.PASSWORD)
   @Post('password/defer')
+  @SwaggerResponse()
   async deferPasswordChange(): Promise<void> {
     await this.commandBus.execute(new AuthDeferPasswordChangeContract());
   }

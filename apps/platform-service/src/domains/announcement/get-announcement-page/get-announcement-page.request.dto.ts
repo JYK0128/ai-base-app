@@ -19,7 +19,7 @@ class GetAnnouncementPageFilters implements FilterRequestDto<Announcement> {
 }
 
 export class GetAnnouncementPageRequestDto implements PageRequestDto<Announcement> {
-  @ApiProperty({ type: GetAnnouncementPageFilters, description: '필터 조건' })
+  @ApiProperty({ type: () => GetAnnouncementPageFilters, description: '필터 조건' })
   @ValidateNested()
   @Type(() => GetAnnouncementPageFilters)
   filter: GetAnnouncementPageFilters = new GetAnnouncementPageFilters();

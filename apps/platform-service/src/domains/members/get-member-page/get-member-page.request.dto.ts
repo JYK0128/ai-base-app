@@ -38,6 +38,6 @@ export class GetMemberPageRequestDto implements PageRequestDto<Member> {
   @ApiPropertyOptional({ description: '페이지 크기', example: 20, default: 20 })
   limit!: number;
 
-  @ApiPropertyOptional({ description: '필터 조건', type: Object })
+  @ApiPropertyOptional({ description: '필터 조건', type: () => Object })
   filters?: FilterRequestDto<Member> & GetMemberPageFilterRangesDto;
 }

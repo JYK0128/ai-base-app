@@ -7,5 +7,5 @@ export * from './is-not-match.decorator';
 export * from './permissions.decorator';
 export * from './personal.decorator';
 export * from './public.decorator';
-export * from './swagger.decorator';
+export * from './swagger-response.decorator';
 export * from './swagger-schema.decorator';

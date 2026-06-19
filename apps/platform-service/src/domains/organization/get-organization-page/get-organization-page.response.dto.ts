@@ -33,6 +33,6 @@ export class GetOrganizationPageResponseDto implements ListResponseDto<Organizat
     this.items = items;
   }
 
-  @ApiProperty({ type: [GetOrganizationPageItemResponseDto], example: [], description: '조직 목록' })
+  @ApiProperty({ type: () => [GetOrganizationPageItemResponseDto], example: [], description: '조직 목록' })
   items!: GetOrganizationPageItemResponseDto[];
 }

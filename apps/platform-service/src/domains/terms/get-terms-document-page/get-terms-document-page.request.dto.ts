@@ -32,7 +32,7 @@ export class GetTermsDocumentPageRequestDto implements ListRequestDto<TermsDocum
   @ApiPropertyOptional({ description: '페이지 크기', example: 20, default: 20 })
   limit!: number;
 
-  @ApiPropertyOptional({ type: GetTermsDocumentPageFiltersDto, description: '필터 조건' })
+  @ApiPropertyOptional({ type: () => GetTermsDocumentPageFiltersDto, description: '필터 조건' })
   @ValidateNested()
   @Type(() => GetTermsDocumentPageFiltersDto)
   filters?: GetTermsDocumentPageFiltersDto;

@@ -1,6 +1,8 @@
 import { Body, Controller, Get, Param, Patch, Query } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 
+import { SwaggerResponse } from '@/common/decorators';
+
 import { ApproveOrganizationContract } from './approve-organization/approve-organization.contract';
 import { ApproveOrganizationRequestDto } from './approve-organization/approve-organization.request.dto';
 import { ApproveOrganizationResponseDto } from './approve-organization/approve-organization.response.dto';
@@ -18,6 +20,7 @@ export class OrganizationController {
   ) {}
 
   @Get()
+  @SwaggerResponse(GetOrganizationPageResponseDto)
   async getOrganizationPage(
     @Query() query: GetOrganizationPageRequestDto,
   ): Promise<GetOrganizationPageResponseDto> {
@@ -25,11 +28,13 @@ export class OrganizationController {
   }
 
   @Get('roles')
+  @SwaggerResponse([GetOrganizationRoleResponseDto])
   async getOrganizationRoles(): Promise<GetOrganizationRoleResponseDto[]> {
     return this.queryBus.execute(new GetOrganizationRolesContract());
   }
 
   @Patch(':id/approve')
+  @SwaggerResponse(ApproveOrganizationResponseDto)
   async approveOrganization(
     @Param('id') id: string,
     @Body() body: ApproveOrganizationRequestDto,

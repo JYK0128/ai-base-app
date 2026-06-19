@@ -102,31 +102,12 @@ export class GetTermsDocumentDetailResponseDto {
     this.currentVersion = currentVersion ?? null;
   }
 
-  @ApiProperty({
-    type: GetTermsDocumentResponseDto,
-    example: {
-      id: '019e5236-adae-70d7-a8f7-2dc90bdf7081',
-      code: 'privacy',
-      title: '개인정보 처리방침',
-      required: true,
-      status: TermsDocumentStatus.PUBLISHED,
-    },
-    description: '문서 기본 정보',
-  })
+  @ApiProperty({ type: () => GetTermsDocumentResponseDto, example: { id: '019e5236-adae-70d7-a8f7-2dc90bdf7081', code: 'privacy', title: '개인정보 처리방침', required: true, status: TermsDocumentStatus.PUBLISHED }, description: '문서 기본 정보' })
   document!: GetTermsDocumentResponseDto;
 
-  @ApiProperty({
-    type: [GetTermsDocumentVersionResponseDto],
-    example: [],
-    description: '버전 목록',
-  })
+  @ApiProperty({ type: () => [GetTermsDocumentVersionResponseDto], example: [], description: '버전 목록' })
   versions!: GetTermsDocumentVersionResponseDto[];
 
-  @ApiPropertyOptional({
-    type: GetTermsDocumentVersionResponseDto,
-    example: null,
-    nullable: true,
-    description: '현재 효력 중인 버전',
-  })
+  @ApiPropertyOptional({ type: () => GetTermsDocumentVersionResponseDto, example: null, nullable: true, description: '현재 효력 중인 버전' })
   currentVersion?: GetTermsDocumentVersionResponseDto | null;
 }
