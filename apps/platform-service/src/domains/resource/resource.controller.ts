@@ -1,13 +1,13 @@
 import { Controller, Get, Param, Query } from '@nestjs/common';
 import { QueryBus } from '@nestjs/cqrs';
 
-import { GetPermissionSetsContract } from './permission-sets/get-permission-sets.contract';
-import type { PermissionSetResponseDto } from './permission-sets/get-permission-sets.response.dto';
-import { GetResourceContract } from './queries/get-resource.contract';
-import type { ResourceDetailResponseDto } from './queries/get-resource.response.dto';
-import { GetResourcesContract } from './queries/get-resources.contract';
-import type { GetResourcesRequestDto } from './queries/get-resources.request.dto';
-import type { ResourceResponseDto } from './queries/get-resources.response.dto';
+import { GetPermissionSetsContract } from './get-permission-sets/get-permission-sets.contract';
+import { GetPermissionSetResponseDto } from './get-permission-sets/get-permission-sets.response.dto';
+import { GetResourceContract } from './get-resource/get-resource.contract';
+import { GetResourceResponseDto } from './get-resource/get-resource.response.dto';
+import { GetResourcePageContract } from './get-resource-page/get-resource-page.contract';
+import { GetResourcePageRequestDto } from './get-resource-page/get-resource-page.request.dto';
+import { GetResourceResponseDto as GetResourcePageItemResponseDto } from './get-resource-page/get-resource-page.response.dto';
 
 @Controller('resources')
 export class ResourceController {
@@ -16,21 +16,21 @@ export class ResourceController {
   ) {}
 
   @Get('permission-sets')
-  async getPermissionSets(): Promise<PermissionSetResponseDto[]> {
+  async getPermissionSets(): Promise<GetPermissionSetResponseDto[]> {
     return this.queryBus.execute(new GetPermissionSetsContract());
   }
 
   @Get(':id')
   async getResource(
     @Param('id') id: string,
-  ): Promise<ResourceDetailResponseDto> {
+  ): Promise<GetResourceResponseDto> {
     return this.queryBus.execute(new GetResourceContract({ id }));
   }
 
   @Get()
-  async getResources(
-    @Query() query: GetResourcesRequestDto,
-  ): Promise<ResourceResponseDto[]> {
-    return this.queryBus.execute(new GetResourcesContract(query));
+  async getResourcePage(
+    @Query() query: GetResourcePageRequestDto,
+  ): Promise<GetResourcePageItemResponseDto[]> {
+    return this.queryBus.execute(new GetResourcePageContract(query));
   }
 }
