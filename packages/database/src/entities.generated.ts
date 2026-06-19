@@ -3,20 +3,20 @@
 
 import { Announcement, AnnouncementMetadata } from './domains/platform/announcement/announcement.entity.js';
 import { CoreEntity } from './domains/core/core.entity.js';
-import { I18nLocale } from './domains/platform/i18n/i18n.locale.entity.js';
-import { I18nTranslation } from './domains/platform/i18n/i18n.translation.entity.js';
+import { I18nLocale } from './domains/platform/i18n/i18n-locale.entity.js';
+import { I18nTranslation } from './domains/platform/i18n/i18n-translation.entity.js';
 import { Member } from './domains/platform/member/member.entity.js';
-import { MemberAccount } from './domains/platform/member/member.account.entity.js';
-import { MemberInvite, MemberInviteMetadata } from './domains/platform/member/member.invite.entity.js';
-import { Organization } from './domains/platform/organization/organization.entity.js';
-import { OrganizationPermission } from './domains/platform/organization/organization.permission.entity.js';
-import { OrganizationRole } from './domains/platform/organization/organization.role.entity.js';
-import { OrganizationRoleAssignment } from './domains/platform/organization/organization.role-assignment.entity.js';
-import { Resource } from './domains/platform/resource/resource.entity.js';
+import { MemberAccount } from './domains/platform/member/member-account.entity.js';
+import { MemberInvite, MemberInviteMetadata } from './domains/platform/member/member-invite.entity.js';
+import { Organization, OrganizationMetadata } from './domains/platform/organization/organization.entity.js';
+import { OrganizationPermission } from './domains/platform/organization/organization-permission.entity.js';
+import { OrganizationRole } from './domains/platform/organization/organization-role.entity.js';
+import { OrganizationRoleAssignment } from './domains/platform/organization/organization-role-assignment.entity.js';
+import { Resource, ResourceMetadata } from './domains/platform/resource/resource.entity.js';
 import { SupportTicket } from './domains/platform/support/support-ticket.entity.js';
-import { TermsConsent } from './domains/platform/terms/terms.consent.entity.js';
-import { TermsDocument } from './domains/platform/terms/terms.document.entity.js';
-import { TermsVersion } from './domains/platform/terms/terms.version.entity.js';
+import { TermsConsent } from './domains/platform/terms/terms-consent.entity.js';
+import { TermsDocument, TermsDocumentMetadata } from './domains/platform/terms/terms-document.entity.js';
+import { TermsVersion } from './domains/platform/terms/terms-version.entity.js';
 import { EntityManager as DriverEntityManager } from '@mikro-orm/postgresql';
 
 export const entities = [
@@ -30,13 +30,16 @@ export const entities = [
   MemberInvite,
   MemberInviteMetadata,
   Organization,
+  OrganizationMetadata,
   OrganizationPermission,
   OrganizationRole,
   OrganizationRoleAssignment,
   Resource,
+  ResourceMetadata,
   SupportTicket,
   TermsConsent,
   TermsDocument,
+  TermsDocumentMetadata,
   TermsVersion,
 ] as const;
 

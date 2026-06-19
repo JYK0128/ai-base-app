@@ -1,8 +1,9 @@
 import { EntityManager } from '@mikro-orm/core';
 import { Seeder } from '@mikro-orm/seeder';
 
-import { I18nTranslation } from '../domains/platform/i18n/i18n.translation.entity';
-import { Resource, ResourceScope, ResourceType } from '../domains/platform/resource/resource.entity';
+import { I18nTranslation } from '../domains/platform/i18n/i18n-translation.entity';
+import { ResourceScope, ResourceType } from '../domains/platform/resource/resource.constants';
+import { Resource, ResourceMetadata } from '../domains/platform/resource/resource.entity';
 
 interface ResourceSeedDto {
   code: string
@@ -13,8 +14,7 @@ interface ResourceSeedDto {
   path?: string
   icon?: string
   sortOrder?: number
-  actions: string[]
-  constraint?: string
+  metadata: Partial<ResourceMetadata>
   parentCode?: string
 }
 
@@ -28,7 +28,12 @@ const RESOURCES_SEEDS: ResourceSeedDto[] = [
     path: '/dashboard',
     icon: 'LayoutDashboard',
     sortOrder: 1,
-    actions: ['READ'],
+    metadata: {
+      creatable: false,
+      readable: true,
+      updatable: false,
+      deletable: false,
+    },
   },
   {
     code: 'ORGANIZATION',
@@ -39,7 +44,12 @@ const RESOURCES_SEEDS: ResourceSeedDto[] = [
     path: '/organizations',
     icon: 'Building2',
     sortOrder: 2,
-    actions: ['CREATE', 'READ', 'UPDATE', 'DELETE'],
+    metadata: {
+      creatable: true,
+      readable: true,
+      updatable: true,
+      deletable: true,
+    },
   },
   {
     code: 'MEMBER',
@@ -50,7 +60,12 @@ const RESOURCES_SEEDS: ResourceSeedDto[] = [
     path: '/members',
     icon: 'Users',
     sortOrder: 3,
-    actions: ['CREATE', 'READ', 'UPDATE', 'DELETE'],
+    metadata: {
+      creatable: true,
+      readable: true,
+      updatable: true,
+      deletable: true,
+    },
   },
   {
     code: 'PERMISSION',
@@ -61,7 +76,12 @@ const RESOURCES_SEEDS: ResourceSeedDto[] = [
     path: '/permissions',
     icon: 'Shield',
     sortOrder: 4,
-    actions: ['CREATE', 'READ', 'UPDATE'],
+    metadata: {
+      creatable: true,
+      readable: true,
+      updatable: true,
+      deletable: false,
+    },
   },
 
   {
@@ -73,7 +93,12 @@ const RESOURCES_SEEDS: ResourceSeedDto[] = [
     path: '/announcements',
     icon: 'Megaphone',
     sortOrder: 5,
-    actions: ['CREATE', 'READ', 'UPDATE', 'DELETE'],
+    metadata: {
+      creatable: true,
+      readable: true,
+      updatable: true,
+      deletable: true,
+    },
   },
 
   {
@@ -85,7 +110,12 @@ const RESOURCES_SEEDS: ResourceSeedDto[] = [
     path: '/terms',
     icon: 'FileText',
     sortOrder: 6,
-    actions: ['CREATE', 'READ', 'UPDATE', 'DELETE'],
+    metadata: {
+      creatable: true,
+      readable: true,
+      updatable: true,
+      deletable: true,
+    },
   },
   {
     code: 'RESOURCE',
@@ -96,7 +126,12 @@ const RESOURCES_SEEDS: ResourceSeedDto[] = [
     path: '/resources',
     icon: 'Key',
     sortOrder: 7,
-    actions: ['CREATE', 'READ', 'UPDATE', 'DELETE'],
+    metadata: {
+      creatable: true,
+      readable: true,
+      updatable: true,
+      deletable: true,
+    },
   },
   {
     code: 'ROLE_RESOURCE_CREATE_BUTTON',
@@ -106,7 +141,12 @@ const RESOURCES_SEEDS: ResourceSeedDto[] = [
     scope: ResourceScope.PLATFORM,
     parentCode: 'RESOURCE',
     sortOrder: 1,
-    actions: ['READ'],
+    metadata: {
+      creatable: false,
+      readable: true,
+      updatable: false,
+      deletable: false,
+    },
   },
   {
     code: 'ROLE_RESOURCE_SAVE_BUTTON',
@@ -116,7 +156,12 @@ const RESOURCES_SEEDS: ResourceSeedDto[] = [
     scope: ResourceScope.PLATFORM,
     parentCode: 'RESOURCE',
     sortOrder: 2,
-    actions: ['READ'],
+    metadata: {
+      creatable: false,
+      readable: true,
+      updatable: false,
+      deletable: false,
+    },
   },
 
   {
@@ -128,7 +173,12 @@ const RESOURCES_SEEDS: ResourceSeedDto[] = [
     path: '/support',
     icon: 'LifeBuoy',
     sortOrder: 8,
-    actions: ['CREATE', 'READ', 'UPDATE', 'DELETE'],
+    metadata: {
+      creatable: true,
+      readable: true,
+      updatable: true,
+      deletable: true,
+    },
   },
   {
     code: 'AUDIT',
@@ -139,7 +189,12 @@ const RESOURCES_SEEDS: ResourceSeedDto[] = [
     path: '/audit',
     icon: 'ScrollText',
     sortOrder: 9,
-    actions: ['READ'],
+    metadata: {
+      creatable: false,
+      readable: true,
+      updatable: false,
+      deletable: false,
+    },
   },
 ];
 
@@ -188,12 +243,11 @@ export class ResourceSeeder extends Seeder {
         name: seed.alias,
         type: seed.type,
         scope: seed.scope,
-        parent,
-        path: seed.path,
-        icon: seed.icon,
-        sortOrder: seed.sortOrder,
-        actions: seed.actions,
-        constraint: seed.constraint,
+        ...(parent ? { parent } : {}),
+        ...(seed.path === undefined ? {} : { path: seed.path }),
+        ...(seed.icon === undefined ? {} : { icon: seed.icon }),
+        ...(seed.sortOrder === undefined ? {} : { sortOrder: seed.sortOrder }),
+        metadata: this.createMetadata(seed.metadata),
       });
       em.persist(resource);
       return resource;
@@ -211,14 +265,34 @@ export class ResourceSeeder extends Seeder {
     resource.name = seed.alias;
     resource.type = seed.type;
     resource.scope = seed.scope;
-    resource.path = seed.path;
-    resource.icon = seed.icon;
-    resource.sortOrder = seed.sortOrder;
-    resource.actions = seed.actions;
-    resource.constraint = seed.constraint;
+    if (seed.path === undefined) {
+      delete resource.path;
+    }
+    else {
+      resource.path = seed.path;
+    }
+
+    if (seed.icon === undefined) {
+      delete resource.icon;
+    }
+    else {
+      resource.icon = seed.icon;
+    }
+
+    if (seed.sortOrder === undefined) {
+      delete resource.sortOrder;
+    }
+    else {
+      resource.sortOrder = seed.sortOrder;
+    }
+
+    resource.metadata = this.createMetadata(seed.metadata);
 
     if (parent !== undefined) {
       resource.parent = parent;
+    }
+    else {
+      delete resource.parent;
     }
   }
 
@@ -258,5 +332,9 @@ export class ResourceSeeder extends Seeder {
         }
       }
     }
+  }
+
+  private createMetadata(metadata: Partial<ResourceMetadata>): ResourceMetadata {
+    return new ResourceMetadata(metadata);
   }
 }

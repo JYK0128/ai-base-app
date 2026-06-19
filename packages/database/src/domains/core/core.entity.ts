@@ -1,10 +1,12 @@
-import { BaseEntity, type CountByOptions, type CountOptions, type CreateOptions, type Cursor, type DeleteOptions, type Dictionary, type EntityClass, type EntityData, type EntityKey, EntityRepositoryType, type FilterQuery, type FindByCursorOptions, type FindOneOptions, type FindOneOrFailOptions, type FindOptions, type Loaded, type NativeInsertUpdateOptions, OptionalProps, type Primary, type RequiredEntityData, type UpdateOptions, type UpsertManyOptions, type UpsertOptions, type WithUsingOptions } from '@mikro-orm/core';
+import { BaseEntity, ConnectionType, type CountByOptions, type CountOptions, type CreateOptions, type Cursor, type DeleteOptions, type Dictionary, type EntityClass, type EntityData, type EntityKey, EntityRepositoryType, type FilterQuery, type FindByCursorOptions, type FindOneOptions, type FindOneOrFailOptions, type FindOptions, type Loaded, LoggingOptions, type NativeInsertUpdateOptions, OptionalProps, type Primary, type RequiredEntityData, type UpdateOptions, type UpsertManyOptions, type UpsertOptions, type WithUsingOptions } from '@mikro-orm/core';
 import { PrimaryKey, Property } from '@mikro-orm/decorators/legacy';
+import { QueryBuilder } from '@mikro-orm/postgresql';
 import { uuidv7 } from 'uuidv7';
+
+import type { EntityManager as SqlEntityManager } from '@/entities.generated';
 
 import { QueryEngine } from './core.query';
 import { CoreRepository } from './core.repository';
-
 export abstract class CoreEntity<
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   TEntity extends object = any,
@@ -50,11 +52,23 @@ export abstract class CoreEntity<
     return this.id === entity.id;
   }
 
-  // === Repository ===
+  // === Others ===
   static getRepository<T extends CoreEntity>(
     this: EntityClass<T>,
-  ) {
+  ): CoreRepository<T> {
     return QueryEngine.em.getRepository<T>(this) as CoreRepository<T>;
+  }
+
+  static getQueryBuilder<
+    T extends CoreEntity,
+    RootAlias extends string = never,
+  >(
+    this: EntityClass<T>,
+    alias?: RootAlias,
+    type?: ConnectionType,
+    loggerContext?: LoggingOptions,
+  ): QueryBuilder<T, RootAlias> {
+    return (QueryEngine.em as SqlEntityManager).createQueryBuilder(this, alias, type, loggerContext);
   }
 
   // === Helper ===
@@ -168,7 +182,7 @@ export abstract class CoreEntity<
     QueryEngine.remove(this);
   }
 
-  // === Native Insert ===
+  // === Native Query - Helper ===
   static nativeInsert<T extends CoreEntity>(
     this: EntityClass<T>,
     data: RequiredEntityData<T>,
@@ -185,7 +199,6 @@ export abstract class CoreEntity<
     return QueryEngine.nativeInsertMany(this, data, options);
   }
 
-  // === Native Upsert ===
   static nativeUpsert<T extends CoreEntity, Fields extends string = never>(
     this: EntityClass<T>,
     data: EntityData<T> | T,
@@ -202,7 +215,24 @@ export abstract class CoreEntity<
     return QueryEngine.nativeUpsertMany<T, Fields>(this, data, options);
   }
 
-  // === Native Update ===
+  static nativeUpdate<T extends CoreEntity>(
+    this: EntityClass<T>,
+    where: FilterQuery<T>,
+    data: EntityData<T>,
+    options?: UpdateOptions<T>,
+  ): Promise<number> {
+    return QueryEngine.nativeUpdate(this, where, data, options);
+  }
+
+  static nativeDelete<T extends CoreEntity>(
+    this: EntityClass<T>,
+    where: FilterQuery<T>,
+    options?: DeleteOptions<T>,
+  ): Promise<number> {
+    return QueryEngine.nativeDelete(this, where, options);
+  }
+
+  // === Native Query - Instance ===
   nativeUpdate(
     data: EntityData<this>,
     options?: UpdateOptions<this>,
@@ -217,7 +247,6 @@ export abstract class CoreEntity<
     );
   }
 
-  // === Native Delete ===
   nativeDelete(
     options?: DeleteOptions<this>,
   ): Promise<number> {

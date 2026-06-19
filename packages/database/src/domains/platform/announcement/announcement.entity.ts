@@ -2,31 +2,9 @@ import { EntityName, type Opt } from '@mikro-orm/core';
 import { Embeddable, Embedded, Entity, Enum, Property } from '@mikro-orm/decorators/legacy';
 
 import { CoreEntity } from '../../core/core.entity';
-
-export enum AnnouncementCategory {
-  NOTICE = 'NOTICE',
-  MAINTENANCE = 'MAINTENANCE',
-  SECURITY = 'SECURITY',
-  EVENT = 'EVENT',
-}
-
-export enum AnnouncementAudience {
-  ALL = 'ALL',
-  PLATFORM = 'PLATFORM',
-  ORGANIZATION = 'ORGANIZATION',
-}
-
-export enum AnnouncementChannel {
-  IN_APP = 'IN_APP',
-  EMAIL = 'EMAIL',
-  PUSH = 'PUSH',
-}
-
-export enum AnnouncementPriority {
-  LOW = 'LOW',
-  NORMAL = 'NORMAL',
-  HIGH = 'HIGH',
-}
+import { AnnouncementAudience, AnnouncementCategory, AnnouncementChannel, AnnouncementPriority, AnnouncementStatus } from './announcement.constants';
+import { isAnnouncementPublished } from './announcement.policy-publication';
+import { getAnnouncementStatus } from './announcement.policy-status';
 
 @Embeddable()
 export class AnnouncementMetadata {
@@ -51,14 +29,14 @@ export class AnnouncementMetadata {
   @Property({ type: 'boolean' })
   pinned: boolean = false;
 
-  @Property({ type: Date })
-  publishedAt!: Date;
+  @Property({ type: Date, nullable: true })
+  publishedAt?: Date | null;
 
   @Property({ type: Date })
-  startAt!: Date;
+  startAt?: Date;
 
   @Property({ type: Date })
-  endAt!: Date;
+  endAt?: Date;
 }
 
 @Entity({ schema: 'platform' })
@@ -71,18 +49,61 @@ export class Announcement extends CoreEntity<Announcement> {
   @Property({ type: 'text' })
   content!: string;
 
-  @Embedded({ entity: () => AnnouncementMetadata, object: true, nullable: true })
+  @Embedded({ entity: () => AnnouncementMetadata, object: true })
   override metadata: Opt<AnnouncementMetadata> = new AnnouncementMetadata();
 
   @Property({ persist: false })
+  get category(): Opt<AnnouncementCategory> {
+    return this.metadata.category;
+  }
+
+  @Property({ persist: false })
+  get audience(): Opt<AnnouncementAudience> {
+    return this.metadata.audience;
+  }
+
+  @Property({ persist: false })
+  get channel(): Opt<AnnouncementChannel> {
+    return this.metadata.channel;
+  }
+
+  @Property({ persist: false })
+  get priority(): Opt<AnnouncementPriority> {
+    return this.metadata.priority;
+  }
+
+  @Property({ persist: false })
+  get pinned(): Opt<boolean> {
+    return this.metadata.pinned;
+  }
+
+  @Property({ persist: false })
+  get publishedAt(): Opt<Date> | null {
+    return this.metadata.publishedAt ?? null;
+  }
+
+  @Property({ persist: false })
+  get startAt(): Opt<Date> | null {
+    return this.metadata.startAt ?? null;
+  }
+
+  @Property({ persist: false })
+  get endAt(): Opt<Date> | null {
+    return this.metadata.endAt ?? null;
+  }
+
+  @Property({ persist: false })
+  get status(): Opt<AnnouncementStatus> {
+    return getAnnouncementStatus(this.metadata);
+  }
+
+  @Property({ persist: false })
   get isPublished(): Opt<boolean> {
-    const publishedAt = this.metadata.publishedAt;
+    return isAnnouncementPublished(this.metadata.publishedAt);
+  }
 
-    if (!publishedAt) {
-      return false;
-    }
-
-    const publishedAtTime = publishedAt.getTime();
-    return Number.isFinite(publishedAtTime);
+  @Property({ persist: false })
+  get author(): Opt<string> {
+    return this.createdBy ?? this.updatedBy ?? '';
   }
 }

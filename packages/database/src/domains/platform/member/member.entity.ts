@@ -4,14 +4,11 @@ import { Entity, Enum, ManyToOne, OneToMany, Property } from '@mikro-orm/decorat
 
 import { CoreEntity } from '../../core/core.entity';
 import { Organization } from '../organization/organization.entity';
-import { OrganizationRoleAssignment } from '../organization/organization.role-assignment.entity';
-import { TermsConsent } from '../terms/terms.consent.entity';
-import { MemberAccount } from './member.account.entity';
-
-export enum MemberStatus {
-  ACTIVE = 'ACTIVE',
-  INACTIVE = 'INACTIVE',
-}
+import { OrganizationRoleAssignment } from '../organization/organization-role-assignment.entity';
+import { TermsConsent } from '../terms/terms-consent.entity';
+import { MemberStatus } from './member.constants';
+import { isMemberActive } from './member.policy-status';
+import { MemberAccount } from './member-account.entity';
 
 @Entity({ schema: 'platform' })
 export class Member extends CoreEntity<Member> {
@@ -24,13 +21,16 @@ export class Member extends CoreEntity<Member> {
   accounts = new Collection<MemberAccount>(this);
 
   @OneToMany(() => OrganizationRoleAssignment, (organizationRole) => organizationRole.member)
-  organizationRoles = new Collection<OrganizationRoleAssignment>(this);
+  roles = new Collection<OrganizationRoleAssignment>(this);
 
   @OneToMany(() => TermsConsent, (consent) => consent.member)
-  termsConsents = new Collection<TermsConsent>(this);
+  consents = new Collection<TermsConsent>(this);
 
   @Property({ type: 'string' })
   name!: string;
+
+  @Property({ type: 'string' })
+  email!: string;
 
   @Enum(() => MemberStatus)
   status: Opt<MemberStatus> = MemberStatus.ACTIVE;
@@ -40,6 +40,6 @@ export class Member extends CoreEntity<Member> {
    */
   @Property({ persist: false })
   get isActive(): Opt<boolean> {
-    return this.status === MemberStatus.ACTIVE;
+    return isMemberActive(this.status);
   }
 }

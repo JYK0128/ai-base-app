@@ -11,6 +11,12 @@ import { SqlHighlighter } from '@mikro-orm/sql-highlighter';
 import metadata from './metadata.json' with { type: 'json' };
 import { AuditSubscriber } from './subscribers';
 
+const databaseUrl = process.env.DATABASE_URL;
+
+if (!databaseUrl) {
+  throw new Error('DATABASE_URL is required');
+}
+
 export default defineConfig({
   entities: [
     'dist/domains/**/*.entity.js',
@@ -19,7 +25,7 @@ export default defineConfig({
     'src/domains/**/*.entity.ts',
   ],
   driver: PostgreSqlDriver,
-  clientUrl: process.env.DATABASE_URL,
+  clientUrl: databaseUrl,
   metadataProvider: process.env.MIKRO_ORM_CLI_TS_LOADER
     ? TsMorphMetadataProvider
     : MetadataProvider,
