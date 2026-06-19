@@ -1,21 +1,30 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty } from '@nestjs/swagger';
 import { type Member, MemberStatus } from '@pkg/database';
 
-import type { MemberRoleDto } from '@/domains/members/members.types';
+import type { EntityResponseDto } from '@/common/interfaces';
 
-export class MemberResponseDto {
+export class GetMemberResponseDto implements EntityResponseDto<Member> {
   constructor(member: Member) {
-    const account = member.accounts.getItems()[0];
-    const roleAssignment = member.organizationRoles.getItems()[0];
+    const accounts = member.accounts.getItems();
+    const roleAssignments = member.roles.getItems();
+    const roleCodes = roleAssignments.map((ra) => ra.role.code);
+    const lastLoginAt = accounts
+      .filter((item) => item.lastLoginAt)
+      .toSorted((a, b) => (b.lastLoginAt?.getTime() ?? 0) - (a.lastLoginAt?.getTime() ?? 0))
+      .at(0)?.lastLoginAt;
 
     this.id = member.id;
     this.name = member.name;
+    this.email = member.email;
     this.status = member.status;
-    this.createdBy = member.createdBy;
-    this.email = account?.email ?? '';
-    this.role = (roleAssignment?.role.code ?? '') as MemberRoleDto;
-    this.lastLoginAt = account?.lastLoginAt?.toISOString() ?? null;
-    this.invitedAt = member.createdAt.toISOString();
+
+    if (roleCodes.length > 0) {
+      this.roles = roleCodes;
+    }
+    if (lastLoginAt) {
+      this.lastLoginAt = lastLoginAt.toISOString();
+    }
+    this.createdAt = member.createdAt;
   }
 
   @ApiProperty({ example: '019e5236-adae-70d7-a8f7-2dc90bdf7082', description: '멤버 식별자' })
@@ -24,21 +33,18 @@ export class MemberResponseDto {
   @ApiProperty({ example: '김개발', description: '멤버 이름' })
   name!: string;
 
-  @ApiProperty({ enum: MemberStatus, example: 'ACTIVE', description: '멤버 상태' })
-  status!: MemberStatus;
-
-  @ApiPropertyOptional({ example: '019e5236-adae-70d7-a8f7-2dc90bdf7081', description: '생성자 식별자' })
-  createdBy?: string;
-
   @ApiProperty({ example: 'hana.lee@example.com', description: '이메일' })
   email!: string;
 
-  @ApiProperty({ example: 'MANAGER', description: '권한' })
-  role!: MemberRoleDto;
+  @ApiProperty({ enum: MemberStatus, example: MemberStatus.ACTIVE, description: '멤버 상태' })
+  status!: MemberStatus;
+
+  @ApiProperty({ example: ['MANAGER'], isArray: true, type: String, description: '권한 목록' })
+  roles?: string[];
 
   @ApiProperty({ example: '2026-05-23T10:11:12.000Z', nullable: true, description: '최근 로그인' })
-  lastLoginAt!: string | null;
+  lastLoginAt?: string;
 
-  @ApiProperty({ example: '2026-05-23T08:30:00.000Z', description: '초대 일시 (생성 시각 기준)' })
-  invitedAt!: string;
+  @ApiProperty({ example: '2026-05-23T08:30:00.000Z', description: '생성 일시' })
+  createdAt!: Date;
 }

@@ -2,8 +2,8 @@ import { Controller, Logger } from '@nestjs/common';
 import { CommandBus } from '@nestjs/cqrs';
 import { EventPattern, Payload } from '@nestjs/microservices';
 
-import { SendInviteEmailCommand } from './commands';
 import { MAIL_EVENT_PATTERNS, type SendInviteEmailPayload } from './mail.contract';
+import { SendInviteEmailContract } from './send-invite-email/send-invite-email.contract';
 
 @Controller()
 export class MailController {
@@ -15,7 +15,7 @@ export class MailController {
 
   @EventPattern(MAIL_EVENT_PATTERNS.INVITE.SEND)
   async handleSendInviteEmail(@Payload() data: SendInviteEmailPayload): Promise<void> {
-    await this.commandBus.execute(new SendInviteEmailCommand(data)).catch((error: unknown) => {
+    await this.commandBus.execute(new SendInviteEmailContract(data)).catch((error: unknown) => {
       if (this.isExpectedMailEventError(error)) {
         this.logger.warn(`Handled ${MAIL_EVENT_PATTERNS.INVITE.SEND} event for invite ${data.inviteId} with expected error: ${this.describeError(error)}`);
         return;

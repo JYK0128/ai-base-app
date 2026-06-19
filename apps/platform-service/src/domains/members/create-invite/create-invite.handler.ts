@@ -23,7 +23,7 @@ export class CreateInviteHandler implements ICommandHandler<CreateInviteContract
   async execute({ data }: CreateInviteContract): Promise<CreateInviteResponseDto> {
     const organization = await this.identifyOrganization();
     const inviter = await this.identifyInviter();
-    const role = await this.identifyRole(data.roleId);
+    const role = await this.identifyRole(data.role);
 
     await this.validatePolicies(organization, data.email);
 
@@ -71,9 +71,9 @@ export class CreateInviteHandler implements ICommandHandler<CreateInviteContract
     );
   }
 
-  private async identifyRole(roleId: string): Promise<OrganizationRole> {
+  private async identifyRole(role: string): Promise<OrganizationRole> {
     return await this.Asserter.assert(
-      OrganizationRole.findOne({ id: roleId }),
+      OrganizationRole.findOne({ id: role }),
       'ROLE_NOT_FOUND',
     );
   }
@@ -86,7 +86,9 @@ export class CreateInviteHandler implements ICommandHandler<CreateInviteContract
     note?: string,
   ): Promise<MemberInvite> {
     const metadata = new MemberInviteMetadata();
-    metadata.note = note;
+    if (note !== undefined) {
+      metadata.note = note;
+    }
 
     return MemberInvite.create({
       name,

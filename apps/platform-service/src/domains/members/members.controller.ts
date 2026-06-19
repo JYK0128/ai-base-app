@@ -2,20 +2,20 @@ import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 
 import { CreateInviteContract } from './create-invite/create-invite.contract';
-import type { CreateInviteRequestDto } from './create-invite/create-invite.request.dto';
-import type { CreateInviteResponseDto } from './create-invite/create-invite.response.dto';
+import { CreateInviteRequestDto } from './create-invite/create-invite.request.dto';
+import { CreateInviteResponseDto } from './create-invite/create-invite.response.dto';
 import { GetMemberContract } from './get-member/get-member.contract';
-import type { GetMemberRequestDto } from './get-member/get-member.request.dto';
-import type { MemberResponseDto } from './get-member/get-member.response.dto';
-import { GetMembersContract } from './get-members/get-members.contract';
-import type { GetMembersRequestDto } from './get-members/get-members.request.dto';
-import type { GetMembersResponseDto } from './get-members/get-members.response.dto';
+import { GetMemberRequestDto } from './get-member/get-member.request.dto';
+import { GetMemberResponseDto } from './get-member/get-member.response.dto';
+import { GetMemberPageContract } from './get-member-page/get-member-page.contract';
+import { GetMemberPageRequestDto } from './get-member-page/get-member-page.request.dto';
+import { GetMemberPageResponseDto } from './get-member-page/get-member-page.response.dto';
 import { UpdateMemberRoleContract } from './update-member-role/update-member-role.contract';
-import type { UpdateMemberRoleRequestDto } from './update-member-role/update-member-role.request.dto';
-import type { UpdateMemberRoleResponseDto } from './update-member-role/update-member-role.response.dto';
+import { UpdateMemberRoleRequestDto } from './update-member-role/update-member-role.request.dto';
+import { UpdateMemberRoleResponseDto } from './update-member-role/update-member-role.response.dto';
 import { UpdateMemberStatusContract } from './update-member-status/update-member-status.contract';
-import type { UpdateMemberStatusRequestDto } from './update-member-status/update-member-status.request.dto';
-import type { UpdateMemberStatusResponseDto } from './update-member-status/update-member-status.response.dto';
+import { UpdateMemberStatusRequestDto } from './update-member-status/update-member-status.request.dto';
+import { UpdateMemberStatusResponseDto } from './update-member-status/update-member-status.response.dto';
 
 @Controller('members')
 export class MembersController {
@@ -46,16 +46,16 @@ export class MembersController {
   }
 
   @Get()
-  async getMembers(
-    @Query() query: GetMembersRequestDto,
-  ): Promise<GetMembersResponseDto[]> {
-    return this.queryBus.execute(new GetMembersContract(query));
+  async getMemberPage(
+    @Query() query: GetMemberPageRequestDto,
+  ): Promise<GetMemberPageResponseDto> {
+    return this.queryBus.execute(new GetMemberPageContract(query));
   }
 
   @Get(':id')
   async getMember(
     @Param('id') id: string,
-  ): Promise<MemberResponseDto> {
+  ): Promise<GetMemberResponseDto> {
     return this.queryBus.execute(new GetMemberContract({ id } satisfies GetMemberRequestDto));
   }
 }
