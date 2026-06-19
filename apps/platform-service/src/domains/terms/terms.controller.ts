@@ -1,49 +1,37 @@
 import { Controller, Get, Param, Query } from '@nestjs/common';
 import { QueryBus } from '@nestjs/cqrs';
 
-import { GetActiveTermsContract } from './queries/get-active-terms.contract';
-import type { TermsDocumentResponseDto } from './queries/get-active-terms.response.dto';
-import { GetTermsDocumentContract } from './queries/get-terms-document.contract';
-import type { TermsDocumentDetailResponseDto } from './queries/get-terms-document.response.dto';
-import type { TermsVersionResponseDto } from './queries/get-terms-document.response.dto';
-import { GetTermsDocumentVersionsContract } from './queries/get-terms-document-versions.contract';
-import type { GetTermsDocumentVersionsRequestDto } from './queries/get-terms-document-versions.request.dto';
-import { GetTermsDocumentsContract } from './queries/get-terms-documents.contract';
-import type { GetTermsDocumentsRequestDto } from './queries/get-terms-documents.request.dto';
+import { GetTermsDocumentContract } from './get-terms-document/get-terms-document.contract';
+import { GetTermsDocumentRequestDto } from './get-terms-document/get-terms-document.request.dto';
+import { GetTermsDocumentDetailResponseDto, GetTermsDocumentResponseDto, GetTermsDocumentVersionResponseDto } from './get-terms-document/get-terms-document.response.dto';
+import { GetTermsDocumentPageContract } from './get-terms-document-page/get-terms-document-page.contract';
+import { GetTermsDocumentPageRequestDto } from './get-terms-document-page/get-terms-document-page.request.dto';
+import { GetTermsDocumentVersionsContract } from './get-terms-document-versions/get-terms-document-versions.contract';
+import { GetTermsDocumentVersionsRequestDto } from './get-terms-document-versions/get-terms-document-versions.request.dto';
 
 @Controller('terms')
 export class TermsController {
-  constructor(
-    private readonly queryBus: QueryBus,
-  ) {}
-
-  @Get()
-  async getActiveTerms(): Promise<TermsDocumentResponseDto[]> {
-    return this.queryBus.execute(new GetActiveTermsContract());
-  }
+  constructor(private readonly queryBus: QueryBus) {}
 
   @Get('documents')
-  async getTermsDocuments(
-    @Query() query: GetTermsDocumentsRequestDto,
-  ): Promise<TermsDocumentResponseDto[]> {
-    return this.queryBus.execute(new GetTermsDocumentsContract(query));
+  async getTermsDocumentPage(
+    @Query() query: GetTermsDocumentPageRequestDto,
+  ): Promise<GetTermsDocumentResponseDto[]> {
+    return this.queryBus.execute(new GetTermsDocumentPageContract(query));
   }
 
   @Get('documents/:id')
   async getTermsDocument(
     @Param('id') id: string,
-  ): Promise<TermsDocumentDetailResponseDto> {
-    return this.queryBus.execute(new GetTermsDocumentContract(id));
+  ): Promise<GetTermsDocumentDetailResponseDto> {
+    return this.queryBus.execute(new GetTermsDocumentContract({ id } satisfies GetTermsDocumentRequestDto));
   }
 
   @Get('documents/:id/versions')
   async getTermsDocumentVersions(
     @Param('id') id: string,
     @Query() query: GetTermsDocumentVersionsRequestDto,
-  ): Promise<TermsVersionResponseDto[]> {
-    return this.queryBus.execute(new GetTermsDocumentVersionsContract({
-      id,
-      keyword: query.keyword,
-    }));
+  ): Promise<GetTermsDocumentVersionResponseDto[]> {
+    return this.queryBus.execute(new GetTermsDocumentVersionsContract(id, query));
   }
 }
