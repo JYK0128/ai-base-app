@@ -5,7 +5,8 @@ import axios from 'axios';
 import { AlertCircle, RefreshCcw } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
-import type { ApiResponse } from '../api/model';
+import type { ApiResponse } from '@/api/generated/model';
+
 import { formatMessage } from '../lib/utils';
 
 interface RouterContext {

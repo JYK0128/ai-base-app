@@ -1,7 +1,10 @@
-import { type TermsDocumentResponseDto, TermsDocumentResponseDtoStatus, type TermsVersionResponseDto, TermsVersionResponseDtoStatus } from '../../../api/model';
+import { type GetTermsDocumentResponseDto,
+         GetTermsDocumentResponseDtoStatus,
+         type GetTermsDocumentVersionResponseDto,
+         GetTermsDocumentVersionResponseDtoStatus } from '@/api/generated/model';
 
-export type ExtendedTermsDocumentResponseDto = TermsDocumentResponseDto;
-export type ExtendedTermsVersionResponseDto = TermsVersionResponseDto;
+export type ExtendedTermsDocumentResponseDto = GetTermsDocumentResponseDto;
+export type ExtendedTermsVersionResponseDto = GetTermsDocumentVersionResponseDto;
 
 export type TermsDocumentScope = 'platform' | 'organization';
 export type TermsDocumentLifecycle = 'ACTIVE' | 'DRAFT' | 'TERMINATED' | 'SCHEDULED_TERMINATION';
@@ -47,7 +50,7 @@ export function toIsoDateString(dateString?: string | null): string {
 
 function getPublishedVersionTimeline(allVersions: ExtendedTermsVersionResponseDto[]) {
   return allVersions
-    .filter((version) => version.status === TermsVersionResponseDtoStatus.PUBLISHED)
+    .filter((version) => version.status === GetTermsDocumentVersionResponseDtoStatus.PUBLISHED)
     .map((version) => ({
       effectiveAt: toDate(version.effectiveAt),
       version,
@@ -61,14 +64,14 @@ function getPublishedVersionTimeline(allVersions: ExtendedTermsVersionResponseDt
     .sort((left, right) => left.effectiveAt.getTime() - right.effectiveAt.getTime());
 }
 
-export function scopeLabel(organizationId?: string | null): string {
-  return organizationId ? '조직' : '플랫폼';
+export function scopeLabel(organization?: string | null): string {
+  return organization ? '조직' : '플랫폼';
 }
 
 export function getDocumentLifecycle(doc?: ExtendedTermsDocumentResponseDto): TermsDocumentLifecycle {
   if (!doc) return 'DRAFT';
 
-  if (doc.status === TermsDocumentResponseDtoStatus.DRAFT) {
+  if (doc.status === GetTermsDocumentResponseDtoStatus.DRAFT) {
     return 'DRAFT';
   }
 
@@ -124,7 +127,7 @@ export function getVersionStatusPresentation(
   version: ExtendedTermsVersionResponseDto,
   allVersions: ExtendedTermsVersionResponseDto[],
 ): VersionStatusPresentation {
-  if (version.status === TermsVersionResponseDtoStatus.DRAFT) {
+  if (version.status === GetTermsDocumentVersionResponseDtoStatus.DRAFT) {
     return {
       description: '아직 게시되지 않은 초안입니다.',
       label: '임시저장',
@@ -163,11 +166,11 @@ export function getVersionStatusPresentation(
 export function isEditableVersion(version?: ExtendedTermsVersionResponseDto): boolean {
   if (!version) return false;
 
-  if (version.status === TermsVersionResponseDtoStatus.DRAFT) {
+  if (version.status === GetTermsDocumentVersionResponseDtoStatus.DRAFT) {
     return true;
   }
 
-  if (version.status !== TermsVersionResponseDtoStatus.PUBLISHED) {
+  if (version.status !== GetTermsDocumentVersionResponseDtoStatus.PUBLISHED) {
     return false;
   }
 

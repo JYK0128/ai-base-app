@@ -2,9 +2,10 @@ import { Avatar, AvatarFallback, Badge, Button, type CellContext, type ColumnDef
 import { Ban, CheckCircle2, Eye, UserCog } from 'lucide-react';
 import { useState } from 'react';
 
-import { useMembersControllerGetMembersV1, useMembersControllerToggleMemberStatusV1, useMembersControllerUpdateMemberRoleV1, useOrganizationControllerGetOrganizationRolesV1 } from '../../../../api/endpoints';
-import type { MemberResponseDto as MemberItem, MemberResponseDtoRole as MemberRole, MemberResponseDtoStatus as MemberStatus, OrganizationControllerGetOrganizationRolesV1Item as OrganizationRoleItem } from '../../../../api/model';
-import { getInitials, ROLE_META } from '../-members.shared';
+import { useMembersControllerGetMemberPageV1, useMembersControllerToggleMemberStatusV1, useMembersControllerUpdateMemberRoleV1, useOrganizationControllerGetOrganizationRolesV1 } from '@/api/generated/endpoints';
+import type { GetMemberPageItemResponseDto as MemberItem, GetMemberPageItemResponseDtoStatus as MemberStatus, GetOrganizationRoleResponseDto as OrganizationRoleItem } from '@/api/generated/model';
+
+import { getInitials, type MemberRole, ROLE_META } from '../-members.shared';
 import { MembersPanel } from './MembersPanel';
 
 function formatLastLoginAt(lastLoginAt: MemberItem['lastLoginAt']): string {
@@ -15,7 +16,7 @@ interface MembersTabProps {
   readonly isActive: boolean
 }
 
-type MemberOverride = Partial<Pick<MemberItem, 'role' | 'status'>>;
+type MemberOverride = Partial<Pick<MemberItem, 'roles' | 'status'>>;
 
 type MemberOverrideMap = Record<string, MemberOverride>;
 
@@ -26,141 +27,141 @@ interface MembersMutationContext {
 const EMPTY_MEMBERS: MemberItem[] = [];
 const EMPTY_ORGANIZATION_ROLES: OrganizationRoleItem[] = [];
 
-function buildMemberColumns(roleOptions: readonly { value: string; label: string; badgeClassName: string }[]): ColumnDef<MemberItem>[] {
+function buildMemberColumns(roleOptions: readonly { value: string, label: string, badgeClassName: string }[]): ColumnDef<MemberItem>[] {
   return [
-  {
-    accessorKey: 'name',
-    header: '멤버',
-    size: 320,
-    enableSorting: true,
-    cell: ({ row }: CellContext<MemberItem, unknown>) => {
-      const member = row.original;
+    {
+      accessorKey: 'name',
+      header: '멤버',
+      size: 320,
+      enableSorting: true,
+      cell: ({ row }: CellContext<MemberItem, unknown>) => {
+        const member = row.original;
 
-      return (
-        <div className="flex items-start gap-3">
-          <Avatar size="sm">
-            <AvatarFallback>{getInitials(member.name)}</AvatarFallback>
-          </Avatar>
-          <div className="min-w-0 space-y-0.5">
-            <div className="flex flex-wrap items-center gap-2">
-              <p className="truncate font-semibold text-slate-900">{member.name}</p>
-              {member.isMe
-                ? (
-                  <Badge variant="secondary" className="h-5 bg-sky-100 text-sky-700 hover:bg-sky-100">
-                    내 계정
-                  </Badge>
-                )
-                : null}
+        return (
+          <div className="flex items-start gap-3">
+            <Avatar size="sm">
+              <AvatarFallback>{getInitials(member.name)}</AvatarFallback>
+            </Avatar>
+            <div className="min-w-0 space-y-0.5">
+              <div className="flex flex-wrap items-center gap-2">
+                <p className="truncate font-semibold text-slate-900">{member.name}</p>
+                {member.isMe
+                  ? (
+                    <Badge variant="secondary" className="h-5 bg-sky-100 text-sky-700 hover:bg-sky-100">
+                      내 계정
+                    </Badge>
+                  )
+                  : null}
+              </div>
+              <p className="truncate text-xs text-slate-500">{member.email}</p>
             </div>
-            <p className="truncate text-xs text-slate-500">{member.email}</p>
           </div>
-        </div>
-      );
-    },
-  },
-  {
-    accessorKey: 'role',
-    header: '권한',
-    size: 180,
-    enableSorting: true,
-    meta: {
-      faceted: {
-        options: roleOptions.map((option) => ({
-          label: option.label,
-          value: option.value,
-        })),
+        );
       },
     },
-    filterFn: 'faceted',
-    cell: ({ row, table }: CellContext<MemberItem, unknown>) => {
-      const member = row.original;
-      const { action } = table.options.meta || {};
+    {
+      accessorKey: 'roles',
+      header: '권한',
+      size: 180,
+      enableSorting: true,
+      meta: {
+        faceted: {
+          options: roleOptions.map((option) => ({
+            label: option.label,
+            value: option.value,
+          })),
+        },
+      },
+      filterFn: 'faceted',
+      cell: ({ row, table }: CellContext<MemberItem, unknown>) => {
+        const member = row.original;
+        const { action } = table.options.meta || {};
 
-      return (
+        return (
+          <div className="flex justify-center">
+            <select
+              value={String(member.roles?.[0] ?? '')}
+              disabled={Boolean(member.isMe)}
+              onChange={(event) => action?.updateMemberRole(member, event.target.value as MemberRole)}
+              className="h-8 w-full max-w-40 rounded-lg border border-slate-200 bg-white px-2.5 text-sm text-slate-700 shadow-sm outline-none transition focus:border-sky-400 focus:ring-2 focus:ring-sky-100 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-400"
+            >
+              {roleOptions.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </div>
+        );
+      },
+    },
+    {
+      accessorKey: 'status',
+      header: '상태',
+      size: 140,
+      enableSorting: true,
+      meta: {
+        faceted: {
+          options: [
+            {
+              label: '활성',
+              value: 'ACTIVE',
+              icon: CheckCircle2,
+            },
+            {
+              label: '비활성',
+              value: 'INACTIVE',
+              icon: Ban,
+            },
+          ],
+        },
+      },
+      filterFn: 'faceted',
+      cell: ({ row }: CellContext<MemberItem, unknown>) => (
         <div className="flex justify-center">
-          <select
-            value={member.role}
-            disabled={member.isMe}
-            onChange={(event) => action?.updateMemberRole(member, event.target.value as MemberRole)}
-            className="h-8 w-full max-w-40 rounded-lg border border-slate-200 bg-white px-2.5 text-sm text-slate-700 shadow-sm outline-none transition focus:border-sky-400 focus:ring-2 focus:ring-sky-100 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-400"
-          >
-            {roleOptions.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
+          <MemberStatusBadge status={row.original.status} />
         </div>
-      );
+      ),
     },
-  },
-  {
-    accessorKey: 'status',
-    header: '상태',
-    size: 140,
-    enableSorting: true,
-    meta: {
-      faceted: {
-        options: [
-          {
-            label: '활성',
-            value: 'ACTIVE',
-            icon: CheckCircle2,
-          },
-          {
-            label: '비활성',
-            value: 'INACTIVE',
-            icon: Ban,
-          },
-        ],
+    {
+      accessorKey: 'lastLoginAt',
+      header: '최근 로그인',
+      size: 180,
+      enableSorting: true,
+      cell: ({ row }: CellContext<MemberItem, unknown>) => (
+        <div className="text-center">
+          <p className="whitespace-nowrap font-medium text-slate-800">
+            {formatLastLoginAt(row.original.lastLoginAt)}
+          </p>
+        </div>
+      ),
+    },
+    {
+      id: 'actions',
+      header: '작업',
+      size: 240,
+      enableSorting: false,
+      enableHiding: false,
+      cell: ({ row, table }: CellContext<MemberItem, unknown>) => {
+        const { action } = table.options.meta || {};
+
+        return (
+          <div className="flex flex-wrap justify-end gap-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="gap-1.5 whitespace-nowrap"
+              onClick={() => action?.handleOpenDetail(row.original)}
+            >
+              <Eye className="size-3.5" />
+              상세
+            </Button>
+
+            <MemberActionButton member={row.original} onToggleStatus={() => action?.toggleMemberStatus(row.original)} />
+          </div>
+        );
       },
     },
-    filterFn: 'faceted',
-    cell: ({ row }: CellContext<MemberItem, unknown>) => (
-      <div className="flex justify-center">
-        <MemberStatusBadge status={row.original.status} />
-      </div>
-    ),
-  },
-  {
-    accessorKey: 'lastLoginAt',
-    header: '최근 로그인',
-    size: 180,
-    enableSorting: true,
-    cell: ({ row }: CellContext<MemberItem, unknown>) => (
-      <div className="text-center">
-        <p className="whitespace-nowrap font-medium text-slate-800">
-          {formatLastLoginAt(row.original.lastLoginAt)}
-        </p>
-      </div>
-    ),
-  },
-  {
-    id: 'actions',
-    header: '작업',
-    size: 240,
-    enableSorting: false,
-    enableHiding: false,
-    cell: ({ row, table }: CellContext<MemberItem, unknown>) => {
-      const { action } = table.options.meta || {};
-
-      return (
-        <div className="flex flex-wrap justify-end gap-2">
-          <Button
-            variant="ghost"
-            size="sm"
-            className="gap-1.5 whitespace-nowrap"
-            onClick={() => action?.handleOpenDetail(row.original)}
-          >
-            <Eye className="size-3.5" />
-            상세
-          </Button>
-
-          <MemberActionButton member={row.original} onToggleStatus={() => action?.toggleMemberStatus(row.original)} />
-        </div>
-      );
-    },
-  },
   ];
 }
 
@@ -170,12 +171,12 @@ export function MembersTab({ isActive }: MembersTabProps) {
       enabled: isActive,
     },
   });
-  const membersQuery = useMembersControllerGetMembersV1(undefined, {
+  const membersQuery = useMembersControllerGetMemberPageV1({ page: 1, limit: 1000 }, {
     query: {
       enabled: isActive,
     },
   });
-  const members = membersQuery.data?.data ?? EMPTY_MEMBERS;
+  const members = membersQuery.data?.data?.items ?? EMPTY_MEMBERS;
   const organizationRoles = organizationRolesQuery.data?.data ?? EMPTY_ORGANIZATION_ROLES;
   const roleOptions = organizationRoles.map((role) => ({
     value: role.code,
@@ -202,7 +203,7 @@ export function MembersTab({ isActive }: MembersTabProps) {
           ...current,
           [variables.data.id]: {
             ...(current[variables.data.id] ?? {}),
-            role: variables.data.role,
+            roles: [variables.data.role as string],
           },
         }));
 
@@ -322,6 +323,14 @@ function MemberStatusBadge({ status }: Readonly<{ status: MemberStatus }>) {
 function RoleBadge({ role }: Readonly<{ role: MemberRole }>) {
   const option = ROLE_META[role];
 
+  if (!option) {
+    return (
+      <Badge variant="outline" className="border-slate-200 bg-slate-100 text-slate-700">
+        미지정
+      </Badge>
+    );
+  }
+
   return (
     <Badge variant="outline" className={option.badgeClassName}>
       {option.label}
@@ -426,7 +435,7 @@ function MemberDetailDrawer({ open, member, onOpenChange, onToggleStatus }: Memb
                     </div>
                     <p className="truncate text-sm text-slate-500">{member.email}</p>
                     <div className="flex flex-wrap gap-2 pt-1">
-                      <RoleBadge role={member.role} />
+                      <RoleBadge role={member.roles?.[0] ?? ''} />
                       <MemberStatusBadge status={member.status} />
                     </div>
                   </div>

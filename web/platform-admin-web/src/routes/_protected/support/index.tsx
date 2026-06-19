@@ -8,16 +8,16 @@ import { Badge,
          TableRow } from '@pkg/ui';
 import { createFileRoute } from '@tanstack/react-router';
 
-import { useSupportControllerGetTicketsV1 } from '../../../api/endpoints';
-import type { TicketResponseDto } from '../../../api/model';
+import { useSupportControllerGetTicketPageV1 } from '@/api/generated/endpoints';
+import type { GetTicketResponseDto } from '@/api/generated/model';
 
 export const Route = createFileRoute('/_protected/support/')({
   component: SupportPage,
 });
 
 function SupportPage() {
-  const { data } = useSupportControllerGetTicketsV1();
-  const tickets: TicketResponseDto[] = data?.data ?? [];
+  const { data } = useSupportControllerGetTicketPageV1();
+  const tickets: GetTicketResponseDto[] = data?.data ?? [];
 
   return (
     <div className="size-full mx-auto flex max-w-300 flex-col gap-6 overflow-hidden p-6">

@@ -11,7 +11,8 @@ import { ArrowRight, Lock, Mail } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { z } from 'zod';
 
-import { useAuthControllerLoginV1 } from '../../api/endpoints';
+import { useAuthControllerLoginV1 } from '@/api/generated/endpoints';
+
 import { useAuth } from '../../hooks/useAuth';
 
 export const Route = createFileRoute('/_public/login')({
@@ -51,11 +52,15 @@ function LoginPage() {
   });
 
   if (isAuthenticated && !isInitializing) {
-    const target = mustChangePassword
-      ? '/change-password'
-      : mustAcceptTerms
-        ? '/agreement'
-        : (redirect || '/dashboard');
+    let target = redirect || '/dashboard';
+
+    if (mustChangePassword) {
+      target = '/change-password';
+    }
+    else if (mustAcceptTerms) {
+      target = '/agreement';
+    }
+
     return <Navigate to={target} />;
   }
 

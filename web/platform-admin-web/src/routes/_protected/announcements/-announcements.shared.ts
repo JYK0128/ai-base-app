@@ -1,11 +1,21 @@
-import type { AnnouncementResponseDto, AnnouncementResponseDtoAudience, AnnouncementResponseDtoCategory, AnnouncementResponseDtoChannel, AnnouncementResponseDtoPriority, AnnouncementResponseDtoStatus, CreateAnnouncementDto } from '../../../api/model';
+import type { CreateAnnouncementRequestDto,
+              GetAnnouncementResponseDto,
+              GetAnnouncementResponseDtoAudience,
+              GetAnnouncementResponseDtoCategory,
+              GetAnnouncementResponseDtoChannel,
+              GetAnnouncementResponseDtoPriority,
+              GetAnnouncementResponseDtoStatus,
+              UpdateAnnouncementRequestDto } from '@/api/generated/model';
 
-export type AnnouncementItem = AnnouncementResponseDto;
-export type AnnouncementCategory = AnnouncementResponseDtoCategory;
-export type AnnouncementAudience = AnnouncementResponseDtoAudience;
-export type AnnouncementChannel = AnnouncementResponseDtoChannel;
-export type AnnouncementPriority = AnnouncementResponseDtoPriority;
-export type AnnouncementStatus = AnnouncementResponseDtoStatus;
+export type AnnouncementItem = GetAnnouncementResponseDto;
+export type AnnouncementCategory = GetAnnouncementResponseDtoCategory;
+export type AnnouncementAudience = GetAnnouncementResponseDtoAudience;
+export type AnnouncementChannel = GetAnnouncementResponseDtoChannel;
+export type AnnouncementPriority = GetAnnouncementResponseDtoPriority;
+export type AnnouncementStatus = GetAnnouncementResponseDtoStatus;
+
+export type CreateAnnouncementDto = CreateAnnouncementRequestDto;
+export type UpdateAnnouncementDto = UpdateAnnouncementRequestDto;
 
 export interface AnnouncementEditorSeed {
   id?: string
@@ -189,7 +199,6 @@ export function buildCreateAnnouncementDto(
   const content = state.content.trim();
 
   return {
-    ...(original.id ? { id: original.id } : {}),
     title: state.title.trim(),
     content,
     category: state.category,
@@ -197,7 +206,28 @@ export function buildCreateAnnouncementDto(
     channel: original.channel,
     priority: state.priority,
     pinned: original.pinned,
+    publishedAt: state.isPublished
+      ? (original.publishedAt || new Date().toISOString())
+      : undefined,
+    startAt: fromDateTimeInputValue(state.startAt) || undefined,
+    endAt: fromDateTimeInputValue(state.endAt) || undefined,
+  };
+}
+
+export function buildUpdateAnnouncementDto(
+  original: AnnouncementEditorSeed,
+  state: AnnouncementEditorState,
+): UpdateAnnouncementDto {
+  return {
+    id: original.id ?? '',
+    title: state.title.trim(),
+    content: state.content.trim(),
+    category: state.category,
+    audience: state.audience,
+    channel: original.channel,
+    priority: state.priority,
     isPublished: state.isPublished,
+    pinned: original.pinned,
     publishedAt: state.isPublished
       ? (original.publishedAt || new Date().toISOString())
       : undefined,

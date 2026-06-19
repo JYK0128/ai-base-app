@@ -1,19 +1,18 @@
 import { createFileRoute, Link, notFound, Outlet, redirect, useLocation } from '@tanstack/react-router';
 import { Building2, FileText, Globe, Info, Key, LayoutDashboard, LifeBuoy, LogOut, type LucideIcon, Megaphone, ScrollText, Settings, Shield, Users } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { getI18nControllerGetLocalesV1QueryOptions, getResourceControllerGetMyResourcesV1QueryOptions, useAuthControllerLogoutV1, useI18nControllerGetTranslationsV1 } from '../api/endpoints';
-import type { LocaleDto } from '../api/model';
-import type { ResourceResponseDto } from '../api/model/resourceResponseDto';
+import { getI18nControllerGetLocalesV1QueryOptions, getResourceControllerGetResourcePageV1QueryOptions } from '@/api/generated/endpoints';
+import { type GetLocaleResponseDto, GetResourcePageFiltersDtoScope, type GetResourceResponseDto } from '@/api/generated/model';
+
 import { useAuth } from '../hooks/useAuth';
-import i18n from '../lib/i18n';
 import { getStoredAdminLocale, normalizeAdminLocale } from '../lib/locale';
 
 // 🌟 트리 자원 평탄화 헬퍼 함수
-function flattenResources(nodes: ResourceResponseDto[]): ResourceResponseDto[] {
-  const result: ResourceResponseDto[] = [];
-  const traverse = (list: ResourceResponseDto[]) => {
+function flattenResources(nodes: GetResourceResponseDto[]): GetResourceResponseDto[] {
+  const result: GetResourceResponseDto[] = [];
+  const traverse = (list: GetResourceResponseDto[]) => {
     for (const node of list) {
       result.push(node);
       if (node.children && node.children.length > 0) {
@@ -26,7 +25,7 @@ function flattenResources(nodes: ResourceResponseDto[]): ResourceResponseDto[] {
 }
 
 // 🌟 현재 경로와 대응하는 MENU 타입 자원을 식별하는 헬퍼 함수
-function findMatchingMenuResource(flattened: ResourceResponseDto[], path: string): ResourceResponseDto | undefined {
+function findMatchingMenuResource(flattened: GetResourceResponseDto[], path: string): GetResourceResponseDto | undefined {
   return flattened.find((res) => {
     if (res.type !== 'MENU' || !res.path) return false;
     return path === res.path || path.startsWith(res.path + '/');
@@ -38,6 +37,8 @@ function isDashboardPath(path: string): boolean {
 }
 
 export const Route = createFileRoute('/_protected')({
+  // The guard is intentionally sequential because each redirect depends on the previous auth gate.
+  // eslint-disable-next-line sonarjs/cognitive-complexity
   beforeLoad: async ({ context, location }) => {
     if (!context.auth.isAuthenticated) {
       throw redirect({
@@ -76,10 +77,14 @@ export const Route = createFileRoute('/_protected')({
 
     const queryClient = context.queryClient;
 
-    let resources: ResourceResponseDto[] = [];
-    let locales: LocaleDto[] = [];
+    let resources: GetResourceResponseDto[] = [];
+    let locales: GetLocaleResponseDto[] = [];
     try {
-      const { queryKey, queryFn } = getResourceControllerGetMyResourcesV1QueryOptions();
+      const { queryKey, queryFn } = getResourceControllerGetResourcePageV1QueryOptions({
+        filters: {
+          scope: GetResourcePageFiltersDtoScope.ORGANIZATION,
+        },
+      });
       const response = await queryClient.ensureQueryData({
         queryKey,
         queryFn,
@@ -139,7 +144,7 @@ export const Route = createFileRoute('/_protected')({
       throw notFound();
     }
 
-    const canReadMenuResource = matchingMenuResource.actions.includes('READ');
+    const canReadMenuResource = (matchingMenuResource.actions ?? []).includes('READ');
     const requiredPermission = `${matchingMenuResource.code}:READ`;
     const hasRequiredPermission = permissions.includes(requiredPermission);
 
@@ -159,19 +164,13 @@ export const Route = createFileRoute('/_protected')({
 });
 
 function ProtectedLayout() {
-  const { logout: authLogout, permissions } = useAuth();
+  const auth = useAuth();
   const location = useLocation();
-  const { mutate: logoutMutate } = useAuthControllerLogoutV1({
-    mutation: {
-      onSettled: () => {
-        authLogout();
-        window.location.href = '/';
-      },
-    },
-  });
 
   const [currentLang, setCurrentLang] = useState<string>(getStoredAdminLocale);
   const { t } = useTranslation('common');
+  const { logout } = auth;
+  const permissions = auth.permissions;
 
   const handleLangChange = (lang: string) => {
     const nextLang = normalizeAdminLocale(lang);
@@ -185,20 +184,6 @@ function ProtectedLayout() {
   if (location.pathname === '/agreement') {
     return <Outlet />;
   }
-
-  // 🌟 현재 로케일의 전체 번역 목록 조회
-  const { data: translationResponse } = useI18nControllerGetTranslationsV1(
-    { locale: currentLang },
-    { query: { enabled: !!currentLang } },
-  );
-
-  useEffect(() => {
-    const bundle = translationResponse?.data?.[currentLang]?.resource;
-    if (!bundle) return;
-
-    i18n.addResourceBundle(currentLang, 'resource', bundle, true, true);
-    void i18n.changeLanguage(currentLang);
-  }, [currentLang, translationResponse]);
 
   // 🌟 Lucide Icon 매핑 테이블
   const IconMap: Record<string, LucideIcon> = {
@@ -286,7 +271,7 @@ function ProtectedLayout() {
         <div className="p-4 border-t">
           <button
             onClick={() => {
-              logoutMutate();
+              logout();
             }}
             className="flex items-center space-x-3 px-3 py-2 w-full rounded-lg text-red-600 hover:bg-red-50 transition-colors"
           >

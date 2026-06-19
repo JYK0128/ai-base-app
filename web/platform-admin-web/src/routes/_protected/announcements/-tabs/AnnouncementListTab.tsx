@@ -3,8 +3,9 @@ import { useQueryClient } from '@tanstack/react-query';
 import { Megaphone, Pin, Plus } from 'lucide-react';
 import { useState } from 'react';
 
-import { useAnnouncementsControllerCreateAnnouncementV1, useAnnouncementsControllerDeleteAnnouncementV1, useAnnouncementsControllerGetAnnouncementsV1, useAnnouncementsControllerUpdateAnnouncementV1 } from '../../../../api/endpoints';
-import { ANNOUNCEMENT_AUDIENCE_LABELS, ANNOUNCEMENT_CATEGORY_LABELS, ANNOUNCEMENT_STATUS_LABELS, type AnnouncementAudience, type AnnouncementEditorSeed, type AnnouncementItem, type AnnouncementStatus, buildAnnouncementPreviewText, createBlankAnnouncement, formatDateTime } from '../-announcements.shared';
+import { useAnnouncementControllerCreateAnnouncementV1, useAnnouncementControllerDeleteAnnouncementV1, useAnnouncementControllerGetAnnouncementPageV1, useAnnouncementControllerUpdateAnnouncementV1 } from '@/api/generated/endpoints';
+
+import { ANNOUNCEMENT_AUDIENCE_LABELS, ANNOUNCEMENT_CATEGORY_LABELS, ANNOUNCEMENT_STATUS_LABELS, type AnnouncementAudience, type AnnouncementEditorSeed, type AnnouncementItem, type AnnouncementStatus, buildAnnouncementPreviewText, type CreateAnnouncementDto, createBlankAnnouncement, formatDateTime, type UpdateAnnouncementDto } from '../-announcements.shared';
 import { AnnouncementEditorModal } from '../-modals/AnnouncementEditorModal';
 import { AnnouncementPreviewModal } from '../-modals/AnnouncementPreviewModal';
 
@@ -117,14 +118,18 @@ const ANNOUNCEMENT_COLUMNS = [
 
 export function AnnouncementListTab() {
   const queryClient = useQueryClient();
-  const announcementsQuery = useAnnouncementsControllerGetAnnouncementsV1();
-  const announcements = (announcementsQuery.data?.data ?? []) as AnnouncementItem[];
+  const announcementsQuery = useAnnouncementControllerGetAnnouncementPageV1({
+    filter: {},
+    page: 1,
+    limit: 100,
+  });
+  const announcements = (announcementsQuery.data?.data?.items ?? []) as AnnouncementItem[];
   const [editorOpen, setEditorOpen] = useState(false);
   const [draftAnnouncement, setDraftAnnouncement] = useState<AnnouncementEditorSeed | null>(null);
   const [editorKey, setEditorKey] = useState('');
   const [previewOpen, setPreviewOpen] = useState(false);
   const [previewAnnouncement, setPreviewAnnouncement] = useState<AnnouncementItem | null>(null);
-  const saveAnnouncementMutation = useAnnouncementsControllerCreateAnnouncementV1({
+  const saveAnnouncementMutation = useAnnouncementControllerCreateAnnouncementV1({
     mutation: {
       onSuccess: () => {
         void queryClient.invalidateQueries({ queryKey: announcementsQuery.queryKey });
@@ -135,7 +140,7 @@ export function AnnouncementListTab() {
     },
   });
 
-  const updateAnnouncementMutation = useAnnouncementsControllerUpdateAnnouncementV1({
+  const updateAnnouncementMutation = useAnnouncementControllerUpdateAnnouncementV1({
     mutation: {
       onSuccess: () => {
         void queryClient.invalidateQueries({ queryKey: announcementsQuery.queryKey });
@@ -146,7 +151,7 @@ export function AnnouncementListTab() {
     },
   });
 
-  const deleteAnnouncementMutation = useAnnouncementsControllerDeleteAnnouncementV1({
+  const deleteAnnouncementMutation = useAnnouncementControllerDeleteAnnouncementV1({
     mutation: {
       onSuccess: () => {
         void queryClient.invalidateQueries({ queryKey: announcementsQuery.queryKey });
@@ -172,9 +177,9 @@ export function AnnouncementListTab() {
     }
   };
 
-  const handleSaveAnnouncement = async (announcement: Parameters<typeof saveAnnouncementMutation.mutateAsync>[0]['data']) => {
-    if (draftAnnouncement?.id) {
-      await updateAnnouncementMutation.mutateAsync({ id: draftAnnouncement.id, data: announcement });
+  const handleSaveAnnouncement = async (announcement: CreateAnnouncementDto | UpdateAnnouncementDto) => {
+    if ('id' in announcement) {
+      await updateAnnouncementMutation.mutateAsync({ id: announcement.id, data: announcement });
     }
     else {
       await saveAnnouncementMutation.mutateAsync({ data: announcement });

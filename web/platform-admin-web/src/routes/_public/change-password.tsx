@@ -11,7 +11,8 @@ import { ArrowLeft, ArrowRight, Lock, ShieldCheck } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { z } from 'zod';
 
-import { useAuthControllerChangePasswordV1, useAuthControllerLogoutV1 } from '../../api/endpoints';
+import { useAuthControllerChangePasswordV1 } from '@/api/generated/endpoints';
+
 import { useAuth } from '../../hooks/useAuth';
 
 export const Route = createFileRoute('/_public/change-password')({
@@ -22,18 +23,10 @@ function ChangePassword() {
   const { logout: authLogout, isAuthenticated } = useAuth();
   const { t } = useTranslation('common');
 
-  const { mutateAsync: logout } = useAuthControllerLogoutV1({
-    mutation: {
-      onSuccess: () => {
-        authLogout();
-      },
-    },
-  });
-
   const { mutateAsync: changePassword, isPending: isChanging } = useAuthControllerChangePasswordV1({
     mutation: {
       onSuccess: async () => {
-        await logout();
+        authLogout();
       },
     },
   });

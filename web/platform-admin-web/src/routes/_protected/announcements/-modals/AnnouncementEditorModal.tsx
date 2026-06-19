@@ -3,21 +3,13 @@ import { useStore } from '@tanstack/react-form';
 import { Loader2, Megaphone } from 'lucide-react';
 import { z } from 'zod';
 
-import type { CreateAnnouncementDto } from '../../../../api/model';
-import { ANNOUNCEMENT_AUDIENCE_LABELS,
-         ANNOUNCEMENT_CATEGORY_LABELS,
-         ANNOUNCEMENT_PRIORITY_LABELS,
-         type AnnouncementCategory,
-         type AnnouncementEditorSeed,
-         type AnnouncementEditorState,
-         buildCreateAnnouncementDto,
-         toEditorState } from '../-announcements.shared';
+import { ANNOUNCEMENT_AUDIENCE_LABELS, ANNOUNCEMENT_CATEGORY_LABELS, ANNOUNCEMENT_PRIORITY_LABELS, type AnnouncementCategory, type AnnouncementEditorSeed, type AnnouncementEditorState, buildCreateAnnouncementDto, buildUpdateAnnouncementDto, type CreateAnnouncementDto, toEditorState, type UpdateAnnouncementDto } from '../-announcements.shared';
 
 interface AnnouncementEditorModalProps {
   readonly announcement: AnnouncementEditorSeed
   readonly open: boolean
   readonly onOpenChange: (open: boolean) => void
-  readonly onSave: (announcement: CreateAnnouncementDto) => void | Promise<void>
+  readonly onSave: (announcement: CreateAnnouncementDto | UpdateAnnouncementDto) => void | Promise<void>
 }
 
 const CATEGORY_ITEMS = (Object.entries(ANNOUNCEMENT_CATEGORY_LABELS) as Array<[AnnouncementCategory, string]>).map(([value, label]) => ({
@@ -67,7 +59,11 @@ export function AnnouncementEditorModal({
     },
     onSubmit: async ({ value }) => {
       try {
-        await onSave(buildCreateAnnouncementDto(announcement, value));
+        await onSave(
+          isAnnouncementEditing(announcement)
+            ? buildUpdateAnnouncementDto(announcement, value)
+            : buildCreateAnnouncementDto(announcement, value),
+        );
         toast.success('공지사항이 저장되었습니다.');
         onOpenChange(false);
       }

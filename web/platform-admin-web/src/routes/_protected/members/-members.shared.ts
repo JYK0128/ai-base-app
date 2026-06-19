@@ -1,4 +1,4 @@
-import type { MemberResponseDtoRole } from '../../../api/model';
+import type { GetMemberResponseDtoStatus } from '@/api/generated/model';
 
 type RoleMeta = {
   label: string
@@ -18,13 +18,16 @@ export const ROLE_META = {
     label: 'Viewer',
     badgeClassName: 'border-slate-200 bg-slate-100 text-slate-700 hover:bg-slate-100',
   },
-} as const satisfies Record<MemberResponseDtoRole, RoleMeta>;
+} as const satisfies Record<string, RoleMeta>;
+
+export type MemberRole = keyof typeof ROLE_META;
+export type MemberStatus = GetMemberResponseDtoStatus;
 
 export const ROLE_OPTIONS = (['OWNER', 'MANAGER', 'VIEWER'] as const).map((value) => ({
   value,
   ...ROLE_META[value],
 })) satisfies readonly {
-  value: MemberResponseDtoRole
+  value: MemberRole
   label: string
   badgeClassName: string
 }[];
