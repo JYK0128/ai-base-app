@@ -193,6 +193,12 @@ export const AnnouncementControllerDeleteAnnouncementV1Response = zod.object({
 }))
 
 
+export const AuthControllerLoginV1Body = zod.object({
+  "email": zod.string().describe('이메일 주소'),
+  "password": zod.string().describe('비밀번호')
+})
+
+
 export const AuthControllerMeV1Response = zod.object({
   "success": zod.boolean().describe('성공 여부'),
   "data": zod.looseObject({

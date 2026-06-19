@@ -28,6 +28,7 @@ export * from './authControllerLoginV1201';
 export * from './authControllerMeV1200';
 export * from './authControllerRefreshV1201';
 export * from './authGetMeResponseDto';
+export * from './authLoginBodyRequestDto';
 export * from './authLoginResponseDto';
 export * from './authMemberInfoDto';
 export * from './authMemberInfoDtoStatus';

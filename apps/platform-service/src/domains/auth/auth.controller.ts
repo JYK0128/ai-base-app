@@ -18,6 +18,7 @@ import { AuthChangePasswordContract } from './change-password/change-password.co
 import { AuthChangePasswordRequestDto } from './change-password/change-password.request.dto';
 import { AuthDeferPasswordChangeContract } from './defer-password-change/defer-password-change.contract';
 import { AuthLoginContract } from './login/login.contract';
+import { AuthLoginBodyRequestDto } from './login/login-body.request.dto';
 import { AuthLoginRequestDto } from './login/login.request.dto';
 import { AuthLoginResponseDto } from './login/login.response.dto';
 import { AuthGetMeContract } from './me/get-me.contract';
@@ -39,7 +40,7 @@ export class AuthController {
   @Post('login')
   @SwaggerResponse(AuthLoginResponseDto)
   async login(
-    @Body() body: Omit<AuthLoginRequestDto, 'clientIp'>,
+    @Body() body: AuthLoginBodyRequestDto,
     @Req() request: { ip?: string },
     @Res({ passthrough: true }) res: Response,
   ): Promise<AuthLoginResponseDto> {

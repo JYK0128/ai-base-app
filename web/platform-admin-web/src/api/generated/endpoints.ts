@@ -39,6 +39,7 @@ import type {
   AuthControllerLoginV1201,
   AuthControllerMeV1200,
   AuthControllerRefreshV1201,
+  AuthLoginBodyRequestDto,
   CreateAnnouncementRequestDto,
   CreateInviteRequestDto,
   CreateTermsAgreementRequestDto,
@@ -486,13 +487,15 @@ const {mutation: mutationOptions} = options ?
     }
 
 export const authControllerLoginV1 = (
-
+    authLoginBodyRequestDto: AuthLoginBodyRequestDto,
  signal?: AbortSignal
 ) => {
 
 
       return authControllerLoginV1Mutator<AuthControllerLoginV1201>(
-      {url: `/api/v1/auth/login`, method: 'POST', signal
+      {url: `/api/v1/auth/login`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: authLoginBodyRequestDto, signal
     },
       );
     }
@@ -500,8 +503,8 @@ export const authControllerLoginV1 = (
 
 
 export const getAuthControllerLoginV1MutationOptions = <TError = AuthControllerLoginV1ErrorType<unknown>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof authControllerLoginV1>>, TError,void, TContext>, }
-): UseMutationOptions<Awaited<ReturnType<typeof authControllerLoginV1>>, TError,void, TContext> => {
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof authControllerLoginV1>>, TError,{data: AuthLoginBodyRequestDto}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof authControllerLoginV1>>, TError,{data: AuthLoginBodyRequestDto}, TContext> => {
 
 const mutationKey = ['authControllerLoginV1'];
 const {mutation: mutationOptions} = options ?
@@ -513,10 +516,10 @@ const {mutation: mutationOptions} = options ?
 
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof authControllerLoginV1>>, void> = () => {
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof authControllerLoginV1>>, {data: AuthLoginBodyRequestDto}> = (props) => {
+          const {data} = props ?? {};
 
-
-          return  authControllerLoginV1()
+          return  authControllerLoginV1(data,)
         }
 
 
@@ -527,15 +530,15 @@ const {mutation: mutationOptions} = options ?
   return  { mutationFn, ...mutationOptions }}
 
     export type AuthControllerLoginV1MutationResult = NonNullable<Awaited<ReturnType<typeof authControllerLoginV1>>>
-
+    export type AuthControllerLoginV1MutationBody = AuthLoginBodyRequestDto
     export type AuthControllerLoginV1MutationError = AuthControllerLoginV1ErrorType<unknown>
 
     export const useAuthControllerLoginV1 = <TError = AuthControllerLoginV1ErrorType<unknown>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof authControllerLoginV1>>, TError,void, TContext>, }
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof authControllerLoginV1>>, TError,{data: AuthLoginBodyRequestDto}, TContext>, }
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof authControllerLoginV1>>,
         TError,
-        void,
+        {data: AuthLoginBodyRequestDto},
         TContext
       > => {
       return useMutation(getAuthControllerLoginV1MutationOptions(options), queryClient);
