@@ -1,9 +1,9 @@
 import { Button, Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, useAppForm } from '@pkg/ui';
 import { z } from 'zod';
 
-import type { ResourceResponseDto } from '../../../../api/model';
+import type { GetResourceResponseDto } from '@/api/generated/model';
 
-export type CreateMenuInput = Pick<ResourceResponseDto, 'code' | 'name' | 'path' | 'type'>;
+export type CreateMenuInput = Pick<GetResourceResponseDto, 'code' | 'name' | 'path' | 'type'>;
 
 interface MenuRegistrationModalProps {
   readonly open: boolean

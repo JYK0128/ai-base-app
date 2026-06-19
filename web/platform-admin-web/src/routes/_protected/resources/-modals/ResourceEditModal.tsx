@@ -3,13 +3,14 @@ import { useStore } from '@tanstack/react-form';
 import { Loader2 } from 'lucide-react';
 import { z } from 'zod';
 
-import { type ResourceResponseDto } from '../../../../api/model';
+import { type GetResourceResponseDto } from '@/api/generated/model';
+
 import { COMMON_ICONS } from '../-constants/commonIcons';
 
 interface ResourceEditModalProps {
   readonly open: boolean
   readonly onOpenChange: (open: boolean) => void
-  readonly resource: ResourceResponseDto | null
+  readonly resource: GetResourceResponseDto | null
   readonly onSave: (resource: {
     code?: string
     name?: string

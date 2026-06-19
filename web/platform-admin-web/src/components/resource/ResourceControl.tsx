@@ -1,6 +1,5 @@
 import { cloneElement, type ReactElement, useMemo } from 'react';
 
-import type { ResourceResponseDto } from '../../api/model';
 import { Route } from '../../routes/_protected';
 
 interface ResourceControlProps {
@@ -10,9 +9,15 @@ interface ResourceControlProps {
   readonly children: ReactElement<{ 'data-resource-code'?: string }>
 }
 
-function flattenResources(nodes: ResourceResponseDto[]): ResourceResponseDto[] {
-  const result: ResourceResponseDto[] = [];
-  const traverse = (items: ResourceResponseDto[]) => {
+interface ResourceLike {
+  code: string
+  actions?: string[]
+  children?: ResourceLike[]
+}
+
+function flattenResources(nodes: readonly ResourceLike[]): ResourceLike[] {
+  const result: ResourceLike[] = [];
+  const traverse = (items: readonly ResourceLike[]) => {
     for (const item of items) {
       result.push(item);
       if (item.children?.length) {
@@ -35,7 +40,7 @@ export function ResourceControl({ code: resourceCode, action = 'READ', fallback 
       return false;
     }
 
-    return resource.actions.includes(action);
+    return resource.actions?.includes(action) ?? false;
   }, [action, resourceCode, resources]);
 
   if (!allowed) {

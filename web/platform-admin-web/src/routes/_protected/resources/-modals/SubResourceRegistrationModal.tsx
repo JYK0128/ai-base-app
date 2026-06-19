@@ -1,9 +1,9 @@
 import { Button, Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, useAppForm } from '@pkg/ui';
 import { z } from 'zod';
 
-import type { ResourceResponseDto } from '../../../../api/model';
+import type { GetResourceResponseDto } from '@/api/generated/model';
 
-export type CreateSubResourceInput = Pick<ResourceResponseDto, 'code' | 'name' | 'type'>;
+export type CreateSubResourceInput = Pick<GetResourceResponseDto, 'code' | 'name' | 'type'>;
 
 interface SubResourceRegistrationModalProps {
   readonly open: boolean
