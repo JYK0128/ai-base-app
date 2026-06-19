@@ -5,7 +5,6 @@ export * from './insert.command';
 export * from './insert-many.command';
 export * from './list.query';
 export * from './page.query';
-export * from './read-all.query';
 export * from './read-one.query';
 export * from './update.command';
 export * from './upsert.command';

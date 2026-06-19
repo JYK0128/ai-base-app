@@ -1,18 +1,7 @@
-import type { Type } from '@nestjs/common';
-import { ApiProperty } from '@nestjs/swagger';
+import type { EntityResponseDto } from './entity.response.dto';
 
-export function withListResponseDto<TBase extends Type>(_Base: TBase) {
-  abstract class MixinClass {
-    @ApiProperty({
-      description: '응답 항목',
-      type: Object,
-      isArray: true,
-    })
-    items!: Partial<InstanceType<TBase>>[];
-  }
-
-  return MixinClass;
-}
-
-export type ListResponseDto<TEntity extends Type>
-  = InstanceType<ReturnType<typeof withListResponseDto<TEntity>>>;
+export type ListResponseDto<TEntity extends object>
+  = object
+    & {
+      items: EntityResponseDto<TEntity>[]
+    };

@@ -1,14 +1,36 @@
-import type { EntityData } from '@mikro-orm/core';
-import type { Type } from '@nestjs/common';
-import { DeepPartialType } from '@nestjs/swagger';
+import type { Collection,
+              Opt,
+              Primary,
+              PrimaryProperty } from '@mikro-orm/core';
 
-export function withEntityResponseDto<TBase extends Type>(Base: TBase) {
-  abstract class MixinClass extends DeepPartialType(Base) {}
+type UnwrapOpt<T> = T extends Opt<infer U> ? U : T;
 
-  return MixinClass as abstract new (
-    ...args: ConstructorParameters<TBase>
-  ) => EntityData<InstanceType<TBase>>;
-}
+type EntityResponseValue<T>
+  = UnwrapOpt<NonNullable<T>> extends Date
+    ? Date
+    : UnwrapOpt<NonNullable<T>> extends
+    | string
+    | number
+    | boolean
+    | bigint
+    | symbol
+      ? UnwrapOpt<NonNullable<T>>
+      : UnwrapOpt<NonNullable<T>> extends Collection<infer U, infer _Owner>
+        ? Array<Primary<NonNullable<U>>>
+        : UnwrapOpt<NonNullable<T>> extends readonly (infer U)[]
+          ? U extends object
+            ? Array<Primary<NonNullable<U>>>
+            : T
+          : UnwrapOpt<NonNullable<T>> extends object
+            ? PrimaryProperty<UnwrapOpt<NonNullable<T>>> extends never
+              ? UnwrapOpt<NonNullable<T>>
+              : Primary<UnwrapOpt<NonNullable<T>>>
+            : UnwrapOpt<NonNullable<T>>;
 
-export type EntityResponseDto<TEntity extends Type>
-  = InstanceType<ReturnType<typeof withEntityResponseDto<TEntity>>>;
+export type EntityResponseDto<TEntity extends object> = {
+  [K in keyof TEntity as TEntity[K] extends (
+    ...args: infer _Args
+  ) => infer _Return
+    ? never
+    : K]?: EntityResponseValue<TEntity[K]>;
+};

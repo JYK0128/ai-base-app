@@ -1,14 +1,21 @@
-import type { EntityData } from '@mikro-orm/core';
-import type { Type } from '@nestjs/common';
-import { DeepPartialType } from '@nestjs/swagger';
+import type { Collection, Opt, PrimaryProperty } from '@mikro-orm/core';
 
-export function withEntityRequestDto<TBase extends Type>(Base: TBase) {
-  abstract class MixinClass extends DeepPartialType(Base) {}
+type UnwrapOpt<T> = T extends Opt<infer U> ? U : T;
 
-  return MixinClass as abstract new (
-    ...args: ConstructorParameters<TBase>
-  ) => EntityData<InstanceType<TBase>>;
-}
-
-export type EntityRequestDto<TEntity extends Type>
-  = InstanceType<ReturnType<typeof withEntityRequestDto<TEntity>>>;
+export type EntityRequestDto<TEntity extends object> = {
+  [K in keyof TEntity as TEntity[K] extends (...args: infer _Args) => infer _Return ? never : K]?: UnwrapOpt<NonNullable<TEntity[K]>> extends Date
+    ? Date | null
+    : UnwrapOpt<NonNullable<TEntity[K]>> extends string | number | boolean | bigint | symbol
+      ? UnwrapOpt<NonNullable<TEntity[K]>> | Extract<TEntity[K], null | undefined>
+      : UnwrapOpt<NonNullable<TEntity[K]>> extends Collection<infer _Item, infer _Owner>
+        ? string[]
+        : UnwrapOpt<NonNullable<TEntity[K]>> extends readonly (infer U)[]
+          ? PrimaryProperty<NonNullable<U>> extends never
+            ? EntityRequestDto<NonNullable<U>>[]
+            : string[]
+          : UnwrapOpt<NonNullable<TEntity[K]>> extends object
+            ? PrimaryProperty<UnwrapOpt<NonNullable<TEntity[K]>>> extends never
+              ? EntityRequestDto<UnwrapOpt<NonNullable<TEntity[K]>>>
+              : string
+            : UnwrapOpt<NonNullable<TEntity[K]>>;
+};
