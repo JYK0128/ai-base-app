@@ -5,8 +5,8 @@ export default defineConfig({
     input: process.env.SWAGGER_URL!,
     output: {
       mode: 'split',
-      target: 'src/api/endpoints.ts',
-      schemas: 'src/api/model',
+      target: 'src/api/generated/endpoints.ts',
+      schemas: 'src/api/generated/model',
       client: 'react-query',
       httpClient: 'axios',
       clean: true,
