@@ -67,7 +67,7 @@ const queryClient = new QueryClient({
 });
 
 function AppInner() {
-  const { isInitializing, isAuthenticated, mustChangePassword, permissions } = useAuth();
+  const { isInitializing, isAuthenticated, mustChangePassword, mustAcceptTerms, permissions } = useAuth();
   const { t } = useTranslation('common');
 
   if (isInitializing) {
@@ -83,7 +83,7 @@ function AppInner() {
       <RouterProvider
         router={router}
         context={{
-          auth: { isAuthenticated, mustChangePassword, permissions },
+          auth: { isAuthenticated, mustChangePassword, mustAcceptTerms, permissions },
           queryClient,
         }}
       />

@@ -23,7 +23,7 @@ export const Route = createFileRoute('/_public/login')({
 
 function LoginPage() {
   const { redirect } = Route.useSearch();
-  const { login, isAuthenticated, mustChangePassword } = useAuth();
+  const { login, isAuthenticated, isInitializing, mustChangePassword, mustAcceptTerms } = useAuth();
   const { t } = useTranslation('common');
 
   const { mutateAsync: loginMutate } = useAuthControllerLoginV1({
@@ -50,9 +50,21 @@ function LoginPage() {
     },
   });
 
-  if (isAuthenticated) {
-    const target = mustChangePassword ? '/change-password' : (redirect || '/dashboard');
+  if (isAuthenticated && !isInitializing) {
+    const target = mustChangePassword
+      ? '/change-password'
+      : mustAcceptTerms
+        ? '/agreement'
+        : (redirect || '/dashboard');
     return <Navigate to={target} />;
+  }
+
+  if (isAuthenticated && isInitializing) {
+    return (
+      <div className="grid min-h-screen place-items-center p-4">
+        <p className="text-sm text-muted-foreground">로그인 상태를 확인하는 중입니다...</p>
+      </div>
+    );
   }
 
   return (

@@ -2,9 +2,9 @@ import { Avatar, AvatarFallback, Badge, Button, type CellContext, type ColumnDef
 import { Ban, CheckCircle2, Eye, UserCog } from 'lucide-react';
 import { useState } from 'react';
 
-import { useMembersControllerGetMembersV1, useMembersControllerToggleMemberStatusV1, useMembersControllerUpdateMemberRoleV1 } from '../../../../api/endpoints';
-import type { MemberResponseDto as MemberItem, MemberResponseDtoRole as MemberRole, MemberResponseDtoStatus as MemberStatus } from '../../../../api/model';
-import { getInitials, ROLE_META, ROLE_OPTIONS } from '../-members.shared';
+import { useMembersControllerGetMembersV1, useMembersControllerToggleMemberStatusV1, useMembersControllerUpdateMemberRoleV1, useOrganizationControllerGetOrganizationRolesV1 } from '../../../../api/endpoints';
+import type { MemberResponseDto as MemberItem, MemberResponseDtoRole as MemberRole, MemberResponseDtoStatus as MemberStatus, OrganizationControllerGetOrganizationRolesV1Item as OrganizationRoleItem } from '../../../../api/model';
+import { getInitials, ROLE_META } from '../-members.shared';
 import { MembersPanel } from './MembersPanel';
 
 function formatLastLoginAt(lastLoginAt: MemberItem['lastLoginAt']): string {
@@ -24,8 +24,10 @@ interface MembersMutationContext {
 }
 
 const EMPTY_MEMBERS: MemberItem[] = [];
+const EMPTY_ORGANIZATION_ROLES: OrganizationRoleItem[] = [];
 
-export const MEMBER_COLUMNS: ColumnDef<MemberItem>[] = [
+function buildMemberColumns(roleOptions: readonly { value: string; label: string; badgeClassName: string }[]): ColumnDef<MemberItem>[] {
+  return [
   {
     accessorKey: 'name',
     header: '멤버',
@@ -63,7 +65,7 @@ export const MEMBER_COLUMNS: ColumnDef<MemberItem>[] = [
     enableSorting: true,
     meta: {
       faceted: {
-        options: ROLE_OPTIONS.map((option) => ({
+        options: roleOptions.map((option) => ({
           label: option.label,
           value: option.value,
         })),
@@ -82,7 +84,7 @@ export const MEMBER_COLUMNS: ColumnDef<MemberItem>[] = [
             onChange={(event) => action?.updateMemberRole(member, event.target.value as MemberRole)}
             className="h-8 w-full max-w-40 rounded-lg border border-slate-200 bg-white px-2.5 text-sm text-slate-700 shadow-sm outline-none transition focus:border-sky-400 focus:ring-2 focus:ring-sky-100 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-400"
           >
-            {ROLE_OPTIONS.map((option) => (
+            {roleOptions.map((option) => (
               <option key={option.value} value={option.value}>
                 {option.label}
               </option>
@@ -159,15 +161,27 @@ export const MEMBER_COLUMNS: ColumnDef<MemberItem>[] = [
       );
     },
   },
-];
+  ];
+}
 
 export function MembersTab({ isActive }: MembersTabProps) {
+  const organizationRolesQuery = useOrganizationControllerGetOrganizationRolesV1({
+    query: {
+      enabled: isActive,
+    },
+  });
   const membersQuery = useMembersControllerGetMembersV1(undefined, {
     query: {
       enabled: isActive,
     },
   });
   const members = membersQuery.data?.data ?? EMPTY_MEMBERS;
+  const organizationRoles = organizationRolesQuery.data?.data ?? EMPTY_ORGANIZATION_ROLES;
+  const roleOptions = organizationRoles.map((role) => ({
+    value: role.code,
+    label: role.name,
+    badgeClassName: ROLE_META[role.code as MemberRole]?.badgeClassName ?? 'border-slate-200 bg-slate-100 text-slate-700 hover:bg-slate-100',
+  }));
   const [memberOverrides, setMemberOverrides] = useState<MemberOverrideMap>({});
 
   const membersView = members.map((member) => {
@@ -266,7 +280,7 @@ export function MembersTab({ isActive }: MembersTabProps) {
         <div className="space-y-4">
           <div className="h-160">
             <DataTable
-              columns={MEMBER_COLUMNS}
+              columns={buildMemberColumns(roleOptions)}
               data={membersView}
               defaultPageSize={10}
               filterColumns={['name', 'email', 'role', 'status', 'lastLoginAt', 'invitedAt', 'createdBy']}
