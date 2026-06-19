@@ -6,6 +6,9 @@
  * OpenAPI spec version: 1.0
  */
 
-export type I18nControllerGetTranslationsV1Params = {
-locale: string;
-};
+export interface UpdateMemberRoleDto {
+  /** 멤버 식별자 */
+  id: string;
+  /** 변경할 역할 */
+  role: string;
+}

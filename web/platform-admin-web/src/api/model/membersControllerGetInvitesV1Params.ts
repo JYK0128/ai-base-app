@@ -9,15 +9,15 @@ import type { MembersControllerGetInvitesV1InviteStatus } from './membersControl
 
 export type MembersControllerGetInvitesV1Params = {
 /**
- * 검색어 (이름, 이메일, 역할 등)
+ * 검색어
  */
 search?: string;
 /**
- * 초대 상태 필터
+ * 초대 상태
  */
 inviteStatus?: MembersControllerGetInvitesV1InviteStatus;
 /**
- * 역할 식별자 필터
+ * 조직 역할
  */
-roleId?: string;
+role?: string;
 };

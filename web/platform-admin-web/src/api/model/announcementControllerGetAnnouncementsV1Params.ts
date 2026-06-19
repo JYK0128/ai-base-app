@@ -5,10 +5,28 @@
  * The AI Base App Platform Service API documentation
  * OpenAPI spec version: 1.0
  */
+import type { AnnouncementControllerGetAnnouncementsV1DirectionItem } from './announcementControllerGetAnnouncementsV1DirectionItem';
+import type { GetAnnouncementPageFilters } from './getAnnouncementPageFilters';
 
 export type AnnouncementControllerGetAnnouncementsV1Params = {
 /**
- * 게시된 공지만 조회할지 여부
+ * 필터 조건
  */
-isPublishedOnly?: boolean;
+filter: GetAnnouncementPageFilters;
+/**
+ * 정렬 필드
+ */
+sort?: string[];
+/**
+ * 정렬 방향
+ */
+direction?: AnnouncementControllerGetAnnouncementsV1DirectionItem[];
+/**
+ * 페이지 번호
+ */
+page?: unknown;
+/**
+ * 페이지 크기
+ */
+limit?: unknown;
 };

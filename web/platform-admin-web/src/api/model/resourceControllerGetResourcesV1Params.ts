@@ -9,7 +9,7 @@ import type { ResourceControllerGetResourcesV1Scope } from './resourceController
 
 export type ResourceControllerGetResourcesV1Params = {
 /**
- * 리소스 관리 범위
+ * 리소스 관리 범위 필터
  */
 scope: ResourceControllerGetResourcesV1Scope;
 };

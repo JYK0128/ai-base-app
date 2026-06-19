@@ -7,25 +7,38 @@
  */
 import * as zod from 'zod';
 
-export const announcementControllerGetAnnouncementsV1QueryIsPublishedOnlyDefault = false;
+export const announcementControllerGetAnnouncementsV1QueryFilterIsPublishedDefault = false;
+export const announcementControllerGetAnnouncementsV1QueryPageDefault = 1;
+export const announcementControllerGetAnnouncementsV1QueryLimitDefault = 20;
 
 export const AnnouncementControllerGetAnnouncementsV1QueryParams = zod.object({
-  "isPublishedOnly": zod.boolean().default(announcementControllerGetAnnouncementsV1QueryIsPublishedOnlyDefault).describe('게시된 공지만 조회할지 여부')
+  "filter": zod.object({
+  "isPublished": zod.boolean().default(announcementControllerGetAnnouncementsV1QueryFilterIsPublishedDefault).describe('게시된 공지만 조회할지 여부'),
+  "status": zod.enum(['DRAFT', 'SCHEDULED', 'ACTIVE', 'EXPIRED']).optional().describe('게시 상태')
+}).describe('필터 조건'),
+  "sort": zod.array(zod.string()).optional().describe('정렬 필드'),
+  "direction": zod.array(zod.enum(['asc', 'desc'])).default([`desc`]).describe('정렬 방향'),
+  "page": zod.unknown().default(announcementControllerGetAnnouncementsV1QueryPageDefault).describe('페이지 번호'),
+  "limit": zod.unknown().default(announcementControllerGetAnnouncementsV1QueryLimitDefault).describe('페이지 크기')
 })
 
 
 export const AnnouncementControllerCreateAnnouncementV1Body = zod.object({
-  "id": zod.string().optional().describe('공지사항 식별자'),
   "title": zod.string().describe('공지사항 제목'),
   "content": zod.string().describe('공지사항 본문'),
   "category": zod.enum(['NOTICE', 'MAINTENANCE', 'SECURITY', 'EVENT']).optional().describe('공지 분류'),
   "audience": zod.enum(['ALL', 'PLATFORM', 'ORGANIZATION']).optional().describe('공지 대상'),
   "channel": zod.enum(['IN_APP', 'EMAIL', 'PUSH']).optional().describe('공지 채널'),
   "priority": zod.enum(['LOW', 'NORMAL', 'HIGH']).optional().describe('공지 우선순위'),
-  "isPublished": zod.boolean().optional().describe('게시 유무'),
-  "publishedAt": zod.string().optional().describe('게시 확정 일시'),
-  "startAt": zod.string().optional().describe('게시 시작일'),
-  "endAt": zod.string().optional().describe('게시 종료일')
+  "pinned": zod.boolean().optional().describe('공지 목록에서 우선 노출할지 여부'),
+  "publishedAt": zod.iso.datetime({"offset":true}).optional().describe('게시 확정 일시'),
+  "startAt": zod.iso.datetime({"offset":true}).optional().describe('게시 시작일'),
+  "endAt": zod.iso.datetime({"offset":true}).optional().describe('게시 종료일')
+})
+
+
+export const AnnouncementControllerGetAnnouncementV1Params = zod.object({
+  "id": zod.string()
 })
 
 
@@ -34,7 +47,7 @@ export const AnnouncementControllerUpdateAnnouncementV1Params = zod.object({
 })
 
 export const AnnouncementControllerUpdateAnnouncementV1Body = zod.object({
-  "id": zod.string().optional().describe('공지사항 식별자'),
+  "id": zod.string().describe('공지사항 식별자'),
   "title": zod.string().describe('공지사항 제목'),
   "content": zod.string().describe('공지사항 본문'),
   "category": zod.enum(['NOTICE', 'MAINTENANCE', 'SECURITY', 'EVENT']).optional().describe('공지 분류'),
@@ -42,9 +55,10 @@ export const AnnouncementControllerUpdateAnnouncementV1Body = zod.object({
   "channel": zod.enum(['IN_APP', 'EMAIL', 'PUSH']).optional().describe('공지 채널'),
   "priority": zod.enum(['LOW', 'NORMAL', 'HIGH']).optional().describe('공지 우선순위'),
   "isPublished": zod.boolean().optional().describe('게시 유무'),
-  "publishedAt": zod.string().optional().describe('게시 확정 일시'),
-  "startAt": zod.string().optional().describe('게시 시작일'),
-  "endAt": zod.string().optional().describe('게시 종료일')
+  "pinned": zod.boolean().optional().describe('공지 목록에서 우선 노출할지 여부'),
+  "publishedAt": zod.iso.datetime({"offset":true}).optional().describe('게시 확정 일시'),
+  "startAt": zod.iso.datetime({"offset":true}).optional().describe('게시 시작일'),
+  "endAt": zod.iso.datetime({"offset":true}).optional().describe('게시 종료일')
 })
 
 
@@ -53,81 +67,20 @@ export const AnnouncementControllerDeleteAnnouncementV1Params = zod.object({
 })
 
 
+export const TermsControllerAgreeTermsV1Body = zod.object({
+  "member": zod.looseObject({
+
+}).describe('멤버'),
+  "termsVersion": zod.looseObject({
+
+}).describe('동의할 약관 버전')
+})
+
+
 export const AuthControllerChangePasswordV1Body = zod.object({
   "currentPassword": zod.string().describe('현재 비밀번호'),
   "newPassword": zod.string().describe('새 비밀번호'),
   "confirmPassword": zod.string().describe('새 비밀번호 확인')
-})
-
-
-export const TermsControllerAgreeTermsV1Body = zod.object({
-  "memberId": zod.string().describe('멤버 식별자'),
-  "termsVersionId": zod.string().describe('동의할 약관 버전 식별자')
-})
-
-
-export const TermsControllerGetTermsDocumentsV1QueryParams = zod.object({
-  "scope": zod.enum(['platform', 'organization']).optional().describe('조회 scope'),
-  "status": zod.enum(['DRAFT', 'PUBLISHED', 'DEPRECATED', 'ACTIVE']).optional().describe('상태 필터'),
-  "keyword": zod.string().optional().describe('검색어')
-})
-
-
-export const TermsControllerCreateTermsDocumentV1Body = zod.object({
-  "code": zod.string().describe('약관 코드'),
-  "title": zod.string().describe('약관 제목'),
-  "required": zod.boolean().optional().describe('필수 동의 여부'),
-  "scope": zod.string().describe('약관 범위 (platform 또는 organization)')
-})
-
-
-export const TermsControllerGetTermsDocumentV1Params = zod.object({
-  "id": zod.string()
-})
-
-
-export const TermsControllerGetTermsDocumentVersionsV1Params = zod.object({
-  "id": zod.string()
-})
-
-export const TermsControllerGetTermsDocumentVersionsV1QueryParams = zod.object({
-  "keyword": zod.string().optional().describe('버전 검색어')
-})
-
-
-export const TermsControllerDeprecateTermsDocumentV1Body = zod.object({
-  "id": zod.string().describe('약관 문서 식별자'),
-  "deprecatedAt": zod.string().describe('폐기 일시')
-})
-
-
-export const TermsControllerCancelDeprecationTermsDocumentV1Body = zod.object({
-  "id": zod.string().describe('약관 문서 식별자')
-})
-
-
-export const TermsControllerDeleteTermsDocumentV1Body = zod.object({
-  "id": zod.string().describe('약관 문서 식별자')
-})
-
-
-export const TermsControllerCreateTermsVersionV1Body = zod.object({
-  "termsDocumentId": zod.string().describe('약관 문서 식별자'),
-  "label": zod.string().describe('버전 라벨'),
-  "content": zod.string().describe('약관 내용'),
-  "effectiveAt": zod.looseObject({
-
-}).nullish().describe('효력 일시')
-})
-
-
-export const TermsControllerUpdateTermsVersionV1Body = zod.object({
-  "id": zod.string().describe('약관 버전 식별자'),
-  "label": zod.string().describe('버전 라벨'),
-  "content": zod.string().describe('약관 내용'),
-  "effectiveAt": zod.looseObject({
-
-}).nullish().describe('효력 일시')
 })
 
 
@@ -160,92 +113,163 @@ export const HealthControllerReadyResponse = zod.object({
 
 
 export const I18nControllerGetTranslationsV1QueryParams = zod.object({
-  "keys": zod.string().optional().describe('조회할 번역 키 목록'),
-  "namespace": zod.string().optional().describe('선택 조회할 네임스페이스'),
-  "locale": zod.string().optional().describe('배치 조회할 로케일 목록')
+  "locale": zod.string()
 })
 
 
+/**
+ * 초대 목록을 조회합니다.
+ * @summary 초대 목록 조회
+ */
 export const MembersControllerGetInvitesV1QueryParams = zod.object({
-  "search": zod.string().optional().describe('검색어 (이름, 이메일, 역할 등)'),
-  "inviteStatus": zod.enum(['QUEUED', 'PENDING', 'EXPIRED', 'CANCELED', 'ACCEPTED', 'REJECTED']).optional().describe('초대 상태 필터'),
-  "roleId": zod.string().optional().describe('역할 식별자 필터')
+  "search": zod.string().optional().describe('검색어'),
+  "inviteStatus": zod.enum(['QUEUED', 'PENDING', 'EXPIRED', 'CANCELED', 'ACCEPTED', 'REJECTED']).optional().describe('초대 상태'),
+  "role": zod.string().optional().describe('조직 역할')
 })
 
 
-export const MembersControllerCreateInviteV1Body = zod.object({
-  "name": zod.string().describe('초대할 사람 이름'),
-  "email": zod.string().describe('초대할 사람 이메일'),
-  "roleId": zod.string().describe('부여할 역할 식별자'),
-  "note": zod.string().optional().describe('메모\/메모사항')
+/**
+ * 멤버 활성/비활성 상태를 전환합니다.
+ * @summary 멤버 상태 토글
+ */
+export const MembersControllerToggleMemberStatusV1Body = zod.object({
+  "id": zod.string().describe('멤버 식별자')
 })
 
 
-export const MembersControllerCancelInviteV1Body = zod.object({
-  "id": zod.string().describe('초대 식별자')
+/**
+ * 멤버 역할을 수정합니다.
+ * @summary 멤버 역할 수정
+ */
+export const MembersControllerUpdateMemberRoleV1Body = zod.object({
+  "id": zod.string().describe('멤버 식별자'),
+  "role": zod.string().describe('변경할 역할')
 })
 
 
+/**
+ * 멤버 목록을 조회합니다.
+ * @summary 멤버 목록 조회
+ */
+export const MembersControllerGetMembersV1QueryParams = zod.object({
+  "search": zod.string().optional().describe('검색어'),
+  "status": zod.enum(['ACTIVE', 'INACTIVE']).optional().describe('멤버 상태'),
+  "role": zod.string().optional().describe('조직 역할')
+})
+
+
+/**
+ * 초대장을 재전송합니다.
+ * @summary 초대장 재전송
+ */
 export const MembersControllerResendInviteV1Body = zod.object({
   "id": zod.string().describe('초대 식별자')
 })
 
 
+/**
+ * 초대를 취소합니다.
+ * @summary 초대 취소
+ */
+export const MembersControllerCancelInviteV1Body = zod.object({
+  "id": zod.string().describe('초대 식별자')
+})
+
+
+/**
+ * 초대를 복구(재전송)합니다.
+ * @summary 초대 복구
+ */
 export const MembersControllerReviveInviteV1Body = zod.object({
   "id": zod.string().describe('초대 식별자')
 })
 
 
-export const MembersControllerToggleMemberStatusV1Body = zod.object({
-  "id": zod.string().describe('멤버 식별자'),
-  "status": zod.enum(['ACTIVE', 'INACTIVE']).describe('변경할 상태')
-})
-
-
-export const MembersControllerUpdateMemberRoleV1Body = zod.object({
-  "id": zod.string().describe('멤버 식별자'),
-  "roleId": zod.string().describe('변경할 역할 식별자')
-})
-
-
-export const MembersControllerGetMembersV1QueryParams = zod.object({
-  "search": zod.string().optional().describe('검색어'),
-  "status": zod.enum(['ACTIVE', 'INACTIVE']).optional().describe('멤버 상태'),
-  "role": zod.looseObject({
-
-}).optional().describe('조직 역할')
-})
-
-
+/**
+ * 특정 멤버 상세를 조회합니다.
+ * @summary 멤버 상세 조회
+ */
 export const MembersControllerGetMemberV1Params = zod.object({
   "id": zod.string()
 })
 
 
-export const OrganizationControllerGetOrganizationsV1QueryParams = zod.object({
-  "status": zod.enum(['PENDING', 'ACTIVE', 'INACTIVE', 'REJECTED']).optional().describe('조직 상태 필터')
+/**
+ * 조직 목록을 조회합니다.
+ * @summary 조직 목록 조회
+ */
+export const organizationControllerGetOrganizationPageV1QueryOffsetDefault = 0;
+export const organizationControllerGetOrganizationPageV1QueryLimitDefault = 20;
+
+export const OrganizationControllerGetOrganizationPageV1QueryParams = zod.object({
+  "sort": zod.array(zod.string()).optional().describe('정렬 필드'),
+  "direction": zod.array(zod.enum(['asc', 'desc'])).default([`desc`]).describe('정렬 방향'),
+  "offset": zod.number().default(organizationControllerGetOrganizationPageV1QueryOffsetDefault).describe('오프셋'),
+  "limit": zod.number().default(organizationControllerGetOrganizationPageV1QueryLimitDefault).describe('페이지 크기'),
+  "filters": zod.object({
+  "status": zod.enum(['PENDING', 'ACTIVE', 'INACTIVE', 'REJECTED']).optional().describe('메타데이터 날짜로 유추되는 조직 상태 필터')
+}).optional().describe('필터 조건')
 })
 
 
+/**
+ * 조직 승인 상태를 처리합니다.
+ * @summary 조직 승인 처리
+ */
 export const OrganizationControllerApproveOrganizationV1Params = zod.object({
   "id": zod.string()
 })
 
 export const OrganizationControllerApproveOrganizationV1Body = zod.object({
+  "id": zod.string().optional().describe('조직 식별자'),
   "approve": zod.boolean().describe('승인 여부')
 })
 
 
+/**
+ * 플랫폼 리소스 트리를 조회합니다.
+ * @summary 리소스 목록 조회
+ */
+export const ResourceControllerGetResourcesV1QueryParams = zod.object({
+  "scope": zod.enum(['PLATFORM', 'ORGANIZATION']).describe('리소스 관리 범위 필터')
+})
+
+
+/**
+ * 조직의 권한 세트를 생성합니다.
+ * @summary 권한 세트 생성
+ */
+export const ResourceControllerCreatePermissionSetV1Body = zod.object({
+  "code": zod.string().describe('권한 세트 코드'),
+  "name": zod.string().describe('권한 세트 이름'),
+  "description": zod.string().optional().describe('권한 세트 설명'),
+  "copyFromId": zod.string().optional().describe('복사할 권한 세트 식별자')
+})
+
+
+/**
+ * 권한 세트의 퍼미션을 수정합니다.
+ * @summary 권한 세트 퍼미션 수정
+ */
+export const ResourceControllerUpdatePermissionSetPermissionsV1Body = zod.object({
+  "id": zod.string().describe('권한 세트 식별자'),
+  "permissionCodes": zod.array(zod.string()).describe('부여할 권한 코드 목록')
+})
+
+
+/**
+ * 리소스 상세를 조회합니다.
+ * @summary 리소스 조회
+ */
 export const ResourceControllerGetResourceV1Params = zod.object({
   "id": zod.string()
 })
 
 
-export const ResourceControllerGetResourcesV1QueryParams = zod.object({
-  "scope": zod.enum(['PLATFORM', 'ORGANIZATION']).describe('리소스 관리 범위'),
-})
-
-
+/**
+ * 리소스를 생성합니다.
+ * @summary 리소스 생성
+ */
 export const ResourceControllerCreateResourceV1Body = zod.object({
   "code": zod.string().describe('리소스 코드'),
   "name": zod.string().describe('리소스 이름'),
@@ -255,21 +279,36 @@ export const ResourceControllerCreateResourceV1Body = zod.object({
 })
 
 
+/**
+ * 리소스를 수정합니다.
+ * @summary 리소스 수정
+ */
 export const ResourceControllerUpdateResourceV1Body = zod.object({
   "id": zod.string().describe('리소스 식별자'),
-  "scope": zod.enum(['PLATFORM', 'ORGANIZATION']).describe('리소스 관리 범위'),
   "code": zod.string().describe('리소스 코드'),
   "name": zod.string().describe('리소스 이름'),
+  "scope": zod.enum(['PLATFORM', 'ORGANIZATION']).describe('리소스 관리 범위'),
   "path": zod.string().optional().describe('리소스 경로'),
   "icon": zod.string().optional().describe('아이콘')
 })
 
 
-export const ResourceControllerDeleteResourceV1Body = zod.object({
-  "id": zod.string().describe('리소스 식별자')
+/**
+ * 리소스 권한을 수정합니다.
+ * @summary 리소스 권한 수정
+ */
+export const ResourceControllerUpdateResourcePermissionsV1Body = zod.object({
+  "scope": zod.enum(['PLATFORM', 'ORGANIZATION']).describe('리소스 관리 범위'),
+  "id": zod.string().describe('리소스 식별자'),
+  "actions": zod.array(zod.string()).describe('리소스 액션 목록'),
+  "constraint": zod.string().optional().describe('제약 조건')
 })
 
 
+/**
+ * 리소스 정렬 순서를 수정합니다.
+ * @summary 리소스 정렬 순서 수정
+ */
 export const ResourceControllerUpdateResourceSortV1Body = zod.object({
   "scope": zod.enum(['PLATFORM', 'ORGANIZATION']).describe('리소스 관리 범위'),
   "items": zod.array(zod.object({
@@ -279,15 +318,126 @@ export const ResourceControllerUpdateResourceSortV1Body = zod.object({
 })
 
 
-export const ResourceControllerUpdateResourcePermissionsV1Body = zod.object({
-  "scope": zod.enum(['PLATFORM', 'ORGANIZATION']).describe('리소스 관리 범위'),
-  "id": zod.string().describe('리소스 식별자'),
-  "actions": zod.array(zod.string()).describe('리소스 액션 목록'),
-  "constraint": zod.string().optional().describe('제약 조건')
+/**
+ * 리소스를 삭제합니다.
+ * @summary 리소스 삭제
+ */
+export const ResourceControllerDeleteResourceV1Body = zod.object({
+  "id": zod.string().describe('리소스 식별자')
 })
 
 
+export const supportControllerGetTicketsV1QueryPageDefault = 1;
+export const supportControllerGetTicketsV1QueryLimitDefault = 20;
+
 export const SupportControllerGetTicketsV1QueryParams = zod.object({
-  "organizationId": zod.string().optional().describe('조직 식별자 필터'),
+  "sort": zod.array(zod.string()).optional().describe('정렬 필드'),
+  "direction": zod.array(zod.enum(['asc', 'desc'])).default([`desc`]).describe('정렬 방향'),
+  "page": zod.number().default(supportControllerGetTicketsV1QueryPageDefault).describe('페이지 번호'),
+  "limit": zod.number().default(supportControllerGetTicketsV1QueryLimitDefault).describe('페이지 크기'),
+  "filters": zod.object({
+  "organization": zod.looseObject({
+
+}).optional().describe('조직 필터'),
   "status": zod.enum(['OPEN', 'IN_PROGRESS', 'RESOLVED', 'CLOSED']).optional().describe('티켓 상태 필터')
+}).optional().describe('필터 조건')
+})
+
+
+/**
+ * 관리자용 약관 문서 목록을 조회합니다.
+ * @summary 약관 문서 목록 조회
+ */
+export const TermsControllerGetTermsDocumentsV1QueryParams = zod.object({
+  "scope": zod.enum(['platform', 'organization']).optional().describe('조회 scope'),
+  "status": zod.enum(['DRAFT', 'PUBLISHED', 'DEPRECATED', 'ACTIVE', 'SCHEDULED_DEPRECATION']).optional().describe('상태 필터'),
+  "keyword": zod.string().optional().describe('검색어')
+})
+
+
+/**
+ * 약관 문서를 생성합니다.
+ * @summary 약관 문서 생성
+ */
+export const TermsControllerCreateTermsDocumentV1Body = zod.object({
+  "code": zod.string().describe('약관 코드'),
+  "title": zod.string().describe('약관 제목'),
+  "required": zod.boolean().describe('필수 동의 여부'),
+  "scope": zod.enum(['platform', 'organization']).describe('생성 scope')
+})
+
+
+/**
+ * 약관 문서 상세를 조회합니다.
+ * @summary 약관 문서 상세 조회
+ */
+export const TermsControllerGetTermsDocumentV1Params = zod.object({
+  "id": zod.string()
+})
+
+
+/**
+ * 약관 문서의 버전 목록을 조회합니다.
+ * @summary 약관 버전 목록 조회
+ */
+export const TermsControllerGetTermsDocumentVersionsV1Params = zod.object({
+  "id": zod.string()
+})
+
+export const TermsControllerGetTermsDocumentVersionsV1QueryParams = zod.object({
+  "keyword": zod.string().optional().describe('버전 검색어')
+})
+
+
+/**
+ * 약관 문서를 폐기하거나 예약 폐기합니다.
+ * @summary 약관 문서 폐기
+ */
+export const TermsControllerDeprecateTermsDocumentV1Body = zod.object({
+  "id": zod.string().describe('약관 문서 식별자'),
+  "deprecatedAt": zod.string().describe('폐기 시점')
+})
+
+
+/**
+ * 약관 문서의 폐기 예약을 취소합니다.
+ * @summary 폐기 예약 취소
+ */
+export const TermsControllerCancelDeprecationTermsDocumentV1Body = zod.object({
+  "id": zod.string().describe('약관 문서 식별자')
+})
+
+
+/**
+ * 현재 효력 중인 버전이 없을 때 약관 문서를 물리 삭제합니다.
+ * @summary 약관 문서 물리 삭제
+ */
+export const TermsControllerDeleteTermsDocumentV1Body = zod.object({
+  "id": zod.string().describe('약관 문서 식별자')
+})
+
+
+/**
+ * 약관 버전을 생성합니다.
+ * @summary 약관 버전 생성
+ */
+export const TermsControllerCreateTermsVersionV1Body = zod.object({
+  "termsDocumentId": zod.string().describe('약관 문서 식별자'),
+  "label": zod.string().describe('약관 버전 라벨'),
+  "content": zod.string().describe('약관 버전 본문'),
+  "effectiveAt": zod.iso.datetime({"offset":true}).describe('발효 시점'),
+  "status": zod.enum(['DRAFT', 'PUBLISHED']).describe('버전 상태')
+})
+
+
+/**
+ * 약관 버전을 수정합니다.
+ * @summary 약관 버전 수정
+ */
+export const TermsControllerUpdateTermsVersionV1Body = zod.object({
+  "id": zod.string().describe('약관 버전 식별자'),
+  "label": zod.string().describe('약관 버전 라벨'),
+  "content": zod.string().describe('약관 버전 본문'),
+  "effectiveAt": zod.iso.datetime({"offset":true}).describe('발효 시점'),
+  "status": zod.enum(['DRAFT', 'PUBLISHED']).describe('버전 상태')
 })

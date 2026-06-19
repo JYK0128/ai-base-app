@@ -6,6 +6,7 @@
  * OpenAPI spec version: 1.0
  */
 
-export type I18nControllerGetTranslationsV1Params = {
-locale: string;
-};
+/**
+ * 동의할 약관 버전
+ */
+export type CreateTermsAgreementRequestDtoTermsVersion = { [key: string]: unknown };

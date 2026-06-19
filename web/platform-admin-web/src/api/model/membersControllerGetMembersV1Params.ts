@@ -17,7 +17,7 @@ search?: string;
  */
 status?: MembersControllerGetMembersV1Status;
 /**
- * 조직 역할들
+ * 조직 역할
  */
-roles?: string[];
+role?: string;
 };

@@ -6,6 +6,7 @@
  * OpenAPI spec version: 1.0
  */
 
-export type I18nControllerGetTranslationsV1Params = {
-locale: string;
-};
+export interface ToggleMemberStatusDto {
+  /** 멤버 식별자 */
+  id: string;
+}

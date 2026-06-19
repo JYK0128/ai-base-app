@@ -12,6 +12,7 @@ export type TermsControllerGetTermsDocumentsV1Status = typeof TermsControllerGet
 export const TermsControllerGetTermsDocumentsV1Status = {
   DRAFT: 'DRAFT',
   PUBLISHED: 'PUBLISHED',
-  TERMINATED: 'TERMINATED',
+  DEPRECATED: 'DEPRECATED',
   ACTIVE: 'ACTIVE',
+  SCHEDULED_DEPRECATION: 'SCHEDULED_DEPRECATION',
 } as const;

@@ -6,6 +6,9 @@
  * OpenAPI spec version: 1.0
  */
 
-export type I18nControllerGetTranslationsV1Params = {
-locale: string;
-};
+export interface DeprecateTermsDocumentDto {
+  /** 약관 문서 식별자 */
+  id: string;
+  /** 폐기 시점 */
+  deprecatedAt: string;
+}

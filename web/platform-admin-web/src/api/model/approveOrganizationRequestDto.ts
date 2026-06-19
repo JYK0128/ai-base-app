@@ -7,6 +7,8 @@
  */
 
 export interface ApproveOrganizationRequestDto {
+  /** 조직 식별자 */
+  id?: string;
   /** 승인 여부 */
   approve: boolean;
 }

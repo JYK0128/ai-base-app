@@ -6,6 +6,9 @@
  * OpenAPI spec version: 1.0
  */
 
-export type I18nControllerGetTranslationsV1Params = {
-locale: string;
-};
+export interface UpdatePermissionSetPermissionsDto {
+  /** 권한 세트 식별자 */
+  id: string;
+  /** 부여할 권한 코드 목록 */
+  permissionCodes: string[];
+}

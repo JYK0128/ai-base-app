@@ -5,15 +5,28 @@
  * The AI Base App Platform Service API documentation
  * OpenAPI spec version: 1.0
  */
-import type { SupportControllerGetTicketsV1Status } from './supportControllerGetTicketsV1Status';
+import type { GetTicketPageFiltersDto } from './getTicketPageFiltersDto';
+import type { SupportControllerGetTicketsV1DirectionItem } from './supportControllerGetTicketsV1DirectionItem';
 
 export type SupportControllerGetTicketsV1Params = {
 /**
- * 조직 식별자 필터
+ * 정렬 필드
  */
-organizationId?: string;
+sort?: string[];
 /**
- * 티켓 상태 필터
+ * 정렬 방향
  */
-status?: SupportControllerGetTicketsV1Status;
+direction?: SupportControllerGetTicketsV1DirectionItem[];
+/**
+ * 페이지 번호
+ */
+page?: number;
+/**
+ * 페이지 크기
+ */
+limit?: number;
+/**
+ * 필터 조건
+ */
+filters?: GetTicketPageFiltersDto;
 };
