@@ -14,7 +14,6 @@
   ```typescript
   @Embeddable()
   export class AnnouncementMetadata {
-    [key: string]: unknown;
 
     constructor(data?: Partial<AnnouncementMetadata>) {
       Object.assign(this, data);
