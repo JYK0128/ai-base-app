@@ -11,6 +11,11 @@ import { buildTermsDocumentScopeFilter,
 import { AgreeTermsAsserter } from './agree-terms/agree-terms.error';
 import { CreateTermsAgreementResponseDto } from './agree-terms/agree-terms.response.dto';
 
+type ActiveTerm = {
+  document: TermsDocument
+  currentVersion: TermsVersion
+};
+
 type AgreementStateInput = {
   memberId: string
   organizationId: string
@@ -74,6 +79,18 @@ export class TermsAgreementService {
     };
   }
 
+  async resolvePendingAgreementTerms({
+    memberId,
+    organizationId,
+  }: AgreementStateInput): Promise<ActiveTerm[]> {
+    const activeTerms = await this.loadActiveTerms(organizationId);
+    const agreedTermsVersionIds = await this.getAgreedTermsVersionIds(memberId);
+
+    return activeTerms.filter(
+      (term) => !agreedTermsVersionIds.includes(term.currentVersion.id),
+    );
+  }
+
   async agree(
     memberId: string,
     organizationId: string,
@@ -116,7 +133,22 @@ export class TermsAgreementService {
     return this.toResponse(termsConsent);
   }
 
-  private async loadActiveTerms(organizationId: string) {
+  private async getAgreedTermsVersionIds(memberId: string): Promise<string[]> {
+    const consents = await this.em.find(
+      TermsConsent,
+      {
+        member: memberId,
+        agreed: true,
+      },
+      {
+        populate: ['termsVersion'],
+      },
+    );
+
+    return consents.map((consent) => consent.termsVersion.id);
+  }
+
+  private async loadActiveTerms(organizationId: string): Promise<ActiveTerm[]> {
     const scopeFilter: FilterQuery<TermsDocument>
       = buildTermsDocumentScopeFilter(organizationId);
     const currentPublishedVersionFilter: FilterQuery<TermsDocument> = {
@@ -150,7 +182,7 @@ export class TermsAgreementService {
           document.versions.getItems(),
         ),
       }))
-      .filter((term) => !!term.currentVersion);
+      .filter((term): term is ActiveTerm => !!term.currentVersion);
   }
 
   private toResponse(consent: TermsConsent): CreateTermsAgreementResponseDto {

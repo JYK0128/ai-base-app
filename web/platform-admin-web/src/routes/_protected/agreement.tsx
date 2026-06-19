@@ -1,11 +1,11 @@
 import { Button, Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle, Checkbox, Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Label, ScrollArea, Separator, toast } from '@pkg/ui';
-import { useQueries, useQueryClient, type UseQueryResult } from '@tanstack/react-query';
+import { useQueryClient } from '@tanstack/react-query';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { Loader2, ShieldCheck } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 
-import { getAuthControllerMeV1QueryKey, getTermsControllerGetTermsDocumentV1QueryOptions, useAuthControllerAgreeTermsV1, useAuthControllerGetTermsV1 } from '@/api/generated/endpoints';
-import type { AuthControllerGetTermsV1200, GetTermsDocumentDetailResponseDto, GetTermsDocumentResponseDto, TermsControllerGetTermsDocumentV1200 } from '@/api/generated/model';
+import { getAuthControllerMeV1QueryKey, useAuthControllerAgreeTermsV1, useAuthControllerGetTermsV1 } from '@/api/generated/endpoints';
+import type { AuthControllerGetTermsV1200, GetPendingTermsAgreementResponseDto } from '@/api/generated/model';
 
 import { useAuth } from '../../hooks/useAuth';
 
@@ -14,15 +14,14 @@ export const Route = createFileRoute('/_protected/agreement')({
 });
 
 type AgreementItem = {
-  document: GetTermsDocumentResponseDto
-  detail?: GetTermsDocumentDetailResponseDto
-  currentVersionId: string | null
+  document: GetPendingTermsAgreementResponseDto['document']
+  currentVersion: GetPendingTermsAgreementResponseDto['currentVersion']
 };
 
 function AgreementPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const { memberId, agreedTermsVersionIds, setMustAcceptTermsOverride } = useAuth();
+  const { memberId, setMustAcceptTermsOverride } = useAuth();
   const { mutateAsync: agreeTerms, isPending } = useAuthControllerAgreeTermsV1();
   const [selectedVersionIds, setSelectedVersionIds] = useState<string[] | null>(null);
 
@@ -32,37 +31,12 @@ function AgreementPage() {
     },
   });
 
-  const documents = useMemo(() => (activeTermsResponse?.data ?? []) as GetTermsDocumentResponseDto[], [activeTermsResponse?.data]);
+  const terms: AgreementItem[] = activeTermsResponse?.data ?? [];
 
-  const detailQueries: UseQueryResult<TermsControllerGetTermsDocumentV1200, unknown>[] = useQueries({
-    queries: documents.map((document) => getTermsControllerGetTermsDocumentV1QueryOptions(document.id, {
-      query: {
-        enabled: !!document.id,
-      },
-    })),
-  });
-
-  const terms = useMemo<AgreementItem[]>(() => {
-    return documents.map((document, index) => {
-      const detail = detailQueries[index]?.data?.data as GetTermsDocumentDetailResponseDto | undefined;
-      return {
-        document,
-        detail,
-        currentVersionId: detail?.currentVersion?.id ?? null,
-      };
-    });
-  }, [detailQueries, documents]);
-
-  const initialSelectedVersionIds = useMemo(() => {
-    return terms
-      .filter((term): term is AgreementItem & { currentVersionId: string } => !!term.currentVersionId && agreedTermsVersionIds.includes(term.currentVersionId))
-      .map((term) => term.currentVersionId);
-  }, [agreedTermsVersionIds, terms]);
-
-  const activeSelectedVersionIds = selectedVersionIds ?? initialSelectedVersionIds;
+  const activeSelectedVersionIds = selectedVersionIds ?? [];
   const requiredTerms = terms.filter((term) => term.document.required);
-  const isAllRequiredAgreed = requiredTerms.every((term) => term.currentVersionId !== null && activeSelectedVersionIds.includes(term.currentVersionId));
-  const isLoading = isActiveTermsLoading || detailQueries.some((query) => query.isLoading);
+  const isAllRequiredAgreed = requiredTerms.every((term) => activeSelectedVersionIds.includes(term.currentVersion.id));
+  const isLoading = isActiveTermsLoading;
 
   const handleSelect = (versionId: string) => {
     setSelectedVersionIds((prev) => {
@@ -86,8 +60,7 @@ function AgreementPage() {
 
     setSelectedVersionIds(
       terms
-        .map((term) => term.currentVersionId)
-        .filter((id): id is string => !!id),
+        .map((term) => term.currentVersion.id),
     );
   };
 
@@ -150,7 +123,7 @@ function AgreementPage() {
             <div className="flex items-center gap-2">
               <Checkbox
                 id="all-terms"
-                checked={terms.length > 0 && activeSelectedVersionIds.length === terms.filter((term) => term.currentVersionId).length}
+                checked={terms.length > 0 && activeSelectedVersionIds.length === terms.length}
                 onCheckedChange={(checked) => handleToggleAll(!!checked)}
               />
               <Label htmlFor="all-terms" className="font-semibold text-slate-700">
@@ -166,11 +139,11 @@ function AgreementPage() {
                   key={term.document.id}
                   title={term.document.title}
                   required={term.document.required}
-                  versionLabel={term.detail?.currentVersion?.label ?? '-'}
-                  content={term.detail?.currentVersion?.content ?? ''}
-                  effectiveAt={term.detail?.currentVersion?.effectiveAt ?? null}
-                  versionId={term.currentVersionId}
-                  checked={term.currentVersionId ? activeSelectedVersionIds.includes(term.currentVersionId) : false}
+                  versionLabel={term.currentVersion.label}
+                  content={term.currentVersion.content}
+                  effectiveAt={term.currentVersion.effectiveAt ?? null}
+                  versionId={term.currentVersion.id}
+                  checked={activeSelectedVersionIds.includes(term.currentVersion.id)}
                   onSelect={handleSelect}
                   onDeselect={handleDeselect}
                 />
@@ -209,13 +182,11 @@ function AgreementTermRow({
   readonly versionLabel: string
   readonly content: string
   readonly effectiveAt: string | null | undefined
-  readonly versionId: string | null
+  readonly versionId: string
   readonly checked: boolean
   readonly onSelect: (versionId: string) => void
   readonly onDeselect: (versionId: string) => void
 }) {
-  if (!versionId) return null;
-
   return (
     <div className="flex items-start justify-between gap-4 rounded-lg border border-slate-200 p-4">
       <div className="flex items-start gap-3">

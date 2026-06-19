@@ -268,6 +268,7 @@ export const AuthControllerGetTermsV1Response = zod.object({
   "requestId": zod.string().optional().describe('요청 ID')
 }).and(zod.object({
   "data": zod.array(zod.object({
+  "document": zod.object({
   "id": zod.string().describe('약관 문서 식별자'),
   "code": zod.string().describe('약관 코드'),
   "title": zod.string().describe('약관 제목'),
@@ -275,6 +276,15 @@ export const AuthControllerGetTermsV1Response = zod.object({
   "terminatedAt": zod.iso.datetime({"offset":true}).optional().describe('종료 일시'),
   "status": zod.enum(['DRAFT', 'PUBLISHED', 'TERMINATED']).describe('약관 상태'),
   "organization": zod.string().optional().describe('조직 식별자')
+}).describe('약관 문서 정보'),
+  "currentVersion": zod.object({
+  "id": zod.string().describe('약관 버전 식별자'),
+  "label": zod.string().describe('버전 라벨'),
+  "content": zod.string().describe('약관 내용'),
+  "checksum": zod.string().describe('체크섬'),
+  "status": zod.enum(['DRAFT', 'PUBLISHED']).describe('버전 상태'),
+  "effectiveAt": zod.iso.datetime({"offset":true}).optional().describe('효력 일시')
+}).describe('현재 효력 중인 최신 버전 정보')
 })).optional()
 }))
 

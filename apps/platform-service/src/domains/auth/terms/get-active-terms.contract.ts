@@ -1,8 +1,8 @@
 import { Query } from '@nestjs/cqrs';
 
-import type { GetTermsDocumentResponseDto } from '../../terms/get-terms-document/get-terms-document.response.dto';
+import type { GetPendingTermsAgreementResponseDto } from './get-pending-terms.response.dto';
 
-export class GetActiveTermsContract extends Query<GetTermsDocumentResponseDto[]> {
+export class GetActiveTermsContract extends Query<GetPendingTermsAgreementResponseDto[]> {
   constructor() {
     super();
   }

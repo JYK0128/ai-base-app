@@ -13,19 +13,18 @@ import { ENV } from '@/env';
 import { CreateTermsAgreementContract } from '../terms/agree-terms/agree-terms.contract';
 import { CreateTermsAgreementRequestDto } from '../terms/agree-terms/agree-terms.request.dto';
 import { CreateTermsAgreementResponseDto } from '../terms/agree-terms/agree-terms.response.dto';
-import { GetTermsDocumentResponseDto } from '../terms/get-terms-document/get-terms-document.response.dto';
 import { AuthChangePasswordContract } from './change-password/change-password.contract';
 import { AuthChangePasswordRequestDto } from './change-password/change-password.request.dto';
 import { AuthDeferPasswordChangeContract } from './defer-password-change/defer-password-change.contract';
 import { AuthLoginContract } from './login/login.contract';
-import { AuthLoginBodyRequestDto } from './login/login-body.request.dto';
-import { AuthLoginRequestDto } from './login/login.request.dto';
 import { AuthLoginResponseDto } from './login/login.response.dto';
+import { AuthLoginBodyRequestDto } from './login/login-body.request.dto';
 import { AuthGetMeContract } from './me/get-me.contract';
 import { AuthGetMeResponseDto } from './me/get-me.response.dto';
 import { AuthRefreshTokenContract } from './refresh-token/refresh-token.contract';
 import { AuthRefreshTokenResponseDto } from './refresh-token/refresh-token.response.dto';
 import { GetActiveTermsContract } from './terms/get-active-terms.contract';
+import { GetPendingTermsAgreementResponseDto } from './terms/get-pending-terms.response.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -87,8 +86,8 @@ export class AuthController {
 
   @Get('terms')
   @Bypass(BYPASS_POLICIES.TERMS)
-  @SwaggerResponse([GetTermsDocumentResponseDto])
-  async getTerms(): Promise<GetTermsDocumentResponseDto[]> {
+  @SwaggerResponse([GetPendingTermsAgreementResponseDto])
+  async getTerms(): Promise<GetPendingTermsAgreementResponseDto[]> {
     return this.queryBus.execute(new GetActiveTermsContract());
   }
 

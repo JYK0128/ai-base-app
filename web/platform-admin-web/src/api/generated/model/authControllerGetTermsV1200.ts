@@ -6,8 +6,8 @@
  * OpenAPI spec version: 1.0
  */
 import type { ApiResponse } from './apiResponse';
-import type { GetTermsDocumentResponseDto } from './getTermsDocumentResponseDto';
+import type { GetPendingTermsAgreementResponseDto } from './getPendingTermsAgreementResponseDto';
 
 export type AuthControllerGetTermsV1200 = ApiResponse & {
-  data?: GetTermsDocumentResponseDto[];
+  data?: GetPendingTermsAgreementResponseDto[];
 };
