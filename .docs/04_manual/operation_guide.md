@@ -30,7 +30,7 @@
 
 ## 2. 서비스별 헬스체크 운영 기준
 
-### 2.1 platform-gateway (API 게이트웨이)
+### 2.1 platform-service (통합 플랫폼 API)
 
 - **헬스 엔드포인트**
   - `GET /health/live` (Neutral version, Prefix 미적용)
@@ -38,29 +38,9 @@
 - **구성 방식**
   - NestJS HTTP Application + `@nestjs/terminus`
 - **readiness 기준**
-  - `auth-service` (TCP 연결 상태) ping 성공 시 Ready (`200 OK`)
+  - PostgreSQL, Redis, RabbitMQ 연결 가능 시 Ready (`200 OK`)
 
-### 2.2 platform-auth-service (인증 마이크로서비스)
-
-- **헬스 엔드포인트**
-  - `GET /health/live`
-  - `GET /health/ready`
-- **구성 방식**
-  - NestJS TCP Microservice + HTTP + `@nestjs/terminus`
-- **readiness 기준**
-  - PostgreSQL 데이터베이스(MikroORM) 및 Redis 연결 가능 시 Ready (`200 OK`)
-
-### 2.3 platform-core-service (코어 마이크로서비스)
-
-- **헬스 엔드포인트**
-  - `GET /health/live`
-  - `GET /health/ready`
-- **구성 방식**
-  - NestJS HTTP + `@nestjs/terminus`
-- **readiness 기준**
-  - PostgreSQL 데이터베이스(MikroORM) 및 Redis 연결 가능 시 Ready (`200 OK`)
-
-### 2.4 Kubernetes Probe 매핑
+### 2.2 Kubernetes Probe 매핑
 
 - `startupProbe` ➡️ `/health/live`
 - `livenessProbe` ➡️ `/health/live`
@@ -71,9 +51,8 @@
 - 전체 파드 상태
   - `kubectl get pods -A`
 - 특정 서비스 롤아웃 상태
-  - `kubectl rollout status deployment/platform-gateway -n dev-api`
-  - `kubectl rollout status deployment/platform-core-service -n dev-api`
-  - `kubectl rollout status deployment/platform-auth-service -n dev-api`
+  - `kubectl rollout status deployment/platform-service -n dev-service`
+  - `kubectl rollout status deployment/platform-admin-web -n dev-web`
 - 네트워크 정책 확인
   - `kubectl get networkpolicy -A`
 - 프로브/이벤트 확인
@@ -87,7 +66,7 @@
 ### 4.1 readiness 503 / startup 실패
 
 1. 앱 로그에서 `/health/ready` 실패 원인 확인
-2. DB 및 Redis 연결 상태 확인
+2. DB, Redis, RabbitMQ 연결 상태 확인
 3. NetworkPolicy에서 해당 트래픽 허용 여부 확인
 
 ### 4.2 CrashLoopBackOff
@@ -103,4 +82,4 @@
 3. 동일 매니페스트를 `--dry-run=server`로 검증 후 재적용
 
 ---
-*최종 업데이트: 2026-06-07*
+*최종 업데이트: 2026-06-13*

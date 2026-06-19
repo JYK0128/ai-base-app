@@ -9,7 +9,7 @@
 * DB 레이어는 도메인 기준으로 `core`와 `platform` 하위의 세부 도메인(`content`, `i18n`, `member`, `organization`, `resource`, `support`, `terms`) 디렉토리로 분리되어 있음.
 * 각 도메인은 `*.entity.ts` + `*.repository.ts` 페어를 기본 단위로 유지하고, `domains/index.ts`에서 일괄 export 하여 서비스에서 단일 진입점으로 참조함.
 * 공통 베이스는 `CoreEntity`/`CoreRepository`를 사용하며, 페이지네이션 공통 로직은 `PaginationRepository`로 분리되어 있음.
-* 워크스페이스 의존 관계는 `apps/platform-auth-service`, `apps/platform-core-service`, `apps/platform-gateway`에서 `@pkg/database`를 직접 참조하는 구조를 기본으로 함.
+* 워크스페이스 의존 관계는 `apps/platform-service`와 `web/platform-admin-web`에서 `@pkg/database`를 직접 참조하는 구조를 기본으로 함.
 
 ## 엔티티 공통 감사 필드 및 삭제 정책
 

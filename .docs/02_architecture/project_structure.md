@@ -8,9 +8,7 @@
 ## 2. 현재 기준 주요 디렉토리 구조
 
 * **apps/**: 실행 가능한 백엔드 애플리케이션 및 마이크로서비스
-  * `platform-gateway`: API 게이트웨이 및 클라이언트 요청 진입점
-  * `platform-core-service`: 코어 비즈니스 로직 처리 마이크로서비스
-  * `platform-auth-service`: 사용자 인증 및 토큰 발급 마이크로서비스
+  * `platform-service`: 인증, 코어, 게이트웨이 기능을 통합한 플랫폼 API
 * **web/**: 실행 가능한 프론트엔드 애플리케이션
   * `platform-admin-web`: 통합 어드민 포탈 웹앱
 * **packages/**: 공통 라이브러리

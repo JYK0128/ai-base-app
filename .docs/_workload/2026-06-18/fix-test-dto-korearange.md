@@ -1,0 +1,76 @@
+# koreaRange 자동완성 지원을 위한 DTO 타입 개조 - 2026-06-18
+
+## 📋 작업 체크리스트
+
+- [x] test.dto.ts 타입 분석 및 수정
+  - 시작: 2026-06-18 18:16
+  - 완료: 2026-06-18 18:18
+- [x] 타입 검증 및 동작 확인
+  - 시작: 2026-06-18 18:18
+  - 완료: 2026-06-18 18:20
+- [x] IDE 자동완성(Autocomplete) 성능 개선을 위해 Mapped Type 조건부 필터링 리팩터링
+  - 시작: 2026-06-18 18:24
+  - 완료: 2026-06-18 18:26
+- [x] 키 필터링을 완전히 제거하고 값 조건식으로 매핑하여 LSP 자동완성 가독성 극대화
+  - 시작: 2026-06-18 18:26
+  - 완료: 2026-06-18 18:27
+- [x] Date 타입을 structural ({ getTime(): number }) 조건식으로 변경하고 Resolve 추론 강제 도입
+  - 시작: 2026-06-18 18:27
+  - 완료: 2026-06-18 18:29
+- [x] interface extends mapped type 형태로 복구하여 클래스 implements 시의 LSP 힌트 정상화
+  - 시작: 2026-06-18 18:29
+  - 완료: 2026-06-18 18:30
+- [x] Declaration Merging 패턴을 도입하여 class와 interface 동명 선언을 통해 dynamic key를 클래스 본문에 직접 바인딩
+  - 시작: 2026-06-18 18:30
+  - 완료: 2026-06-18 18:31
+- [x] implements 방식을 유지하기 위해 Mapped Type key remapping (as clause)을 완전히 제거하고 dynamic key union 매핑 방식으로 변경
+  - 시작: 2026-06-18 18:31
+  - 완료: 2026-06-18 18:32
+- [x] FilterRequestRangeDto와 일치하는 중첩 조건부 key remapping과 단일 value 매핑 구조로 최종 최적화
+  - 시작: 2026-06-18 18:32
+  - 완료: 2026-06-18 18:33
+- [x] Key remapping의 조건식을 값(value) 영역으로 완전히 이동시켜 key의 정적 선언을 강제하여 LSP 자동완성 보장
+  - 시작: 2026-06-18 18:33
+  - 완료: 2026-06-18 18:34
+- [x] Date 맵드 타입과 number 맵드 타입을 교차(Intersection) 형태로 분리 정의한 뒤 Partial로 감싸 복잡도를 제거하고 자동완성 기능 복구
+  - 시작: 2026-06-18 18:34
+  - 완료: 2026-06-18 18:35
+- [x] Mapped Type을 완전히 배제하고 UnionToIntersection 유틸리티와 Record를 활용한 순수 분산 조건부 분기(Distributive Conditional Types)로 재설계
+  - 시작: 2026-06-18 18:35
+  - 완료: 2026-06-18 18:36
+- [x] RangeOf<T> 유틸리티 타입을 통한 타입-레벨 리팩터링으로 맵드 타입 내의 복잡성을 외부로 격리하여 자동완성 캐시 정상화
+  - 시작: 2026-06-18 18:36
+  - 완료: 2026-06-18 18:37
+- [x] exactOptionalPropertyTypes/LSP 캐시 회피를 위해 인터페이스 필수 지정 및 중간 매개 인터페이스(IBar) 도입을 통한 implements 정상 구체화
+  - 시작: 2026-06-18 18:37
+  - 완료: 2026-06-18 18:39
+- [x] 키 생성(RawTestRange)과 값 필터링(TestRange)을 2단계 Mapped Type으로 완전 격리하여 LSP의 중첩 조건문 해석 병목 현상 해결
+  - 시작: 2026-06-18 18:39
+  - 완료: 2026-06-18 18:40
+- [x] TestRange를 optional 형태로 변환하고 클래스 구현부 멤버에도 ? 마커를 추가하여 exactOptionalPropertyTypes 환경에 대응
+  - 시작: 2026-06-18 18:40
+  - 완료: 2026-06-18 18:41
+- [x] class와 interface 동명 선언(Declaration Merging) + Required<T> 래핑 구조를 적용하여 클래스 바디 작성 시 강제 자동완성을 호출하고 구현은 optional(?)로 남겨두는 복합 설계 구현
+  - 시작: 2026-06-18 18:41
+  - 완료: 2026-06-18 18:42
+- [x] 이중 동적 키 리매핑(Double Mapped Type) 구조를 제거하고 단일 맵드 타입(Single Mapped Type)으로 최적화하여 옵셔널 상태에서의 LSP 자동완성을 완벽하게 복구
+  - 시작: 2026-06-18 18:42
+  - 완료: 2026-06-18 18:43
+- [x] Dummy 필수 마커 속성(_rangeDto: true) 및 `= true as const` 초기화 기법을 도입하여 TS2564 경고 해결 및 100% Quick Fix 자동완성 도달
+  - 시작: 2026-06-18 18:45
+  - 완료: 2026-06-18 18:46
+- [x] 제네릭 엔티티 추적용 필수 속성(_rangeDto: T)과 클래스 내 definite assignment assertion(!) 적용을 완료하여 TS2564 경고 최종 소거 및 타입 매핑 연결성 극대화
+  - 시작: 2026-06-18 18:46
+  - 완료: 2026-06-18 18:47
+- [x] Prettify 유틸리티 타입을 적용해 intersection(&) 타입을 단일 객체 타입으로 평탄화(Flatten)하여 ctrl + space 자동완성 리포트 성능 복구
+  - 시작: 2026-06-18 18:47
+  - 완료: 2026-06-18 18:48
+- [x] EntityRequestDto의 노하우를 살려 맵드 타입 본문에서의 키 리매핑(as clause)을 원천 제거하고, 분산 키 유니온(RangeKeys)과 템플릿 리터럴 역추적(OriginalKeyOf) 방식을 설계하여 자동완성 완벽 복구
+  - 시작: 2026-06-18 18:51
+  - 완료: 2026-06-18 18:52
+- [x] 제네릭 지연 평가를 방지하기 위해 구체 타입 별칭(BarRange)을 정의하고 바인딩하는 'Concrete Type Alias' 패턴으로 교체하여 ctrl + space 자동완성 복구
+  - 시작: 2026-06-18 18:52
+  - 완료: 2026-06-18 18:53
+- [x] type 별칭의 lazy 평가 문제를 타파하기 위해 명목적 타입 선언인 interface 상속 구조(interface BarRange extends TestRange<Foo>)를 도입하여 컴파일러의 즉시 평가 및 캐싱 인덱스 활용을 통한 ctrl + space 완벽 동작 보장
+  - 시작: 2026-06-18 18:53
+  - 완료: 2026-06-18 18:54

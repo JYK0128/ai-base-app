@@ -264,23 +264,54 @@ export class InviteEmailPublisher {
 
 ---
 
-## 📦 6. 피처별 DTO 독립성 원칙
+## 📌 Request / Response 계약 선택 기준
 
-모든 유스케이스(Feature)는 격리된 API 사양과 독립적인 진화 방향을 유지하기 위해 자신만의 전용 DTO(Data Transfer Object)를 정의함.
+CQRS 메시지와 DTO를 고를 때는 아래 규칙을 우선 적용함.
 
-* **피처별 전용 DTO 생성**: 예를 들어 `UpdateMemberStatus`와 `UpdateMemberRole`이 둘 다 멤버의 `id`값만 응답(`{ id: string }`)하는 동일 구조를 갖더라도, 각 피처의 디렉토리 하위에 각각 `UpdateMemberStatusResponseDto`, `UpdateMemberRoleResponseDto` 클래스를 독립적으로 생성하여 정의함.
-* **영향도 격리**: 특정 피처의 기능 개편으로 인해 API 필드 사양이 달라질 때, DTO가 독립적으로 격리되어 있어야만 타 기능에 영향을 주지 않고 안전하게 변경을 전파할 수 있음.
+| 상황 | request 계약 | response 계약 | 예시 |
+| --- | --- | --- | --- |
+| 단순 바디 전송 | `PayloadRequestDto` | `PayloadResponseDto` | `login`, `refresh-token`, `change-password` |
+| 엔티티 1건 생성/수정 | `EntityRequestDto<TEntity>` | `IdResponseDto<TEntity>` | `save-announcement`, `create-invite` |
+| 단건 조회 | `IdRequestDto<TEntity>` | `EntityResponseDto<TEntity>` | `get-member`, `get-resource` |
+| 단건 삭제 | `IdRequestDto<TEntity>` | `IdResponseDto<TEntity>` | `delete-announcement` |
+| 복수 삭제 | `IdListRequestDto<TEntity>` | `IdListResponseDto<TEntity>` | bulk delete |
+| 목록 조회 | `ListRequestDto<TEntity>` | `ListResponseDto<TEntity>` | `get-announcements`, `get-resources`, `get-members` |
+| 페이지 조회 | `PageRequestDto<TEntity>` | `PageResponseDto<TEntity>` | `get-members`, `get-tickets` |
+| 커서 조회 | `CursorRequestDto<TEntity>` | `CursorResponseDto<TEntity>` | cursor 기반 목록 |
+| 엔티티와 다르게 가공된 응답 | 해당 request 계약 유지 | 표준 response 계약으로 환원 우선, 예외적으로 커스텀 DTO | `GetLocalesResponseDto`, `AnnouncementResponseDto`, `GetMeResponseDto` |
 
-### 💻 구현 예시 (독립적인 DTO 작성)
+### 요약 규칙
+
+- 생성/수정 응답은 `IdResponseDto`
+- 조회 단건은 `EntityResponseDto`
+- 삭제는 `IdResponseDto` / `IdListResponseDto`
+- 조회는 `PageRequestDto` / `ListRequestDto` / `CursorRequestDto`
+- 정렬만/필터만 쓰는 조회는 만들지 않음
+- 응답이 엔티티와 다르게 가공되더라도 표준 response 계약으로 되돌릴 수 있는지 먼저 검토함
+- 완전 자유형 응답이면 `PayloadResponseDto`
+
+---
+
+## 📦 6. 응답 계약 우선 원칙
+
+응답 DTO는 피처별로 임의의 형태를 만들기 전에 `common/interfaces/response`의 표준 계약을 우선 사용함.
+
+* **표준 계약 우선**: `IdResponseDto`, `IdListResponseDto`, `EntityResponseDto`, `ListResponseDto`, `PageResponseDto`, `CursorResponseDto`, `PayloadResponseDto` 중 하나를 먼저 선택함.
+* **가공 응답은 예외**: 엔티티와 다르게 가공된 응답은 우선 표준 계약으로 환원 가능한지 검토하고, 정말 필요한 경우에만 별도 DTO를 허용함.
+* **커스텀 DTO 최소화**: 표준 계약으로 충분한데도 가공 DTO를 따로 만든 경우, 먼저 표준 계약으로 바꾸는 방향으로 수정함.
+
+### 💻 구현 예시 (표준 response 계약 사용)
 
 ```typescript
-// domains/members/update-member-status/update-member-status.response.dto.ts
-export class UpdateMemberStatusResponseDto {
-  constructor(public readonly id: string) {}
+// domains/members/update-member-status/update-member-status.contract.ts
+import type { IdResponseDto } from '@/common/interfaces';
+
+export class UpdateMemberStatusContract extends Command<IdResponseDto<typeof Member>> {
+  constructor(public readonly data: UpdateMemberStatusRequestDto) {
+    super();
+  }
 }
 
-// domains/members/update-member-role/update-member-role.response.dto.ts
-export class UpdateMemberRoleResponseDto {
-  constructor(public readonly id: string) {}
-}
+// domains/members/update-member-status/update-member-status.handler.ts
+return { id: member.id };
 ```

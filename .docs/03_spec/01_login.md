@@ -58,6 +58,7 @@
 | 필드 | 설명 |
 | --- | --- |
 | `accessToken` | API Gateway 인증 통과에 쓰이는 Bearer 토큰 |
+| `refreshToken` | 서버가 `HttpOnly` 쿠키로 설정하는 리프레시 토큰 |
 | `isAuthenticated` | 클라이언트 메모리 내 로그인 활성화 유무 |
 | `mustChangePassword` | 계정 생성 후 최초 로그인 여부 혹은 비밀번호 초기화 상태 구분 값 |
 
@@ -68,10 +69,18 @@
 ### 6.1 로그인 및 리다이렉션 흐름
 
 * 사용자가 이메일과 패스워드를 기입하고 제출하여 인증 성공 시, `login(data.accessToken)` 훅 액션이 가동됨.
+* 로그인 응답은 `accessToken`을 본문으로 제공하고, `refreshToken`이 발급된 경우 서버가 `refreshToken` 쿠키를 함께 설정함.
+* 서버는 클라이언트 IP를 `x-real-ip`, 요청 IP, `0.0.0.0` 순서로 확정하여 로그인 이력 및 세션 컨텍스트에 반영함.
 * 계정이 비밀번호 의무 변경 대상(`mustChangePassword === true`)인 경우 즉시 `/change-password` 라우트로 리다이렉트 처리함.
 * 정상 로그인 완료 시에는 이전 접근을 시도했던 `redirect` 쿼리 매개변수 경로 또는 기본 대시보드인 `/dashboard`로 이동함.
 
-### 6.2 비밀번호 강제 변경 및 강제 로그아웃
+### 6.2 토큰 재발급
+
+* 클라이언트는 `refreshToken` 쿠키를 기반으로 `POST /api/v1/auth/refresh`를 호출하여 신규 `accessToken`을 수령함.
+* 토큰 재발급 응답은 `accessToken`, `refreshToken`, `id`를 포함하며, 서버는 신규 `refreshToken`을 쿠키로 재설정함.
+* 프론트엔드는 응답 본문의 `accessToken`으로 클라이언트 인증 상태를 갱신함.
+
+### 6.3 비밀번호 강제 변경 및 강제 로그아웃
 
 * 비밀번호 변경이 성공적으로 완료되면 백엔드의 세션 무효화 처리가 동시 유도됨.
 * 프론트엔드는 `onSuccess` 콜백 내에서 즉시 `logout()`을 강제 트리거하여 클라이언트 메모리의 토큰을 소멸시키고 로그인 화면으로 퇴장 처리함.
@@ -117,9 +126,12 @@
 
 | 기능 | Method | Endpoint | DTO | 비고 |
 | --- | --- | --- | --- | --- |
-| 로그인 시도 | `POST` | `/api/v1/auth/login` | `LoginRequestDto` | 성공 시 Access Token 수령 |
+| 로그인 시도 | `POST` | `/api/v1/auth/login` | `AuthLoginRequestDto` | 성공 시 Access Token 수령 및 Refresh Token 쿠키 설정 |
+| 활성 약관 조회 | `GET` | `/api/v1/auth/terms` | 없음 | 로그인 및 동의 흐름에서 활성 약관 조회 |
+| 약관 동의 저장 | `POST` | `/api/v1/auth/terms/agreements` | `CreateTermsAgreementRequestDto` | 현재 로그인한 사용자 기준 동의 이력 저장 |
+| 토큰 재발급 | `POST` | `/api/v1/auth/refresh` | `AuthRefreshTokenRequestDto` | Refresh Token 쿠키 기반 Access Token 갱신 |
 | 비밀번호 변경 | `POST` | `/api/v1/auth/change-password` | `ChangePasswordRequestDto` | 변경 완료 즉시 로그아웃 트리거 |
 | 세션 무효화 로그아웃 | `POST` | `/api/v1/auth/logout` | 없음 | 쿠키 및 토큰 소멸 수행 |
 
 ---
-*최종 업데이트: 2026-06-07*
+*최종 업데이트: 2026-06-15*

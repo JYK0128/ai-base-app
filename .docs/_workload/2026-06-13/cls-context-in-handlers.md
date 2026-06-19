@@ -1,6 +1,7 @@
 # Cls Context in Handlers - 2026-06-13
 
 ## 📋 작업 체크리스트
+
 - [x] ChangePassword / DeferPasswordChange 핸들러 내 ClsService 주입 및 accountId 직접 취득 구현
   - 시작: 2026-06-13 09:19
   - 완료: `664c115`
