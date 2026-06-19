@@ -1,4 +1,5 @@
 import { Transactional } from '@mikro-orm/decorators/legacy';
+import { InjectRepository } from '@mikro-orm/nestjs';
 import { CommandHandler, type ICommandHandler } from '@nestjs/cqrs';
 import { CoreRepository, MemberAccount } from '@pkg/database';
 import { JwtUtil } from '@pkg/shared';
@@ -6,22 +7,22 @@ import { JwtUtil } from '@pkg/shared';
 import { ENV } from '@/env';
 
 import { AuthCacheService } from '../auth.cache';
-import { extractPermissions } from '../auth-permissions';
-import { RefreshTokenContract } from './refresh-token.contract';
+import { AuthRefreshTokenContract } from './refresh-token.contract';
 import { RefreshTokenAsserter } from './refresh-token.error';
-import type { RefreshTokenResponseDto } from './refresh-token.response.dto';
+import type { AuthRefreshTokenResponseDto } from './refresh-token.response.dto';
 
-@CommandHandler(RefreshTokenContract)
-export class RefreshTokenHandler implements ICommandHandler<RefreshTokenContract> {
+@CommandHandler(AuthRefreshTokenContract)
+export class RefreshTokenHandler implements ICommandHandler<AuthRefreshTokenContract> {
   private readonly Asserter = RefreshTokenAsserter;
 
   constructor(
-    private readonly authService: AuthCacheService,
+    @InjectRepository(MemberAccount)
     private readonly memberAccountRepository: CoreRepository<MemberAccount>,
+    private readonly authCacheService: AuthCacheService,
   ) {}
 
   @Transactional()
-  async execute(command: RefreshTokenContract): Promise<RefreshTokenResponseDto> {
+  async execute(command: AuthRefreshTokenContract): Promise<AuthRefreshTokenResponseDto & { refreshToken: string }> {
     const { refreshToken } = command.data;
 
     const account = await this.identifyAccount(refreshToken);
@@ -40,7 +41,7 @@ export class RefreshTokenHandler implements ICommandHandler<RefreshTokenContract
   }
 
   private async verifySession(accountId: string, token: string) {
-    const storedToken = await this.authService.get<string>(`refresh:${accountId}`);
+    const storedToken = await this.authCacheService.get<string>(`refresh:${accountId}`);
     await this.Asserter.throwIf(!storedToken || storedToken !== token, 'SESSION_EXPIRED');
   }
 
@@ -52,7 +53,7 @@ export class RefreshTokenHandler implements ICommandHandler<RefreshTokenContract
     const account = await this.Asserter.assert(
       this.memberAccountRepository.findOne(
         { id: accountId },
-        { populate: ['member.organization', 'member.organizationRoles.role.permissions.resource'] },
+        { populate: ['member.organization', 'member.roles.role.permissions.resource'] },
       ),
       'ACCOUNT_NOT_FOUND',
     );
@@ -71,21 +72,13 @@ export class RefreshTokenHandler implements ICommandHandler<RefreshTokenContract
   }
 
   private async processTokenRotation(account: MemberAccount) {
-    const organizationId = account.member.organization?.id;
-    const { permissions } = extractPermissions(account.member, organizationId);
     const accountId = account.id;
-    const memberId = account.member.id;
     const accessExpiresAt = Math.floor(Date.now() / 1000) + ENV.JWT_ACCESS_EXPIRES_IN;
     const refreshExpiresAt = Math.floor(Date.now() / 1000) + ENV.JWT_REFRESH_EXPIRES_IN;
 
     const tokens = await JwtUtil.issuePair(
       {
         sub: accountId,
-        accountId,
-        memberId,
-        organizationId,
-        mustChangePassword: account.isPasswordExpired,
-        permissions,
       },
       {
         access: {
@@ -99,15 +92,12 @@ export class RefreshTokenHandler implements ICommandHandler<RefreshTokenContract
       },
     );
 
-    await this.authService.set(
+    await this.authCacheService.set(
       `refresh:${account.id}`,
       tokens.refreshToken,
       ENV.JWT_REFRESH_EXPIRES_IN,
     );
 
-    return {
-      id: account.id,
-      ...tokens,
-    };
+    return tokens;
   }
 }

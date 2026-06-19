@@ -1,7 +1,7 @@
 import { ForbiddenException, UnauthorizedException } from '@nestjs/common';
 import { defineErrors, ExceptionGuard } from '@pkg/shared/server';
 
-import type { LoginRequestDto } from './login.request.dto';
+import type { AuthLoginRequestDto } from './login.request.dto';
 
 type LoginMetadata = {
   attempts?: number
@@ -71,5 +71,5 @@ const LOGIN_ERROR_MESSAGES = defineErrors({
 
 export const LoginAsserter = ExceptionGuard
   .withMetadata<LoginMetadata>()
-  .withContext<Pick<LoginRequestDto, 'email'>>()
+  .withContext<AuthLoginRequestDto>()
   .setMessages(LOGIN_ERROR_MESSAGES);

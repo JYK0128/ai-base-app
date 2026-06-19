@@ -1,4 +1,5 @@
 import { Transactional } from '@mikro-orm/decorators/legacy';
+import { InjectRepository } from '@mikro-orm/nestjs';
 import { UnauthorizedException } from '@nestjs/common';
 import { CommandHandler, type ICommandHandler } from '@nestjs/cqrs';
 import { CoreRepository, MemberAccount } from '@pkg/database';
@@ -6,27 +7,28 @@ import { ClsService } from 'nestjs-cls';
 
 import { ENV } from '@/env';
 
-import { DeferPasswordChangeContract } from './defer-password-change.contract';
+import { AuthDeferPasswordChangeContract } from './defer-password-change.contract';
 import { DeferPasswordChangeAsserter } from './defer-password-change.error';
-import { DeferPasswordChangeResponseDto } from './defer-password-change.response.dto';
+import { AuthDeferPasswordChangeResponseDto } from './defer-password-change.response.dto';
 
-@CommandHandler(DeferPasswordChangeContract)
-export class DeferPasswordChangeHandler implements ICommandHandler<DeferPasswordChangeContract> {
+@CommandHandler(AuthDeferPasswordChangeContract)
+export class DeferPasswordChangeHandler implements ICommandHandler<AuthDeferPasswordChangeContract> {
   private readonly Asserter = DeferPasswordChangeAsserter;
 
   constructor(
     private readonly cls: ClsService,
+    @InjectRepository(MemberAccount)
     private readonly memberAccountRepository: CoreRepository<MemberAccount>,
   ) {}
 
   @Transactional()
-  async execute(_command: DeferPasswordChangeContract): Promise<DeferPasswordChangeResponseDto> {
+  async execute(_command: AuthDeferPasswordChangeContract): Promise<AuthDeferPasswordChangeResponseDto> {
     const account = await this.identifyAccount();
     await this.validatePolicies(account);
 
     this.processDeferment(account);
 
-    return new DeferPasswordChangeResponseDto();
+    return new AuthDeferPasswordChangeResponseDto();
   }
 
   private async identifyAccount(): Promise<MemberAccount> {

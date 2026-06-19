@@ -3,7 +3,7 @@ import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
 import { CoreRepository, I18nLocale } from '@pkg/database';
 
 import { GetLocalesContract } from './get-locales.contract';
-import { GetLocalesResponseDto, I18nLocaleResponseDto } from './get-locales.response.dto';
+import { GetLocaleResponseDto, GetLocalesResponseDto } from './get-locales.response.dto';
 
 @QueryHandler(GetLocalesContract)
 export class GetLocalesHandler implements IQueryHandler<GetLocalesContract> {
@@ -18,6 +18,6 @@ export class GetLocalesHandler implements IQueryHandler<GetLocalesContract> {
       { orderBy: [{ sortOrder: 'ASC' }, { code: 'ASC' }] },
     );
 
-    return new GetLocalesResponseDto(locales.map((locale) => new I18nLocaleResponseDto(locale)));
+    return new GetLocalesResponseDto(locales.map((locale) => new GetLocaleResponseDto(locale)));
   }
 }

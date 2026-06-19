@@ -4,8 +4,9 @@ import { MinLength } from 'class-validator';
 import { IsMatch } from '@/common/decorators/is-match.decorator';
 import { IsNotEmptyString } from '@/common/decorators/is-not-empty-string.decorator';
 import { IsNotMatch } from '@/common/decorators/is-not-match.decorator';
+import type { PayloadRequestDto } from '@/common/interfaces';
 
-export class ChangePasswordRequestDto {
+export class AuthChangePasswordRequestDto implements PayloadRequestDto {
   @ApiProperty({ example: 'CurrentPassword123!', description: '현재 비밀번호' })
   @IsNotEmptyString({ message: '현재 비밀번호는 필수 입력 항목입니다.' })
   currentPassword!: string;

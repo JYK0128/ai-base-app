@@ -9,17 +9,21 @@ import { Public } from '@/common/decorators/public.decorator';
 import { createCookieOptions } from '@/common/utils/cookie';
 import { ENV } from '@/env';
 
-import { ChangePasswordContract } from './change-password/change-password.contract';
-import type { ChangePasswordRequestDto } from './change-password/change-password.request.dto';
-import { DeferPasswordChangeContract } from './defer-password-change/defer-password-change.contract';
-import { LoginContract } from './login/login.contract';
-import type { LoginRequestDto } from './login/login.request.dto';
-import type { LoginResponseDto } from './login/login.response.dto';
-import { GetMeContract } from './me/get-me.contract';
-import { GetMeResponseDto } from './me/get-me.response.dto';
-import { RefreshTokenContract } from './refresh-token/refresh-token.contract';
-import type { RefreshTokenRequestDto } from './refresh-token/refresh-token.request.dto';
-import type { RefreshTokenResponseDto } from './refresh-token/refresh-token.response.dto';
+import { CreateTermsAgreementContract } from '../terms/agree-terms/agree-terms.contract';
+import { CreateTermsAgreementRequestDto } from '../terms/agree-terms/agree-terms.request.dto';
+import type { CreateTermsAgreementResponseDto } from '../terms/agree-terms/agree-terms.response.dto';
+import type { GetTermsDocumentResponseDto } from '../terms/get-terms-document/get-terms-document.response.dto';
+import { AuthChangePasswordContract } from './change-password/change-password.contract';
+import { AuthChangePasswordRequestDto } from './change-password/change-password.request.dto';
+import { AuthDeferPasswordChangeContract } from './defer-password-change/defer-password-change.contract';
+import { AuthLoginContract } from './login/login.contract';
+import { AuthLoginRequestDto } from './login/login.request.dto';
+import { AuthLoginResponseDto } from './login/login.response.dto';
+import { AuthGetMeContract } from './me/get-me.contract';
+import { AuthGetMeResponseDto } from './me/get-me.response.dto';
+import { AuthRefreshTokenContract } from './refresh-token/refresh-token.contract';
+import { AuthRefreshTokenResponseDto } from './refresh-token/refresh-token.response.dto';
+import { GetActiveTermsContract } from './terms/get-active-terms.contract';
 
 @Controller('auth')
 export class AuthController {
@@ -30,21 +34,24 @@ export class AuthController {
   ) {}
 
   @Public()
+  @Bypass(BYPASS_POLICIES.TERMS)
   @Post('login')
   async login(
-    @Body() body: Omit<LoginRequestDto, 'clientIp'>,
+    @Body() body: Omit<AuthLoginRequestDto, 'clientIp'>,
     @Req() request: { ip?: string },
     @Res({ passthrough: true }) res: Response,
-  ): Promise<Pick<LoginResponseDto, 'accessToken'>> {
+  ): Promise<AuthLoginResponseDto> {
     const clientIp = this.cls.get('clientIp') ?? request.ip ?? '0.0.0.0';
-    const tokens = await this.commandBus.execute<LoginContract, LoginResponseDto>(new LoginContract({
+    const tokens = await this.commandBus.execute<AuthLoginContract, AuthLoginResponseDto>(new AuthLoginContract({
       ...body,
       clientIp,
     }));
 
-    res.cookie('refreshToken', tokens.refreshToken, createCookieOptions({
-      maxAge: ENV.JWT_REFRESH_EXPIRES_IN * 1000,
-    }));
+    if (tokens.refreshToken) {
+      res.cookie('refreshToken', tokens.refreshToken, createCookieOptions({
+        maxAge: ENV.JWT_REFRESH_EXPIRES_IN * 1000,
+      }));
+    }
 
     return {
       accessToken: tokens.accessToken,
@@ -56,36 +63,48 @@ export class AuthController {
   async refresh(
     @Cookies('refreshToken') refreshToken: string,
     @Res({ passthrough: true }) res: Response,
-  ): Promise<Pick<RefreshTokenResponseDto, 'accessToken'>> {
-    const { accessToken, refreshToken: newRefreshToken } = await this.commandBus.execute<RefreshTokenContract, RefreshTokenResponseDto>(new RefreshTokenContract({
-      refreshToken,
-    } satisfies RefreshTokenRequestDto));
+  ): Promise<AuthRefreshTokenResponseDto> {
+    const { accessToken, refreshToken: newRefreshToken }
+      = await this.commandBus.execute(new AuthRefreshTokenContract({ refreshToken }));
 
     res.cookie('refreshToken', newRefreshToken, createCookieOptions({
       maxAge: ENV.JWT_REFRESH_EXPIRES_IN * 1000,
     }));
 
-    return {
-      accessToken,
-    };
+    return { accessToken };
   }
 
   @Get('me')
-  async me(): Promise<GetMeResponseDto> {
-    return this.queryBus.execute<GetMeContract, GetMeResponseDto>(new GetMeContract());
+  @Bypass(BYPASS_POLICIES.TERMS)
+  async me(): Promise<AuthGetMeResponseDto> {
+    return this.queryBus.execute(new AuthGetMeContract());
+  }
+
+  @Get('terms')
+  @Bypass(BYPASS_POLICIES.TERMS)
+  async getTerms(): Promise<GetTermsDocumentResponseDto[]> {
+    return this.queryBus.execute(new GetActiveTermsContract());
+  }
+
+  @Bypass(BYPASS_POLICIES.TERMS)
+  @Post('terms/agreements')
+  async agreeTerms(
+    @Body() body: CreateTermsAgreementRequestDto,
+  ): Promise<CreateTermsAgreementResponseDto> {
+    return this.commandBus.execute(new CreateTermsAgreementContract(body));
   }
 
   @Bypass(BYPASS_POLICIES.PASSWORD)
   @Post('password/change')
   async changePassword(
-    @Body() body: ChangePasswordRequestDto,
+    @Body() body: AuthChangePasswordRequestDto,
   ): Promise<void> {
-    await this.commandBus.execute(new ChangePasswordContract(body));
+    await this.commandBus.execute(new AuthChangePasswordContract(body));
   }
 
   @Bypass(BYPASS_POLICIES.PASSWORD)
   @Post('password/defer')
   async deferPasswordChange(): Promise<void> {
-    await this.commandBus.execute(new DeferPasswordChangeContract());
+    await this.commandBus.execute(new AuthDeferPasswordChangeContract());
   }
 }

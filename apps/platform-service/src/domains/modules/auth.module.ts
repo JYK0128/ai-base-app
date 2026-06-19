@@ -3,7 +3,7 @@ import { MikroOrmModule } from '@mikro-orm/nestjs';
 import { CacheModule } from '@nestjs/cache-manager';
 import { Module } from '@nestjs/common';
 import { CqrsModule } from '@nestjs/cqrs';
-import { MemberAccount } from '@pkg/database';
+import { MemberAccount, TermsConsent, TermsDocument, TermsVersion } from '@pkg/database';
 
 import { ENV } from '@/env';
 
@@ -14,13 +14,15 @@ import { DeferPasswordChangeHandler } from '../auth/defer-password-change/defer-
 import { LoginHandler } from '../auth/login/login.handler';
 import { GetMeHandler } from '../auth/me/get-me.handler';
 import { RefreshTokenHandler } from '../auth/refresh-token/refresh-token.handler';
+import { GetActiveTermsHandler } from '../auth/terms/get-active-terms.handler';
+import { CreateTermsAgreementHandler } from '../terms/agree-terms/agree-terms.handler';
+import { TermsAgreementService } from '../terms/terms-agreement.service';
 
 @Module({
   imports: [
     CqrsModule,
-    MikroOrmModule.forFeature([MemberAccount]),
+    MikroOrmModule.forFeature([MemberAccount, TermsConsent, TermsDocument, TermsVersion]),
     CacheModule.register({
-      ttl: 60000,
       stores: [
         createKeyv(ENV.REDIS_URL, {
           namespace: 'auth',
@@ -36,6 +38,10 @@ import { RefreshTokenHandler } from '../auth/refresh-token/refresh-token.handler
     ChangePasswordHandler,
     DeferPasswordChangeHandler,
     GetMeHandler,
+    GetActiveTermsHandler,
+    CreateTermsAgreementHandler,
+    TermsAgreementService,
   ],
+  exports: [TermsAgreementService],
 })
 export class AuthModule {}
