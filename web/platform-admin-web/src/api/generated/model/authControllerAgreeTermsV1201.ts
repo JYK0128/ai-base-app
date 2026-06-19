@@ -9,5 +9,5 @@ import type { ApiResponse } from './apiResponse';
 import type { CreateTermsAgreementResponseDto } from './createTermsAgreementResponseDto';
 
 export type AuthControllerAgreeTermsV1201 = ApiResponse & {
-  data?: CreateTermsAgreementResponseDto;
+  data?: CreateTermsAgreementResponseDto[];
 };

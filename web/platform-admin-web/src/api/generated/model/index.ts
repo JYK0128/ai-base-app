@@ -44,8 +44,6 @@ export * from './createAnnouncementResponseDto';
 export * from './createInviteRequestDto';
 export * from './createInviteResponseDto';
 export * from './createTermsAgreementRequestDto';
-export * from './createTermsAgreementRequestDtoMember';
-export * from './createTermsAgreementRequestDtoTermsVersion';
 export * from './createTermsAgreementResponseDto';
 export * from './deleteAnnouncementResponseDto';
 export * from './errorInfo';

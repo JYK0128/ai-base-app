@@ -17,13 +17,17 @@ export class CreateTermsAgreementHandler implements ICommandHandler<CreateTermsA
   ) {}
 
   @Transactional()
-  async execute({ data }: CreateTermsAgreementContract): Promise<CreateTermsAgreementResponseDto> {
+  async execute({ data }: CreateTermsAgreementContract): Promise<CreateTermsAgreementResponseDto[]> {
     const memberId = this.cls.get<string>('memberId');
     const organizationId = this.cls.get<string>('organizationId');
 
     await this.Asserter.throwIf(!memberId, 'REQUEST_CONTEXT_NOT_FOUND');
-    await this.Asserter.throwIf(memberId !== data.member, 'MEMBER_MISMATCH');
 
-    return this.termsAgreementService.agree(memberId, organizationId, data.termsVersion);
+    const uniqueTermsVersionIds = [...new Set(data.termsVersionIds)];
+    return Promise.all(
+      uniqueTermsVersionIds.map((termsVersionId) => (
+        this.termsAgreementService.agree(memberId, organizationId, termsVersionId)
+      )),
+    );
   }
 }

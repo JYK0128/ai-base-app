@@ -21,7 +21,7 @@ type AgreementItem = {
 function AgreementPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const { memberId, setMustAcceptTermsOverride } = useAuth();
+  const { setMustAcceptTermsOverride } = useAuth();
   const { mutateAsync: agreeTerms, isPending } = useAuthControllerAgreeTermsV1();
   const [selectedVersionIds, setSelectedVersionIds] = useState<string[] | null>(null);
 
@@ -32,11 +32,19 @@ function AgreementPage() {
   });
 
   const terms: AgreementItem[] = activeTermsResponse?.data ?? [];
+  const platformTerms = terms.filter((term) => !term.document.organization);
+  const organizationTerms = terms.filter((term) => !!term.document.organization);
 
   const activeSelectedVersionIds = selectedVersionIds ?? [];
+  const platformVersionIds = platformTerms.map((term) => term.currentVersion.id);
+  const organizationVersionIds = organizationTerms.map((term) => term.currentVersion.id);
   const requiredTerms = terms.filter((term) => term.document.required);
   const isAllRequiredAgreed = requiredTerms.every((term) => activeSelectedVersionIds.includes(term.currentVersion.id));
   const isLoading = isActiveTermsLoading;
+  const isPlatformAllSelected = platformVersionIds.length > 0
+    && platformVersionIds.every((versionId) => activeSelectedVersionIds.includes(versionId));
+  const isOrganizationAllSelected = organizationVersionIds.length > 0
+    && organizationVersionIds.every((versionId) => activeSelectedVersionIds.includes(versionId));
 
   const handleSelect = (versionId: string) => {
     setSelectedVersionIds((prev) => {
@@ -52,24 +60,31 @@ function AgreementPage() {
     });
   };
 
-  const handleToggleAll = (checked: boolean) => {
-    if (!checked) {
-      setSelectedVersionIds([]);
+  const handleToggleSectionAll = (versionIds: string[], checked: boolean) => {
+    if (versionIds.length === 0) {
       return;
     }
 
-    setSelectedVersionIds(
-      terms
-        .map((term) => term.currentVersion.id),
-    );
+    setSelectedVersionIds((prev) => {
+      const current = new Set(prev ?? activeSelectedVersionIds);
+
+      if (!checked) {
+        for (const versionId of versionIds) {
+          current.delete(versionId);
+        }
+
+        return [...current];
+      }
+
+      for (const versionId of versionIds) {
+        current.add(versionId);
+      }
+
+      return [...current];
+    });
   };
 
   const handleSubmit = async () => {
-    if (!memberId) {
-      toast.error('멤버 정보를 확인할 수 없습니다.');
-      return;
-    }
-
     if (!isAllRequiredAgreed) {
       toast.error('필수 약관에 모두 동의해 주세요.');
       return;
@@ -78,9 +93,7 @@ function AgreementPage() {
     const targetVersionIds = activeSelectedVersionIds.filter((versionId, index, values) => values.indexOf(versionId) === index);
 
     try {
-      for (const termsVersionId of targetVersionIds) {
-        await agreeTerms({ data: { memberId, termsVersionId } });
-      }
+      await agreeTerms({ data: { termsVersionIds: targetVersionIds } });
 
       setMustAcceptTermsOverride(false);
       await queryClient.invalidateQueries({ queryKey: getAuthControllerMeV1QueryKey() });
@@ -106,8 +119,8 @@ function AgreementPage() {
   }
 
   return (
-    <div className="grid min-h-screen place-items-center bg-slate-50 p-4">
-      <Card className="w-full max-w-2xl border-slate-200 shadow-xl">
+    <div className="grid min-h-screen place-items-center overflow-hidden bg-slate-50 p-4">
+      <Card className="flex max-h-[calc(100vh-2rem)] w-full max-w-2xl flex-col overflow-hidden border-slate-200 shadow-xl">
         <CardHeader>
           <div className="flex items-center gap-2 text-slate-900">
             <ShieldCheck className="h-6 w-6" />
@@ -118,36 +131,32 @@ function AgreementPage() {
           </CardDescription>
         </CardHeader>
 
-        <CardContent className="space-y-4">
+        <CardContent className="scroll-y space-y-4">
           <div className="rounded-xl border border-slate-200 bg-white p-4">
-            <div className="flex items-center gap-2">
-              <Checkbox
-                id="all-terms"
-                checked={terms.length > 0 && activeSelectedVersionIds.length === terms.length}
-                onCheckedChange={(checked) => handleToggleAll(!!checked)}
+            <Separator className="mb-4" />
+
+            <div className="space-y-6">
+              <AgreementSection
+                title="플랫폼 약관"
+                description="서비스 전체에 공통으로 적용되는 약관입니다."
+                terms={platformTerms}
+                allChecked={isPlatformAllSelected}
+                onToggleAll={(checked) => handleToggleSectionAll(platformVersionIds, checked)}
+                activeSelectedVersionIds={activeSelectedVersionIds}
+                onSelect={handleSelect}
+                onDeselect={handleDeselect}
               />
-              <Label htmlFor="all-terms" className="font-semibold text-slate-700">
-                전체 동의
-              </Label>
-            </div>
 
-            <Separator className="my-4" />
-
-            <div className="space-y-4">
-              {terms.map((term) => (
-                <AgreementTermRow
-                  key={term.document.id}
-                  title={term.document.title}
-                  required={term.document.required}
-                  versionLabel={term.currentVersion.label}
-                  content={term.currentVersion.content}
-                  effectiveAt={term.currentVersion.effectiveAt ?? null}
-                  versionId={term.currentVersion.id}
-                  checked={activeSelectedVersionIds.includes(term.currentVersion.id)}
-                  onSelect={handleSelect}
-                  onDeselect={handleDeselect}
-                />
-              ))}
+              <AgreementSection
+                title="조직 약관"
+                description="현재 소속 조직에만 적용되는 약관입니다."
+                terms={organizationTerms}
+                allChecked={isOrganizationAllSelected}
+                onToggleAll={(checked) => handleToggleSectionAll(organizationVersionIds, checked)}
+                activeSelectedVersionIds={activeSelectedVersionIds}
+                onSelect={handleSelect}
+                onDeselect={handleDeselect}
+              />
             </div>
           </div>
 
@@ -236,5 +245,68 @@ function AgreementTermRow({
         </DialogContent>
       </Dialog>
     </div>
+  );
+}
+
+function AgreementSection({
+  title,
+  description,
+  terms,
+  allChecked,
+  onToggleAll,
+  activeSelectedVersionIds,
+  onSelect,
+  onDeselect,
+}: {
+  readonly title: string
+  readonly description: string
+  readonly terms: AgreementItem[]
+  readonly allChecked: boolean
+  readonly onToggleAll: (checked: boolean) => void
+  readonly activeSelectedVersionIds: string[]
+  readonly onSelect: (versionId: string) => void
+  readonly onDeselect: (versionId: string) => void
+}) {
+  if (terms.length === 0) {
+    return null;
+  }
+
+  return (
+    <section className="space-y-3">
+      <div className="flex items-center justify-between gap-3">
+        <div className="space-y-1">
+          <h3 className="text-sm font-semibold text-slate-900">{title}</h3>
+          <p className="text-xs text-slate-500">{description}</p>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <Checkbox
+            id={`${title}-all`}
+            checked={allChecked}
+            onCheckedChange={(checked) => onToggleAll(!!checked)}
+          />
+          <Label htmlFor={`${title}-all`} className="text-sm font-medium text-slate-700">
+            전체 동의
+          </Label>
+        </div>
+      </div>
+
+      <div className="space-y-4">
+        {terms.map((term) => (
+          <AgreementTermRow
+            key={term.document.id}
+            title={term.document.title}
+            required={term.document.required}
+            versionLabel={term.currentVersion.label}
+            content={term.currentVersion.content}
+            effectiveAt={term.currentVersion.effectiveAt ?? null}
+            versionId={term.currentVersion.id}
+            checked={activeSelectedVersionIds.includes(term.currentVersion.id)}
+            onSelect={onSelect}
+            onDeselect={onDeselect}
+          />
+        ))}
+      </div>
+    </section>
   );
 }

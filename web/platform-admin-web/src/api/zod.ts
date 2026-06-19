@@ -290,12 +290,7 @@ export const AuthControllerGetTermsV1Response = zod.object({
 
 
 export const AuthControllerAgreeTermsV1Body = zod.object({
-  "member": zod.looseObject({
-
-}).describe('멤버'),
-  "termsVersion": zod.looseObject({
-
-}).describe('동의할 약관 버전')
+  "termsVersionIds": zod.array(zod.string()).describe('동의할 약관 버전 식별자 목록')
 })
 
 

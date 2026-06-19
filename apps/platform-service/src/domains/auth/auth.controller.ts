@@ -93,10 +93,10 @@ export class AuthController {
 
   @Bypass(BYPASS_POLICIES.TERMS)
   @Post('terms/agreements')
-  @SwaggerResponse(CreateTermsAgreementResponseDto)
+  @SwaggerResponse([CreateTermsAgreementResponseDto])
   async agreeTerms(
     @Body() body: CreateTermsAgreementRequestDto,
-  ): Promise<CreateTermsAgreementResponseDto> {
+  ): Promise<CreateTermsAgreementResponseDto[]> {
     return this.commandBus.execute(new CreateTermsAgreementContract(body));
   }
 
