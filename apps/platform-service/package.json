@@ -15,6 +15,7 @@
   },
   "dependencies": {
     "@keyv/redis": "5.1.6",
+    "@mikro-orm/core": "7.1.4",
     "@mikro-orm/decorators": "7.1.4",
     "@mikro-orm/nestjs": "7.0.2",
     "@mikro-orm/postgresql": "7.1.4",
@@ -38,7 +39,6 @@
     "express": "5.2.1",
     "helmet": "8.1.0",
     "jose": "6.2.3",
-    "kafkajs": "2.2.4",
     "keyv": "5.6.0",
     "nodemailer": "8.0.10",
     "nestjs-cls": "6.2.0",

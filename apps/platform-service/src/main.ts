@@ -1,5 +1,6 @@
 import 'reflect-metadata';
 
+import { MikroORM } from '@mikro-orm/core';
 import { RequestMethod, ValidationPipe, VersioningType } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
@@ -48,7 +49,7 @@ export function configureApp(app: NestExpressApplication) {
 
   app.use(
     helmet({
-      contentSecurityPolicy: isProduction ? undefined : false,
+      ...(isProduction ? {} : { contentSecurityPolicy: false }),
     }),
   );
 
@@ -68,10 +69,13 @@ async function bootstrap() {
 
   configureApp(app);
 
+  const orm = app.get(MikroORM);
+  await orm.connect();
+
   if (ENV.NODE_ENV !== 'production') {
     const config = new DocumentBuilder()
-      .setTitle('AI Base App API')
-      .setDescription('The AI Base App Gateway API documentation')
+      .setTitle('AI Base App Platform Service API')
+      .setDescription('The AI Base App Platform Service API documentation')
       .setVersion('1.0')
       .addBearerAuth()
       .build();
@@ -87,7 +91,7 @@ async function bootstrap() {
 
   const port = ENV.PORT;
   await app.listen(port, '0.0.0.0');
-  logger.log(`Service Gateway is running on: http://localhost:${port}`);
+  logger.log(`Platform Service is running on: http://localhost:${port}`);
 }
 
 void bootstrap();

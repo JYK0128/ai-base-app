@@ -23,7 +23,7 @@ export class HttpInterceptor<T> implements NestInterceptor<T, ApiResponse<T>> {
     // 응답 랩핑
     return next.handle().pipe(
       map((data: T): ApiResponse<T> => {
-        const { traceId, requestId } = this.cls.get() as { traceId: string, requestId: string };
+        const { traceId, requestId } = this.cls.get() || {};
         const res = data instanceof ApiResponse
           ? data
           : ApiResponse.success(data, { traceId, requestId });

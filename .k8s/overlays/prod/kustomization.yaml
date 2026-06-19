@@ -10,12 +10,8 @@ resources:
   - prod-service-namespace.yaml
   - prod-infra-namespace.yaml
   - prod-web-namespace.yaml
-  - platform-gateway-hpa.yaml
-  - platform-gateway-pdb.yaml
-  - platform-auth-service-hpa.yaml
-  - platform-auth-service-pdb.yaml
-  - platform-core-service-hpa.yaml
-  - platform-core-service-pdb.yaml
+  - platform-service-hpa.yaml
+  - platform-service-pdb.yaml
   - platform-admin-web-hpa.yaml
   - platform-admin-web-pdb.yaml
   - postgres-backup-cronjob.yaml
@@ -46,21 +42,11 @@ secretGenerator:
     behavior: replace
     envs:
       - secrets/redis-secret.env
-  - name: platform-auth-service-secret
+  - name: platform-service-secret
     namespace: dev-service
     behavior: replace
     envs:
-      - secrets/platform-auth-service-secret.env
-  - name: platform-gateway-secret
-    namespace: dev-web
-    behavior: replace
-    envs:
-      - secrets/platform-gateway-secret.env
-  - name: platform-core-service-secret
-    namespace: dev-service
-    behavior: replace
-    envs:
-      - secrets/platform-core-service-secret.env
+      - secrets/platform-service-secret.env
 
 replacements:
   - source:
@@ -98,10 +84,10 @@ replacements:
           create: true
 
 patches:
-  # ===== platform-gateway =====
+  # ===== platform-service =====
   - target:
       kind: Deployment
-      name: platform-gateway-deploy
+      name: platform-service-deploy
     patch: |-
       - op: replace
         path: /spec/replicas
@@ -123,7 +109,7 @@ patches:
             whenUnsatisfiable: ScheduleAnyway
             labelSelector:
               matchLabels:
-                app.kubernetes.io/name: platform-gateway
+                app.kubernetes.io/name: platform-service
                 env: prod
       - op: add
         path: /spec/template/spec/affinity
@@ -135,129 +121,35 @@ patches:
                   topologyKey: kubernetes.io/hostname
                   labelSelector:
                     matchLabels:
-                      app.kubernetes.io/name: platform-gateway
+                      app.kubernetes.io/name: platform-service
                       env: prod
   - target:
       kind: ConfigMap
-      name: platform-gateway-cm
+      name: platform-service-cm
     patch: |-
       - op: replace
-        path: /data/AUTH_SERVICE_URL
-        value: platform-auth-service.prod-service.svc.cluster.local:3001
+        path: /data/CLIENT_URL
+        value: https://your-domain.com
       - op: replace
-        path: /data/CORE_SERVICE_URL
-        value: platform-core-service.prod-service.svc.cluster.local:3005
+        path: /data/CORS_ORIGIN
+        value: https://your-domain.com
       - op: replace
         path: /data/NODE_ENV
         value: production
   - target:
       kind: Gateway
-      name: platform-gateway-gw
+      name: platform-admin-web-gw
     patch: |-
       - op: replace
         path: /spec/servers/0/hosts
         value: ["your-domain.com", "*.your-domain.com"]
   - target:
       kind: VirtualService
-      name: platform-gateway-vs
+      name: platform-admin-web-vs
     patch: |-
       - op: replace
         path: /spec/hosts
         value: ["your-domain.com"]
-
-  # ===== platform-auth-service =====
-  - target:
-      kind: Deployment
-      name: platform-auth-service-deploy
-    patch: |-
-      - op: replace
-        path: /spec/replicas
-        value: 3
-      - op: add
-        path: /spec/template/spec/containers/0/resources
-        value:
-          requests:
-            cpu: "250m"
-            memory: "256Mi"
-          limits:
-            cpu: "500m"
-            memory: "512Mi"
-      - op: add
-        path: /spec/template/spec/topologySpreadConstraints
-        value:
-          - maxSkew: 1
-            topologyKey: kubernetes.io/hostname
-            whenUnsatisfiable: ScheduleAnyway
-            labelSelector:
-              matchLabels:
-                app.kubernetes.io/name: platform-auth-service
-                env: prod
-      - op: add
-        path: /spec/template/spec/affinity
-        value:
-          podAntiAffinity:
-            preferredDuringSchedulingIgnoredDuringExecution:
-              - weight: 100
-                podAffinityTerm:
-                  topologyKey: kubernetes.io/hostname
-                  labelSelector:
-                    matchLabels:
-                      app.kubernetes.io/name: platform-auth-service
-                      env: prod
-  - target:
-      kind: ConfigMap
-      name: platform-auth-service-cm
-    patch: |-
-      - op: replace
-        path: /data/NODE_ENV
-        value: production
-
-  # ===== platform-core-service =====
-  - target:
-      kind: Deployment
-      name: platform-core-service-deploy
-    patch: |-
-      - op: replace
-        path: /spec/replicas
-        value: 3
-      - op: add
-        path: /spec/template/spec/containers/0/resources
-        value:
-          requests:
-            cpu: "250m"
-            memory: "256Mi"
-          limits:
-            cpu: "500m"
-            memory: "512Mi"
-      - op: add
-        path: /spec/template/spec/topologySpreadConstraints
-        value:
-          - maxSkew: 1
-            topologyKey: kubernetes.io/hostname
-            whenUnsatisfiable: ScheduleAnyway
-            labelSelector:
-              matchLabels:
-                app.kubernetes.io/name: platform-core-service
-                env: prod
-      - op: add
-        path: /spec/template/spec/affinity
-        value:
-          podAntiAffinity:
-            preferredDuringSchedulingIgnoredDuringExecution:
-              - weight: 100
-                podAffinityTerm:
-                  topologyKey: kubernetes.io/hostname
-                  labelSelector:
-                    matchLabels:
-                      app.kubernetes.io/name: platform-core-service
-                      env: prod
-  - target:
-      kind: ConfigMap
-      name: platform-core-service-cm
-    patch: |-
-      - op: replace
-        path: /data/NODE_ENV
-        value: production
 
   # ===== platform-admin-web =====
   - target:
@@ -343,20 +235,6 @@ patches:
   # ===== NetworkPolicies Cross-Namespace Updates =====
   - target:
       kind: NetworkPolicy
-      name: egress-gateway-to-services
-    patch: |-
-      - op: replace
-        path: /spec/egress/0/to/0/namespaceSelector/matchLabels/kubernetes.io~1metadata.name
-        value: prod-service
-  - target:
-      kind: NetworkPolicy
-      name: ingress-services-from-gateway
-    patch: |-
-      - op: replace
-        path: /spec/ingress/0/from/0/namespaceSelector/matchLabels/kubernetes.io~1metadata.name
-        value: prod-web
-  - target:
-      kind: NetworkPolicy
       name: egress-services-to-infra
     patch: |-
       - op: replace
@@ -372,6 +250,13 @@ patches:
   - target:
       kind: NetworkPolicy
       name: ingress-redis-from-services
+    patch: |-
+      - op: replace
+        path: /spec/ingress/0/from/0/namespaceSelector/matchLabels/kubernetes.io~1metadata.name
+        value: prod-service
+  - target:
+      kind: NetworkPolicy
+      name: ingress-rabbitmq-from-services
     patch: |-
       - op: replace
         path: /spec/ingress/0/from/0/namespaceSelector/matchLabels/kubernetes.io~1metadata.name

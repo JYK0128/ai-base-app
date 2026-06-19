@@ -3,3 +3,5 @@ kind: Kustomization
 resources:
   - platform-admin-web-deploy.yaml
   - platform-admin-web-svc.yaml
+  - platform-admin-web-gw.yaml
+  - platform-admin-web-vs.yaml

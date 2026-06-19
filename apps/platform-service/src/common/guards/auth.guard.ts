@@ -3,42 +3,36 @@ import { Reflector } from '@nestjs/core';
 import { JwtService } from '@nestjs/jwt';
 import { Request } from 'express';
 import type { JWTPayload } from 'jose';
+import { ClsService } from 'nestjs-cls';
 
 import { BYPASS_KEY, BYPASS_POLICIES } from '@/common/decorators/bypass.decorator';
 import { PERMISSIONS_KEY } from '@/common/decorators/permissions.decorator';
 import { IS_PERSONAL_KEY } from '@/common/decorators/personal.decorator';
 import { IS_PUBLIC_KEY } from '@/common/decorators/public.decorator';
 
-type AuthPayload = JWTPayload & {
-  accountId?: string
-  memberId?: string
-  organizationId?: string
-  permissions?: string[]
-  mustChangePassword?: boolean
-};
-
 @Injectable()
 export class AuthGuard implements CanActivate {
   constructor(
     private readonly jwtService: JwtService,
     private readonly reflector: Reflector,
+    private readonly cls: ClsService,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     if (!this.checkPublic(context)) {
-      const request = context.switchToHttp().getRequest<Request & { user?: AuthPayload }>();
+      const request = context.switchToHttp().getRequest<Request & { user?: JWTPayload }>();
       const payload = this.verifyToken(request);
       request.user = payload;
 
-      this.handleBypass(context, payload);
+      this.handleBypass(context);
       this.handlePersonal(context, request, payload);
-      this.handlePermissions(context, payload);
+      this.handlePermissions(context);
     }
 
     return true;
   }
 
-  private verifyToken(request: Request): AuthPayload {
+  private verifyToken(request: Request): JWTPayload {
     const authorizationHeader = request.headers['authorization'];
 
     if (typeof authorizationHeader !== 'string') {
@@ -56,7 +50,7 @@ export class AuthGuard implements CanActivate {
     }
 
     try {
-      return this.jwtService.verify<AuthPayload>(token);
+      return this.jwtService.verify<JWTPayload>(token);
     }
     catch {
       throw new UnauthorizedException('Invalid or expired token');
@@ -70,23 +64,33 @@ export class AuthGuard implements CanActivate {
     ]);
   }
 
-  private handleBypass(context: ExecutionContext, payload: AuthPayload) {
+  private handleBypass(context: ExecutionContext) {
     const bypassPolicies = this.reflector.getAllAndOverride<string[]>(BYPASS_KEY, [
       context.getHandler(),
       context.getClass(),
     ]);
     const canBypassPassword = Array.isArray(bypassPolicies)
       && bypassPolicies.some((policy) => policy === BYPASS_POLICIES.PASSWORD);
+    const canBypassTerms = Array.isArray(bypassPolicies)
+      && bypassPolicies.some((policy) => policy === BYPASS_POLICIES.TERMS);
+    const isPasswordExpired = this.cls.get('isPasswordExpired');
+    const mustAcceptTerms = this.cls.get('mustAcceptTerms');
+
+    if (typeof isPasswordExpired !== 'boolean' || typeof mustAcceptTerms !== 'boolean') {
+      throw new UnauthorizedException('Request context is missing');
+    }
 
     // 비밀번호 변경이 필요한 토큰인데, 해당 정책 우회가 없는 경우
-    if (payload.mustChangePassword && !canBypassPassword) {
+    if (isPasswordExpired && !canBypassPassword) {
       throw new ForbiddenException('Password change is required before accessing this resource');
     }
 
-    // MFA, 약관 동의 등 추가 정책도 여기서 확장 가능
+    if (mustAcceptTerms && !canBypassTerms) {
+      throw new ForbiddenException('Terms agreement is required before accessing this resource');
+    }
   }
 
-  private handlePersonal(context: ExecutionContext, request: Request, payload: AuthPayload) {
+  private handlePersonal(context: ExecutionContext, request: Request, payload: JWTPayload) {
     const isPersonal = this.reflector.getAllAndOverride<boolean>(IS_PERSONAL_KEY, [
       context.getHandler(),
       context.getClass(),
@@ -116,21 +120,22 @@ export class AuthGuard implements CanActivate {
         throw new ForbiddenException('Resource owner identification (id) is required');
       }
 
-      // 토큰의 accountId(DB ID)와 요청의 ID가 일치하는지 확인
-      const accountId = payload.accountId;
+      // 토큰의 sub(DB ID)와 요청의 ID가 일치하는지 확인
+      const accountId = payload.sub;
       const isOwner = accountId === ownerId;
 
       if (!isOwner) {
         throw new ForbiddenException('You do not have permission to access this personal resource');
       }
 
-      if (organizationId && payload.organizationId && payload.organizationId !== organizationId) {
+      const userOrgId = this.cls.get<string | undefined>('organizationId');
+      if (organizationId && userOrgId && userOrgId !== organizationId) {
         throw new ForbiddenException('You do not have permission to access this organization resource');
       }
     }
   }
 
-  private handlePermissions(context: ExecutionContext, payload: AuthPayload) {
+  private handlePermissions(context: ExecutionContext) {
     const requiredPermissions = this.reflector.getAllAndOverride<string[]>(PERMISSIONS_KEY, [
       context.getHandler(),
       context.getClass(),
@@ -144,11 +149,10 @@ export class AuthGuard implements CanActivate {
       return;
     }
 
-    if (!Array.isArray(payload.permissions)) {
-      throw new UnauthorizedException('Invalid token payload');
+    const userPermissions = this.cls.get('permissions');
+    if (!Array.isArray(userPermissions)) {
+      throw new UnauthorizedException('Request context is missing');
     }
-
-    const userPermissions = payload.permissions;
     const hasPermission = requiredPermissions.every((required) =>
       userPermissions.some((owned) => owned === required),
     );

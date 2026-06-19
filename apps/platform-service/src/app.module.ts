@@ -4,7 +4,6 @@ import { MikroOrmModule } from '@mikro-orm/nestjs';
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { JwtModule } from '@nestjs/jwt';
-import { ClientsModule, Transport } from '@nestjs/microservices';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { databaseConfig, entities } from '@pkg/database';
 import { ClsModule } from 'nestjs-cls';
@@ -29,9 +28,7 @@ import { ENV } from '@/env';
     }),
     LoggerModule.forRoot({
       pinoHttp: {
-        transport: ENV.NODE_ENV !== 'production'
-          ? { target: 'pino-pretty', options: { colorize: true } }
-          : undefined,
+        ...(ENV.NODE_ENV !== 'production' ? { transport: { target: 'pino-pretty', options: { colorize: true } } } : {}),
         customLogLevel: (_req, res, err) => {
           if (err || res.statusCode >= 500) {
             return 'error';
@@ -58,33 +55,7 @@ import { ENV } from '@/env';
       secret: ENV.JWT_ACCESS_SECRET,
       signOptions: { expiresIn: ENV.JWT_ACCESS_EXPIRES_IN },
     }),
-    ClientsModule.register([
-      {
-        name: 'RABBITMQ_CLIENT',
-        transport: Transport.RMQ,
-        options: {
-          urls: [ENV.RABBITMQ_URL],
-          queue: 'mail_queue',
-          queueOptions: {
-            durable: true,
-          },
-          socketOptions: {
-            frameMax: 8192,
-          },
-        },
-      },
-      {
-        name: 'KAFKA_CLIENT',
-        transport: Transport.KAFKA,
-        options: {
-          client: {
-            brokers: [ENV.KAFKA_URL],
-            clientId: 'platform-service',
-          },
-          producerOnlyMode: true,
-        },
-      },
-    ]),
+
     ...Object.values(modules),
   ],
   controllers: [],

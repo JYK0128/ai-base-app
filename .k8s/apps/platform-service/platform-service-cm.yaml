@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: platform-service-cm
+  namespace: dev-service
+  labels:
+    app.kubernetes.io/name: platform-service
+    app.kubernetes.io/part-of: ai-base-app
+data:
+  NODE_ENV: "development"
+  PORT: "3000"
+  JWT_ACCESS_EXPIRES_IN: "600"
+  JWT_REFRESH_EXPIRES_IN: "3600"
+  LOGIN_MAX_ATTEMPTS: "5"
+  LOGIN_ATTEMPT_TTL: "300"
+  LOGIN_LOCK_TTL: "1800"
+  PASSWORD_EXPIRY_DAYS: "90"
+  CLIENT_URL: "http://localhost:5173"
+  CORS_ORIGIN: "http://localhost:5173"
