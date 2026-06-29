@@ -19,7 +19,9 @@ export function HighlightedText({ text, highlight }: Readonly<HighlightedTextPro
           ? (
             <mark
               key={i}
-              className="bg-primary/20 text-primary font-medium rounded-sm px-0.5"
+              className="
+                rounded-sm bg-primary/20 px-0.5 font-medium text-primary
+              "
             >
               {part}
             </mark>

@@ -41,7 +41,11 @@ export function DataTablePagination<TData>({
   }
 
   return (
-    <div className="flex items-center justify-between py-2 text-muted-foreground pr-1 w-full shrink-0">
+    <div className="
+      flex w-full shrink-0 items-center justify-between py-2 pr-1
+      text-muted-foreground
+    "
+    >
       {/* Left: Selection Count */}
       <div className="flex-1 text-sm whitespace-nowrap">
         {table.getFilteredSelectedRowModel().rows.length}
@@ -59,31 +63,31 @@ export function DataTablePagination<TData>({
           <Button
             variant="outline"
             size="icon"
-            className="h-8 w-8"
+            className="size-8"
             onClick={() => table.setPageIndex(Math.max(0, pageIndex - 10))}
             disabled={pageIndex === 0}
             title="10 pages back (or jump to start)"
           >
-            <ChevronsLeft className="h-4 w-4" />
+            <ChevronsLeft className="size-4" />
           </Button>
           <Button
             variant="outline"
             size="icon"
-            className="h-8 w-8"
+            className="size-8"
             onClick={() => table.previousPage()}
             disabled={!table.getCanPreviousPage()}
           >
-            <ChevronLeft className="h-4 w-4" />
+            <ChevronLeft className="size-4" />
           </Button>
         </div>
 
-        <div className="flex items-center gap-1 mx-2">
+        <div className="mx-2 flex items-center gap-1">
           {pageButtons.map((index) => (
             <Button
               key={index}
               variant={pageIndex === index ? 'default' : 'outline'}
               size="icon"
-              className="h-8 w-8"
+              className="size-8"
               onClick={() => table.setPageIndex(index)}
             >
               {index + 1}
@@ -95,27 +99,27 @@ export function DataTablePagination<TData>({
           <Button
             variant="outline"
             size="icon"
-            className="h-8 w-8"
+            className="size-8"
             onClick={() => table.nextPage()}
             disabled={!table.getCanNextPage()}
           >
-            <ChevronRight className="h-4 w-4" />
+            <ChevronRight className="size-4" />
           </Button>
           <Button
             variant="outline"
             size="icon"
-            className="h-8 w-8"
+            className="size-8"
             onClick={() => table.setPageIndex(Math.min(pageCount - 1, pageIndex + 10))}
             disabled={pageIndex === pageCount - 1}
             title="10 pages forward (or jump to end)"
           >
-            <ChevronsRight className="h-4 w-4" />
+            <ChevronsRight className="size-4" />
           </Button>
         </div>
       </div>
 
       {/* Right: Page Size Selector */}
-      <div className="flex-1 flex items-center justify-end space-x-2">
+      <div className="flex flex-1 items-center justify-end space-x-2">
         <span className="text-sm whitespace-nowrap">Rows per page</span>
         <Select
           value={`${table.getState().pagination.pageSize}`}

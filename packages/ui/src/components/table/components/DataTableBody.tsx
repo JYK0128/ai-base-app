@@ -28,7 +28,10 @@ export function DataTableBody<TData>({
         <TableRow
           key={row.id}
           data-state={row.getIsSelected() && 'selected'}
-          className="bg-card hover:bg-muted/50 transition-colors group/pinned h-12"
+          className="
+            group/pinned h-12 bg-card transition-colors
+            hover:bg-muted/50
+          "
         >
           {row.getVisibleCells().map((cell) => (
             <DataTableCell
@@ -51,7 +54,10 @@ export function DataTableBody<TData>({
           <TableRow
             key={row.id}
             data-state={row.getIsSelected() && 'selected'}
-            className="hover:bg-muted/50 transition-colors h-12"
+            className="
+              h-12 transition-colors
+              hover:bg-muted/50
+            "
           >
             {row.getVisibleCells().map((cell) => (
               <DataTableCell
@@ -78,7 +84,10 @@ export function DataTableBody<TData>({
         <TableRow
           key={row.id}
           data-state={row.getIsSelected() && 'selected'}
-          className="bg-card hover:bg-muted/50 transition-colors h-12"
+          className="
+            h-12 bg-card transition-colors
+            hover:bg-muted/50
+          "
         >
           {row.getVisibleCells().map((cell) => (
             <DataTableCell

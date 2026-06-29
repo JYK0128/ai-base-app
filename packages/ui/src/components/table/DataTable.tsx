@@ -33,6 +33,7 @@ import { Pin,
 
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Spinner } from '@/components/ui/spinner';
 import { Table } from '@/components/ui/table';
 import { cn } from '@/lib/utils';
 
@@ -59,6 +60,7 @@ interface DataTableProps<TData> {
   pageSizeOptions?: number[]
   enableRowPinning?: boolean
   enableColumnPinning?: boolean
+  loading?: boolean
   meta?: TableMeta<TData>
 }
 
@@ -78,6 +80,7 @@ export function DataTable<TData>({
   pageSizeOptions = [10, 20, 30, 50, 100],
   enableRowPinning = false,
   enableColumnPinning = true,
+  loading = false,
   meta,
 }: Readonly<DataTableProps<TData>>) {
   'use no memo';
@@ -128,20 +131,26 @@ export function DataTable<TData>({
             variant="ghost"
             size="icon"
             className={cn(
-              'h-8 w-8 transition-colors',
+              'size-8 transition-colors',
               row.getIsPinned()
-                ? 'text-primary hover:text-primary/80'
-                : 'text-muted-foreground/50 hover:text-muted-foreground',
+                ? `
+                  text-primary
+                  hover:text-primary/80
+                `
+                : `
+                  text-muted-foreground/50
+                  hover:text-muted-foreground
+                `,
             )}
             onClick={() => row.pin(row.getIsPinned() ? false : 'top')}
             title={row.getIsPinned() ? 'Unpin row' : 'Pin to top'}
           >
             {row.getIsPinned()
               ? (
-                <PinOff className="h-4 w-4" />
+                <PinOff className="size-4" />
               )
               : (
-                <Pin className="h-4 w-4" />
+                <Pin className="size-4" />
               )}
           </Button>
         ),
@@ -242,14 +251,42 @@ export function DataTable<TData>({
   });
 
   return (
-    <div className="space-y-4 w-full h-full flex flex-col overflow-hidden">
+    <div className="flex size-full flex-col space-y-4 overflow-hidden">
       <DataTableToolbar
         table={table}
         filterColumns={filterColumns}
         filterPlaceholder={filterPlaceholder}
       />
 
-      <div className="rounded-md border bg-card scroll flex-1">
+      <div className="scroll relative flex-1 rounded-md border bg-card" aria-busy={loading}>
+        {loading
+          ? (
+            <div className="
+              absolute inset-0 z-10 flex items-center justify-center
+              bg-background/70 backdrop-blur-[1px]
+            "
+            >
+              <div className="
+                flex items-center gap-3 rounded-full border border-slate-200
+                bg-white px-4 py-2 shadow-sm
+              "
+              >
+                <Spinner className="size-4 text-slate-500" />
+                <span className="text-sm font-medium text-slate-600">Loading</span>
+                <span
+                  className="
+                    flex items-center gap-0.5 text-sm font-medium text-slate-600
+                  "
+                  aria-label="Loading"
+                >
+                  <span className="animate-bounce [animation-delay:0ms]">.</span>
+                  <span className="animate-bounce [animation-delay:150ms]">.</span>
+                  <span className="animate-bounce [animation-delay:300ms]">.</span>
+                </span>
+              </div>
+            </div>
+          )
+          : null}
         <Table className="w-full table-fixed border-separate border-spacing-0">
           <DataTableHeader
             table={table}

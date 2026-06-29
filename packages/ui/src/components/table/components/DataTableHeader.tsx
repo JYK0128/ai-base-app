@@ -26,7 +26,7 @@ export function DataTableHeader<TData>({
               <TableHead
                 key={header.id}
                 className={cn(
-                  'relative h-11 transition-colors group/head whitespace-nowrap',
+                  'group/head relative h-11 whitespace-nowrap transition-colors',
                   'sticky top-0 bg-card/95 backdrop-blur-sm', // Solid base for all headers
                   (isAction || isPin) && 'p-0! text-center font-normal',
                   header.column.getIsPinned() ? 'z-70' : 'z-50',

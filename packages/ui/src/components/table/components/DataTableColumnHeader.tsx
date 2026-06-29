@@ -89,6 +89,11 @@ export function DataTableColumnHeader<TData, TValue>({
   const facetedConfig = meta?.faceted;
   const filterType = meta?.filterType;
   const sortDirection = header.column.getIsSorted();
+  const canSort = header.column.getCanSort();
+  const canPin = enableColumnPinning
+    && header.column.getCanPin()
+    && header.column.id !== 'pin'
+    && header.column.id !== 'select';
 
   const filterValue = column.getFilterValue();
   const selectedValues = facetedConfig ? new Set(filterValue as string[]) : new Set();
@@ -100,7 +105,7 @@ export function DataTableColumnHeader<TData, TValue>({
 
   if (isAction) {
     return (
-      <div className="flex items-center justify-center h-full w-full">
+      <div className="flex size-full items-center justify-center">
         {flexRender(header.column.columnDef.header, header.getContext())}
       </div>
     );
@@ -115,274 +120,356 @@ export function DataTableColumnHeader<TData, TValue>({
       isFiltered = filterValue !== '';
     }
   }
+  const canFilter = Boolean(facetedConfig || filterType || isFiltered);
+  const canOpenColumnMenu = canSort || canFilter || canPin;
 
   return (
-    <div className="flex items-center gap-1 h-full w-full px-2.5 overflow-hidden">
+    <div className="flex size-full items-center gap-1 overflow-hidden px-2.5">
       <div
-        className="flex-1 min-w-0 flex items-center gap-1.5 cursor-pointer group/title h-full"
-        onClick={() => header.column.toggleSorting(undefined, true)}
+        className={cn(
+          `group/title flex h-full min-w-0 flex-1 items-center gap-1.5`,
+          canSort && 'cursor-pointer',
+        )}
+        onClick={() => {
+          if (canSort) {
+            header.column.toggleSorting(undefined, true);
+          }
+        }}
       >
-        <div className="truncate font-bold text-[11px] uppercase tracking-wide text-muted-foreground group-hover/title:text-foreground transition-colors whitespace-nowrap">
+        <div className="
+          truncate text-[11px] font-bold tracking-wide whitespace-nowrap
+          text-muted-foreground uppercase transition-colors
+          group-hover/title:text-foreground
+        "
+        >
           {flexRender(header.column.columnDef.header, header.getContext())}
         </div>
 
-        {sortDirection && (
+        {canSort && sortDirection && (
           <div className="shrink-0">
             {sortDirection === 'asc'
               ? (
-                <ChevronUp className="h-3.5 w-3.5 text-primary" />
+                <ChevronUp className="size-3.5 text-primary" />
               )
               : (
-                <ChevronDown className="h-3.5 w-3.5 text-primary" />
+                <ChevronDown className="size-3.5 text-primary" />
               )}
           </div>
         )}
 
         {isFiltered && (
-          <div className="h-1.5 w-1.5 rounded-full bg-primary shrink-0 animate-pulse" />
+          <div className="
+            size-1.5 shrink-0 animate-pulse rounded-full bg-primary
+          "
+          />
         )}
       </div>
 
-      <div
-        className={cn(
-          'shrink-0 flex items-center gap-0.5',
-          (!header.column.getIsPinned() && !isFiltered) && 'invisible group-hover/head:visible',
-        )}
-      >
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              variant="ghost"
-              size="icon"
-              className={cn(
-                'h-6 w-6 rounded-sm p-0 text-muted-foreground/60 hover:text-foreground hover:bg-accent',
-                (header.column.getIsPinned() || isFiltered) && 'text-primary bg-primary/5 visible',
-              )}
-            >
-              <MoreVertical className="h-3.5 w-3.5" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-64 p-1">
-            <div className="px-2 py-1.5 text-[10px] font-bold text-muted-foreground/60 uppercase tracking-widest leading-none">
-              Sorting
-            </div>
-
-            <DropdownMenuCheckboxItem
-              checked={header.column.getIsSorted() === 'asc'}
-              onCheckedChange={() => header.column.toggleSorting(false)}
-            >
-              <ChevronUp className="mr-2 h-4 w-4 text-muted-foreground/70" />
-              Sort Ascending
-            </DropdownMenuCheckboxItem>
-            <DropdownMenuCheckboxItem
-              checked={header.column.getIsSorted() === 'desc'}
-              onCheckedChange={() => header.column.toggleSorting(true, true)}
-            >
-              <ChevronDown className="mr-2 h-4 w-4 text-muted-foreground/70" />
-              Sort Descending
-            </DropdownMenuCheckboxItem>
-
-            {header.column.getIsSorted() && (
-              <DropdownMenuItem
-                onClick={() => header.column.clearSorting()}
-                className="text-destructive focus:text-destructive"
-              >
-                <RotateCcw className="mr-2 h-4 w-4" />
-                Clear Sorting
-              </DropdownMenuItem>
-            )}
-
-            {/* Faceted Filter Section */}
-            {facetedConfig && (
-              <>
-                <DropdownMenuSeparator />
-                <div className="px-2 py-1.5 text-[10px] font-bold text-muted-foreground/60 uppercase tracking-widest leading-none flex items-center gap-1.5">
-                  <Filter className="h-3 w-3" />
-                  Filter:
-                  {' '}
-                  {header.column.columnDef.header as string}
-                </div>
-                <div className="max-h-50 scroll-y">
-                  {facetedConfig.options.map((option) => {
-                    const isSelected = selectedValues.has(option.value);
-                    const count = facetedConfig.facetCounts
-                      ? facetedConfig.facetCounts[option.value]
-                      : facetValues?.get(option.value);
-
-                    return (
-                      <DropdownMenuCheckboxItem
-                        key={option.value}
-                        checked={isSelected}
-                        onCheckedChange={() => {
-                          if (isSelected) {
-                            selectedValues.delete(option.value);
-                          }
-                          else {
-                            selectedValues.add(option.value);
-                          }
-                          const filterValues = Array.from(selectedValues);
-                          column.setFilterValue(
-                            filterValues.length ? filterValues : undefined,
-                          );
-                        }}
-                      >
-                        {option.icon && (
-                          <option.icon className="mr-2 h-4 w-4 text-muted-foreground/70" />
-                        )}
-                        <span className="flex-1 text-xs">{option.label}</span>
-                        {count !== undefined && (
-                          <span className="ml-2 text-[10px] font-mono text-muted-foreground/50">
-                            {count}
-                          </span>
-                        )}
-                      </DropdownMenuCheckboxItem>
-                    );
-                  })}
-                </div>
-              </>
-            )}
-
-            {/* Number Range Filter Section */}
-            {filterType === 'number' && (
-              <>
-                <DropdownMenuSeparator />
-                <div className="px-2 py-1.5 text-[10px] font-bold text-muted-foreground/60 uppercase tracking-widest leading-none flex items-center gap-1.5">
-                  <Filter className="h-3 w-3" />
-                  Range:
-                  {' '}
-                  {header.column.columnDef.header as string}
-                </div>
-                <div className="px-2 py-2 flex gap-2 items-center" onClick={(e) => e.stopPropagation()}>
-                  <DebouncedInput
-                    placeholder="Min"
-                    type="number"
-                    value={(filterValue as [number, number])?.[0] ?? ''}
-                    onChange={(val) => {
-                      column.setFilterValue((old: [number, number]) => [val as number, old?.[1]]);
-                    }}
-                    className="h-8 text-xs bg-muted/30"
-                  />
-                  <span className="text-muted-foreground text-xs">-</span>
-                  <DebouncedInput
-                    placeholder="Max"
-                    type="number"
-                    value={(filterValue as [number, number])?.[1] ?? ''}
-                    onChange={(val) => {
-                      column.setFilterValue((old: [number, number]) => [old?.[0], val as number]);
-                    }}
-                    className="h-8 text-xs bg-muted/30"
-                  />
-                </div>
-              </>
-            )}
-
-            {/* Date Range Filter Section */}
-            {filterType === 'date' && (
-              <>
-                <DropdownMenuSeparator />
-                <div className="px-2 py-1.5 text-[10px] font-bold text-muted-foreground/60 uppercase tracking-widest leading-none flex items-center gap-1.5">
-                  <Calendar className="h-3 w-3" />
-                  Date Range:
-                  {' '}
-                  {header.column.columnDef.header as string}
-                </div>
-                <div className="px-2 py-2 flex flex-col gap-2" onClick={(e) => e.stopPropagation()}>
-                  <Input
-                    type="date"
-                    value={(filterValue as [string, string])?.[0] ?? ''}
-                    onChange={(e) => {
-                      const val = e.target.value || undefined;
-                      column.setFilterValue((old: [string, string]) => [val, old?.[1]]);
-                    }}
-                    className="h-8 text-[11px] bg-muted/30"
-                  />
-                  <Input
-                    type="date"
-                    value={(filterValue as [string, string])?.[1] ?? ''}
-                    onChange={(e) => {
-                      const val = e.target.value || undefined;
-                      column.setFilterValue((old: [string, string]) => [old?.[0], val]);
-                    }}
-                    className="h-8 text-[11px] bg-muted/30"
-                  />
-                </div>
-              </>
-            )}
-
-            {/* Text Search Filter Section */}
-            {filterType === 'text' && (
-              <>
-                <DropdownMenuSeparator />
-                <div className="px-2 py-1.5 text-[10px] font-bold text-muted-foreground/60 uppercase tracking-widest leading-none flex items-center gap-1.5">
-                  <Search className="h-3 w-3" />
-                  Search:
-                  {' '}
-                  {header.column.columnDef.header as string}
-                </div>
-                <div className="px-2 py-2" onClick={(e) => e.stopPropagation()}>
-                  <DebouncedInput
-                    placeholder={`Search ${header.column.columnDef.header as string}...`}
-                    value={(filterValue as string) ?? ''}
-                    onChange={(val) => column.setFilterValue(val)}
-                    className="h-8 text-xs bg-muted/30"
-                  />
-                </div>
-              </>
-            )}
-
-            {isFiltered && (
-              <>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem
-                  onClick={() => column.setFilterValue(undefined)}
-                  className="justify-center text-center font-bold text-xs text-destructive focus:text-destructive py-2"
-                >
-                  Clear Column Filter
-                </DropdownMenuItem>
-              </>
-            )}
-
-            {enableColumnPinning
-              && header.column.getCanPin()
-              && header.column.id !== 'pin'
-              && header.column.id !== 'select' && (
-              <>
-                <DropdownMenuSeparator />
-                <div className="px-2 py-1.5 text-[10px] font-bold text-muted-foreground/60 uppercase tracking-widest leading-none">
-                  Pinning
-                </div>
-
-                <DropdownMenuCheckboxItem
-                  checked={header.column.getIsPinned() === 'left'}
-                  onCheckedChange={() =>
-                    header.column.pin(header.column.getIsPinned() === 'left' ? false : 'left')}
-                >
-                  <ArrowLeftToLine className="mr-2 h-4 w-4 text-muted-foreground/70" />
-                  Pin Left
-                </DropdownMenuCheckboxItem>
-                <DropdownMenuCheckboxItem
-                  checked={header.column.getIsPinned() === 'right'}
-                  onCheckedChange={() =>
-                    header.column.pin(header.column.getIsPinned() === 'right' ? false : 'right')}
-                >
-                  <ArrowRightToLine className="mr-2 h-4 w-4 text-muted-foreground/70" />
-                  Pin Right
-                </DropdownMenuCheckboxItem>
-
-                {header.column.getIsPinned() && (
-                  <DropdownMenuItem
-                    onClick={() => header.column.pin(false)}
-                    className="text-destructive focus:text-destructive"
-                  >
-                    <PinOff className="mr-2 h-4 w-4" />
-                    Remove Pin
-                  </DropdownMenuItem>
+      {canOpenColumnMenu && (
+        <div
+          className={cn(
+            'flex shrink-0 items-center gap-0.5',
+            (!header.column.getIsPinned() && !isFiltered) && `
+              invisible
+              group-hover/head:visible
+            `,
+          )}
+        >
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className={cn(
+                  `
+                    size-6 rounded-sm p-0 text-muted-foreground/60
+                    hover:bg-accent hover:text-foreground
+                  `,
+                  (header.column.getIsPinned() || isFiltered) && `
+                    visible bg-primary/5 text-primary
+                  `,
                 )}
-              </>
-            )}
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
+              >
+                <MoreVertical className="size-3.5" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-64 p-1">
+              {canSort && (
+                <>
+                  <div className="
+                    px-2 py-1.5 text-[10px] leading-none font-bold
+                    tracking-widest text-muted-foreground/60 uppercase
+                  "
+                  >
+                    Sorting
+                  </div>
+
+                  <DropdownMenuCheckboxItem
+                    checked={header.column.getIsSorted() === 'asc'}
+                    onCheckedChange={() => header.column.toggleSorting(false)}
+                  >
+                    <ChevronUp className="mr-2 size-4 text-muted-foreground/70" />
+                    Sort Ascending
+                  </DropdownMenuCheckboxItem>
+                  <DropdownMenuCheckboxItem
+                    checked={header.column.getIsSorted() === 'desc'}
+                    onCheckedChange={() => header.column.toggleSorting(true, true)}
+                  >
+                    <ChevronDown className="
+                      mr-2 size-4 text-muted-foreground/70
+                    "
+                    />
+                    Sort Descending
+                  </DropdownMenuCheckboxItem>
+
+                  {header.column.getIsSorted() && (
+                    <DropdownMenuItem
+                      onClick={() => header.column.clearSorting()}
+                      className="
+                        text-destructive
+                        focus:text-destructive
+                      "
+                    >
+                      <RotateCcw className="mr-2 size-4" />
+                      Clear Sorting
+                    </DropdownMenuItem>
+                  )}
+                </>
+              )}
+
+              {/* Faceted Filter Section */}
+              {facetedConfig && (
+                <>
+                  <DropdownMenuSeparator />
+                  <div className="
+                    flex items-center gap-1.5 px-2 py-1.5 text-[10px]
+                    leading-none font-bold tracking-widest
+                    text-muted-foreground/60 uppercase
+                  "
+                  >
+                    <Filter className="size-3" />
+                    Filter:
+                    {' '}
+                    {header.column.columnDef.header as string}
+                  </div>
+                  <div className="scroll-y max-h-50">
+                    {facetedConfig.options.map((option) => {
+                      const isSelected = selectedValues.has(option.value);
+                      const count = facetedConfig.facetCounts
+                        ? facetedConfig.facetCounts[option.value]
+                        : facetValues?.get(option.value);
+
+                      return (
+                        <DropdownMenuCheckboxItem
+                          key={option.value}
+                          checked={isSelected}
+                          onCheckedChange={() => {
+                            if (isSelected) {
+                              selectedValues.delete(option.value);
+                            }
+                            else {
+                              selectedValues.add(option.value);
+                            }
+                            const filterValues = Array.from(selectedValues);
+                            column.setFilterValue(
+                              filterValues.length ? filterValues : undefined,
+                            );
+                          }}
+                        >
+                          {option.icon && (
+                            <option.icon className="
+                              mr-2 size-4 text-muted-foreground/70
+                            "
+                            />
+                          )}
+                          <span className="flex-1 text-xs">{option.label}</span>
+                          {count !== undefined && (
+                            <span className="
+                              ml-2 font-mono text-[10px]
+                              text-muted-foreground/50
+                            "
+                            >
+                              {count}
+                            </span>
+                          )}
+                        </DropdownMenuCheckboxItem>
+                      );
+                    })}
+                  </div>
+                </>
+              )}
+
+              {/* Number Range Filter Section */}
+              {filterType === 'number' && (
+                <>
+                  <DropdownMenuSeparator />
+                  <div className="
+                    flex items-center gap-1.5 px-2 py-1.5 text-[10px]
+                    leading-none font-bold tracking-widest
+                    text-muted-foreground/60 uppercase
+                  "
+                  >
+                    <Filter className="size-3" />
+                    Range:
+                    {' '}
+                    {header.column.columnDef.header as string}
+                  </div>
+                  <div className="flex items-center gap-2 p-2" onClick={(e) => e.stopPropagation()}>
+                    <DebouncedInput
+                      placeholder="Min"
+                      type="number"
+                      value={(filterValue as [number, number])?.[0] ?? ''}
+                      onChange={(val) => {
+                        column.setFilterValue((old: [number, number]) => [val as number, old?.[1]]);
+                      }}
+                      className="h-8 bg-muted/30 text-xs"
+                    />
+                    <span className="text-xs text-muted-foreground">-</span>
+                    <DebouncedInput
+                      placeholder="Max"
+                      type="number"
+                      value={(filterValue as [number, number])?.[1] ?? ''}
+                      onChange={(val) => {
+                        column.setFilterValue((old: [number, number]) => [old?.[0], val as number]);
+                      }}
+                      className="h-8 bg-muted/30 text-xs"
+                    />
+                  </div>
+                </>
+              )}
+
+              {/* Date Range Filter Section */}
+              {filterType === 'date' && (
+                <>
+                  <DropdownMenuSeparator />
+                  <div className="
+                    flex items-center gap-1.5 px-2 py-1.5 text-[10px]
+                    leading-none font-bold tracking-widest
+                    text-muted-foreground/60 uppercase
+                  "
+                  >
+                    <Calendar className="size-3" />
+                    Date Range:
+                    {' '}
+                    {header.column.columnDef.header as string}
+                  </div>
+                  <div className="flex flex-col gap-2 p-2" onClick={(e) => e.stopPropagation()}>
+                    <Input
+                      type="date"
+                      value={(filterValue as [string, string])?.[0] ?? ''}
+                      onChange={(e) => {
+                        const val = e.target.value || undefined;
+                        column.setFilterValue((old: [string, string]) => [val, old?.[1]]);
+                      }}
+                      className="h-8 bg-muted/30 text-[11px]"
+                    />
+                    <Input
+                      type="date"
+                      value={(filterValue as [string, string])?.[1] ?? ''}
+                      onChange={(e) => {
+                        const val = e.target.value || undefined;
+                        column.setFilterValue((old: [string, string]) => [old?.[0], val]);
+                      }}
+                      className="h-8 bg-muted/30 text-[11px]"
+                    />
+                  </div>
+                </>
+              )}
+
+              {/* Text Search Filter Section */}
+              {filterType === 'text' && (
+                <>
+                  <DropdownMenuSeparator />
+                  <div className="
+                    flex items-center gap-1.5 px-2 py-1.5 text-[10px]
+                    leading-none font-bold tracking-widest
+                    text-muted-foreground/60 uppercase
+                  "
+                  >
+                    <Search className="size-3" />
+                    Search:
+                    {' '}
+                    {header.column.columnDef.header as string}
+                  </div>
+                  <div className="p-2" onClick={(e) => e.stopPropagation()}>
+                    <DebouncedInput
+                      placeholder={`Search ${header.column.columnDef.header as string}...`}
+                      value={(filterValue as string) ?? ''}
+                      onChange={(val) => column.setFilterValue(val)}
+                      className="h-8 bg-muted/30 text-xs"
+                    />
+                  </div>
+                </>
+              )}
+
+              {isFiltered && (
+                <>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    onClick={() => column.setFilterValue(undefined)}
+                    className="
+                      justify-center py-2 text-center text-xs font-bold
+                      text-destructive
+                      focus:text-destructive
+                    "
+                  >
+                    Clear Column Filter
+                  </DropdownMenuItem>
+                </>
+              )}
+
+              {canPin && (
+                <>
+                  <DropdownMenuSeparator />
+                  <div className="
+                    px-2 py-1.5 text-[10px] leading-none font-bold
+                    tracking-widest text-muted-foreground/60 uppercase
+                  "
+                  >
+                    Pinning
+                  </div>
+
+                  <DropdownMenuCheckboxItem
+                    checked={header.column.getIsPinned() === 'left'}
+                    onCheckedChange={() =>
+                      header.column.pin(header.column.getIsPinned() === 'left' ? false : 'left')}
+                  >
+                    <ArrowLeftToLine className="
+                      mr-2 size-4 text-muted-foreground/70
+                    "
+                    />
+                    Pin Left
+                  </DropdownMenuCheckboxItem>
+                  <DropdownMenuCheckboxItem
+                    checked={header.column.getIsPinned() === 'right'}
+                    onCheckedChange={() =>
+                      header.column.pin(header.column.getIsPinned() === 'right' ? false : 'right')}
+                  >
+                    <ArrowRightToLine className="
+                      mr-2 size-4 text-muted-foreground/70
+                    "
+                    />
+                    Pin Right
+                  </DropdownMenuCheckboxItem>
+
+                  {header.column.getIsPinned() && (
+                    <DropdownMenuItem
+                      onClick={() => header.column.pin(false)}
+                      className="
+                        text-destructive
+                        focus:text-destructive
+                      "
+                    >
+                      <PinOff className="mr-2 size-4" />
+                      Remove Pin
+                    </DropdownMenuItem>
+                  )}
+                </>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      )}
     </div>
   );
 }

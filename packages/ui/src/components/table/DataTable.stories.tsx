@@ -49,7 +49,7 @@ const columns: ColumnDef<User>[] = [
     header: 'Age',
     size: 80,
     enableSorting: true,
-    cell: ({ getValue }) => <div className="text-right pr-4">{getValue<number>()}</div>,
+    cell: ({ getValue }) => <div className="pr-4 text-right">{getValue<number>()}</div>,
     meta: {
       filterType: 'number',
     },
@@ -61,7 +61,7 @@ const columns: ColumnDef<User>[] = [
     size: 120,
     enableSorting: true,
     cell: ({ getValue }) => (
-      <div className="text-right font-mono pr-4 text-primary">
+      <div className="pr-4 text-right font-mono text-primary">
         $
         {getValue<number>().toLocaleString()}
       </div>
@@ -155,7 +155,7 @@ const meta: Meta<typeof DataTable<User>> = {
     layout: 'fullscreen',
   },
   render: (args) => (
-    <div className="p-8 w-full">
+    <div className="w-full p-8">
       <DataTable {...args} />
     </div>
   ),
@@ -258,15 +258,23 @@ export const ServerSide: Story = {
     }, [fetchServerData]);
 
     return (
-      <div className="p-8 space-y-4">
-        <div className="flex items-center justify-between bg-primary/5 p-4 rounded-lg border border-primary/10">
+      <div className="space-y-4 p-8">
+        <div className="
+          flex items-center justify-between rounded-lg border border-primary/10
+          bg-primary/5 p-4
+        "
+        >
           <div>
             <h3 className="font-bold text-primary">Server-Side Simulation Mode</h3>
             <p className="text-xs text-muted-foreground">Check browser console to see raw server action calls.</p>
           </div>
           {loading && (
-            <div className="flex items-center gap-2 text-primary font-bold text-sm animate-pulse">
-              <div className="h-2 w-2 bg-primary rounded-full animate-bounce" />
+            <div className="
+              flex animate-pulse items-center gap-2 text-sm font-bold
+              text-primary
+            "
+            >
+              <div className="size-2 animate-bounce rounded-full bg-primary" />
               Fetching from Server...
             </div>
           )}
@@ -318,8 +326,8 @@ export const FixedParentHeight: Story = {
     enableRowPinning: true,
   },
   render: (args) => (
-    <div className="p-8 w-full">
-      <div className="h-[400px] border rounded-lg overflow-auto bg-background p-4">
+    <div className="w-full p-8">
+      <div className="h-100 overflow-auto rounded-lg border bg-background p-4">
         <DataTable {...args} />
       </div>
     </div>

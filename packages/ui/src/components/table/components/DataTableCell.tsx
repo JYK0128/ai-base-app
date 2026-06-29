@@ -69,11 +69,15 @@ function getCellClassName<TData, TValue>(
   const isFirstRightPinned = isPinnedColumn === 'right' && table.getRightLeafColumns().at(0)?.id === columnId;
 
   return cn(
-    'transition-colors relative',
+    'relative transition-colors',
     isActionColumn ? 'p-0! text-center' : 'px-4 align-middle',
     (isPinnedRow || isPinnedColumn) && 'sticky bg-card/95 backdrop-blur-sm',
-    isLastPinnedRow && 'border-b border-border/80 shadow-[0_4px_12px_-2px_rgba(0,0,0,0.1)]',
-    isFirstBottomRow && 'border-t border-border/80 shadow-[0_-4px_12px_-2px_rgba(0,0,0,0.1)]',
+    isLastPinnedRow && `
+      border-b border-border/80 shadow-[0_4px_12px_-2px_rgba(0,0,0,0.1)]
+    `,
+    isFirstBottomRow && `
+      border-t border-border/80 shadow-[0_-4px_12px_-2px_rgba(0,0,0,0.1)]
+    `,
     isPinnedColumn === 'left' && 'border-r',
     isPinnedColumn === 'right' && 'border-l',
     isLastLeftPinned && 'shadow-[6px_0_15px_-6px_rgba(0,0,0,0.1)]',
@@ -106,7 +110,7 @@ export function DataTableCell<TData, TValue>({
   return (
     <TableCell key={cell.id} className={cellClassName} style={style}>
       <div className={cn(
-        'truncate w-full font-medium',
+        'w-full truncate font-medium',
         isActionColumn ? 'flex justify-center' : '',
       )}
       >

@@ -1,4 +1,5 @@
-import { type Table } from '@tanstack/react-table';
+import { type Column,
+         type Table } from '@tanstack/react-table';
 import { ChevronDown } from 'lucide-react';
 import * as React from 'react';
 
@@ -13,6 +14,20 @@ interface DataTableToolbarProps<TData> {
   table: Table<TData>
   filterColumns?: (keyof TData)[]
   filterPlaceholder?: string
+}
+
+function getColumnDisplayLabel<TData>(column: Column<TData, unknown>): string {
+  const header = column.columnDef.header;
+
+  if (typeof header === 'string') {
+    return header;
+  }
+
+  if (typeof header === 'number' || typeof header === 'boolean') {
+    return String(header);
+  }
+
+  return column.id;
 }
 
 function DebouncedInput({
@@ -57,7 +72,7 @@ export function DataTableToolbar<TData>({
   const globalFilter = table.getState().globalFilter as string | undefined;
 
   return (
-    <div className="flex flex-wrap items-center gap-2 shrink-0">
+    <div className="flex shrink-0 flex-wrap items-center gap-2 p-1">
       {filterColumns && filterColumns.length > 0 && (
         <DebouncedInput
           placeholder={filterPlaceholder ?? `Search in ${filterColumns.join(', ')}...`}
@@ -71,7 +86,7 @@ export function DataTableToolbar<TData>({
           <Button variant="outline" className="ml-auto">
             Columns
             {' '}
-            <ChevronDown className="ml-2 h-4 w-4" />
+            <ChevronDown className="ml-2 size-4" />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
@@ -86,7 +101,7 @@ export function DataTableToolbar<TData>({
                   checked={column.getIsVisible()}
                   onCheckedChange={(value) => column.toggleVisibility(!!value)}
                 >
-                  {column.id}
+                  {getColumnDisplayLabel(column)}
                 </DropdownMenuCheckboxItem>
               );
             })}
