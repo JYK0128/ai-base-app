@@ -1,6 +1,7 @@
 export * from './components/boundary';
 export * from './components/form';
 export * from './components/list';
+export * from './components/popup';
 export * from './components/table';
 export * from './components/tree';
 export * from './components/ui';

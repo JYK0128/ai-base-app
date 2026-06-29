@@ -69,7 +69,10 @@ export function SortableTreeNodeRow<T>(props: Readonly<SortableTreeNodeRowProps<
     <div
       role="presentation"
       data-tree-row-id={node.id}
-      className="grid border-b border-slate-100 last:border-b-0"
+      className="
+        grid border-b border-slate-100
+        last:border-b-0
+      "
     >
       {!disabled && (
         <SortableTreeDropIndicator
@@ -91,7 +94,10 @@ export function SortableTreeNodeRow<T>(props: Readonly<SortableTreeNodeRowProps<
         aria-disabled={isDisabled || undefined}
         data-tree-node-id={node.id}
         className={cn(
-          'group/tree-item grid gap-1 rounded-md border border-transparent bg-background pr-2 text-sm outline-none transition-colors',
+          `
+            group/tree-item grid gap-1 rounded-md border border-transparent
+            bg-background pr-2 text-sm transition-colors outline-none
+          `,
           isDragSource ? 'opacity-0' : isDisabled && 'opacity-55',
           isDropTarget && 'border-primary/50 bg-primary/10',
         )}
@@ -107,7 +113,12 @@ export function SortableTreeNodeRow<T>(props: Readonly<SortableTreeNodeRowProps<
             aria-hidden={!hasChildren}
             disabled={!hasChildren}
             onClick={handleToggleExpanded}
-            className="inline-flex size-7 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:pointer-events-none disabled:opacity-0"
+            className="
+              inline-flex size-7 shrink-0 items-center justify-center rounded-md
+              text-muted-foreground transition-colors
+              hover:bg-muted hover:text-foreground
+              disabled:pointer-events-none disabled:opacity-0
+            "
           >
             {expandIcon}
           </button>
@@ -118,13 +129,23 @@ export function SortableTreeNodeRow<T>(props: Readonly<SortableTreeNodeRowProps<
               type="button"
               disabled={isDisabled}
               aria-label={`Drag ${label}`}
-              className="inline-flex size-7 shrink-0 cursor-grab items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground active:cursor-grabbing disabled:cursor-not-allowed"
+              className="
+                inline-flex size-7 shrink-0 cursor-grab items-center
+                justify-center rounded-md text-muted-foreground
+                transition-colors
+                hover:bg-muted hover:text-foreground
+                active:cursor-grabbing
+                disabled:cursor-not-allowed
+              "
             >
               ::
             </button>
           )}
 
-          <div className="flex min-w-0 flex-1 items-center justify-between gap-3">
+          <div className="
+            flex min-w-0 flex-1 items-center justify-between gap-3
+          "
+          >
             {renderNode({
               node,
               depth,

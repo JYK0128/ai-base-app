@@ -46,7 +46,11 @@ function NavigationListStory() {
   const [items, setItems] = React.useState<NavigationItem[]>(initialItems);
 
   return (
-    <main className="min-h-screen bg-background p-8 text-foreground flex items-center justify-center">
+    <main className="
+      flex min-h-screen items-center justify-center bg-background p-8
+      text-foreground
+    "
+    >
       <div className="w-full max-w-md space-y-4">
         <div className="space-y-1">
           <h1 className="text-lg font-semibold tracking-tight">Navigation Sections</h1>
@@ -61,19 +65,29 @@ function NavigationListStory() {
             <div
               ref={ref}
               className={cn(
-                'flex items-center gap-3 rounded-md border bg-card p-3 shadow-sm hover:shadow-md hover:border-accent-foreground/10 transition-all duration-200',
-                state.isDragging && 'opacity-40 border-primary',
+                `
+                  flex items-center gap-3 rounded-md border bg-card p-3
+                  shadow-sm transition-all duration-200
+                  hover:border-accent-foreground/10 hover:shadow-md
+                `,
+                state.isDragging && 'border-primary opacity-40',
               )}
             >
               <button
                 {...dragHandleProps}
-                className="inline-flex size-8 shrink-0 items-center justify-center cursor-grab select-none touch-none active:cursor-grabbing text-muted-foreground hover:text-foreground active:text-primary transition-colors hover:bg-muted rounded"
+                className="
+                  inline-flex size-8 shrink-0 cursor-grab touch-none
+                  items-center justify-center rounded-sm text-muted-foreground
+                  transition-colors select-none
+                  hover:bg-muted hover:text-foreground
+                  active:cursor-grabbing active:text-primary
+                "
               >
                 <GripVertical className="size-4" />
               </button>
 
               <div className="min-w-0 flex-1">
-                <div className="font-semibold text-sm">
+                <div className="text-sm font-semibold">
                   {node.label}
                 </div>
                 <div className="text-xs text-muted-foreground">

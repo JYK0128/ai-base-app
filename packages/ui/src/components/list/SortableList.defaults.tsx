@@ -14,18 +14,29 @@ export function renderDefaultNode<T>({
   return (
     <div
       ref={ref}
-      className={`flex items-center gap-3 rounded-md border bg-card p-3 shadow-sm hover:shadow-md transition-all duration-200 ${
-        state.isDragging ? 'opacity-40 border-primary' : 'border-border'
-      }`}
+      className={`
+        flex items-center gap-3 rounded-md border bg-card p-3 shadow-sm
+        transition-all duration-200
+        hover:shadow-md
+        ${
+    state.isDragging ? 'border-primary opacity-40' : 'border-border'
+    }
+      `}
     >
       <button
         {...dragHandleProps}
         type="button"
-        className="inline-flex size-8 shrink-0 items-center justify-center cursor-grab select-none touch-none active:cursor-grabbing text-muted-foreground hover:text-foreground hover:bg-muted rounded transition-colors"
+        className="
+          inline-flex size-8 shrink-0 cursor-grab touch-none items-center
+          justify-center rounded-sm text-muted-foreground transition-colors
+          select-none
+          hover:bg-muted hover:text-foreground
+          active:cursor-grabbing
+        "
       >
         <GripVertical className="size-4" />
       </button>
-      <span className="font-semibold text-sm text-foreground">{String(node.id)}</span>
+      <span className="text-sm font-semibold text-foreground">{String(node.id)}</span>
     </div>
   );
 }
@@ -35,7 +46,11 @@ export function renderDefaultNode<T>({
  */
 export function renderDefaultEmpty() {
   return (
-    <div className="flex min-h-16 items-center justify-center rounded-md border border-dashed border-border px-3 py-4 text-sm text-muted-foreground">
+    <div className="
+      flex min-h-16 items-center justify-center rounded-md border border-dashed
+      border-border px-3 py-4 text-sm text-muted-foreground
+    "
+    >
       Empty list
     </div>
   );

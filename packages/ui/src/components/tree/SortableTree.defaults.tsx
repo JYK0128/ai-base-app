@@ -28,7 +28,9 @@ export function renderDefaultDropIndicator({
       className={cn(
         'h-0.5 w-full rounded-full transition-colors',
         state.isOver && state.isDragging && state.isDropAllowed && 'bg-primary',
-        state.isOver && state.isDragging && !state.isDropAllowed && 'bg-destructive',
+        state.isOver && state.isDragging && !state.isDropAllowed && `
+          bg-destructive
+        `,
       )}
     />
   );
@@ -39,7 +41,11 @@ export function renderDefaultDropIndicator({
  */
 export function renderDefaultEmpty() {
   return (
-    <div className="flex min-h-16 items-center justify-center rounded-md border border-dashed px-3 py-4 text-sm text-muted-foreground">
+    <div className="
+      flex min-h-16 items-center justify-center rounded-md border border-dashed
+      px-3 py-4 text-sm text-muted-foreground
+    "
+    >
       Empty
     </div>
   );

@@ -180,7 +180,10 @@ function SortableTreeDragOverlayNode<T>(props: Readonly<SortableTreeDragOverlayN
       aria-disabled={isDisabled || undefined}
       data-tree-node-id={node.id}
       className={cn(
-        'group/tree-item grid gap-1 rounded-md border border-transparent bg-background pr-2 text-sm outline-none transition-colors',
+        `
+          group/tree-item grid gap-1 rounded-md border border-transparent
+          bg-background pr-2 text-sm transition-colors outline-none
+        `,
         isDisabled && 'opacity-55',
       )}
       style={{
@@ -194,7 +197,11 @@ function SortableTreeDragOverlayNode<T>(props: Readonly<SortableTreeDragOverlayN
           aria-label={expandButtonAriaLabel}
           aria-hidden={!hasChildren}
           disabled
-          className="inline-flex size-7 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors disabled:pointer-events-none disabled:opacity-0"
+          className="
+            inline-flex size-7 shrink-0 items-center justify-center rounded-md
+            text-muted-foreground transition-colors
+            disabled:pointer-events-none disabled:opacity-0
+          "
         >
           {expandIcon}
         </button>
@@ -203,7 +210,11 @@ function SortableTreeDragOverlayNode<T>(props: Readonly<SortableTreeDragOverlayN
           type="button"
           disabled
           aria-label={`Drag ${label}`}
-          className="inline-flex size-7 shrink-0 items-center justify-center rounded-md text-muted-foreground disabled:cursor-not-allowed"
+          className="
+            inline-flex size-7 shrink-0 items-center justify-center rounded-md
+            text-muted-foreground
+            disabled:cursor-not-allowed
+          "
         >
           ::
         </button>

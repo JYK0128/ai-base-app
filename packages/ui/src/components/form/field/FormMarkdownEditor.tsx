@@ -75,7 +75,10 @@ function FormMarkdownEditor({
       className={cn('min-h-fit min-w-fit', className)}
     >
       {label && (
-        <div style={{ width: labelWidth }} className="flex items-start cursor-default select-none">
+        <div
+          style={{ width: labelWidth }}
+          className="flex cursor-default items-start select-none"
+        >
           <FieldLabel htmlFor={field.name}>
             {label}
             {required && <sup className="text-red-600"> *</sup>}
@@ -85,8 +88,16 @@ function FormMarkdownEditor({
       <FieldContent className="flex-1">
         <div
           className={cn(
-            'overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm transition-colors focus-within:border-slate-300 focus-within:ring-1 focus-within:ring-slate-200',
-            hasError && 'border-rose-300 focus-within:border-rose-400 focus-within:ring-rose-100',
+            `
+              overflow-hidden rounded-lg border border-slate-200 bg-white
+              shadow-sm transition-colors
+              focus-within:border-slate-300 focus-within:ring-1
+              focus-within:ring-slate-200
+            `,
+            hasError && `
+              border-rose-300
+              focus-within:border-rose-400 focus-within:ring-rose-100
+            `,
           )}
         >
           <Editor

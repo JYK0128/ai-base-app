@@ -107,7 +107,9 @@ function WorkspaceTreeStory({ mode }: WorkspaceTreeStoryProps) {
 
   return (
     <main
-      className="grid min-h-screen grid-rows-[auto_1fr] bg-background text-foreground"
+      className="
+        grid min-h-screen grid-rows-[auto_1fr] bg-background text-foreground
+      "
       data-tree-serialized={serializeTree(treeSnapshot)}
       data-tree-last-move={lastMove}
     >
@@ -156,7 +158,7 @@ function WorkspaceTreeStory({ mode }: WorkspaceTreeStoryProps) {
 
         <div className="min-w-0 border-l pl-6">
           <h2 className="text-sm font-medium">Structure</h2>
-          <pre className="mt-3 overflow-auto rounded-md bg-muted p-3 text-xs leading-5">
+          <pre className="mt-3 overflow-auto rounded-md bg-muted p-3 text-xs/5">
             {serializeTree(treeSnapshot)}
           </pre>
         </div>
@@ -189,7 +191,9 @@ function renderWorkspaceDropIndicator({
       className={cn(
         'h-0.5 w-full rounded-full transition-colors',
         state.isOver && state.isDragging && state.isDropAllowed && 'bg-primary',
-        state.isOver && state.isDragging && !state.isDropAllowed && 'bg-destructive',
+        state.isOver && state.isDragging && !state.isDropAllowed && `
+          bg-destructive
+        `,
       )}
     />
   );

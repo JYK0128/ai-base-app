@@ -24,7 +24,7 @@ type Story = StoryObj<typeof FormInput>;
  */
 const schema = z.object({
   username: z.string(),
-  email: z.email(),
+  email: z.string().email(),
 });
 const defaultValues = {
   username: '',
@@ -47,7 +47,7 @@ function FormTemplate(args: Readonly<FormInputProps>) {
   return (
     <form.AppForm>
       <form.Layout
-        className="w-100 flex flex-col gap-6"
+        className="flex w-100 flex-col gap-6"
         onSubmit={() => void form.handleSubmit()}
       >
         <form.FieldSet>

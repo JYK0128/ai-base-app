@@ -68,7 +68,10 @@ function FormInput({
       className={cn('min-h-fit min-w-fit', className)}
     >
       {label && (
-        <div style={{ width: labelWidth }} className="flex items-start cursor-default select-none">
+        <div
+          style={{ width: labelWidth }}
+          className="flex cursor-default items-start select-none"
+        >
           <FieldLabel
             htmlFor={field.name}
           >

@@ -45,7 +45,10 @@ function FormCheckbox({
             'flex gap-2',
             orientation === 'vertical' && 'flex-col',
             orientation === 'horizontal' && 'flex-row items-center',
-            orientation === 'responsive' && 'flex-col @md/field-group:flex-row @md/field-group:items-center',
+            orientation === 'responsive' && `
+              flex-col
+              @md/field-group:flex-row @md/field-group:items-center
+            `,
           )}
         >
           <div className="shrink-0">
@@ -70,8 +73,8 @@ function FormCheckbox({
               <FieldLabel
                 htmlFor={field.name}
                 className={cn(
-                  'text-sm font-medium leading-none cursor-pointer',
-                  checkboxProps.disabled && 'opacity-50 cursor-not-allowed',
+                  'cursor-pointer text-sm leading-none font-medium',
+                  checkboxProps.disabled && 'cursor-not-allowed opacity-50',
                 )}
               >
                 {label}
@@ -81,7 +84,10 @@ function FormCheckbox({
           )}
         </div>
         {description && (
-          <FieldDescription className={cn(label && orientation === 'horizontal' && 'ml-6')}>
+          <FieldDescription className={cn(label && orientation === 'horizontal' && `
+            ml-6
+          `)}
+          >
             {description}
           </FieldDescription>
         )}

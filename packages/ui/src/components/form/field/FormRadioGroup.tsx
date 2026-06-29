@@ -59,7 +59,10 @@ function FormRadioGroup({
       ref={ref}
     >
       {label && (
-        <div style={{ width: labelWidth }} className="flex items-start cursor-default select-none">
+        <div
+          style={{ width: labelWidth }}
+          className="flex cursor-default items-start select-none"
+        >
           <FieldLegend>
             {label}
             {required && <sup className="text-red-600"> *</sup>}
@@ -83,7 +86,10 @@ function FormRadioGroup({
             'flex gap-3',
             orientation === 'vertical' && 'flex-col',
             orientation === 'horizontal' && 'flex-row flex-wrap',
-            orientation === 'responsive' && 'flex-col @md/field-group:flex-row @md/field-group:flex-wrap',
+            orientation === 'responsive' && `
+              flex-col
+              @md/field-group:flex-row @md/field-group:flex-wrap
+            `,
           )}
         >
           {items.map((item) => {
@@ -97,7 +103,9 @@ function FormRadioGroup({
                 />
                 <FieldLabel
                   htmlFor={itemId}
-                  className={cn('cursor-pointer', item.disabled && 'opacity-50 cursor-not-allowed')}
+                  className={cn('cursor-pointer', item.disabled && `
+                    cursor-not-allowed opacity-50
+                  `)}
                 >
                   {item.label}
                 </FieldLabel>

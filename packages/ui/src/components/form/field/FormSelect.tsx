@@ -54,7 +54,10 @@ function FormSelect({
       className={cn('min-h-fit min-w-fit', className)}
     >
       {label && (
-        <div style={{ width: labelWidth }} className="flex items-center cursor-default select-none">
+        <div
+          style={{ width: labelWidth }}
+          className="flex cursor-default items-center select-none"
+        >
           <FieldLabel
             htmlFor={field.name}
           >

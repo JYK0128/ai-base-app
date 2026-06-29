@@ -44,7 +44,7 @@ function FormTemplate(args: Readonly<FormTextareaProps>) {
   return (
     <form.AppForm>
       <form.Layout
-        className="w-100 flex flex-col gap-6"
+        className="flex w-100 flex-col gap-6"
         onSubmit={() => void form.handleSubmit()}
       >
         <form.FieldSet>
