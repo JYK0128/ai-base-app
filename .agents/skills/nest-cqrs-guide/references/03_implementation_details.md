@@ -79,9 +79,9 @@ Command 핸들러는 데이터를 변경하는 역할로 데이터 일관성을 
 * `@CommandHandler(Contract)` 데코레이터를 클래스에 적용하고 `ICommandHandler<Contract>` 인터페이스를 구현함.
 * `execute` 메서드 상단에 `@Transactional()` 데코레이터(가져올 곳: `@mikro-orm/decorators/legacy`)를 작성하여 트랜잭션 경계를 설정함.
 * `execute` 메서드 내부의 로직 흐름은 반드시 **선형적인 3단계 흐름(3-Phase Flow)**에 따라 구현하여 핵심 비즈니스 로직을 가시화함:
-  1. **Identification (식별)**: `ClsService` 컨텍스트 정보 및 리포지토리를 통해 주 엔티티를 조회함 (가드성 널 체크 및 미존재 예외 처리는 이 단계 내부 메서드에 캡슐화).
-  2. **Verification (검증)**: 식별된 엔티티를 활용하여 비즈니스 규칙 및 도메인 정책을 검증함 (예: `validatePolicies()`).
-  3. **Process (처리)**: 검증 완료 후 엔티티 상태를 변경하거나 도메인 비즈니스 액션을 실행함 (예: `processUpdate()`).
+  1. **Identification (식별)**: `ClsService` 컨텍스트 정보 및 리포지토리를 통해 사전 대상 또는 컨텍스트를 확보함.
+  2. **Verification (검증)**: 확보된 컨텍스트를 활용하여 비즈니스 규칙 및 도메인 정책을 검증함.
+  3. **Process (처리)**: `process(contract, identified...)` 순서로 호출하며, command는 상태 변경/외부 효과, query는 메인 조회와 DTO wrapping을 수행함.
 * `ClsService`를 통해 요청 스레드 컨텍스트(예: `organizationId`, `memberId`)를 안전하게 획득함.
 * `this.Asserter.assert` 메서드를 사용하여 데이터베이스 조회 및 비즈니스 검증을 즉시 수행함(Fail-Fast).
 * 비즈니스 핵심 로직은 가독성 증대를 위해 private 메서드로 분할하여 선형적으로 구성함.
@@ -110,15 +110,11 @@ export class CreateInviteHandler implements ICommandHandler<CreateInviteContract
   ) {}
 
   @Transactional()
-  async execute({ data }: CreateInviteContract): Promise<CreateInviteResponseDto> {
-    // 1. 컨텍스트 및 의존성 데이터 식별 (Fail-Fast)
+  async execute(command: CreateInviteContract): Promise<CreateInviteResponseDto> {
     const organization = await this.identifyOrganization();
     const inviter = await this.identifyInviter();
+    const invite = await this.processCreation(command, organization);
 
-    // 2. 핵심 비즈니스 처리
-    const invite = await this.processCreation(organization, data.name, data.email);
-
-    // 3. 비동기 사이드 이펙트 트리거
     this.inviteEmailPublisher.publishInviteEmail({
       inviteId: invite.id,
       email: invite.email,
@@ -153,7 +149,8 @@ export class CreateInviteHandler implements ICommandHandler<CreateInviteContract
     );
   }
 
-  private async processCreation(organization: Organization, name: string, email: string): Promise<MemberInvite> {
+  private async processCreation(command: CreateInviteContract, organization: Organization): Promise<MemberInvite> {
+    const { name, email } = command.data;
     return MemberInvite.create({
       name,
       email,
@@ -191,9 +188,24 @@ export class GetMemberHandler implements IQueryHandler<GetMemberContract> {
 
   constructor(private readonly cls: ClsService) {}
 
-  async execute({ data }: GetMemberContract): Promise<MemberResponseDto> {
+  async execute(query: GetMemberContract): Promise<MemberResponseDto> {
+    this.verifyMember(query);
+    return this.processDetail(query);
+  }
+
+  private verifyMember(_query: GetMemberContract): void {
+    // 멤버 조회 정책 검증 영역
+  }
+
+  private async processDetail(query: GetMemberContract): Promise<MemberResponseDto> {
     const organization = await this.identifyOrganization();
-    const member = await this.identifyMember(organization, data.id);
+    const member = await this.Asserter.assert(
+      Member.findOne(
+        { id: query.data.id, organization },
+        { populate: ['accounts', 'organizationRoles.role'] }
+      ),
+      'MEMBER_NOT_FOUND',
+    );
 
     return new MemberResponseDto(member);
   }
@@ -204,18 +216,7 @@ export class GetMemberHandler implements IQueryHandler<GetMemberContract> {
       return this.Asserter.throw('ORGANIZATION_NOT_FOUND');
     }
 
-    // DB 조회 없이 참조 타입만 생성
     return Organization.getReference(organizationId);
-  }
-
-  private async identifyMember(organization: Organization, id: string): Promise<Member> {
-    return await this.Asserter.assert(
-      Member.findOne(
-        { id, organization },
-        { populate: ['accounts', 'organizationRoles.role'] }
-      ),
-      'MEMBER_NOT_FOUND',
-    );
   }
 }
 ```
@@ -278,7 +279,7 @@ CQRS 메시지와 DTO를 고를 때는 아래 규칙을 우선 적용함.
 | 목록 조회 | `ListRequestDto<TEntity>` | `ListResponseDto<TEntity>` | `get-announcements`, `get-resources`, `get-members` |
 | 페이지 조회 | `PageRequestDto<TEntity>` | `PageResponseDto<TEntity>` | `get-members`, `get-tickets` |
 | 커서 조회 | `CursorRequestDto<TEntity>` | `CursorResponseDto<TEntity>` | cursor 기반 목록 |
-| 엔티티와 다르게 가공된 응답 | 해당 request 계약 유지 | 표준 response 계약으로 환원 우선, 예외적으로 커스텀 DTO | `GetLocalesResponseDto`, `AnnouncementResponseDto`, `GetMeResponseDto` |
+| 엔티티와 다르게 가공된 응답 | 해당 request 계약 유지 | 표준 response 계약 우선, 예외적으로 커스텀 DTO | `GetLocalesResponseDto`, `AnnouncementResponseDto`, `GetMeResponseDto` |
 
 ### 요약 규칙
 
@@ -297,8 +298,8 @@ CQRS 메시지와 DTO를 고를 때는 아래 규칙을 우선 적용함.
 응답 DTO는 피처별로 임의의 형태를 만들기 전에 `common/interfaces/response`의 표준 계약을 우선 사용함.
 
 * **표준 계약 우선**: `IdResponseDto`, `IdListResponseDto`, `EntityResponseDto`, `ListResponseDto`, `PageResponseDto`, `CursorResponseDto`, `PayloadResponseDto` 중 하나를 먼저 선택함.
-* **가공 응답은 예외**: 엔티티와 다르게 가공된 응답은 우선 표준 계약으로 환원 가능한지 검토하고, 정말 필요한 경우에만 별도 DTO를 허용함.
-* **커스텀 DTO 최소화**: 표준 계약으로 충분한데도 가공 DTO를 따로 만든 경우, 먼저 표준 계약으로 바꾸는 방향으로 수정함.
+* **가공 응답은 예외**: 엔티티와 다르게 가공된 응답은 먼저 표준 계약으로 표현 가능한지 확인하고, 필요한 경우에만 별도 DTO를 허용함.
+* **커스텀 DTO 최소화**: 표준 계약으로 충분하면 별도 가공 DTO를 만들지 않음.
 
 ### 💻 구현 예시 (표준 response 계약 사용)
 

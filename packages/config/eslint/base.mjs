@@ -6,6 +6,8 @@ import sonarjs from 'eslint-plugin-sonarjs';
 import unusedImports from 'eslint-plugin-unused-imports';
 import tseslint from 'typescript-eslint';
 
+import generatedAliasRule from './generated-aliases.mjs';
+
 /** @type {import("eslint").Linter.Config[]} */
 export default defineConfig([
   globalIgnores(['node_modules', 'dist', '.next', '.turbo']),
@@ -123,6 +125,15 @@ export default defineConfig([
           argsIgnorePattern: '^_',
         },
       ],
+    },
+  },
+  {
+    files: ['**/src/routes/_protected/**/*.{ts,tsx}'],
+    plugins: {
+      generated: generatedAliasRule,
+    },
+    rules: {
+      'generated/no-generated-type-aliases': 'error',
     },
   },
 ]);

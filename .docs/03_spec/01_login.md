@@ -2,136 +2,132 @@
 
 ## 1. 개요
 
-* 플랫폼 어드민 포털에 접근하기 위한 관문 역할 수행.
-* 미인증 사용자가 최초로 서비스를 조작하기 위해 세션을 획득하는 로그인 기능 제공.
-* 최초 가입 혹은 임시 패스워드 발급 상태일 때 보안 강화를 위한 비밀번호 강제 변경 및 세션 제어 인터페이스 제공.
+* 플랫폼 어드민 포털 진입을 위한 인증 관문이다.
+* 인증 방식은 `sid` `HttpOnly` 쿠키 기반 세션이다.
+* 상태 변경 요청은 `x-csrf-token` 헤더를 함께 보내야 한다.
+* 클라이언트는 토큰을 저장하지 않으며, `/auth/me` 조회 결과와 `authStatus` 상태 머신으로 화면을 분기한다.
 * 구현 파일 경로:
-  * **로그인**: `web/platform-admin-web/src/routes/_public/login.tsx` (경로: `/login`)
-  * **비밀번호 변경**: `web/platform-admin-web/src/routes/_public/change-password.tsx` (경로: `/change-password`)
+  * 로그인: `web/platform-admin-web/src/routes/_public/login.tsx`
+  * 비밀번호 변경: `web/platform-admin-web/src/routes/_protected/change-password.tsx`
+  * 약관 동의: `web/platform-admin-web/src/routes/_protected/agreement.tsx`
 
----
+## 2. 라우트 정보
 
-## 2. 메뉴 식별 정보
+| 항목 | 로그인 화면 | 비밀번호 변경 화면 | 약관 동의 화면 |
+| --- | --- | --- | --- |
+| 경로 | `/login` | `/change-password` | `/agreement` |
+| 노출 위치 | Public | Protected special route | Protected special route |
+| 접근 조건 | 누구나 접근 | `authStatus = password_change_required` 또는 세션 유지 상태 | `authStatus = terms_agreement_required` 또는 세션 유지 상태 |
 
-* 본 화면들은 보호된 영역(`_protected`)이 아닌 전체 공개 영역(`_public`) 라우트에 귀속되며, 사이드바 메뉴에 노출되지 않음.
-
-| 항목 | 로그인 화면 | 비밀번호 변경 화면 |
-| --- | --- | --- |
-| 경로 | `/login` | `/change-password` |
-| 접근 권한 | 무제한 (Public) | 인증 세션 획득 상태 (`isAuthenticated = true`) |
-
----
-
-## 3. 화면 및 서비스 목적
+## 3. 목적
 
 | 목적 | 설명 |
 | --- | --- |
-| 관리자 인증 세션 수립 | 사용자가 제출한 이메일과 비밀번호를 검증하여 JWT Access Token을 수령 후 보관 처리함. |
-| 초기 비밀번호 의무 변경 조치 | 임시 패스워드로 로그인된 매니저를 보호 영역 진입 전에 비밀번호 변경 화면으로 강제 이동시켜 보안을 제고함. |
-| 보안 토큰 파기 및 재로그인 | 비밀번호 변경 성공 시 보안 유지를 위해 기존 토큰을 소멸시키고 신규 비밀번호로 재인증을 유도함. |
-
----
+| 세션 수립 | 이메일/비밀번호 검증 성공 시 서버가 `sid` 세션을 생성하고 쿠키를 발급한다. |
+| 정책 분기 | 비밀번호 만료와 약관 미동의는 세션을 유지한 채 별도 화면으로 분기한다. |
+| CSRF 갱신 | 로그인/로그아웃/세션 만료 이후에는 `/auth/csrf`로 새 토큰을 다시 발급한다. |
+| 세션 복구 | 새로고침 또는 초기 진입 시 `/auth/me` 결과로 인증 상태를 복구한다. |
 
 ## 4. 화면 구성
 
-### 4.1 로그인 화면 (`/login`)
+### 4.1 로그인 화면
 
-* **이메일 입력 필드**: 사용자의 가입 이메일을 입력받음. 메일 아이콘 포함.
-* **비밀번호 입력 필드**: 비밀번호를 입력받으며 보안 마스킹(`type="password"`) 처리함. 열쇠 아이콘 포함.
-* **로그인 단추**: 기입한 양식을 백엔드로 제출 처리함.
-* **보조 링크**: 비밀번호 찾기(Forgot Password) 및 신규 관리자 가입 신청(Create Account)을 위한 하단 바로가기 텍스트 링크.
+* 이메일 입력 필드
+* 비밀번호 입력 필드
+* 로그인 단추
+* 비밀번호 찾기, 계정 생성 안내 링크
 
-### 4.2 비밀번호 변경 화면 (`/change-password`)
+### 4.2 비밀번호 변경 화면
 
-* **이전 화면 이동 단추**: 상단에 배치, 클릭 시 현재 임시 세션을 취소하고 로그인 화면으로 돌아감.
-* **현재 비밀번호 필드**: 신원 확인을 위해 현재 사용 중인 임시 비밀번호를 입력받음.
-* **새 비밀번호 필드**: 신규 비밀번호를 입력받음.
-* **새 비밀번호 확인 필드**: 새 비밀번호를 한 번 더 입력받아 일치 여부를 대조함.
-* **비밀번호 변경 단추**: 검증 통과 후 최종 패스워드 교체를 제출 처리함.
+* 이전 화면 이동 단추
+* 현재 비밀번호 입력 필드
+* 새 비밀번호 입력 필드
+* 새 비밀번호 확인 필드
+* 비밀번호 변경 단추
 
----
+### 4.3 약관 동의 화면
+
+* 동의 대기 약관 목록
+* 약관 상세 확인
+* 개별/전체 동의 단추
 
 ## 5. 데이터 모델
 
-### 5.1 로그인 세션 (AuthSession)
+### 5.1 인증 세션 상태
 
 | 필드 | 설명 |
 | --- | --- |
-| `accessToken` | API Gateway 인증 통과에 쓰이는 Bearer 토큰 |
-| `refreshToken` | 서버가 `HttpOnly` 쿠키로 설정하는 리프레시 토큰 |
-| `isAuthenticated` | 클라이언트 메모리 내 로그인 활성화 유무 |
-| `mustChangePassword` | 계정 생성 후 최초 로그인 여부 혹은 비밀번호 초기화 상태 구분 값 |
-
----
+| `sid` | 서버가 발급하는 세션 식별자 쿠키 |
+| `authStatus` | `initializing`, `anonymous`, `authenticated`, `password_change_required`, `terms_agreement_required`, `revoked` 중 하나 |
+| `sessionLoaded` | `/auth/me` 조회 완료 여부 |
+| `permissions` | 메뉴 접근 제어에 사용하는 권한 코드 목록 |
+| `passwordPolicy` | 비밀번호 만료 상태와 만료 시점 스냅샷 |
+| `termsPolicy` | 약관 재동의 필요 여부와 미동의 버전 목록 |
 
 ## 6. 기능 상세
 
-### 6.1 로그인 및 리다이렉션 흐름
+### 6.1 로그인 흐름
 
-* 사용자가 이메일과 패스워드를 기입하고 제출하여 인증 성공 시, `login(data.accessToken)` 훅 액션이 가동됨.
-* 로그인 응답은 `accessToken`을 본문으로 제공하고, `refreshToken`이 발급된 경우 서버가 `refreshToken` 쿠키를 함께 설정함.
-* 서버는 클라이언트 IP를 `x-real-ip`, 요청 IP, `0.0.0.0` 순서로 확정하여 로그인 이력 및 세션 컨텍스트에 반영함.
-* 계정이 비밀번호 의무 변경 대상(`mustChangePassword === true`)인 경우 즉시 `/change-password` 라우트로 리다이렉트 처리함.
-* 정상 로그인 완료 시에는 이전 접근을 시도했던 `redirect` 쿼리 매개변수 경로 또는 기본 대시보드인 `/dashboard`로 이동함.
+* 사용자가 이메일과 비밀번호를 제출한다.
+* 프론트는 제출 전에 `/auth/csrf`를 통해 발급받은 토큰을 `x-csrf-token` 헤더로 포함한다.
+* 백엔드는 자격 증명 검증 후 세션을 생성하고 `sid` 쿠키를 설정한다.
+* 프론트는 응답 본문이 아니라 `/auth/me` 재조회 결과를 기준으로 상태를 갱신한다.
+* 세션이 `password_change_required`이면 `/change-password`로 이동한다.
+* 세션이 `terms_agreement_required`이면 `/agreement`로 이동한다.
+* 그 외 정상 세션이면 `/dashboard`로 이동한다.
 
-### 6.2 토큰 재발급
+### 6.2 비밀번호 변경
 
-* 클라이언트는 `refreshToken` 쿠키를 기반으로 `POST /api/v1/auth/refresh`를 호출하여 신규 `accessToken`을 수령함.
-* 토큰 재발급 응답은 `accessToken`, `refreshToken`, `id`를 포함하며, 서버는 신규 `refreshToken`을 쿠키로 재설정함.
-* 프론트엔드는 응답 본문의 `accessToken`으로 클라이언트 인증 상태를 갱신함.
+* 비밀번호 변경 성공 시 세션은 유지한다.
+* 변경 후 세션 정책이 다시 계산된다.
+* 프론트는 `revalidateAuth()`로 `/auth/me`를 다시 읽고 다음 화면을 결정한다.
 
-### 6.3 비밀번호 강제 변경 및 강제 로그아웃
+### 6.3 약관 동의
 
-* 비밀번호 변경이 성공적으로 완료되면 백엔드의 세션 무효화 처리가 동시 유도됨.
-* 프론트엔드는 `onSuccess` 콜백 내에서 즉시 `logout()`을 강제 트리거하여 클라이언트 메모리의 토큰을 소멸시키고 로그인 화면으로 퇴장 처리함.
-
----
+* 약관 동의 완료 후 세션 정책이 다시 계산된다.
+* 미동의 상태가 해소되면 `/dashboard`로 이동한다.
 
 ## 7. 상태 판정 규칙
 
-### 7.1 세션 인증 상태 판정
-
-| 판정 기준 | UI 동작 | 설명 |
-| --- | --- | --- |
-| `isAuthenticated = true` 상태로 `/login` 진입 | 자동 대시보드 리다이렉트 | 이미 활성 세션이 있으므로 로그인 양식을 우회함 |
-| `isAuthenticated = false` 상태로 `/change-password` 진입 | 자동 로그인 페이지 리다이렉트 | 비밀번호를 변경하려면 로그인된 세션 상태가 확인되어야 함 |
-
----
+| 판정 기준 | UI 동작 |
+| --- | --- |
+| `authStatus = authenticated` 상태로 `/login` 진입 | `/dashboard`로 리다이렉트 |
+| `authStatus = password_change_required` | `/change-password`로 리다이렉트 |
+| `authStatus = terms_agreement_required` | `/agreement`로 리다이렉트 |
+| `authStatus = anonymous` 또는 `revoked` | `/login` 유지 또는 `/login`으로 리다이렉트 |
 
 ## 8. 입력 검증
 
-### 8.1 로그인 폼 검증 (Zod Schema)
+### 8.1 로그인
 
-* **이메일**: 필수 입력, 이메일 정규식 준수 검사 (`올바른 이메일 형식을 입력해주세요.`)
-* **비밀번호**: 필수 입력, 최소 1자 이상 검증 (`비밀번호를 입력해주세요.`)
+* 이메일: 필수, 이메일 형식 검증
+* 비밀번호: 필수, 최소 1자
 
-### 8.2 비밀번호 변경 폼 검증 (Zod Schema)
+### 8.2 비밀번호 변경
 
-* **현재 비밀번호**: 필수 입력, 최소 1자 이상 검증
-* **새 비밀번호**: 필수 입력, 최소 6자 이상 검증 (`새 비밀번호는 최소 6자 이상이어야 합니다.`)
-* **새 비밀번호 확인**: 필수 입력 및 새 비밀번호 입력값과의 일치 여부 검증 (`새 비밀번호가 일치하지 않습니다.`)
-
----
+* 현재 비밀번호: 필수
+* 새 비밀번호: 필수, 최소 6자
+* 새 비밀번호 확인: 필수, 새 비밀번호와 일치해야 함
 
 ## 9. 사용자 피드백
 
 | 상황 | 피드백 |
 | --- | --- |
-| 비밀번호 변경 중 | 버튼 상태가 `변경 중...` (Disabled) 상태로 전환 수행 |
-| 비밀번호 일치 오류 | 확인 필드 하단에 `새 비밀번호가 일치하지 않습니다.` 안내 가이드 실시간 표출 |
-
----
+| 로그인 중 | 제출 버튼 비활성화 |
+| 비밀번호 변경 중 | 제출 버튼 비활성화 |
+| 약관 동의 중 | 동의 버튼 비활성화 |
+| 세션 만료 | `anonymous`로 전환 후 로그인 화면으로 복귀 |
 
 ## 10. API 연동 기준
 
-| 기능 | Method | Endpoint | DTO | 비고 |
-| --- | --- | --- | --- | --- |
-| 로그인 시도 | `POST` | `/api/v1/auth/login` | `AuthLoginRequestDto` | 성공 시 Access Token 수령 및 Refresh Token 쿠키 설정 |
-| 활성 약관 조회 | `GET` | `/api/v1/auth/terms` | 없음 | 로그인 및 동의 흐름에서 활성 약관 조회 |
-| 약관 동의 저장 | `POST` | `/api/v1/auth/terms/agreements` | `CreateTermsAgreementRequestDto` | 현재 로그인한 사용자 기준 동의 이력 저장 |
-| 토큰 재발급 | `POST` | `/api/v1/auth/refresh` | `AuthRefreshTokenRequestDto` | Refresh Token 쿠키 기반 Access Token 갱신 |
-| 비밀번호 변경 | `POST` | `/api/v1/auth/change-password` | `ChangePasswordRequestDto` | 변경 완료 즉시 로그아웃 트리거 |
-| 세션 무효화 로그아웃 | `POST` | `/api/v1/auth/logout` | 없음 | 쿠키 및 토큰 소멸 수행 |
+| 기능 | Method | Endpoint | 비고 |
+| --- | --- | --- | --- |
+| CSRF 토큰 발급 | `GET` | `/api/v1/auth/csrf` | 상태 변경 요청 전 토큰 재발급 |
+| 로그인 | `POST` | `/api/v1/auth/login` | 성공 시 `sid` 쿠키 설정 |
+| 내 세션 조회 | `GET` | `/api/v1/auth/me` | 세션 기반 사용자 정보 반환 |
+| 비밀번호 변경 | `POST` | `/api/v1/auth/password/change` | 세션 유지 후 정책 재계산 |
+| 약관 동의 | `POST` | `/api/v1/auth/terms/agreements` | 세션 유지 후 정책 재계산 |
+| 로그아웃 | `POST` | `/api/v1/auth/logout` | 서버 세션 삭제 및 `sid`/CSRF 쿠키 만료 |
 
 ---
-*최종 업데이트: 2026-06-15*
+*최종 업데이트: 2026-06-21*

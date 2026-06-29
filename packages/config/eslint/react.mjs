@@ -1,4 +1,5 @@
 import { defineConfig } from 'eslint/config';
+import betterTailwindcss from 'eslint-plugin-better-tailwindcss';
 import reactPlugin from 'eslint-plugin-react';
 import reactHooks from 'eslint-plugin-react-hooks';
 import reactRefresh from 'eslint-plugin-react-refresh';
@@ -57,6 +58,19 @@ export default defineConfig([
           ],
         },
       ],
+    },
+  },
+  {
+    files: ['**/*.{jsx,tsx}'],
+    extends: [betterTailwindcss.configs['recommended']],
+    rules: {
+      'better-tailwindcss/enforce-consistent-line-wrapping': ['warn',
+        {
+          group: 'newLine',
+          preferSingleLine: false,
+          // printWidth: 0,
+          // classesPerLine: 1000,
+        }],
     },
   },
 ]);

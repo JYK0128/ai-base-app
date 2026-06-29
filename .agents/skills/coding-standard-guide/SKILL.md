@@ -31,6 +31,7 @@ description: 코드 수정, 버그 수정, 리팩터링, 린트/타입 오류 �
    - [최소 폴백 및 단일 신뢰 원천](file:///Users/server/Documents/GitHub/ai-base-app/.agents/skills/coding-standard-guide/references/03_minimal_fallback_and_trust.md) 가이드에 정의된 Fail-Fast 및 Source of Trust 원칙을 필수로 적용함
 3. **영향 검토**:
    - 엔티티, DTO, Helper, Generated Model, 테스트 코드 등의 영향 범위 해당 여부를 검증함
+   - Generated Model은 원본 이름을 직접 사용하고, 이름 재매핑용 별칭은 생성하지 않음
 4. **검증**:
    - 변경 범위에 맞춰 `tsc --noEmit`, `eslint`, `stylelint` 등 검증 도구를 수행하여 오류를 해결함
 5. **최종 보고**:

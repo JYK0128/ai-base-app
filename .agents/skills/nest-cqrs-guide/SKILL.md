@@ -1,6 +1,6 @@
 ---
 name: nest-cqrs-guide
-description: NestJS CQRS message, handler, event, and error structure guidance. Use when working on command/query/event classes, handlers, contracts, DTOs, ExceptionGuard-based errors, and CQRS tests.
+description: NestJS CQRS message, handler, event, and error structure guidance. Use when working on command/query/event classes, handlers, contracts, DTOs, ExceptionGuard-based errors, CQRS tests, and identify/verify/process handler flow.
 ---
 
 # NestJS CQRS Guide
@@ -21,6 +21,7 @@ description: NestJS CQRS message, handler, event, and error structure guidance. 
 | 📂 2. 도메인 및 디렉토리 구조 | feature-first 구조, 파일 역할, 중첩 규칙, export/import 기준 | `references/02_directory_structure.md` |
 | 🛠️ 3. 핵심 구성 요소 구현 | 메시지 클래스, 핸들러, 에러/어서터, 이벤트, DTO/contract 작성 기준 | `references/03_implementation_details.md` |
 | 🧪 4. 테스트 및 린트 | CQRS 테스트 방식, import 정리, 타입체크/린트 검증 기준 | `references/04_testing_and_lint.md` |
+| 🔄 5. 핸들러 단계 규칙 | `command/query` 기준 `identify - verify - process` 흐름, `process` 인자 순서, query DTO wrapping 규칙 | `references/05_handler_flow_contracts.md` |
 
 ---
 
@@ -29,9 +30,10 @@ description: NestJS CQRS message, handler, event, and error structure guidance. 
 1. **대상 파악**:
    - 변경 대상이 command, query, event, handler, DTO, error 중 무엇인지 먼저 분류함
 2. **구조 참조**:
-   - 위 참조 파일에서 역할 분리와 디렉토리 기준을 확인함
+   - 위 참조 파일에서 역할 분리와 디렉토리 기준을 확인하고, 특히 `command/query` 기준의 `identify - verify - process` 규칙을 확인함
 3. **구현**:
    - 메시지와 핸들러를 분리하고, payload와 결과를 명시적으로 유지함
+   - `process(command/query, identified...)` 순서를 지키고, query는 `process`에서 메인 조회와 DTO wrapping을 수행함
 4. **검증**:
    - 구조 변경 후 타입체크와 린트를 실행함
 5. **정리**:

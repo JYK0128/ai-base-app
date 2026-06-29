@@ -38,6 +38,7 @@
 * 📄 [08. 약관 관리 기능명세서](./08_terms_management.md)
 * 📢 [09. 공지사항 관리 기능명세서](./09_announcement_management.md)
 * 🔍 [10. 감사 로그 및 고객 지원 기능명세서](./10_audit_and_support.md)
+* 🧭 [11. platform-admin-web 메뉴 / 탭 / 기능 목록](./11_platform_admin_web_menu_tab_function_list.md)
 
 ---
-*최종 업데이트: 2026-06-07*
+*최종 업데이트: 2026-06-28*
