@@ -1,14 +1,19 @@
-import { Avatar, AvatarFallback, Badge, Button, type CellContext, type ColumnDef, DataTable, Drawer, DrawerClose, DrawerContent, DrawerDescription, DrawerFooter, DrawerHeader, DrawerTitle, Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle, Separator } from '@pkg/ui';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, Avatar, AvatarFallback, Badge, Button, type CellContext, type ColumnDef, type ColumnFiltersState, DataTable, Drawer, DrawerClose, DrawerContent, DrawerDescription, DrawerFooter, DrawerHeader, DrawerTitle, Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle, type PaginationState, type SortingState } from '@pkg/ui';
 import { Ban, CheckCircle2, Eye, UserCog } from 'lucide-react';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 
-import { useMembersControllerGetMemberPageV1, useMembersControllerToggleMemberStatusV1, useMembersControllerUpdateMemberRoleV1, useOrganizationControllerGetOrganizationRolesV1 } from '@/api/generated/endpoints';
-import type { GetMemberPageItemResponseDto as MemberItem, GetMemberPageItemResponseDtoStatus as MemberStatus, GetOrganizationRoleResponseDto as OrganizationRoleItem } from '@/api/generated/model';
+import { useMembersControllerGetMemberPageV1, useMembersControllerUpdateMemberRoleV1, useMembersControllerUpdateMemberStatusV1, useOrganizationControllerGetOrganizationRoleListV1 } from '@/api/generated/endpoints';
+import { type GetMemberPageFiltersDto, MemberPageItem, MemberPageItemStatus, MembersControllerGetMemberPageV1DirectionItem, MembersControllerGetMemberPageV1SortItem, OrganizationRoleListItem } from '@/api/generated/model';
 
-import { getInitials, type MemberRole, ROLE_META } from '../-members.shared';
-import { MembersPanel } from './MembersPanel';
+import { ManagementPanel } from '../../-components/ManagementPanel';
+import { buildRoleOptions, getRoleMeta } from '../-helpers/members-role.helper';
+import { getInitials } from '../-helpers/members-text.helper';
 
-function formatLastLoginAt(lastLoginAt: MemberItem['lastLoginAt']): string {
+type MemberRow = MemberPageItem & {
+  isMe?: boolean
+};
+
+function formatLastLoginAt(lastLoginAt: MemberRow['lastLoginAt']): string {
   return typeof lastLoginAt === 'string' ? lastLoginAt : '-';
 }
 
@@ -16,7 +21,7 @@ interface MembersTabProps {
   readonly isActive: boolean
 }
 
-type MemberOverride = Partial<Pick<MemberItem, 'roles' | 'status'>>;
+type MemberOverride = Partial<Pick<MemberRow, 'roles' | 'status'>>;
 
 type MemberOverrideMap = Record<string, MemberOverride>;
 
@@ -24,17 +29,36 @@ interface MembersMutationContext {
   previousOverrides: MemberOverrideMap
 }
 
-const EMPTY_MEMBERS: MemberItem[] = [];
-const EMPTY_ORGANIZATION_ROLES: OrganizationRoleItem[] = [];
+const EMPTY_MEMBERS: MemberRow[] = [];
+const EMPTY_ORGANIZATION_ROLES: OrganizationRoleListItem[] = [];
 
-function buildMemberColumns(roleOptions: readonly { value: string, label: string, badgeClassName: string }[]): ColumnDef<MemberItem>[] {
+type RoleOption = {
+  id: string
+  value: string
+  label: string
+};
+
+function isMemberStatus(value: unknown): value is MemberPageItemStatus {
+  return value === MemberPageItemStatus.ACTIVE || value === MemberPageItemStatus.INACTIVE;
+}
+
+function getServerStatusFilter(columnFilters: ColumnFiltersState): MemberPageItemStatus | undefined {
+  const statusFilter = columnFilters.find((filter) => filter.id === 'status');
+  const selectedStatuses = Array.isArray(statusFilter?.value)
+    ? statusFilter.value.filter(isMemberStatus)
+    : [];
+
+  return selectedStatuses.length === 1 ? selectedStatuses[0] : undefined;
+}
+
+function buildMemberColumns(roleOptions: readonly RoleOption[]): ColumnDef<MemberRow>[] {
   return [
     {
       accessorKey: 'name',
       header: '멤버',
       size: 320,
       enableSorting: true,
-      cell: ({ row }: CellContext<MemberItem, unknown>) => {
+      cell: ({ row }: CellContext<MemberRow, unknown>) => {
         const member = row.original;
 
         return (
@@ -47,7 +71,13 @@ function buildMemberColumns(roleOptions: readonly { value: string, label: string
                 <p className="truncate font-semibold text-slate-900">{member.name}</p>
                 {member.isMe
                   ? (
-                    <Badge variant="secondary" className="h-5 bg-sky-100 text-sky-700 hover:bg-sky-100">
+                    <Badge
+                      variant="secondary"
+                      className="
+                        h-5 bg-sky-100 text-sky-700
+                        hover:bg-sky-100
+                      "
+                    >
                       내 계정
                     </Badge>
                   )
@@ -63,30 +93,28 @@ function buildMemberColumns(roleOptions: readonly { value: string, label: string
       accessorKey: 'roles',
       header: '권한',
       size: 180,
-      enableSorting: true,
-      meta: {
-        faceted: {
-          options: roleOptions.map((option) => ({
-            label: option.label,
-            value: option.value,
-          })),
-        },
-      },
-      filterFn: 'faceted',
-      cell: ({ row, table }: CellContext<MemberItem, unknown>) => {
+      enableSorting: false,
+      cell: ({ row, table }: CellContext<MemberRow, unknown>) => {
         const member = row.original;
         const { action } = table.options.meta || {};
+        const selectedRoleId = roleOptions.find((option) => option.value === (member.roles?.[0] ?? ''))?.id ?? '';
 
         return (
           <div className="flex justify-center">
             <select
-              value={String(member.roles?.[0] ?? '')}
+              value={selectedRoleId}
               disabled={Boolean(member.isMe)}
-              onChange={(event) => action?.updateMemberRole(member, event.target.value as MemberRole)}
-              className="h-8 w-full max-w-40 rounded-lg border border-slate-200 bg-white px-2.5 text-sm text-slate-700 shadow-sm outline-none transition focus:border-sky-400 focus:ring-2 focus:ring-sky-100 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-400"
+              onChange={(event) => action?.updateMemberRole(member, event.target.value)}
+              className="
+                h-8 w-full max-w-40 rounded-lg border border-slate-200 bg-white
+                px-2.5 text-sm text-slate-700 shadow-sm transition outline-none
+                focus:border-sky-400 focus:ring-2 focus:ring-sky-100
+                disabled:cursor-not-allowed disabled:bg-slate-50
+                disabled:text-slate-400
+              "
             >
               {roleOptions.map((option) => (
-                <option key={option.value} value={option.value}>
+                <option key={option.id} value={option.id}>
                   {option.label}
                 </option>
               ))}
@@ -105,19 +133,19 @@ function buildMemberColumns(roleOptions: readonly { value: string, label: string
           options: [
             {
               label: '활성',
-              value: 'ACTIVE',
+              value: MemberPageItemStatus.ACTIVE,
               icon: CheckCircle2,
             },
             {
               label: '비활성',
-              value: 'INACTIVE',
+              value: MemberPageItemStatus.INACTIVE,
               icon: Ban,
             },
           ],
         },
       },
       filterFn: 'faceted',
-      cell: ({ row }: CellContext<MemberItem, unknown>) => (
+      cell: ({ row }: CellContext<MemberRow, unknown>) => (
         <div className="flex justify-center">
           <MemberStatusBadge status={row.original.status} />
         </div>
@@ -128,9 +156,9 @@ function buildMemberColumns(roleOptions: readonly { value: string, label: string
       header: '최근 로그인',
       size: 180,
       enableSorting: true,
-      cell: ({ row }: CellContext<MemberItem, unknown>) => (
+      cell: ({ row }: CellContext<MemberRow, unknown>) => (
         <div className="text-center">
-          <p className="whitespace-nowrap font-medium text-slate-800">
+          <p className="font-medium whitespace-nowrap text-slate-800">
             {formatLastLoginAt(row.original.lastLoginAt)}
           </p>
         </div>
@@ -142,7 +170,7 @@ function buildMemberColumns(roleOptions: readonly { value: string, label: string
       size: 240,
       enableSorting: false,
       enableHiding: false,
-      cell: ({ row, table }: CellContext<MemberItem, unknown>) => {
+      cell: ({ row, table }: CellContext<MemberRow, unknown>) => {
         const { action } = table.options.meta || {};
 
         return (
@@ -156,8 +184,6 @@ function buildMemberColumns(roleOptions: readonly { value: string, label: string
               <Eye className="size-3.5" />
               상세
             </Button>
-
-            <MemberActionButton member={row.original} onToggleStatus={() => action?.toggleMemberStatus(row.original)} />
           </div>
         );
       },
@@ -166,23 +192,71 @@ function buildMemberColumns(roleOptions: readonly { value: string, label: string
 }
 
 export function MembersTab({ isActive }: MembersTabProps) {
-  const organizationRolesQuery = useOrganizationControllerGetOrganizationRolesV1({
+  const organizationRolesQuery = useOrganizationControllerGetOrganizationRoleListV1({
     query: {
       enabled: isActive,
     },
   });
-  const membersQuery = useMembersControllerGetMemberPageV1({ page: 1, limit: 1000 }, {
+  const [globalFilter, setGlobalFilter] = useState('');
+  const [pagination, setPagination] = useState<PaginationState>({
+    pageIndex: 0,
+    pageSize: 10,
+  });
+  const [sorting, setSorting] = useState<SortingState>([]);
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+
+  const normalizedGlobalFilter = globalFilter.trim();
+
+  const membersQueryParams = useMemo(() => {
+    const filters: GetMemberPageFiltersDto = {};
+    const statusFilter = getServerStatusFilter(columnFilters);
+
+    if (normalizedGlobalFilter.length > 0) {
+      filters.search = normalizedGlobalFilter;
+    }
+
+    if (statusFilter) {
+      filters.status = statusFilter;
+    }
+
+    const sortPairs = sorting
+      .map((item) => ({
+        sort: item.id as MembersControllerGetMemberPageV1SortItem,
+        direction: item.desc
+          ? MembersControllerGetMemberPageV1DirectionItem.desc
+          : MembersControllerGetMemberPageV1DirectionItem.asc,
+      }))
+      .filter((item) => (
+        item.sort === MembersControllerGetMemberPageV1SortItem.createdAt
+        || item.sort === MembersControllerGetMemberPageV1SortItem.name
+        || item.sort === MembersControllerGetMemberPageV1SortItem.status
+        || item.sort === MembersControllerGetMemberPageV1SortItem.lastLoginAt
+      ));
+
+    return {
+      page: pagination.pageIndex + 1,
+      limit: pagination.pageSize,
+      filters,
+      ...(sortPairs.length > 0
+        ? {
+          sort: sortPairs.map((item) => item.sort),
+          direction: sortPairs.map((item) => item.direction),
+        }
+        : {}),
+    };
+  }, [columnFilters, normalizedGlobalFilter, pagination.pageIndex, pagination.pageSize, sorting]);
+
+  const membersQuery = useMembersControllerGetMemberPageV1(membersQueryParams, {
     query: {
       enabled: isActive,
     },
   });
-  const members = membersQuery.data?.data?.items ?? EMPTY_MEMBERS;
-  const organizationRoles = organizationRolesQuery.data?.data ?? EMPTY_ORGANIZATION_ROLES;
-  const roleOptions = organizationRoles.map((role) => ({
-    value: role.code,
-    label: role.name,
-    badgeClassName: ROLE_META[role.code as MemberRole]?.badgeClassName ?? 'border-slate-200 bg-slate-100 text-slate-700 hover:bg-slate-100',
-  }));
+  const members = membersQuery.data?.items ?? EMPTY_MEMBERS;
+  const totalCount = membersQuery.data?.totalCount ?? 0;
+  const totalPages = membersQuery.data?.totalPages ?? 0;
+  const organizationRoles = organizationRolesQuery.data?.items ?? EMPTY_ORGANIZATION_ROLES;
+  const isLoading = organizationRolesQuery.isPending || membersQuery.isPending;
+  const roleOptions = buildRoleOptions(organizationRoles);
   const [memberOverrides, setMemberOverrides] = useState<MemberOverrideMap>({});
 
   const membersView = members.map((member) => {
@@ -198,12 +272,14 @@ export function MembersTab({ isActive }: MembersTabProps) {
     mutation: {
       onMutate: (variables) => {
         const previousOverrides = memberOverrides;
+        const nextRoleId = typeof variables.data.role === 'string' ? variables.data.role : '';
+        const nextRoleCode = roleOptions.find((option) => option.id === nextRoleId)?.value;
 
         setMemberOverrides((current) => ({
           ...current,
           [variables.data.id]: {
             ...(current[variables.data.id] ?? {}),
-            roles: [variables.data.role as string],
+            roles: nextRoleCode ? [nextRoleCode] : (current[variables.data.id]?.roles ?? []),
           },
         }));
 
@@ -219,23 +295,16 @@ export function MembersTab({ isActive }: MembersTabProps) {
     },
   });
 
-  const toggleMemberStatusMutation = useMembersControllerToggleMemberStatusV1<unknown, MembersMutationContext>({
+  const toggleMemberStatusMutation = useMembersControllerUpdateMemberStatusV1<unknown, MembersMutationContext>({
     mutation: {
       onMutate: (variables) => {
         const previousOverrides = memberOverrides;
-        const currentMember = membersView.find((member) => member.id === variables.data.id);
-
-        if (!currentMember) {
-          return { previousOverrides };
-        }
-
-        const nextStatus = currentMember.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE';
 
         setMemberOverrides((current) => ({
           ...current,
           [variables.data.id]: {
             ...(current[variables.data.id] ?? {}),
-            status: nextStatus,
+            status: variables.data.status,
           },
         }));
 
@@ -259,77 +328,115 @@ export function MembersTab({ isActive }: MembersTabProps) {
 
   const metaValue = {
     action: {
-      updateMemberRole: (row: MemberItem, nextRole: MemberRole) => {
-        void updateMemberRoleMutation.mutateAsync({ data: { id: row.id, role: nextRole } });
+      updateMemberRole: (row: MemberRow, nextRoleId: string) => {
+        void updateMemberRoleMutation.mutateAsync({
+          data: {
+            id: row.id,
+            role: nextRoleId,
+          },
+        });
       },
-      toggleMemberStatus: (row: MemberItem) => {
-        void toggleMemberStatusMutation.mutateAsync({ data: { id: row.id } });
-      },
-      handleOpenDetail: (row: MemberItem) => {
+      handleOpenDetail: (row: MemberRow) => {
         setSelectedMemberId(row.id);
       },
     },
   };
 
   return (
-    <div className="flex flex-1 flex-col">
-      <MembersPanel
+    <div className="flex min-h-0 flex-1 flex-col">
+      <ManagementPanel
         icon={<UserCog className="size-4 text-sky-600" />}
         title="멤버 목록"
-        description="검색은 툴바에서, 상태와 권한은 컬럼 헤더 메뉴에서 조작합니다."
+        description="검색은 툴바에서, 권한은 목록에서, 상태는 상세에서 조작합니다."
       >
-        <div className="space-y-4">
-          <div className="h-160">
-            <DataTable
-              columns={buildMemberColumns(roleOptions)}
-              data={membersView}
-              defaultPageSize={10}
-              filterColumns={['name', 'email', 'role', 'status', 'lastLoginAt', 'invitedAt', 'createdBy']}
-              filterPlaceholder="이름, 이메일, 권한, 초대한 사람으로 검색"
-              meta={metaValue}
-            />
-          </div>
-        </div>
-      </MembersPanel>
+        <DataTable
+          columns={buildMemberColumns(roleOptions)}
+          data={membersView}
+          rowCount={totalCount}
+          pageCount={totalPages}
+          defaultPageSize={10}
+          filterColumns={['email']}
+          filterPlaceholder="이름, 이메일로 검색"
+          onGlobalFilterChange={(value) => {
+            setGlobalFilter(typeof value === 'string' ? value : '');
+            setPagination((current) => (
+              current.pageIndex === 0
+                ? current
+                : { ...current, pageIndex: 0 }
+            ));
+          }}
+          onSortingChange={(nextSorting) => {
+            setSorting(nextSorting);
+            setPagination((current) => (
+              current.pageIndex === 0
+                ? current
+                : { ...current, pageIndex: 0 }
+            ));
+          }}
+          onColumnFiltersChange={(nextColumnFilters) => {
+            setColumnFilters(nextColumnFilters);
+            setPagination((current) => (
+              current.pageIndex === 0
+                ? current
+                : { ...current, pageIndex: 0 }
+            ));
+          }}
+          onPaginationChange={setPagination}
+          loading={isLoading}
+          meta={metaValue}
+        />
+      </ManagementPanel>
 
       <MemberDetailDrawer
         open={selectedMemberId !== null}
         member={selectedMember}
         onOpenChange={handleDrawerOpenChange}
         onToggleStatus={(id) => {
-          void toggleMemberStatusMutation.mutateAsync({ data: { id } });
+          const member = membersView.find((item) => item.id === id);
+
+          if (!member) {
+            return;
+          }
+
+          void toggleMemberStatusMutation.mutateAsync({
+            data: {
+              id,
+              status: member.status === MemberPageItemStatus.ACTIVE
+                ? MemberPageItemStatus.INACTIVE
+                : MemberPageItemStatus.ACTIVE,
+            },
+          });
         }}
       />
     </div>
   );
 }
 
-function MemberStatusBadge({ status }: Readonly<{ status: MemberStatus }>) {
-  if (status === 'ACTIVE') {
+function MemberStatusBadge({ status }: Readonly<{ status: MemberPageItemStatus }>) {
+  if (status === MemberPageItemStatus.ACTIVE) {
     return (
-      <Badge className="border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-50">
+      <Badge className="
+        border-emerald-200 bg-emerald-50 text-emerald-700
+        hover:bg-emerald-50
+      "
+      >
         활성
       </Badge>
     );
   }
 
   return (
-    <Badge variant="outline" className="border-slate-200 bg-slate-100 text-slate-700">
+    <Badge
+      variant="outline"
+      className="border-slate-200 bg-slate-100 text-slate-700"
+    >
       비활성
     </Badge>
   );
 }
 
-function RoleBadge({ role }: Readonly<{ role: MemberRole }>) {
-  const option = ROLE_META[role];
-
-  if (!option) {
-    return (
-      <Badge variant="outline" className="border-slate-200 bg-slate-100 text-slate-700">
-        미지정
-      </Badge>
-    );
-  }
+function RoleBadge({ role }: Readonly<{ role: string | null | undefined }>) {
+  const option = getRoleMeta(role);
 
   return (
     <Badge variant="outline" className={option.badgeClassName}>
@@ -342,18 +449,23 @@ function MemberActionButton({
   member,
   onToggleStatus,
 }: Readonly<{
-  member: MemberItem
+  member: MemberRow
   onToggleStatus: (id: string) => void
 }>) {
   if (member.isMe) {
     return (
-      <Button variant="outline" size="sm" disabled className="gap-1.5 whitespace-nowrap">
+      <Button
+        variant="outline"
+        size="sm"
+        disabled
+        className="gap-1.5 whitespace-nowrap"
+      >
         내 계정 보호
       </Button>
     );
   }
 
-  const isActive = member.status === 'ACTIVE';
+  const isActive = member.status === MemberPageItemStatus.ACTIVE;
 
   return (
     <Button
@@ -380,18 +492,50 @@ function MemberActionButton({
 }
 
 interface MemberDetailDrawerProps {
-  readonly member: MemberItem | null
+  readonly member: MemberRow | null
   readonly onOpenChange: (open: boolean) => void
   readonly onToggleStatus: (id: string) => void
   readonly open: boolean
 }
 
 function MemberDetailDrawer({ open, member, onOpenChange, onToggleStatus }: MemberDetailDrawerProps) {
+  const [isDeactivateConfirmOpen, setIsDeactivateConfirmOpen] = useState(false);
+
+  const handleOpenChange = (nextOpen: boolean) => {
+    if (!nextOpen) {
+      setIsDeactivateConfirmOpen(false);
+    }
+
+    onOpenChange(nextOpen);
+  };
+
+  const handleToggleStatus = () => {
+    if (!member) {
+      return;
+    }
+
+    if (member.status === MemberPageItemStatus.ACTIVE) {
+      setIsDeactivateConfirmOpen(true);
+      return;
+    }
+
+    onToggleStatus(member.id);
+  };
+
+  const handleConfirmDeactivate = () => {
+    if (!member) {
+      return;
+    }
+
+    setIsDeactivateConfirmOpen(false);
+    onToggleStatus(member.id);
+  };
+
   return (
-    <Drawer open={open} onOpenChange={onOpenChange} direction="right">
+    <Drawer open={open} onOpenChange={handleOpenChange} direction="right">
       <DrawerContent className="h-full w-120 max-w-[92vw] bg-white p-0">
-        <div className="flex h-full flex-col">
-          <DrawerHeader className="border-b border-slate-200 px-4 py-4">
+        <div className="grid h-full min-h-0 grid-rows-[auto_minmax(0,1fr)_auto]">
+          <DrawerHeader className="border-b border-slate-200 p-4">
             <DrawerTitle className="flex items-center gap-2 text-slate-900">
               <UserCog className="size-4 text-sky-600" />
               멤버 상세
@@ -403,7 +547,10 @@ function MemberDetailDrawer({ open, member, onOpenChange, onToggleStatus }: Memb
 
           {!member
             ? (
-              <div className="flex flex-1 flex-col items-center justify-center p-6">
+              <div className="
+                flex flex-1 flex-col items-center justify-center p-6
+              "
+              >
                 <Empty>
                   <EmptyHeader>
                     <EmptyMedia variant="icon">
@@ -416,40 +563,58 @@ function MemberDetailDrawer({ open, member, onOpenChange, onToggleStatus }: Memb
               </div>
             )
             : (
-              <div className="flex flex-1 flex-col gap-4 scroll p-4">
-                <div className="flex items-start gap-3">
-                  <Avatar size="lg">
-                    <AvatarFallback>{getInitials(member.name)}</AvatarFallback>
-                  </Avatar>
+              <div className="scroll-y flex flex-col gap-4 p-4">
+                <div className="
+                  flex flex-col gap-3
+                  sm:flex-row sm:items-start sm:justify-between
+                "
+                >
+                  <div className="flex items-start gap-3">
+                    <Avatar size="lg">
+                      <AvatarFallback>{getInitials(member.name)}</AvatarFallback>
+                    </Avatar>
 
-                  <div className="min-w-0 space-y-1">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <p className="text-base font-semibold text-slate-950">{member.name}</p>
-                      {member.isMe
-                        ? (
-                          <Badge variant="secondary" className="h-5 bg-sky-100 text-sky-700 hover:bg-sky-100">
-                            내 계정
-                          </Badge>
-                        )
-                        : null}
-                    </div>
-                    <p className="truncate text-sm text-slate-500">{member.email}</p>
-                    <div className="flex flex-wrap gap-2 pt-1">
-                      <RoleBadge role={member.roles?.[0] ?? ''} />
-                      <MemberStatusBadge status={member.status} />
+                    <div className="min-w-0 space-y-1">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <p className="text-base font-semibold text-slate-950">{member.name}</p>
+                        {member.isMe
+                          ? (
+                            <Badge
+                              variant="secondary"
+                              className="
+                                h-5 bg-sky-100 text-sky-700
+                                hover:bg-sky-100
+                              "
+                            >
+                              내 계정
+                            </Badge>
+                          )
+                          : null}
+                      </div>
+                      <p className="truncate text-sm text-slate-500">{member.email}</p>
+                      <div className="flex flex-wrap gap-2 pt-1">
+                        <RoleBadge role={member.roles?.[0]} />
+                        <MemberStatusBadge status={member.status} />
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                <Separator />
-
-                <div className="flex flex-wrap gap-2">
-                  <MemberActionButton member={member} onToggleStatus={onToggleStatus} />
+                  <div className="
+                    shrink-0
+                    sm:pt-1
+                  "
+                  >
+                    <MemberActionButton member={member} onToggleStatus={handleToggleStatus} />
+                  </div>
                 </div>
 
                 {member.isMe
                   ? (
-                    <p className="rounded-xl border border-dashed border-sky-200 bg-sky-50 px-3 py-2 text-xs leading-5 text-sky-700">
+                    <p className="
+                      rounded-xl border border-dashed border-sky-200 bg-sky-50
+                      px-3 py-2 text-xs/5 text-sky-700
+                    "
+                    >
                       내 계정은 비활성화할 수 없습니다.
                     </p>
                   )
@@ -457,13 +622,32 @@ function MemberDetailDrawer({ open, member, onOpenChange, onToggleStatus }: Memb
               </div>
             )}
 
-          <DrawerFooter className="border-t border-slate-200 px-4 py-4">
+          <DrawerFooter className="border-t border-slate-200 p-4">
             <DrawerClose asChild>
               <Button type="button" variant="outline" className="w-full">
                 닫기
               </Button>
             </DrawerClose>
           </DrawerFooter>
+
+          <AlertDialog open={isDeactivateConfirmOpen} onOpenChange={setIsDeactivateConfirmOpen}>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>멤버를 비활성화할까요?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  {member?.name ?? '선택한 멤버'}
+                  의 계정을 비활성화합니다.
+                  다시 활성화할 수 있지만, 비활성화 동안에는 접근이 제한됩니다.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>취소</AlertDialogCancel>
+                <AlertDialogAction onClick={handleConfirmDeactivate}>
+                  비활성화
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </div>
       </DrawerContent>
     </Drawer>

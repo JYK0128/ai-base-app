@@ -7,6 +7,6 @@
  */
 
 export interface CreateInviteResponseDto {
-  /** 초대 식별자 */
+  /** 식별자 */
   id: string;
 }

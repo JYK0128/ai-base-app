@@ -25,19 +25,19 @@ export class SendInviteEmailHandler implements ICommandHandler<SendInviteEmailCo
   @Transactional()
   async execute(command: SendInviteEmailContract): Promise<void> {
     const payload = await this.identifyPayload(command);
-    await this.validatePolicies(payload);
-    await this.processEmailSending(payload);
+    await this.verifyPolicies(payload);
+    await this.processSend(payload);
   }
 
   private async identifyPayload(command: SendInviteEmailContract): Promise<SendInviteEmailContract['payload']> {
     return command.payload;
   }
 
-  private async validatePolicies(_payload: SendInviteEmailContract['payload']): Promise<void> {
+  private async verifyPolicies(_payload: SendInviteEmailContract['payload']): Promise<void> {
     // 발송 정책 유효성 검사 영역
   }
 
-  private async processEmailSending(payload: SendInviteEmailContract['payload']): Promise<void> {
+  private async processSend(payload: SendInviteEmailContract['payload']): Promise<void> {
     const { email, organizationName, inviterName, token, inviteId, attemptId } = payload;
 
     await this.Asserter.assert(

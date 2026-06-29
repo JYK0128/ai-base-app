@@ -6,9 +6,4 @@
  * OpenAPI spec version: 1.0
  */
 
-export interface UpdateMemberRoleRequestDto {
-  /** 멤버 식별자 */
-  id: string;
-  /** 변경할 역할 */
-  role: string;
-}
+export interface GetInviteListFiltersDto { [key: string]: unknown }

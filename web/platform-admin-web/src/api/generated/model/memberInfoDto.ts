@@ -5,10 +5,13 @@
  * The AI Base App Platform Service API documentation
  * OpenAPI spec version: 1.0
  */
+import type { MemberInfoDtoStatus } from './memberInfoDtoStatus';
 
-export interface UpdateMemberRoleRequestDto {
+export interface MemberInfoDto {
   /** 멤버 식별자 */
   id: string;
-  /** 변경할 역할 */
-  role: string;
+  /** 멤버 이름 */
+  name: string;
+  /** 멤버 상태 */
+  status: MemberInfoDtoStatus;
 }

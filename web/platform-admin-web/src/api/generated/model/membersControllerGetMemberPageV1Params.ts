@@ -5,18 +5,11 @@
  * The AI Base App Platform Service API documentation
  * OpenAPI spec version: 1.0
  */
+import type { GetMemberPageFiltersDto } from './getMemberPageFiltersDto';
 import type { MembersControllerGetMemberPageV1DirectionItem } from './membersControllerGetMemberPageV1DirectionItem';
-import type { Object } from './object';
+import type { MembersControllerGetMemberPageV1SortItem } from './membersControllerGetMemberPageV1SortItem';
 
 export type MembersControllerGetMemberPageV1Params = {
-/**
- * 정렬 필드
- */
-sort?: string[];
-/**
- * 정렬 방향
- */
-direction?: MembersControllerGetMemberPageV1DirectionItem[];
 /**
  * 페이지 번호
  */
@@ -28,5 +21,13 @@ limit?: number;
 /**
  * 필터 조건
  */
-filters?: Object;
+filters?: GetMemberPageFiltersDto;
+/**
+ * 정렬 필드
+ */
+sort?: MembersControllerGetMemberPageV1SortItem[];
+/**
+ * 정렬 방향
+ */
+direction?: MembersControllerGetMemberPageV1DirectionItem[];
 };

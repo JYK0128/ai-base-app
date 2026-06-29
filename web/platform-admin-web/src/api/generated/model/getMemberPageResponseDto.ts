@@ -5,11 +5,9 @@
  * The AI Base App Platform Service API documentation
  * OpenAPI spec version: 1.0
  */
-import type { GetMemberPageItemResponseDto } from './getMemberPageItemResponseDto';
+import type { MemberPageItem } from './memberPageItem';
 
 export interface GetMemberPageResponseDto {
-  /** 멤버 목록 */
-  items: GetMemberPageItemResponseDto[];
   /** 전체 개수 */
   totalCount: number;
   /** 페이지 번호 */
@@ -22,4 +20,6 @@ export interface GetMemberPageResponseDto {
   hasNextPage: boolean;
   /** 이전 페이지 존재 여부 */
   hasPrevPage: boolean;
+  /** 멤버 목록 */
+  items: MemberPageItem[];
 }

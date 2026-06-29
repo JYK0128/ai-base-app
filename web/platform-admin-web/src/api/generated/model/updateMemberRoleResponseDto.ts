@@ -7,6 +7,6 @@
  */
 
 export interface UpdateMemberRoleResponseDto {
-  /** 멤버 식별자 */
+  /** 식별자 */
   id: string;
 }
