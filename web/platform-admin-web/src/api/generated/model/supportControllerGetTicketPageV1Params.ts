@@ -7,16 +7,9 @@
  */
 import type { GetTicketPageFiltersDto } from './getTicketPageFiltersDto';
 import type { SupportControllerGetTicketPageV1DirectionItem } from './supportControllerGetTicketPageV1DirectionItem';
+import type { SupportControllerGetTicketPageV1SortItem } from './supportControllerGetTicketPageV1SortItem';
 
 export type SupportControllerGetTicketPageV1Params = {
-/**
- * 정렬 필드
- */
-sort?: string[];
-/**
- * 정렬 방향
- */
-direction?: SupportControllerGetTicketPageV1DirectionItem[];
 /**
  * 페이지 번호
  */
@@ -29,4 +22,12 @@ limit?: number;
  * 필터 조건
  */
 filters?: GetTicketPageFiltersDto;
+/**
+ * 정렬 필드
+ */
+sort?: SupportControllerGetTicketPageV1SortItem[];
+/**
+ * 정렬 방향
+ */
+direction?: SupportControllerGetTicketPageV1DirectionItem[];
 };

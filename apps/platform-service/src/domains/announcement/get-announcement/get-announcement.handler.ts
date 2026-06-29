@@ -1,6 +1,5 @@
-import { InjectRepository } from '@mikro-orm/nestjs';
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
-import { Announcement, CoreRepository } from '@pkg/database';
+import { Announcement } from '@pkg/database';
 
 import { GetAnnouncementContract } from './get-announcement.contract';
 import { GetAnnouncementAsserter } from './get-announcement.error';
@@ -10,14 +9,18 @@ import { GetAnnouncementResponseDto } from './get-announcement.response.dto';
 export class GetAnnouncementHandler implements IQueryHandler<GetAnnouncementContract> {
   private readonly Asserter = GetAnnouncementAsserter;
 
-  constructor(
-    @InjectRepository(Announcement)
-    private readonly announcementRepository: CoreRepository<Announcement>,
-  ) {}
+  async execute(query: GetAnnouncementContract): Promise<GetAnnouncementResponseDto> {
+    this.verifyAnnouncement(query);
+    return this.processDetail(query);
+  }
 
-  async execute({ data }: GetAnnouncementContract): Promise<GetAnnouncementResponseDto> {
+  private verifyAnnouncement(_query: GetAnnouncementContract): void {
+    // 공지 조회 정책 검증 영역
+  }
+
+  private async processDetail(query: GetAnnouncementContract): Promise<GetAnnouncementResponseDto> {
     const announcement = await this.Asserter.assert(
-      this.announcementRepository.findOne({ id: data.id }),
+      Announcement.findOne({ id: query.data.id }),
       'ANNOUNCEMENT_NOT_FOUND',
     );
 

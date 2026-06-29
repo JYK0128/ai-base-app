@@ -6,8 +6,8 @@
  * OpenAPI spec version: 1.0
  */
 import type { ApiResponse } from './apiResponse';
-import type { GetTicketResponseDto } from './getTicketResponseDto';
+import type { GetTicketPageResponseDto } from './getTicketPageResponseDto';
 
 export type SupportControllerGetTicketPageV1200 = ApiResponse & {
-  data?: GetTicketResponseDto[];
+  data?: GetTicketPageResponseDto;
 };

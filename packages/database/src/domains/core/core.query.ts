@@ -1,5 +1,5 @@
 import { BaseEntity, CountByOptions, CountOptions, CreateOptions, Cursor, DeleteOptions, Dictionary, EntityData, EntityKey, EntityManager, EntityName, FilterQuery, FindByCursorOptions, FindOneOptions, FindOneOrFailOptions, FindOptions, Loaded, NativeInsertUpdateOptions, Primary, RequestContext, RequiredEntityData, UpdateOptions, UpsertManyOptions, UpsertOptions, WithUsingOptions } from '@mikro-orm/core';
-import { ServerContext } from '@pkg/shared/server';
+import { AuthContext } from '@pkg/shared/server';
 
 export const QueryEngine = {
   get em(): EntityManager {
@@ -7,9 +7,9 @@ export const QueryEngine = {
     if (!em) throw new Error('EntityManager not found in RequestContext.');
     return em;
   },
-  get context(): ServerContext {
-    const context = this.em.getLoggerContext<ServerContext>();
-    if (!context) throw new Error('ServerContext not found in RequestContext.');
+  get context(): AuthContext {
+    const context = this.em.getLoggerContext<AuthContext>();
+    if (!context) throw new Error('AuthContext not found in RequestContext.');
     return context;
   },
 
@@ -211,7 +211,7 @@ export const QueryEngine = {
     return this.em.nativeUpdate(clz, where as FilterQuery<NoInfer<Entity>>, {
       ...data,
       updatedAt: new Date(),
-      updatedBy: this.context.accountId,
+      updatedBy: this.context.account?.id,
     }, options);
   },
 

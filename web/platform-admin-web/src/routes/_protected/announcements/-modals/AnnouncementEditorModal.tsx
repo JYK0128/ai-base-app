@@ -3,29 +3,32 @@ import { useStore } from '@tanstack/react-form';
 import { Loader2, Megaphone } from 'lucide-react';
 import { z } from 'zod';
 
-import { ANNOUNCEMENT_AUDIENCE_LABELS, ANNOUNCEMENT_CATEGORY_LABELS, ANNOUNCEMENT_PRIORITY_LABELS, type AnnouncementCategory, type AnnouncementEditorSeed, type AnnouncementEditorState, buildCreateAnnouncementDto, buildUpdateAnnouncementDto, type CreateAnnouncementDto, toEditorState, type UpdateAnnouncementDto } from '../-announcements.shared';
+import type { AnnouncementPageItemAudience, AnnouncementPageItemCategory, AnnouncementPageItemPriority, CreateAnnouncementRequestDto, UpdateAnnouncementRequestDto } from '@/api/generated/model';
+
+import { buildCreateAnnouncementDto, buildUpdateAnnouncementDto, toEditorState } from '../-helpers/announcements.helper';
+import { ANNOUNCEMENT_AUDIENCE_LABELS, ANNOUNCEMENT_CATEGORY_LABELS, ANNOUNCEMENT_PRIORITY_LABELS, type AnnouncementEditorSeed, type AnnouncementEditorState } from '../-helpers/announcements-types.helper';
 
 interface AnnouncementEditorModalProps {
   readonly announcement: AnnouncementEditorSeed
   readonly open: boolean
   readonly onOpenChange: (open: boolean) => void
-  readonly onSave: (announcement: CreateAnnouncementDto | UpdateAnnouncementDto) => void | Promise<void>
+  readonly onSave: (announcement: CreateAnnouncementRequestDto | UpdateAnnouncementRequestDto) => void | Promise<void>
 }
 
-const CATEGORY_ITEMS = (Object.entries(ANNOUNCEMENT_CATEGORY_LABELS) as Array<[AnnouncementCategory, string]>).map(([value, label]) => ({
+const CATEGORY_ITEMS = (Object.entries(ANNOUNCEMENT_CATEGORY_LABELS) as Array<[AnnouncementPageItemCategory, string]>).map(([value, label]) => ({
   value,
   label,
-})) satisfies Array<{ value: AnnouncementCategory, label: string }>;
+})) satisfies Array<{ value: AnnouncementPageItemCategory, label: string }>;
 
 const AUDIENCE_ITEMS = [
-  { value: 'ALL', label: ANNOUNCEMENT_AUDIENCE_LABELS.ALL },
-  { value: 'ORGANIZATION', label: ANNOUNCEMENT_AUDIENCE_LABELS.ORGANIZATION },
-] satisfies Array<{ value: string, label: string }>;
+  { value: 'ALL' as AnnouncementPageItemAudience, label: ANNOUNCEMENT_AUDIENCE_LABELS.ALL },
+  { value: 'ORGANIZATION' as AnnouncementPageItemAudience, label: ANNOUNCEMENT_AUDIENCE_LABELS.ORGANIZATION },
+] satisfies Array<{ value: AnnouncementPageItemAudience, label: string }>;
 
 const PRIORITY_ITEMS = Object.entries(ANNOUNCEMENT_PRIORITY_LABELS).map(([value, label]) => ({
-  value,
+  value: value as AnnouncementPageItemPriority,
   label,
-})) satisfies Array<{ value: string, label: string }>;
+})) satisfies Array<{ value: AnnouncementPageItemPriority, label: string }>;
 
 const ANNOUNCEMENT_EDITOR_SCHEMA = z.object({
   title: z.string().trim().min(1, '제목을 입력해주세요.'),
@@ -77,10 +80,22 @@ export function AnnouncementEditorModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="grid h-[85vh] w-full grid-rows-[auto_1fr] overflow-hidden bg-white p-6 sm:max-w-5xl!">
+      <DialogContent className="
+        grid h-[85vh] w-full grid-rows-[auto_1fr] overflow-hidden bg-white p-6
+        sm:max-w-5xl!
+      "
+      >
         <DialogHeader className="border-b border-slate-200 pb-3">
-          <DialogTitle className="flex items-center gap-2 text-lg font-bold tracking-tight text-slate-950">
-            <span className="rounded-xl border border-slate-200 bg-slate-50 p-1.5 text-slate-500">
+          <DialogTitle className="
+            flex items-center gap-2 text-lg font-bold tracking-tight
+            text-slate-950
+          "
+          >
+            <span className="
+              rounded-xl border border-slate-200 bg-slate-50 p-1.5
+              text-slate-500
+            "
+            >
               <Megaphone className="size-4" />
             </span>
             {isAnnouncementEditing(announcement) ? '공지 수정' : '공지 작성'}
@@ -96,8 +111,14 @@ export function AnnouncementEditorModal({
           <form.Layout className="grid h-full grid-rows-[minmax(0,1fr)_auto]" onSubmit={(event) => void form.handleSubmit(event)}>
             <div className="scroll py-4 pr-1">
               <div className="grid gap-6">
-                <form.FieldSet className="rounded-xl border border-slate-200 bg-slate-50/60 p-4">
-                  <form.FieldLegend className="px-1 text-sm font-semibold text-slate-900">
+                <form.FieldSet className="
+                  rounded-xl border border-slate-200 bg-slate-50/60 p-4
+                "
+                >
+                  <form.FieldLegend className="
+                    px-1 text-sm font-semibold text-slate-900
+                  "
+                  >
                     기본 정보
                   </form.FieldLegend>
 
@@ -114,7 +135,11 @@ export function AnnouncementEditorModal({
                       )}
                     </form.AppField>
 
-                    <div className="grid gap-4 lg:grid-cols-2">
+                    <div className="
+                      grid gap-4
+                      lg:grid-cols-2
+                    "
+                    >
                       <form.AppField name="category">
                         {(field) => (
                           <field.Select
@@ -142,7 +167,11 @@ export function AnnouncementEditorModal({
                       </form.AppField>
                     </div>
 
-                    <div className="grid gap-4 lg:grid-cols-2">
+                    <div className="
+                      grid gap-4
+                      lg:grid-cols-2
+                    "
+                    >
                       <form.AppField name="priority">
                         {(field) => (
                           <field.Select
@@ -159,7 +188,11 @@ export function AnnouncementEditorModal({
 
                     <form.AppField name="isPublished">
                       {(field) => (
-                        <div className="flex items-center justify-between rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-sm">
+                        <div className="
+                          flex items-center justify-between rounded-xl border
+                          border-slate-200 bg-white px-4 py-3 shadow-sm
+                        "
+                        >
                           <div className="space-y-1">
                             <div className="text-sm font-medium text-slate-900">게시 유무</div>
                             <div className="text-xs text-slate-500">
@@ -177,12 +210,22 @@ export function AnnouncementEditorModal({
                   </form.FieldGroup>
                 </form.FieldSet>
 
-                <form.FieldSet className="rounded-xl border border-slate-200 bg-slate-50/60 p-4">
-                  <form.FieldLegend className="px-1 text-sm font-semibold text-slate-900">
+                <form.FieldSet className="
+                  rounded-xl border border-slate-200 bg-slate-50/60 p-4
+                "
+                >
+                  <form.FieldLegend className="
+                    px-1 text-sm font-semibold text-slate-900
+                  "
+                  >
                     게시 설정
                   </form.FieldLegend>
 
-                  <form.FieldGroup className="grid gap-4 lg:grid-cols-2">
+                  <form.FieldGroup className="
+                    grid gap-4
+                    lg:grid-cols-2
+                  "
+                  >
                     <form.AppField name="startAt">
                       {(field) => (
                         <field.Input
@@ -211,8 +254,14 @@ export function AnnouncementEditorModal({
                   </form.FieldGroup>
                 </form.FieldSet>
 
-                <form.FieldSet className="rounded-xl border border-slate-200 bg-slate-50/60 p-4">
-                  <form.FieldLegend className="px-1 text-sm font-semibold text-slate-900">
+                <form.FieldSet className="
+                  rounded-xl border border-slate-200 bg-slate-50/60 p-4
+                "
+                >
+                  <form.FieldLegend className="
+                    px-1 text-sm font-semibold text-slate-900
+                  "
+                  >
                     본문
                   </form.FieldLegend>
 

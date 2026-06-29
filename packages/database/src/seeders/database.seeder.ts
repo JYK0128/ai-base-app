@@ -5,6 +5,7 @@ import { I18nSeeder } from './i18n.seeder';
 import { OrganizationSeeder } from './organization.seeder';
 import { OrganizationPermissionSeeder } from './organization-permission.seeder';
 import { PlatformSeeder } from './platform.seeder';
+import { resetRedis } from './redis-reset';
 import { ResourceSeeder } from './resource.seeder';
 import { TermsSeeder } from './terms.seeder';
 
@@ -15,6 +16,7 @@ import { TermsSeeder } from './terms.seeder';
  */
 export class DatabaseSeeder extends Seeder {
   async run(em: EntityManager): Promise<void> {
+    await resetRedis();
     await this.call(em, [I18nSeeder]);
     await this.call(em, [ResourceSeeder]);
     await this.call(em, [PlatformSeeder]);

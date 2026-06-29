@@ -6,13 +6,16 @@ import { SwaggerResponse } from '@/common/decorators';
 import { ApproveOrganizationContract } from './approve-organization/approve-organization.contract';
 import { ApproveOrganizationRequestDto } from './approve-organization/approve-organization.request.dto';
 import { ApproveOrganizationResponseDto } from './approve-organization/approve-organization.response.dto';
-import { GetOrganizationPageContract } from './get-organization-page/get-organization-page.contract';
-import { GetOrganizationPageRequestDto } from './get-organization-page/get-organization-page.request.dto';
-import { GetOrganizationPageResponseDto } from './get-organization-page/get-organization-page.response.dto';
-import { GetOrganizationRolesContract } from './get-organization-roles/get-organization-roles.contract';
-import { GetOrganizationRoleResponseDto } from './get-organization-roles/get-organization-roles.response.dto';
+import { GetOrganizationListContract } from './get-organization-list/get-organization-list.contract';
+import { GetOrganizationListRequestDto } from './get-organization-list/get-organization-list.request.dto';
+import { GetOrganizationListResponseDto } from './get-organization-list/get-organization-list.response.dto';
+import { GetOrganizationRoleListContract } from './organization-role-list/get-organization-role-list.contract';
+import { GetOrganizationRoleListResponseDto } from './organization-role-list/get-organization-role-list.response.dto';
+import { UpdateOrganizationContract } from './update-organization/update-organization.contract';
+import { UpdateOrganizationRequestDto } from './update-organization/update-organization.request.dto';
+import { UpdateOrganizationResponseDto } from './update-organization/update-organization.response.dto';
 
-@Controller('organizations')
+@Controller('organization')
 export class OrganizationController {
   constructor(
     private readonly queryBus: QueryBus,
@@ -20,17 +23,17 @@ export class OrganizationController {
   ) {}
 
   @Get()
-  @SwaggerResponse(GetOrganizationPageResponseDto)
-  async getOrganizationPage(
-    @Query() query: GetOrganizationPageRequestDto,
-  ): Promise<GetOrganizationPageResponseDto> {
-    return this.queryBus.execute(new GetOrganizationPageContract(query));
+  @SwaggerResponse(GetOrganizationListResponseDto)
+  async getOrganizationList(
+    @Query() query: GetOrganizationListRequestDto,
+  ): Promise<GetOrganizationListResponseDto> {
+    return this.queryBus.execute(new GetOrganizationListContract(query));
   }
 
   @Get('roles')
-  @SwaggerResponse([GetOrganizationRoleResponseDto])
-  async getOrganizationRoles(): Promise<GetOrganizationRoleResponseDto[]> {
-    return this.queryBus.execute(new GetOrganizationRolesContract());
+  @SwaggerResponse(GetOrganizationRoleListResponseDto)
+  async getOrganizationRoleList(): Promise<GetOrganizationRoleListResponseDto> {
+    return this.queryBus.execute(new GetOrganizationRoleListContract());
   }
 
   @Patch(':id/approve')
@@ -43,5 +46,13 @@ export class OrganizationController {
       id,
       approve: body.approve,
     } satisfies ApproveOrganizationRequestDto));
+  }
+
+  @Patch()
+  @SwaggerResponse(UpdateOrganizationResponseDto)
+  async updateOrganization(
+    @Body() body: UpdateOrganizationRequestDto,
+  ): Promise<UpdateOrganizationResponseDto> {
+    return this.commandBus.execute(new UpdateOrganizationContract(body));
   }
 }

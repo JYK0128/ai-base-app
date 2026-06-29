@@ -1,7 +1,6 @@
 import i18n from 'i18next';
+import LanguageDetector from 'i18next-browser-languagedetector';
 import { initReactI18next } from 'react-i18next';
-
-import { getStoredAdminLocale, normalizeAdminLocale } from './locale';
 
 const resources = {
   ko: {
@@ -76,30 +75,24 @@ const resources = {
   },
 } as const;
 
-const initialLanguage = normalizeAdminLocale(getStoredAdminLocale());
-
 void i18n
+  .use(LanguageDetector)
   .use(initReactI18next)
   .init({
     resources,
-    lng: initialLanguage,
     fallbackLng: 'ko',
     defaultNS: 'common',
     ns: ['common', 'resource'],
     interpolation: {
       escapeValue: false,
     },
+    detection: {
+      order: ['localStorage', 'navigator', 'htmlTag'],
+      caches: ['localStorage'],
+      lookupLocalStorage: 'i18nextLng',
+    },
     returnNull: false,
     returnEmptyString: false,
   });
 
 export default i18n;
-
-export function setAdminLanguage(locale: string) {
-  const nextLocale = normalizeAdminLocale(locale);
-  void i18n.changeLanguage(nextLocale);
-  if (typeof window !== 'undefined') {
-    localStorage.setItem('admin_lang', nextLocale);
-  }
-  return nextLocale;
-}

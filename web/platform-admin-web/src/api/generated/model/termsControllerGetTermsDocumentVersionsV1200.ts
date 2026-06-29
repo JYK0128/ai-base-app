@@ -6,8 +6,8 @@
  * OpenAPI spec version: 1.0
  */
 import type { ApiResponse } from './apiResponse';
-import type { GetTermsDocumentVersionResponseDto } from './getTermsDocumentVersionResponseDto';
+import type { GetTermDocumentVersionListResponseDto } from './getTermDocumentVersionListResponseDto';
 
 export type TermsControllerGetTermsDocumentVersionsV1200 = ApiResponse & {
-  data?: GetTermsDocumentVersionResponseDto[];
+  data?: GetTermDocumentVersionListResponseDto;
 };

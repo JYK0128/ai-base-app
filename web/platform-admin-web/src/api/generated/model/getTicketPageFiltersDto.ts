@@ -5,12 +5,11 @@
  * The AI Base App Platform Service API documentation
  * OpenAPI spec version: 1.0
  */
-import type { GetTicketPageFiltersDtoOrganization } from './getTicketPageFiltersDtoOrganization';
 import type { GetTicketPageFiltersDtoStatus } from './getTicketPageFiltersDtoStatus';
 
 export interface GetTicketPageFiltersDto {
   /** 조직 필터 */
-  organization?: GetTicketPageFiltersDtoOrganization;
+  organization?: string;
   /** 티켓 상태 필터 */
   status?: GetTicketPageFiltersDtoStatus;
 }

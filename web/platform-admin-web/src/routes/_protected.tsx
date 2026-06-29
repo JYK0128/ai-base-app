@@ -1,290 +1,166 @@
-import { createFileRoute, Link, notFound, Outlet, redirect, useLocation } from '@tanstack/react-router';
-import { Building2, FileText, Globe, Info, Key, LayoutDashboard, LifeBuoy, LogOut, type LucideIcon, Megaphone, ScrollText, Settings, Shield, Users } from 'lucide-react';
-import { useState } from 'react';
+import { createFileRoute, Link, Outlet, redirect, useNavigate } from '@tanstack/react-router';
+import { Bell,
+         BookOpen,
+         Building2,
+         Gauge,
+         Globe,
+         LifeBuoy,
+         LogOut,
+         type LucideIcon,
+         ScrollText,
+         Shield,
+         SquareKanban,
+         Users } from 'lucide-react';
+import type { ChangeEventHandler, MouseEventHandler } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { getI18nControllerGetLocalesV1QueryOptions, getResourceControllerGetResourcePageV1QueryOptions } from '@/api/generated/endpoints';
-import { type GetLocaleResponseDto, GetResourcePageFiltersDtoScope, type GetResourceResponseDto } from '@/api/generated/model';
-
-import { useAuth } from '../hooks/useAuth';
-import { getStoredAdminLocale, normalizeAdminLocale } from '../lib/locale';
-
-// 🌟 트리 자원 평탄화 헬퍼 함수
-function flattenResources(nodes: GetResourceResponseDto[]): GetResourceResponseDto[] {
-  const result: GetResourceResponseDto[] = [];
-  const traverse = (list: GetResourceResponseDto[]) => {
-    for (const node of list) {
-      result.push(node);
-      if (node.children && node.children.length > 0) {
-        traverse(node.children);
-      }
-    }
-  };
-  traverse(nodes);
-  return result;
-}
-
-// 🌟 현재 경로와 대응하는 MENU 타입 자원을 식별하는 헬퍼 함수
-function findMatchingMenuResource(flattened: GetResourceResponseDto[], path: string): GetResourceResponseDto | undefined {
-  return flattened.find((res) => {
-    if (res.type !== 'MENU' || !res.path) return false;
-    return path === res.path || path.startsWith(res.path + '/');
-  });
-}
-
-function isDashboardPath(path: string): boolean {
-  return path === '/dashboard' || path === '/dashboard/';
-}
+import { getAuthControllerGetAllowedResourceListV1QueryOptions } from '../api/generated/endpoints';
+import { type AllowedResourceListItem,
+         AllowedResourceListItemType } from '../api/generated/model';
 
 export const Route = createFileRoute('/_protected')({
-  // The guard is intentionally sequential because each redirect depends on the previous auth gate.
-  // eslint-disable-next-line sonarjs/cognitive-complexity
-  beforeLoad: async ({ context, location }) => {
-    if (!context.auth.isAuthenticated) {
-      throw redirect({
-        to: '/login',
-        search: {
-          redirect: location.pathname,
-        },
-      });
+  beforeLoad: ({ context }) => {
+    if (context.session.requiredAgreeTerms) {
+      throw redirect({ to: '/term-agreement' });
     }
-
-    if (context.auth.mustChangePassword) {
-      throw redirect({
-        to: '/change-password',
-      });
+    if (context.session.requiredPasswordChange) {
+      throw redirect({ to: '/change-password' });
     }
-
-    if (context.auth.mustAcceptTerms && location.pathname !== '/agreement') {
-      throw redirect({
-        to: '/agreement',
-      });
+    if (!context.session.isAuthenticated) {
+      throw redirect({ to: '/login' });
     }
-
-    if (!context.auth.mustAcceptTerms && location.pathname === '/agreement') {
-      throw redirect({
-        to: '/dashboard',
-      });
-    }
-
-    if (location.pathname === '/agreement') {
-      return {
-        resources: [],
-        flatResources: [],
-        locales: [],
-      };
-    }
-
-    const queryClient = context.queryClient;
-
-    let resources: GetResourceResponseDto[] = [];
-    let locales: GetLocaleResponseDto[] = [];
-    try {
-      const { queryKey, queryFn } = getResourceControllerGetResourcePageV1QueryOptions({
-        filters: {
-          scope: GetResourcePageFiltersDtoScope.ORGANIZATION,
-        },
-      });
-      const response = await queryClient.ensureQueryData({
-        queryKey,
-        queryFn,
-        staleTime: 1000 * 60 * 5, // 5분 동안 fresh 상태 유지
-        gcTime: 1000 * 60 * 10,   // 0인 전역 gcTime 우회
-      });
-      resources = response.data ?? [];
-    }
-    catch (error) {
-      console.error('Failed to prefetch dynamic resources in route guard:', error);
-    }
-
-    try {
-      const { queryKey, queryFn } = getI18nControllerGetLocalesV1QueryOptions();
-      const response = await queryClient.ensureQueryData({
-        queryKey,
-        queryFn,
-        staleTime: 1000 * 60 * 60,
-        gcTime: 1000 * 60 * 60,
-      });
-      locales = response.data?.list ?? [];
-    }
-    catch (error) {
-      console.error('Failed to prefetch locales in route guard:', error);
-    }
-
-    const permissions = context.auth.permissions;
-    const path = location.pathname;
-    const allowDashboardWithoutResource = isDashboardPath(path);
-
-    // 보호 구간은 리소스가 없으면 기본 차단(fail-closed)
-    if (resources.length === 0) {
-      if (allowDashboardWithoutResource) {
-        return {
-          resources,
-          flatResources: [],
-          locales,
-        };
-      }
-
-      throw notFound();
-    }
-
-    const flattened = flattenResources(resources);
-    const matchingMenuResource = findMatchingMenuResource(flattened, path);
-
-    // 보호 구간에서는 MENU 자원에 매칭되지 않는 경로도 접근 불가로 처리
-    if (!matchingMenuResource) {
-      if (allowDashboardWithoutResource) {
-        return {
-          resources,
-          flatResources: flattened,
-          locales,
-        };
-      }
-
-      throw notFound();
-    }
-
-    const canReadMenuResource = (matchingMenuResource.actions ?? []).includes('READ');
-    const requiredPermission = `${matchingMenuResource.code}:READ`;
-    const hasRequiredPermission = permissions.includes(requiredPermission);
-
-    // READ 자체가 허용되지 않았거나, 사용자 READ 권한이 없으면 NotFound 처리
-    if (!canReadMenuResource || !hasRequiredPermission) {
-      throw notFound();
-    }
-
-    // 🌟 하위 레이아웃 컴포넌트가 동기식으로 사용할 수 있도록 리소스 데이터 반환
-    return {
-      resources,
-      flatResources: flattened,
-      locales,
-    };
+  },
+  loader: async ({ context }) => {
+    const res = await context.queryClient.ensureQueryData(
+      getAuthControllerGetAllowedResourceListV1QueryOptions(),
+    );
+    return res?.items || [];
   },
   component: ProtectedLayout,
 });
 
 function ProtectedLayout() {
-  const auth = useAuth();
-  const location = useLocation();
+  const { session } = Route.useRouteContext();
+  const menuItems = Route.useLoaderData();
+  const navigate = useNavigate();
+  const { t, i18n } = useTranslation();
 
-  const [currentLang, setCurrentLang] = useState<string>(getStoredAdminLocale);
-  const { t } = useTranslation('common');
-  const { logout } = auth;
-  const permissions = auth.permissions;
-
-  const handleLangChange = (lang: string) => {
-    const nextLang = normalizeAdminLocale(lang);
-    setCurrentLang(nextLang);
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('admin_lang', nextLang);
-    }
+  const handleLogout: MouseEventHandler<HTMLButtonElement> = () => {
+    void (async () => {
+      await session.clear();
+      await navigate({ to: '/login' });
+    })();
+  };
+  const handleChangeLanguage: ChangeEventHandler<HTMLSelectElement> = (e) => {
+    void i18n.changeLanguage(e.target.value);
   };
 
-  const { flatResources } = Route.useRouteContext();
-  if (location.pathname === '/agreement') {
-    return <Outlet />;
-  }
-
-  // 🌟 Lucide Icon 매핑 테이블
-  const IconMap: Record<string, LucideIcon> = {
-    LayoutDashboard,
-    Building2,
-    Megaphone,
-    LifeBuoy,
-    ScrollText,
-    Shield,
-    FileText,
-    Key,
-    Users,
-    Settings,
-    Info,
+  const iconByCode: Record<string, LucideIcon> = {
+    DASHBOARD: Gauge,
+    ANNOUNCEMENT: Bell,
+    ORGANIZATION: Building2,
+    MEMBER: Users,
+    RESOURCE: SquareKanban,
+    PERMISSION: Shield,
+    TERMS: BookOpen,
+    SUPPORT: LifeBuoy,
+    AUDIT: ScrollText,
   };
 
-  // 🌟 API로 조회한 MENU 타입 리소스를 기반으로 메뉴 동적 렌더링
-  const menuItemsFromApi = flatResources
-    .filter((res) => res.type === 'MENU')
-    .map((res) => {
-      // READ 액션 권한 찾기
-      const requiredPermission = `${res.code}:READ`;
+  const renderMenuItems = (items: AllowedResourceListItem[], depth = 0) =>
+    items
+      .filter((item) => item.type === AllowedResourceListItemType.MENU)
+      .slice()
+      .sort((a, b) => (a.sortOrder ?? Number.MAX_SAFE_INTEGER) - (b.sortOrder ?? Number.MAX_SAFE_INTEGER))
+      .map((item) => {
+        const Icon = iconByCode[item.code] ?? Gauge;
+        const hasChildren = item.children.length > 0;
+        const hasPath = Boolean(item.path);
+        const paddingLeft = 12 + depth * 16;
 
-      let toPath = `/${res.code.toLowerCase()}`;
-      if (res.path) {
-        toPath = res.path;
-      }
-
-      // Lucide 아이콘 매핑
-      const iconKey = res.icon || 'Shield';
-      const IconComponent = IconMap[iconKey] || Shield;
-
-      // 다국어 번역
-      const label = t(res.code, { ns: 'resource', defaultValue: res.name });
-
-      return {
-        label,
-        icon: IconComponent,
-        to: toPath,
-        requiredPermission,
-        displayOrder: res.sortOrder ?? 99,
-      };
-    })
-    .sort((a, b) => a.displayOrder - b.displayOrder);
-
-  const visibleMenuItems = menuItemsFromApi.filter(
-    (item) => permissions.includes(item.requiredPermission),
-  );
+        return (
+          <div key={item.id} className="space-y-1">
+            {hasPath
+              ? (
+                <Link
+                  to={item.path}
+                  activeProps={{ className: 'bg-slate-100 text-slate-950' }}
+                  className="
+                    flex items-center space-x-3 rounded-lg px-3 py-2
+                    text-slate-600 transition-colors
+                    hover:bg-slate-50 hover:text-slate-900
+                  "
+                  style={{ paddingLeft }}
+                >
+                  <Icon className="size-5" />
+                  <span className="font-medium">{item.name}</span>
+                </Link>
+              )
+              : (
+                <div
+                  className="
+                    flex items-center space-x-3 rounded-lg px-3 py-2
+                    text-slate-500
+                  "
+                  style={{ paddingLeft }}
+                >
+                  <Icon className="size-5" />
+                  <span className="font-medium">{item.name}</span>
+                </div>
+              )}
+            {hasChildren ? <div className="space-y-1">{renderMenuItems(item.children, depth + 1)}</div> : null}
+          </div>
+        );
+      });
 
   return (
     <div className="flex h-screen bg-slate-50 font-sans">
       {/* Sidebar */}
-      <aside className="w-64 bg-white border-r flex flex-col">
-        <div className="p-6 border-b flex flex-col gap-3">
-          <div className="text-xl font-bold text-slate-800 tracking-tight">{t('appName')}</div>
-          <div className="flex items-center space-x-2 bg-slate-50 px-2.5 py-1.5 rounded-lg border border-slate-100">
-            <Globe className="w-4 h-4 text-slate-400" />
+      <aside className="flex w-64 flex-col border-r bg-white">
+        <div className="flex flex-col gap-3 border-b p-6">
+          <div className="text-xl font-bold tracking-tight text-slate-800">{t('appName')}</div>
+          <div className="
+            flex items-center space-x-2 rounded-lg border border-slate-100
+            bg-slate-50 px-2.5 py-1.5
+          "
+          >
+            <Globe className="size-4 text-slate-400" />
             <select
-              value={currentLang}
-              onChange={(e) => handleLangChange(e.target.value)}
-              className="text-xs bg-transparent font-medium text-slate-500 focus:outline-none cursor-pointer w-full"
+              value={i18n.language}
+              onChange={handleChangeLanguage}
+              className="
+                w-full cursor-pointer bg-transparent text-xs font-medium
+                text-slate-500
+                focus:outline-none
+              "
             >
               <option value="ko">한국어 (KO)</option>
               <option value="en">English (EN)</option>
-              <option value="ja">日本語 (JA)</option>
-              <option value="zh-CN">中文 (ZH-CN)</option>
             </select>
           </div>
         </div>
 
-        <nav className="flex-1 p-4 space-y-1">
-          {visibleMenuItems.map((item) => (
-            <Link
-              key={item.to}
-              to={item.to}
-              activeProps={{ className: 'bg-slate-100 text-slate-900' }}
-              className="flex items-center space-x-3 px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors"
-            >
-              <item.icon className="w-5 h-5" />
-              <span className="font-medium">{item.label}</span>
-            </Link>
-          ))}
-        </nav>
+        <nav className="flex-1 space-y-1 p-4">{renderMenuItems(menuItems)}</nav>
 
-        <div className="p-4 border-t">
+        <div className="border-t p-4">
           <button
-            onClick={() => {
-              logout();
-            }}
-            className="flex items-center space-x-3 px-3 py-2 w-full rounded-lg text-red-600 hover:bg-red-50 transition-colors"
+            onClick={handleLogout}
+            className="
+              flex w-full items-center space-x-3 rounded-lg px-3 py-2
+              text-red-600 transition-colors
+              hover:bg-red-50
+            "
           >
-            <LogOut className="w-5 h-5" />
+            <LogOut className="size-5" />
             <span className="font-medium">{t('logout')}</span>
           </button>
         </div>
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 scroll bg-slate-50">
+      <main className="scroll flex-1 bg-slate-50">
         <Outlet />
       </main>
     </div>
   );
-}
+};

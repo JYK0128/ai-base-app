@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import type { Announcement } from '@pkg/database';
+import { Announcement } from '@pkg/database';
 import { AnnouncementAudience,
          AnnouncementCategory,
          AnnouncementChannel,
@@ -8,16 +8,18 @@ import { Type } from 'class-transformer';
 import { IsBoolean, IsDate, IsEnum, IsOptional } from 'class-validator';
 
 import { IsNotEmptyString } from '@/common/decorators/is-not-empty-string.decorator';
-import type { EntityRequestDto } from '@/common/interfaces';
+import { EntityRequestType } from '@/common/interfaces';
 
-export class CreateAnnouncementRequestDto implements EntityRequestDto<Announcement> {
+export class CreateAnnouncementRequestDto extends EntityRequestType(Announcement) {
   @ApiProperty({ example: '공지 제목', description: '공지사항 제목' })
+  @Type(() => String)
   @IsNotEmptyString({ message: '제목은 공백만으로 구성될 수 없습니다.' })
-  title!: string;
+  override title!: string;
 
   @ApiProperty({ example: '공지 본문', description: '공지사항 본문' })
+  @Type(() => String)
   @IsNotEmptyString({ message: '본문은 공백만으로 구성될 수 없습니다.' })
-  content!: string;
+  override content!: string;
 
   @ApiPropertyOptional({
     enum: AnnouncementCategory,
@@ -25,8 +27,9 @@ export class CreateAnnouncementRequestDto implements EntityRequestDto<Announceme
     description: '공지 분류',
   })
   @IsOptional()
+  @Type(() => String)
   @IsEnum(AnnouncementCategory)
-  category?: AnnouncementCategory;
+  override category?: AnnouncementCategory;
 
   @ApiPropertyOptional({
     enum: AnnouncementAudience,
@@ -34,8 +37,9 @@ export class CreateAnnouncementRequestDto implements EntityRequestDto<Announceme
     description: '공지 대상',
   })
   @IsOptional()
+  @Type(() => String)
   @IsEnum(AnnouncementAudience)
-  audience?: AnnouncementAudience;
+  override audience?: AnnouncementAudience;
 
   @ApiPropertyOptional({
     enum: AnnouncementChannel,
@@ -43,8 +47,9 @@ export class CreateAnnouncementRequestDto implements EntityRequestDto<Announceme
     description: '공지 채널',
   })
   @IsOptional()
+  @Type(() => String)
   @IsEnum(AnnouncementChannel)
-  channel?: AnnouncementChannel;
+  override channel?: AnnouncementChannel;
 
   @ApiPropertyOptional({
     enum: AnnouncementPriority,
@@ -52,16 +57,18 @@ export class CreateAnnouncementRequestDto implements EntityRequestDto<Announceme
     description: '공지 우선순위',
   })
   @IsOptional()
+  @Type(() => String)
   @IsEnum(AnnouncementPriority)
-  priority?: AnnouncementPriority;
+  override priority?: AnnouncementPriority;
 
   @ApiPropertyOptional({
     example: true,
     description: '공지 목록에서 우선 노출할지 여부',
   })
   @IsOptional()
+  @Type(() => Boolean)
   @IsBoolean()
-  pinned?: boolean;
+  override pinned?: boolean;
 
   @ApiPropertyOptional({
     example: '2026-06-13T03:11:56.000Z',
@@ -70,7 +77,7 @@ export class CreateAnnouncementRequestDto implements EntityRequestDto<Announceme
   @IsOptional()
   @Type(() => Date)
   @IsDate()
-  publishedAt?: Date;
+  override publishedAt?: Date;
 
   @ApiPropertyOptional({
     example: '2026-06-13T03:11:56.000Z',
@@ -78,7 +85,7 @@ export class CreateAnnouncementRequestDto implements EntityRequestDto<Announceme
   })
   @Type(() => Date)
   @IsDate()
-  startAt!: Date;
+  override startAt!: Date;
 
   @ApiPropertyOptional({
     example: '2026-06-20T03:11:56.000Z',
@@ -86,5 +93,5 @@ export class CreateAnnouncementRequestDto implements EntityRequestDto<Announceme
   })
   @Type(() => Date)
   @IsDate()
-  endAt!: Date;
+  override endAt!: Date;
 }

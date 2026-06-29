@@ -1,11 +1,11 @@
 import { ChangeSetType, type EventSubscriber, type FlushEventArgs } from '@mikro-orm/core';
-import type { ServerContext } from '@pkg/shared/server';
+import type { AuthContext } from '@pkg/shared/server';
 
 import { CoreEntity } from '../domains/core/core.entity';
 
 export class AuditSubscriber implements EventSubscriber {
   onFlush(args: FlushEventArgs): void {
-    const accountId = this.getAccountId(args);
+    const { account } = args.em.getLoggerContext<AuthContext>();
     const now = new Date();
 
     for (const changeSet of [...args.uow.getChangeSets()]) {
@@ -14,24 +14,19 @@ export class AuditSubscriber implements EventSubscriber {
       }
 
       if (this.isCreateChangeSet(changeSet.type)) {
-        this.applyCreateAudit(args, changeSet.entity, accountId, now);
+        this.applyCreateAudit(args, changeSet.entity, account?.id, now);
         continue;
       }
 
       if (this.isUpdateChangeSet(changeSet.type)) {
-        this.applyUpdateAudit(args, changeSet.entity, accountId, now);
+        this.applyUpdateAudit(args, changeSet.entity, account?.id, now);
         continue;
       }
 
       if (this.isDeleteChangeSet(changeSet.type)) {
-        this.applyDeleteAudit(args, changeSet.entity, accountId, now);
+        this.applyDeleteAudit(args, changeSet.entity, account?.id, now);
       }
     }
-  }
-
-  private getAccountId(args: FlushEventArgs): string | undefined {
-    const { accountId } = args.em.getLoggerContext<ServerContext>() ?? {};
-    return accountId;
   }
 
   private isCoreEntity(entity: unknown): entity is CoreEntity {

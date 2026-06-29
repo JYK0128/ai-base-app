@@ -5,17 +5,11 @@
  * The AI Base App Platform Service API documentation
  * OpenAPI spec version: 1.0
  */
+import type { GetTermDocumentVersionListFiltersDto } from './getTermDocumentVersionListFiltersDto';
 import type { TermsControllerGetTermsDocumentVersionsV1DirectionItem } from './termsControllerGetTermsDocumentVersionsV1DirectionItem';
+import type { TermsControllerGetTermsDocumentVersionsV1SortItem } from './termsControllerGetTermsDocumentVersionsV1SortItem';
 
 export type TermsControllerGetTermsDocumentVersionsV1Params = {
-/**
- * 정렬 필드
- */
-sort?: string[];
-/**
- * 정렬 방향
- */
-direction?: TermsControllerGetTermsDocumentVersionsV1DirectionItem[];
 /**
  * 오프셋
  */
@@ -24,4 +18,16 @@ offset?: number;
  * 페이지 크기
  */
 limit?: number;
+/**
+ * 필터 조건
+ */
+filters?: GetTermDocumentVersionListFiltersDto;
+/**
+ * 정렬 필드
+ */
+sort?: TermsControllerGetTermsDocumentVersionsV1SortItem[];
+/**
+ * 정렬 방향
+ */
+direction?: TermsControllerGetTermsDocumentVersionsV1DirectionItem[];
 };

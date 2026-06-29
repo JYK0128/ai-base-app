@@ -1,13 +1,13 @@
 import { Button, Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@pkg/ui';
 import { Languages } from 'lucide-react';
 
-import type { GetLocaleResponseDto, GetResourceResponseDto } from '@/api/generated/model';
+import type { GetResourceResponseDto, LocaleListItem } from '@/api/generated/model';
 
 interface ResourceLanguageModalProps {
   readonly open: boolean
   readonly onOpenChange: (open: boolean) => void
   readonly resource: GetResourceResponseDto | null
-  readonly locales: GetLocaleResponseDto[]
+  readonly locales: LocaleListItem[]
 }
 
 export function ResourceLanguageModal({
@@ -18,7 +18,11 @@ export function ResourceLanguageModal({
 }: ResourceLanguageModalProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-full sm:max-w-xl">
+      <DialogContent className="
+        w-full
+        sm:max-w-xl
+      "
+      >
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Languages className="size-4" />

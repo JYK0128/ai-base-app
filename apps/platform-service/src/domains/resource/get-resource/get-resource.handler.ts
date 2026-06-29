@@ -1,4 +1,3 @@
-import { EntityManager } from '@mikro-orm/core';
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
 import { Resource } from '@pkg/database';
 
@@ -10,18 +9,21 @@ import { GetResourceResponseDto } from './get-resource.response.dto';
 export class GetResourceHandler implements IQueryHandler<GetResourceContract> {
   private readonly Asserter = GetResourceAsserter;
 
-  constructor(private readonly em: EntityManager) {}
-
   async execute(query: GetResourceContract): Promise<GetResourceResponseDto> {
-    const resource = await this.identifyResource(query.data.id);
-    return new GetResourceResponseDto(resource);
+    this.verifyResource(query);
+    return this.processDetail(query);
   }
 
-  private async identifyResource(id: string): Promise<Resource> {
-    const resource: Resource = await this.Asserter.assert(
-      this.em.findOne(Resource, { id }, { populate: ['parent'] }),
+  private verifyResource(_query: GetResourceContract): void {
+    // 리소스 조회 정책 검증 영역
+  }
+
+  private async processDetail(query: GetResourceContract): Promise<GetResourceResponseDto> {
+    const resource = await this.Asserter.assert(
+      Resource.findOne({ id: query.data.id }, { populate: ['parent'] }),
       'RESOURCE_NOT_FOUND',
     );
-    return resource;
+
+    return new GetResourceResponseDto(resource);
   }
 }

@@ -1,6 +1,7 @@
 import KeyvRedis from '@keyv/redis';
 import { Controller, Get, VERSION_NEUTRAL } from '@nestjs/common';
 import { Transport } from '@nestjs/microservices';
+import { ApiExcludeController } from '@nestjs/swagger';
 import { DiskHealthIndicator, HealthCheck, HealthCheckService, MemoryHealthIndicator, MicroserviceHealthIndicator, MikroOrmHealthIndicator } from '@nestjs/terminus';
 
 import { Public } from '@/common/decorators/public.decorator';
@@ -14,6 +15,7 @@ const redisStore = new KeyvRedis(ENV.REDIS_URL, {
   path: 'health',
   version: VERSION_NEUTRAL,
 })
+@ApiExcludeController()
 @Public()
 export class HealthController {
   constructor(

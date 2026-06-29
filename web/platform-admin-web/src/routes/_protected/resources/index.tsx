@@ -7,10 +7,8 @@ export const Route = createFileRoute('/_protected/resources/')({
 });
 
 function ResourceManagementPage() {
-  const { locales } = Route.useRouteContext();
-
   return (
-    <div className="size-full mx-auto flex max-w-300 flex-col gap-6 p-6">
+    <div className="mx-auto flex size-full max-w-300 flex-col gap-6 p-6">
       <header className="space-y-2 border-b border-slate-200 pb-4">
         <h1 className="text-2xl font-bold tracking-tight text-slate-950">리소스 관리</h1>
         <p className="max-w-3xl text-sm text-slate-500">
@@ -18,8 +16,8 @@ function ResourceManagementPage() {
         </p>
       </header>
 
-      <div className="flex-1 flex flex-col">
-        <ResourceTreeTab locales={locales} />
+      <div className="flex flex-1 flex-col">
+        <ResourceTreeTab />
       </div>
     </div>
   );

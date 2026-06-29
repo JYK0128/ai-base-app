@@ -6,27 +6,28 @@
  * OpenAPI spec version: 1.0
  */
 import type { AnnouncementControllerGetAnnouncementPageV1DirectionItem } from './announcementControllerGetAnnouncementPageV1DirectionItem';
+import type { AnnouncementControllerGetAnnouncementPageV1SortItem } from './announcementControllerGetAnnouncementPageV1SortItem';
 import type { GetAnnouncementPageFilters } from './getAnnouncementPageFilters';
 
 export type AnnouncementControllerGetAnnouncementPageV1Params = {
 /**
+ * 페이지 번호
+ */
+page?: number;
+/**
+ * 페이지 크기
+ */
+limit?: number;
+/**
  * 필터 조건
  */
-filter: GetAnnouncementPageFilters;
+filters: GetAnnouncementPageFilters;
 /**
  * 정렬 필드
  */
-sort?: string[];
+sort?: AnnouncementControllerGetAnnouncementPageV1SortItem[];
 /**
  * 정렬 방향
  */
 direction?: AnnouncementControllerGetAnnouncementPageV1DirectionItem[];
-/**
- * 페이지 번호
- */
-page?: unknown;
-/**
- * 페이지 크기
- */
-limit?: unknown;
 };

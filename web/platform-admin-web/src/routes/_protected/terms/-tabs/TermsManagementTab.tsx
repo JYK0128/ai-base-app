@@ -1,16 +1,17 @@
 import { Badge, Card, CardContent, CardDescription, CardHeader, CardTitle, ScrollArea } from '@pkg/ui';
-import { useQuery } from '@tanstack/react-query';
 import { FileText, Loader2, ScrollText } from 'lucide-react';
 import { useMemo, useState } from 'react';
 
-import { getTermsControllerGetTermsDocumentV1QueryOptions, useTermsControllerGetTermsDocumentPageV1 } from '@/api/generated/endpoints';
-import type { GetTermsDocumentDetailResponseDto, GetTermsDocumentResponseDto, TermsControllerGetTermsDocumentPageV1Params, TermsControllerGetTermsDocumentPageV1200 } from '@/api/generated/model';
+import { useTermsControllerGetTermsDocumentListV1, useTermsControllerGetTermsDocumentV1 } from '@/api/generated/endpoints';
+import type { GetTermDocumentDetailResponseDto, GetTermDocumentItem, TermsControllerGetTermsDocumentListV1Params } from '@/api/generated/model';
+import { pickApiItems } from '@/lib/api-response';
 
-import { useAuth } from '../../../../hooks/useAuth';
-import { formatDateTime, getDocumentLifecycle, getVersionStatusPresentation, type TermsDocumentLifecycle, type TermsDocumentScope } from '../-terms.shared';
+import { type SessionContext, useSession } from '../../../../hooks/useSession';
+import { formatDateTime } from '../-helpers/terms-date.helper';
+import { getDocumentLifecycle, getVersionStatusPresentation, type TermsDocumentLifecycle, type TermsDocumentScope } from '../-helpers/terms-lifecycle.helper';
 
 interface TermsManagementTabProps {
-  readonly isActive: boolean
+  readonly isActive?: boolean
 }
 
 function documentStatusTone(status: TermsDocumentLifecycle) {
@@ -30,36 +31,32 @@ function scopeLabel(scope: TermsDocumentScope) {
   return scope === 'organization' ? '조직' : '플랫폼';
 }
 
-export function TermsManagementTab({ isActive }: TermsManagementTabProps) {
-  const { organizationId } = useAuth();
+export function TermsManagementTab({ isActive = true }: TermsManagementTabProps) {
+  const session: SessionContext = useSession();
+  const organizationId = session.data?.organization?.id ?? null;
   const [selectedDocumentId, setSelectedDocumentId] = useState<string>('');
 
-  const termsDocumentsQueryParams = useMemo<TermsControllerGetTermsDocumentPageV1Params>(() => ({
+  const termsDocumentsQueryParams = useMemo<TermsControllerGetTermsDocumentListV1Params>(() => ({
     filters: {
       scope: organizationId ? 'organization' : 'platform',
     },
-    sort: ['createdAt'],
-    direction: ['desc'],
-    offset: 0,
-    limit: 100,
   }), [organizationId]);
 
-  const termsDocumentsQuery = useTermsControllerGetTermsDocumentPageV1<TermsControllerGetTermsDocumentPageV1200>(termsDocumentsQueryParams, {
+  const termsDocumentsQuery = useTermsControllerGetTermsDocumentListV1<GetTermDocumentItem[]>(termsDocumentsQueryParams, {
     query: {
       enabled: isActive,
+      select: (response) => pickApiItems(response),
     },
   });
 
-  const documents = (termsDocumentsQuery.data?.data ?? []) as GetTermsDocumentResponseDto[];
+  const documents = termsDocumentsQuery.data ?? [];
   const effectiveSelectedDocumentId = selectedDocumentId || documents[0]?.id || '';
-
-  const selectedDocumentQuery = getTermsControllerGetTermsDocumentV1QueryOptions(effectiveSelectedDocumentId, {
+  const selectedDocumentDetailQuery = useTermsControllerGetTermsDocumentV1<GetTermDocumentDetailResponseDto>(effectiveSelectedDocumentId, {
     query: {
       enabled: !!effectiveSelectedDocumentId && isActive,
     },
   });
-
-  const selectedDocumentDetailQuery = useQuery<TermsControllerGetTermsDocumentV1200>(selectedDocumentQuery).data?.data as GetTermsDocumentDetailResponseDto | undefined;
+  const selectedDocumentDetail = selectedDocumentDetailQuery.data;
 
   if (!isActive) {
     return null;
@@ -67,7 +64,11 @@ export function TermsManagementTab({ isActive }: TermsManagementTabProps) {
 
   if (termsDocumentsQuery.isLoading && documents.length === 0) {
     return (
-      <div className="grid min-h-[320px] place-items-center rounded-xl border border-dashed border-slate-200 bg-white">
+      <div className="
+        grid min-h-80 place-items-center rounded-xl border border-dashed
+        border-slate-200 bg-white
+      "
+      >
         <div className="flex items-center gap-2 text-sm text-slate-500">
           <Loader2 className="size-4 animate-spin" />
           약관 문서를 불러오는 중입니다...
@@ -77,7 +78,11 @@ export function TermsManagementTab({ isActive }: TermsManagementTabProps) {
   }
 
   return (
-    <div className="grid gap-4 lg:grid-cols-[320px_minmax(0,1fr)]">
+    <div className="
+      grid gap-4
+      lg:grid-cols-[320px_minmax(0,1fr)]
+    "
+    >
       <Card className="border-slate-200">
         <CardHeader className="border-b border-slate-200">
           <CardTitle className="flex items-center gap-2">
@@ -89,7 +94,7 @@ export function TermsManagementTab({ isActive }: TermsManagementTabProps) {
           </CardDescription>
         </CardHeader>
         <CardContent className="p-0">
-          <ScrollArea className="h-[540px]">
+          <ScrollArea className="h-135">
             <div className="space-y-2 p-3">
               {documents.map((document) => {
                 const lifecycle = getDocumentLifecycle(document);
@@ -100,9 +105,17 @@ export function TermsManagementTab({ isActive }: TermsManagementTabProps) {
                     key={document.id}
                     type="button"
                     onClick={() => setSelectedDocumentId(document.id)}
-                    className={`w-full rounded-lg border p-3 text-left transition ${
-                      isSelected ? 'border-slate-300 bg-slate-50' : 'border-slate-100 bg-white hover:border-slate-200 hover:bg-slate-50'
-                    }`}
+                    className={`
+                      w-full rounded-lg border p-3 text-left transition
+                      ${
+                  isSelected
+                    ? 'border-slate-300 bg-slate-50'
+                    : `
+                      border-slate-100 bg-white
+                      hover:border-slate-200 hover:bg-slate-50
+                    `
+                  }
+                    `}
                   >
                     <div className="flex items-center justify-between gap-2">
                       <span className="font-semibold text-slate-900">{document.title}</span>
@@ -111,7 +124,13 @@ export function TermsManagementTab({ isActive }: TermsManagementTabProps) {
                       </Badge>
                     </div>
                     <div className="mt-2 flex items-center gap-2">
-                      <Badge variant="secondary" className={`text-[10px] ${documentStatusTone(lifecycle)}`}>
+                      <Badge
+                        variant="secondary"
+                        className={`
+                          text-[10px]
+                          ${documentStatusTone(lifecycle)}
+                        `}
+                      >
                         {lifecycle}
                       </Badge>
                       <span className="text-xs text-slate-500">
@@ -122,7 +141,11 @@ export function TermsManagementTab({ isActive }: TermsManagementTabProps) {
                 );
               })}
               {documents.length === 0 && (
-                <div className="grid place-items-center rounded-lg border border-dashed border-slate-200 bg-slate-50 py-12 text-sm text-slate-500">
+                <div className="
+                  grid place-items-center rounded-lg border border-dashed
+                  border-slate-200 bg-slate-50 py-12 text-sm text-slate-500
+                "
+                >
                   등록된 약관 문서가 없습니다.
                 </div>
               )}
@@ -142,9 +165,13 @@ export function TermsManagementTab({ isActive }: TermsManagementTabProps) {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4 p-4">
-          {!effectiveSelectedDocumentId || !selectedDocumentDetailQuery
+          {!effectiveSelectedDocumentId || !selectedDocumentDetail
             ? (
-              <div className="grid min-h-[360px] place-items-center rounded-lg border border-dashed border-slate-200 bg-slate-50 text-sm text-slate-500">
+              <div className="
+                grid min-h-90 place-items-center rounded-lg border border-dashed
+                border-slate-200 bg-slate-50 text-sm text-slate-500
+              "
+              >
                 문서를 선택해 주세요.
               </div>
             )
@@ -154,31 +181,31 @@ export function TermsManagementTab({ isActive }: TermsManagementTabProps) {
                   <div className="flex items-start justify-between gap-4">
                     <div className="space-y-1">
                       <h3 className="text-lg font-semibold text-slate-950">
-                        {selectedDocumentDetailQuery.document.title}
+                        {selectedDocumentDetail.document.title}
                       </h3>
                       <p className="text-sm text-slate-500">
-                        {selectedDocumentDetailQuery.document.code}
+                        {selectedDocumentDetail.document.code}
                       </p>
                     </div>
                     <Badge variant="outline">
-                      {selectedDocumentDetailQuery.document.required ? '필수' : '선택'}
+                      {selectedDocumentDetail.document.required ? '필수' : '선택'}
                     </Badge>
                   </div>
                   <div className="mt-4 grid gap-2 text-sm text-slate-600">
                     <p>
                       범위:
                       {' '}
-                      {scopeLabel(selectedDocumentDetailQuery.document.organization ? 'organization' : 'platform')}
+                      {scopeLabel(selectedDocumentDetail.document.organization ? 'organization' : 'platform')}
                     </p>
                     <p>
                       상태:
                       {' '}
-                      {getDocumentLifecycle(selectedDocumentDetailQuery.document)}
+                      {getDocumentLifecycle(selectedDocumentDetail.document)}
                     </p>
                     <p>
                       종료 일시:
                       {' '}
-                      {formatDateTime(selectedDocumentDetailQuery.document.terminatedAt)}
+                      {formatDateTime(selectedDocumentDetail.document.terminatedAt)}
                     </p>
                   </div>
                 </div>
@@ -186,12 +213,20 @@ export function TermsManagementTab({ isActive }: TermsManagementTabProps) {
                 <div className="space-y-3">
                   <h4 className="text-sm font-semibold text-slate-900">버전 목록</h4>
                   <div className="space-y-2">
-                    {selectedDocumentDetailQuery.versions.map((version) => {
-                      const presentation = getVersionStatusPresentation(version, selectedDocumentDetailQuery.versions);
+                    {selectedDocumentDetail.versions.map((version) => {
+                      const presentation = getVersionStatusPresentation(version, selectedDocumentDetail.versions);
 
                       return (
-                        <div key={version.id} className="rounded-lg border border-slate-200 bg-slate-50 p-3">
-                          <div className="flex items-center justify-between gap-2">
+                        <div
+                          key={version.id}
+                          className="
+                            rounded-lg border border-slate-200 bg-slate-50 p-3
+                          "
+                        >
+                          <div className="
+                            flex items-center justify-between gap-2
+                          "
+                          >
                             <span className="font-medium text-slate-900">{version.label}</span>
                             <Badge variant="secondary" className="text-[10px]">
                               {presentation.label}

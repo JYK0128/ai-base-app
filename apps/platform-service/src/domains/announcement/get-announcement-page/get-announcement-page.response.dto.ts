@@ -1,10 +1,11 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Announcement, AnnouncementAudience, AnnouncementCategory, AnnouncementChannel, AnnouncementMetadata, AnnouncementPriority, AnnouncementStatus } from '@pkg/database';
 
-import type { EntityResponseDto, PageResponseDto } from '@/common/interfaces';
+import { EntityResponseType, PageResponseDto } from '@/common/interfaces';
 
-export class GetAnnouncementPageItemResponseDto implements EntityResponseDto<Announcement> {
+export class AnnouncementPageItem extends EntityResponseType(Announcement) {
   constructor(announcement: Announcement) {
+    super();
     const metadata = announcement.metadata ?? new AnnouncementMetadata();
 
     this.id = announcement.id;
@@ -26,83 +27,66 @@ export class GetAnnouncementPageItemResponseDto implements EntityResponseDto<Ann
   }
 
   @ApiProperty({ example: '019e5236-adae-70d7-a8f7-2dc90bdf7080', description: '공지사항 식별자' })
-  id!: string;
+  override id!: string;
 
   @ApiProperty({ example: '시스템 점검 안내', description: '공지사항 제목' })
-  title!: string;
+  override title!: string;
 
   @ApiProperty({ example: '더 나은 서비스 제공을 위해 시스템 점검을 진행합니다.', description: '공지사항 본문 내용' })
-  content!: string;
+  override content!: string;
 
   @ApiProperty({ example: '2026-06-06T13:00:00.000Z', description: '생성 일시' })
-  createdAt!: Date;
+  override createdAt!: Date;
 
   @ApiProperty({ example: '2026-06-06T14:00:00.000Z', description: '수정 일시' })
-  updatedAt?: Date;
+  override updatedAt?: Date;
 
   @ApiProperty({ enum: AnnouncementCategory, example: AnnouncementCategory.NOTICE, description: '공지 분류' })
-  category!: AnnouncementCategory;
+  override category!: AnnouncementCategory;
 
   @ApiProperty({ enum: AnnouncementAudience, example: AnnouncementAudience.ORGANIZATION, description: '공지 대상' })
-  audience!: AnnouncementAudience;
+  override audience!: AnnouncementAudience;
 
   @ApiProperty({ enum: AnnouncementChannel, example: AnnouncementChannel.IN_APP, description: '공지 채널' })
-  channel!: AnnouncementChannel;
+  override channel!: AnnouncementChannel;
 
   @ApiProperty({ enum: AnnouncementPriority, example: AnnouncementPriority.NORMAL, description: '공지 우선순위' })
-  priority!: AnnouncementPriority;
+  override priority!: AnnouncementPriority;
 
   @ApiProperty({ example: true, description: '상단 고정 여부' })
-  pinned!: boolean;
+  override pinned!: boolean;
 
   @ApiPropertyOptional({ example: '2026-06-06T15:00:00.000Z', description: '게시 확정 일시' })
-  publishedAt?: Date;
+  override publishedAt?: Date;
 
   @ApiPropertyOptional({ example: '2026-06-07T00:00:00.000Z', description: '게시 시작일' })
-  startAt?: Date;
+  override startAt?: Date;
 
   @ApiPropertyOptional({ example: '2026-06-30T23:59:59.000Z', description: '게시 종료일' })
-  endAt?: Date;
+  override endAt?: Date;
 
   @ApiProperty({ enum: AnnouncementStatus, example: AnnouncementStatus.ACTIVE, description: '게시 상태' })
-  status!: AnnouncementStatus;
+  override status!: AnnouncementStatus;
 
   @ApiProperty({ example: true, description: '게시 확정 여부' })
-  isPublished!: boolean;
+  override isPublished!: boolean;
 
   @ApiProperty({ example: 'system', description: '작성자', readOnly: true })
-  author!: string;
+  override author!: string;
 }
 
-export class GetAnnouncementPageResponseDto implements PageResponseDto<Announcement> {
-  constructor(items: GetAnnouncementPageItemResponseDto[], totalCount: number, page: number, limit: number, totalPages: number, hasNextPage: boolean, hasPrevPage: boolean) {
-    this.items = items;
-    this.totalCount = totalCount;
-    this.page = page;
-    this.limit = limit;
-    this.totalPages = totalPages;
-    this.hasNextPage = hasNextPage;
-    this.hasPrevPage = hasPrevPage;
+export class GetAnnouncementPageResponseDto extends PageResponseDto<AnnouncementPageItem> {
+  constructor(args: PageResponseDto<AnnouncementPageItem>) {
+    super();
+    this.items = args.items;
+    this.totalCount = args.totalCount;
+    this.page = args.page;
+    this.limit = args.limit;
+    this.totalPages = args.totalPages;
+    this.hasNextPage = args.hasNextPage;
+    this.hasPrevPage = args.hasPrevPage;
   }
 
-  @ApiProperty({ type: () => [GetAnnouncementPageItemResponseDto], example: [], description: '공지사항 목록' })
-  items!: GetAnnouncementPageItemResponseDto[];
-
-  @ApiProperty({ example: 25, description: '전체 개수' })
-  totalCount!: number;
-
-  @ApiProperty({ example: 1, description: '페이지 번호' })
-  page!: number;
-
-  @ApiProperty({ example: 10, description: '페이지 크기' })
-  limit!: number;
-
-  @ApiProperty({ example: 3, description: '전체 페이지 수' })
-  totalPages!: number;
-
-  @ApiProperty({ example: true, description: '다음 페이지 존재 여부' })
-  hasNextPage!: boolean;
-
-  @ApiProperty({ example: false, description: '이전 페이지 존재 여부' })
-  hasPrevPage!: boolean;
+  @ApiProperty({ type: () => [AnnouncementPageItem], example: [], description: '공지사항 목록' })
+  items!: AnnouncementPageItem[];
 }

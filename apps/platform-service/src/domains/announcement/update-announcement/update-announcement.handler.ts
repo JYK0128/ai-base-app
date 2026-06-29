@@ -3,6 +3,7 @@ import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { CommandHandler, type ICommandHandler } from '@nestjs/cqrs';
 import { AnnouncementMetadata } from '@pkg/database';
 import { Announcement } from '@pkg/database';
+import type { AuthAccountContext } from '@pkg/shared/server';
 import { JsonbSetQueryBuilder } from '@pkg/shared/server';
 import { ClsService } from 'nestjs-cls';
 
@@ -14,35 +15,51 @@ export class UpdateAnnouncementHandler implements ICommandHandler<UpdateAnnounce
   constructor(private readonly cls: ClsService) {}
 
   @Transactional()
-  async execute({ data }: UpdateAnnouncementContract): Promise<UpdateAnnouncementResponseDto> {
-    const accountId = this.cls.get<string>('accountId');
+  async execute(command: UpdateAnnouncementContract): Promise<UpdateAnnouncementResponseDto> {
+    const account = this.identifyRequestAccount();
+    this.verifyUpdate(command, account);
+    return await this.processUpdate(command, account);
+  }
 
-    if (!accountId) {
+  private identifyRequestAccount(): AuthAccountContext {
+    const account = this.cls.get<AuthAccountContext>('account');
+    if (!account) {
       throw new BadRequestException('REQUEST_CONTEXT_NOT_FOUND');
     }
 
+    return account;
+  }
+
+  private verifyUpdate(_command: UpdateAnnouncementContract, _account: AuthAccountContext): void {
+    // 공지 수정 정책 검증 영역
+  }
+
+  private async processUpdate(
+    command: UpdateAnnouncementContract,
+    account: AuthAccountContext,
+  ): Promise<UpdateAnnouncementResponseDto> {
     const metadataExpression = new JsonbSetQueryBuilder<{ metadata: AnnouncementMetadata }>().build(
       'metadata',
-      this.buildAnnouncementMetadataPatch(data),
+      this.buildAnnouncementMetadataPatch(command.data),
     );
 
     const result = await Announcement
       .getQueryBuilder()
       .update({
-        title: data.title.trim(),
-        content: data.content.trim(),
+        title: command.data.title.trim(),
+        content: command.data.content.trim(),
         updatedAt: new Date(),
-        updatedBy: accountId,
+        updatedBy: account.id,
         metadata: metadataExpression,
       })
-      .where({ id: data.id })
+      .where({ id: command.data.id })
       .execute();
 
     if (result.affectedRows === 0) {
       throw new NotFoundException('ANNOUNCEMENT_NOT_FOUND');
     }
 
-    return new UpdateAnnouncementResponseDto(data.id);
+    return new UpdateAnnouncementResponseDto(command.data.id);
   }
 
   private buildAnnouncementMetadataPatch(

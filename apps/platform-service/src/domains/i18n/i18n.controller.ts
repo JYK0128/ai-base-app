@@ -3,8 +3,8 @@ import { QueryBus } from '@nestjs/cqrs';
 
 import { SwaggerResponse } from '@/common/decorators';
 
-import { GetLocalesContract } from './locales/get-locales.contract';
-import { GetLocalesResponseDto } from './locales/get-locales.response.dto';
+import { GetLocaleListContract } from './locale-list/get-locale-list.contract';
+import { GetLocaleListResponseDto } from './locale-list/get-locale-list.response.dto';
 
 @Controller('i18n')
 export class I18nController {
@@ -13,8 +13,8 @@ export class I18nController {
   ) {}
 
   @Get('locales')
-  @SwaggerResponse(GetLocalesResponseDto)
-  async getLocales(): Promise<GetLocalesResponseDto> {
-    return this.queryBus.execute(new GetLocalesContract());
+  @SwaggerResponse(GetLocaleListResponseDto)
+  async getLocaleList(): Promise<GetLocaleListResponseDto> {
+    return this.queryBus.execute(new GetLocaleListContract());
   }
 }

@@ -1,20 +1,27 @@
-import { Badge, Button, type ColumnDef, DataTable, toast } from '@pkg/ui';
+import { Badge, Button, type ColumnDef, confirm, DataTable, toast } from '@pkg/ui';
 import { useQueryClient } from '@tanstack/react-query';
 import { Megaphone, Pin, Plus } from 'lucide-react';
 import { useState } from 'react';
 
 import { useAnnouncementControllerCreateAnnouncementV1, useAnnouncementControllerDeleteAnnouncementV1, useAnnouncementControllerGetAnnouncementPageV1, useAnnouncementControllerUpdateAnnouncementV1 } from '@/api/generated/endpoints';
+import type { AnnouncementPageItem, AnnouncementPageItemAudience, AnnouncementPageItemCategory, AnnouncementPageItemStatus, CreateAnnouncementRequestDto, UpdateAnnouncementRequestDto } from '@/api/generated/model';
 
-import { ANNOUNCEMENT_AUDIENCE_LABELS, ANNOUNCEMENT_CATEGORY_LABELS, ANNOUNCEMENT_STATUS_LABELS, type AnnouncementAudience, type AnnouncementEditorSeed, type AnnouncementItem, type AnnouncementStatus, buildAnnouncementPreviewText, type CreateAnnouncementDto, createBlankAnnouncement, formatDateTime, type UpdateAnnouncementDto } from '../-announcements.shared';
+import { ManagementPanel } from '../../-components/ManagementPanel';
+import { buildAnnouncementPreviewText, createBlankAnnouncement, formatDateTime, toAnnouncementEditorSeed } from '../-helpers/announcements.helper';
+import { ANNOUNCEMENT_AUDIENCE_LABELS, ANNOUNCEMENT_CATEGORY_LABELS, ANNOUNCEMENT_STATUS_LABELS, type AnnouncementEditorSeed } from '../-helpers/announcements-types.helper';
 import { AnnouncementEditorModal } from '../-modals/AnnouncementEditorModal';
 import { AnnouncementPreviewModal } from '../-modals/AnnouncementPreviewModal';
 
-function getStatusTone(status: AnnouncementStatus) {
+function getStatusTone(status: AnnouncementPageItemStatus) {
   switch (status) {
     case 'DRAFT':
       return 'border-slate-200 bg-slate-100 text-slate-700';
-    case 'PUBLISHED':
+    case 'SCHEDULED':
+      return 'border-amber-200 bg-amber-50 text-amber-700';
+    case 'ACTIVE':
       return 'border-emerald-200 bg-emerald-50 text-emerald-700';
+    case 'EXPIRED':
+      return 'border-rose-200 bg-rose-50 text-rose-700';
   }
 }
 
@@ -34,7 +41,13 @@ const ANNOUNCEMENT_COLUMNS = [
             <button
               type="button"
               onClick={() => action?.openPreview?.(row.original)}
-              className="min-w-0 flex-1 truncate text-left font-medium text-slate-900 transition hover:text-sky-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-200"
+              className="
+                min-w-0 flex-1 truncate text-left font-medium text-slate-900
+                transition
+                hover:text-sky-600
+                focus-visible:ring-2 focus-visible:ring-sky-200
+                focus-visible:outline-none
+              "
               title={`${title} 미리보기`}
             >
               {title}
@@ -50,10 +63,16 @@ const ANNOUNCEMENT_COLUMNS = [
     header: '분류',
     size: 100,
     cell: ({ getValue }) => {
-      const value = getValue<AnnouncementItem['category']>();
+      const value = getValue<AnnouncementPageItemCategory>();
 
       return (
-        <Badge variant="outline" className="rounded-full border-slate-200 bg-slate-50 px-2.5 py-1 text-[11px] text-slate-700">
+        <Badge
+          variant="outline"
+          className="
+            rounded-full border-slate-200 bg-slate-50 px-2.5 py-1 text-[11px]
+            text-slate-700
+          "
+        >
           {ANNOUNCEMENT_CATEGORY_LABELS[value]}
         </Badge>
       );
@@ -64,10 +83,16 @@ const ANNOUNCEMENT_COLUMNS = [
     header: '대상',
     size: 110,
     cell: ({ getValue }) => {
-      const value = getValue<AnnouncementAudience>();
+      const value = getValue<AnnouncementPageItemAudience>();
 
       return (
-        <Badge variant="outline" className="rounded-full border-slate-200 bg-white px-2.5 py-1 text-[11px] text-slate-700">
+        <Badge
+          variant="outline"
+          className="
+            rounded-full border-slate-200 bg-white px-2.5 py-1 text-[11px]
+            text-slate-700
+          "
+        >
           {ANNOUNCEMENT_AUDIENCE_LABELS[value]}
         </Badge>
       );
@@ -78,10 +103,16 @@ const ANNOUNCEMENT_COLUMNS = [
     header: '상태',
     size: 110,
     cell: ({ getValue }) => {
-      const value = getValue<AnnouncementStatus>();
+      const value = getValue<AnnouncementPageItemStatus>();
 
       return (
-        <Badge variant="secondary" className={`rounded-full px-2.5 py-1 text-[11px] ${getStatusTone(value)}`}>
+        <Badge
+          variant="secondary"
+          className={`
+            rounded-full px-2.5 py-1 text-[11px]
+            ${getStatusTone(value)}
+          `}
+        >
           {ANNOUNCEMENT_STATUS_LABELS[value]}
         </Badge>
       );
@@ -97,7 +128,10 @@ const ANNOUNCEMENT_COLUMNS = [
       const endAtText = row.original.endAt ? formatDateTime(row.original.endAt) : '-';
 
       return (
-        <div className="flex flex-col gap-0.5 py-1 font-mono text-xs text-slate-600">
+        <div className="
+          flex flex-col gap-0.5 py-1 font-mono text-xs text-slate-600
+        "
+        >
           <span>{`확정 ${publishedAtText}`}</span>
           <span className="text-[11px] text-slate-600">{`${startAtText} ~ ${endAtText}`}</span>
         </div>
@@ -114,21 +148,22 @@ const ANNOUNCEMENT_COLUMNS = [
       </span>
     ),
   },
-] satisfies ColumnDef<AnnouncementItem>[];
+] satisfies ColumnDef<AnnouncementPageItem>[];
 
 export function AnnouncementListTab() {
   const queryClient = useQueryClient();
   const announcementsQuery = useAnnouncementControllerGetAnnouncementPageV1({
-    filter: {},
+    filters: {},
     page: 1,
     limit: 100,
   });
-  const announcements = (announcementsQuery.data?.data?.items ?? []) as AnnouncementItem[];
+
+  const announcements = (announcementsQuery.data?.items ?? []);
   const [editorOpen, setEditorOpen] = useState(false);
   const [draftAnnouncement, setDraftAnnouncement] = useState<AnnouncementEditorSeed | null>(null);
   const [editorKey, setEditorKey] = useState('');
   const [previewOpen, setPreviewOpen] = useState(false);
-  const [previewAnnouncement, setPreviewAnnouncement] = useState<AnnouncementItem | null>(null);
+  const [previewAnnouncement, setPreviewAnnouncement] = useState<AnnouncementPageItem | null>(null);
   const saveAnnouncementMutation = useAnnouncementControllerCreateAnnouncementV1({
     mutation: {
       onSuccess: () => {
@@ -177,7 +212,7 @@ export function AnnouncementListTab() {
     }
   };
 
-  const handleSaveAnnouncement = async (announcement: CreateAnnouncementDto | UpdateAnnouncementDto) => {
+  const handleSaveAnnouncement = async (announcement: CreateAnnouncementRequestDto | UpdateAnnouncementRequestDto) => {
     if ('id' in announcement) {
       await updateAnnouncementMutation.mutateAsync({ id: announcement.id, data: announcement });
     }
@@ -187,28 +222,37 @@ export function AnnouncementListTab() {
   };
 
   const handleDeleteAnnouncement = async (id: string) => {
-    if (confirm('정말로 이 공지사항을 삭제하시겠습니까?')) {
-      try {
-        await deleteAnnouncementMutation.mutateAsync({ id });
-        toast.success('공지사항이 삭제되었습니다.');
-        setPreviewOpen(false);
-        setPreviewAnnouncement(null);
-      }
-      catch {
-        // Parent mutation handles error toast
-      }
+    const confirmed = await confirm({
+      title: '공지사항을 삭제할까요?',
+      description: '삭제한 공지사항은 복구할 수 없습니다.',
+      actionText: '삭제',
+      cancelText: '취소',
+    });
+
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      await deleteAnnouncementMutation.mutateAsync({ id });
+      toast.success('공지사항이 삭제되었습니다.');
+      setPreviewOpen(false);
+      setPreviewAnnouncement(null);
+    }
+    catch {
+      // Parent mutation handles error toast
     }
   };
 
-  const handleOpenPreview = (announcement: AnnouncementItem) => {
+  const handleOpenPreview = (announcement: AnnouncementPageItem) => {
     setPreviewAnnouncement(announcement);
     setPreviewOpen(true);
   };
 
-  const handleOpenEdit = (announcement: AnnouncementItem) => {
+  const handleOpenEdit = (announcement: AnnouncementPageItem) => {
     setPreviewOpen(false);
     setPreviewAnnouncement(null);
-    setDraftAnnouncement(announcement);
+    setDraftAnnouncement(toAnnouncementEditorSeed(announcement));
     setEditorKey(announcement.id);
     setEditorOpen(true);
   };
@@ -229,37 +273,28 @@ export function AnnouncementListTab() {
   };
 
   return (
-    <section className="flex flex-1 flex-col overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-      <header className="flex flex-col gap-3 border-b border-slate-200 px-4 py-4 lg:flex-row lg:items-center lg:justify-between">
-        <div className="flex items-start gap-3">
-          <div className="mt-0.5 rounded-xl border border-slate-200 bg-slate-50 p-1.5 text-slate-500">
-            <Megaphone className="size-4" />
-          </div>
-          <div className="space-y-1">
-            <h2 className="text-base font-semibold text-slate-900">공지 목록</h2>
-            <p className="text-sm text-slate-500">
-              운영 공지를 한 화면에서 확인하고 새 공지를 추가할 수 있습니다.
-            </p>
-          </div>
-        </div>
-
-        <div className="flex w-full items-center justify-end gap-2 lg:w-auto">
+    <>
+      <ManagementPanel
+        icon={<Megaphone className="size-4" />}
+        title="공지 목록"
+        description="운영 공지를 한 화면에서 확인하고 새 공지를 추가할 수 있습니다."
+        actions={(
           <Button type="button" size="sm" onClick={handleOpenCreateEditor}>
             <Plus className="size-3.5" />
             추가
           </Button>
+        )}
+      >
+        <div className="scroll flex-1">
+          <DataTable
+            columns={ANNOUNCEMENT_COLUMNS}
+            data={announcements}
+            filterColumns={['title', 'content', 'category', 'audience', 'status']}
+            filterPlaceholder="제목, 내용, 분류, 대상으로 검색"
+            meta={metaValue}
+          />
         </div>
-      </header>
-
-      <div className="flex-1 scroll px-4 py-4">
-        <DataTable
-          columns={ANNOUNCEMENT_COLUMNS}
-          data={announcements}
-          filterColumns={['title', 'content', 'category', 'audience', 'status']}
-          filterPlaceholder="제목, 내용, 분류, 대상으로 검색"
-          meta={metaValue}
-        />
-      </div>
+      </ManagementPanel>
 
       {draftAnnouncement
         ? (
@@ -284,6 +319,6 @@ export function AnnouncementListTab() {
           />
         )
         : null}
-    </section>
+    </>
   );
 }

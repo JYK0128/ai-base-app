@@ -2,7 +2,7 @@ import { Badge } from '@pkg/ui';
 import { Activity } from 'lucide-react';
 
 import { OrganizationPanel } from '../-components/OrganizationPanel';
-import { type OrganizationActivityMock } from '../-organizations.shared';
+import { type OrganizationActivityMock } from '../-helpers/organizations.helper';
 
 export function OrganizationActivityTab({ activity }: Readonly<{ activity: OrganizationActivityMock[] }>) {
   return (
@@ -15,21 +15,36 @@ export function OrganizationActivityTab({ activity }: Readonly<{ activity: Organ
         {activity.map((item, index) => (
           <div key={item.title} className="relative pl-6">
             {index < activity.length - 1
-              ? <div className="absolute bottom-0 left-[11px] top-7 w-px bg-slate-200" />
+              ? (
+                <div className="
+                  absolute top-7 bottom-0 left-2.75 w-px bg-slate-200
+                "
+                />
+              )
               : null}
-            <div className="absolute left-0 top-1 flex size-6 items-center justify-center rounded-full border border-slate-200 bg-white">
+            <div className="
+              absolute top-1 left-0 flex size-6 items-center justify-center
+              rounded-full border border-slate-200 bg-white
+            "
+            >
               <div className={getActivityToneClass(item.tone)}>
                 <item.icon className="size-3.5" />
               </div>
             </div>
-            <div className="rounded-2xl border border-slate-200 bg-slate-50/80 p-4">
+            <div className="
+              rounded-2xl border border-slate-200 bg-slate-50/80 p-4
+            "
+            >
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <p className="font-semibold text-slate-900">{item.title}</p>
-                <Badge variant="outline" className="border-slate-200 bg-white text-slate-600">
+                <Badge
+                  variant="outline"
+                  className="border-slate-200 bg-white text-slate-600"
+                >
                   {item.when}
                 </Badge>
               </div>
-              <p className="mt-2 text-sm leading-6 text-slate-600">{item.description}</p>
+              <p className="mt-2 text-sm/6 text-slate-600">{item.description}</p>
             </div>
           </div>
         ))}

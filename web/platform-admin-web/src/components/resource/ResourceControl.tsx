@@ -1,23 +1,19 @@
 import { cloneElement, type ReactElement, useMemo } from 'react';
 
+import { type AllowedResourceListItem, type AllowedResourceListItemActionsItem } from '@/api/generated/model';
+
 import { Route } from '../../routes/_protected';
 
 interface ResourceControlProps {
   readonly code: string
-  readonly action?: string
+  readonly action?: AllowedResourceListItemActionsItem
   readonly fallback?: ReactElement | null
   readonly children: ReactElement<{ 'data-resource-code'?: string }>
 }
 
-interface ResourceLike {
-  code: string
-  actions?: string[]
-  children?: ResourceLike[]
-}
-
-function flattenResources(nodes: readonly ResourceLike[]): ResourceLike[] {
-  const result: ResourceLike[] = [];
-  const traverse = (items: readonly ResourceLike[]) => {
+function flattenResources(nodes: readonly AllowedResourceListItem[]): AllowedResourceListItem[] {
+  const result: AllowedResourceListItem[] = [];
+  const traverse = (items: readonly AllowedResourceListItem[]) => {
     for (const item of items) {
       result.push(item);
       if (item.children?.length) {
@@ -31,16 +27,16 @@ function flattenResources(nodes: readonly ResourceLike[]): ResourceLike[] {
 }
 
 export function ResourceControl({ code: resourceCode, action = 'READ', fallback = null, children }: ResourceControlProps) {
-  const { resources } = Route.useRouteContext();
+  const resources = Route.useLoaderData();
   const allowed = useMemo(() => {
-    const flattenedResources = flattenResources(resources ?? []);
+    const flattenedResources = flattenResources(resources);
     const resource = flattenedResources.find((item) => item.code === resourceCode);
 
     if (!resource) {
       return false;
     }
 
-    return resource.actions?.includes(action) ?? false;
+    return resource.actions.includes(action);
   }, [action, resourceCode, resources]);
 
   if (!allowed) {

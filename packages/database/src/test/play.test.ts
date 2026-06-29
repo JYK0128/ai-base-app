@@ -1,4 +1,4 @@
-import { raw, RequestContext, sql } from '@mikro-orm/core';
+import { RequestContext, sql } from '@mikro-orm/core';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 import { Member, MemberAccount, MemberStatus, Organization, OrganizationRole, TermsDocument, TermsVersion } from '@/domains';
@@ -48,9 +48,9 @@ describe('Database Playground', () => {
 
       const latestEffectQuery = TermsVersion.getQueryBuilder('sub_tv');
       latestEffectQuery
-        .select(raw('MAX(sub_tv."effectiveAt")'))
+        .select(sql`MAX(sub_tv."effectiveAt")`)
         .where({
-          'sub_tv.termsDocument': raw('td.id'),
+          'sub_tv.termsDocument': sql`td.id`,
           'sub_tv.effectiveAt': { $lte: new Date() },
         });
 
@@ -86,7 +86,7 @@ describe('Database Playground', () => {
       }
 
       const qb1 = OrganizationRole.getQueryBuilder('role');
-      const count = await qb1
+      const _count = await qb1
         .leftJoin('role.assignments', 'assignment')
         .select([
           'role.id',
@@ -99,7 +99,7 @@ describe('Database Playground', () => {
         .groupBy('role.id')
         .execute();
 
-      const qb2 = OrganizationRole.getQueryBuilder('role')
+      const _qb2 = OrganizationRole.getQueryBuilder('role')
         .leftJoinAndSelect('permissions', 'permission')
         .leftJoinAndSelect('permission.resource', 'resource')
         .where({

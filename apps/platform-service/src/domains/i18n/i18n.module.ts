@@ -4,7 +4,7 @@ import { CqrsModule } from '@nestjs/cqrs';
 import { I18nLocale } from '@pkg/database';
 
 import { I18nController } from './i18n.controller';
-import { GetLocalesHandler } from './locales/get-locales.handler';
+import { GetLocaleListHandler } from './locale-list/get-locale-list.handler';
 
 @Module({
   imports: [
@@ -12,6 +12,6 @@ import { GetLocalesHandler } from './locales/get-locales.handler';
     MikroOrmModule.forFeature([I18nLocale]),
   ],
   controllers: [I18nController],
-  providers: [GetLocalesHandler],
+  providers: [GetLocaleListHandler],
 })
 export class I18nModule {}

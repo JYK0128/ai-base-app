@@ -7,6 +7,6 @@
  */
 
 export interface UpdateAnnouncementResponseDto {
-  /** 공지사항 식별자 */
+  /** 식별자 */
   id: string;
 }

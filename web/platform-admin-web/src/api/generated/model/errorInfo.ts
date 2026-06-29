@@ -5,11 +5,12 @@
  * The AI Base App Platform Service API documentation
  * OpenAPI spec version: 1.0
  */
+import type { ErrorInfoCode } from './errorInfoCode';
 import type { ErrorInfoDetails } from './errorInfoDetails';
 
 export interface ErrorInfo {
   /** 에러 코드 */
-  code: string;
+  code: ErrorInfoCode;
   /** 에러 메시지 */
   message: string | string[];
   /** 상세 정보 */

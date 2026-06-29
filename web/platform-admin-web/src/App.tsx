@@ -1,13 +1,17 @@
 import './index.css';
 
-import { Toaster } from '@pkg/ui';
-import { keepPreviousData, QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { alert, Popup, Toaster } from '@pkg/ui';
+import { keepPreviousData, QueryCache, QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { createRouter, RouterProvider } from '@tanstack/react-router';
+import { isAxiosError } from 'axios';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { getAuthControllerMeV1QueryKey } from './api/generated/endpoints';
 import { NotFound } from './components/NotFound';
-import { useAuth } from './hooks/useAuth';
+import { useSession } from './hooks/useSession';
+import { useWheelScroll } from './hooks/useWheelScroll';
+import { clearCsrfToken } from './lib/axios';
 import { routeTree } from './routeTree.gen';
 
 const TanStackRouterDevtools
@@ -31,7 +35,7 @@ const ReactQueryDevtools
 const router = createRouter({
   routeTree,
   context: {
-    auth: undefined!,
+    session: undefined!,
     queryClient: undefined!,
   },
   defaultNotFoundComponent: NotFound,
@@ -43,8 +47,33 @@ declare module '@tanstack/react-router' {
   }
 }
 
+let isHandlingUnauthorized = false;
+const authQueryKey = getAuthControllerMeV1QueryKey();
+
 // 1) QueryClient 설정 (mini-sass와 동일하게 MutationCache 추가)
 const queryClient = new QueryClient({
+  queryCache: new QueryCache({
+    onError: (error, query) => {
+      const isAuthQuery = query.queryKey.length === authQueryKey.length
+        && query.queryKey.every((value, index) => value === authQueryKey[index]);
+
+      if (!isAxiosError(error) || error.response?.status !== 401 || isAuthQuery || isHandlingUnauthorized) {
+        return;
+      }
+
+      isHandlingUnauthorized = true;
+      clearCsrfToken();
+      queryClient.clear();
+      void alert({
+        title: '로그아웃되었습니다.',
+        description: '세션이 만료되었습니다. 다시 로그인해 주세요.',
+      });
+
+      void router.navigate({ to: '/login', replace: true }).finally(() => {
+        isHandlingUnauthorized = false;
+      });
+    },
+  }),
   defaultOptions: {
     queries: {
       retry: false,
@@ -67,13 +96,18 @@ const queryClient = new QueryClient({
 });
 
 function AppInner() {
-  const { isInitializing, isAuthenticated, mustChangePassword, mustAcceptTerms, permissions } = useAuth();
+  const session = useSession();
   const { t } = useTranslation('common');
 
-  if (isInitializing) {
+  useWheelScroll();
+
+  if (session.isPending) {
     return (
-      <div className="flex h-screen items-center justify-center bg-slate-50 font-sans">
-        <div className="text-slate-400 font-medium">{t('loadingAuth')}</div>
+      <div className="
+        flex h-screen items-center justify-center bg-slate-50 font-sans
+      "
+      >
+        <div className="font-medium text-slate-400">{t('loadingAuth')}</div>
       </div>
     );
   }
@@ -83,7 +117,7 @@ function AppInner() {
       <RouterProvider
         router={router}
         context={{
-          auth: { isAuthenticated, mustChangePassword, mustAcceptTerms, permissions },
+          session,
           queryClient,
         }}
       />
@@ -100,6 +134,7 @@ function App() {
     <QueryClientProvider client={queryClient}>
 
       <AppInner />
+      <Popup />
       <Toaster position="top-center" richColors />
     </QueryClientProvider>
 

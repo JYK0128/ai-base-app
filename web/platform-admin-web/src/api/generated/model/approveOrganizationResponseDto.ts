@@ -7,6 +7,6 @@
  */
 
 export interface ApproveOrganizationResponseDto {
-  /** 조직 식별자 */
+  /** 식별자 */
   id: string;
 }

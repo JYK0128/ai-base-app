@@ -1,13 +1,15 @@
+import type { ObjectQuery } from '@mikro-orm/core';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import type { Announcement } from '@pkg/database';
 import { AnnouncementStatus } from '@pkg/database';
 import { Type } from 'class-transformer';
-import { IsBoolean, IsOptional } from 'class-validator';
-import { ValidateNested } from 'class-validator';
+import { IsBoolean, IsEnum, IsIn, IsOptional, ValidateNested } from 'class-validator';
 
-import { type FilterRequestDto, type PageRequestDto, SortDirection, type SortKey } from '@/common/interfaces';
+import { FilterableRequestDto, PageRequestDto, SortDirection, type SortKey } from '@/common/interfaces';
 
-class GetAnnouncementPageFilters implements FilterRequestDto<Announcement> {
+const ANNOUNCEMENT_PAGE_SORT = ['createdAt'] as const;
+
+class GetAnnouncementPageFilters extends FilterableRequestDto<Announcement> {
   @ApiPropertyOptional({ description: '게시된 공지만 조회할지 여부', example: true, default: false })
   @IsOptional()
   @IsBoolean()
@@ -15,24 +17,70 @@ class GetAnnouncementPageFilters implements FilterRequestDto<Announcement> {
 
   @ApiPropertyOptional({ enum: AnnouncementStatus, description: '게시 상태', example: AnnouncementStatus.ACTIVE })
   @IsOptional()
+  @Type(() => String)
+  @IsEnum(AnnouncementStatus)
   status?: AnnouncementStatus;
+
+  toFilterQuery(): ObjectQuery<Announcement> {
+    const queries: ObjectQuery<Announcement>[] = [];
+    let queryFilter: ObjectQuery<Announcement>;
+
+    if (this.status === AnnouncementStatus.DRAFT) {
+      queries.push({ metadata: { publishedAt: null } });
+    }
+    else if (this.status === AnnouncementStatus.SCHEDULED) {
+      queries.push({ metadata: { publishedAt: { $ne: null }, startAt: { $gt: new Date() } } });
+    }
+    else if (this.status === AnnouncementStatus.ACTIVE) {
+      queries.push({
+        metadata: {
+          publishedAt: { $ne: null },
+          startAt: { $lte: new Date() },
+          endAt: { $gte: new Date() },
+        },
+      });
+    }
+    else if (this.status === AnnouncementStatus.EXPIRED) {
+      queries.push({ metadata: { publishedAt: { $ne: null }, endAt: { $lt: new Date() } } });
+    }
+
+    if (typeof this.isPublished === 'boolean') {
+      queries.push(
+        this.isPublished
+          ? { metadata: { publishedAt: { $ne: null } } }
+          : { metadata: { publishedAt: null } },
+      );
+    }
+
+    if (queries.length === 0) {
+      queryFilter = {};
+    }
+    else if (queries.length === 1) {
+      queryFilter = queries[0];
+    }
+    else {
+      queryFilter = { $and: queries };
+    }
+
+    return queryFilter;
+  }
 }
 
-export class GetAnnouncementPageRequestDto implements PageRequestDto<Announcement> {
+export class GetAnnouncementPageRequestDto extends PageRequestDto<Announcement> {
   @ApiProperty({ type: () => GetAnnouncementPageFilters, description: '필터 조건' })
   @ValidateNested()
   @Type(() => GetAnnouncementPageFilters)
-  filter: GetAnnouncementPageFilters = new GetAnnouncementPageFilters();
+  filters: GetAnnouncementPageFilters = new GetAnnouncementPageFilters();
 
-  @ApiPropertyOptional({ description: '정렬 필드', example: ['createdAt'], default: ['createdAt'], isArray: true })
+  @ApiPropertyOptional({ description: '정렬 필드', isArray: true, enum: ANNOUNCEMENT_PAGE_SORT })
+  @IsOptional()
+  @IsIn(ANNOUNCEMENT_PAGE_SORT, { each: true })
+  @Type(() => String)
   sort: Array<SortKey<Announcement>> = ['createdAt'];
 
-  @ApiPropertyOptional({ description: '정렬 방향', enum: SortDirection, example: [SortDirection.DESC], default: [SortDirection.DESC], isArray: true })
-  direction: SortDirection[] = [SortDirection.DESC];
-
-  @ApiPropertyOptional({ description: '페이지 번호', example: 1, default: 1 })
-  page = 1;
-
-  @ApiPropertyOptional({ description: '페이지 크기', example: 20, default: 20 })
-  limit = 20;
+  @ApiPropertyOptional({ description: '정렬 방향', isArray: true, enum: SortDirection })
+  @IsOptional()
+  @IsEnum(SortDirection, { each: true })
+  @Type(() => String)
+  direction: SortDirection[] = ['desc'];
 }

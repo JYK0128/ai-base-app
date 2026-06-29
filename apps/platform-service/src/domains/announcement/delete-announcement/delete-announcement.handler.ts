@@ -11,10 +11,24 @@ export class DeleteAnnouncementHandler implements ICommandHandler<DeleteAnnounce
   ) {}
 
   @Transactional()
-  async execute({ data }: DeleteAnnouncementContract): Promise<DeleteAnnouncementResponseDto> {
-    const announcement = Announcement.getReference(data.id);
-    announcement.remove();
+  async execute(command: DeleteAnnouncementContract): Promise<DeleteAnnouncementResponseDto> {
+    const announcement = this.identifyAnnouncement(command);
+    this.verifyDeletion(announcement);
+    this.processDelete(announcement);
 
     return new DeleteAnnouncementResponseDto(announcement.id);
+  }
+
+  private identifyAnnouncement(command: DeleteAnnouncementContract): Announcement {
+    const announcement = Announcement.getReference(command.data.id);
+    return announcement;
+  }
+
+  private verifyDeletion(_announcement: Announcement): void {
+    // 공지 삭제 정책 검증 영역
+  }
+
+  private processDelete(announcement: Announcement): void {
+    announcement.remove();
   }
 }

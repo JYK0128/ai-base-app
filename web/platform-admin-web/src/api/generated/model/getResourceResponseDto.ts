@@ -30,6 +30,4 @@ export interface GetResourceResponseDto {
   actions: GetResourceResponseDtoActionsItem[];
   /** 부모 리소스 식별자 */
   parent?: string;
-  /** 하위 리소스 목록 */
-  children: GetResourceResponseDto[];
 }

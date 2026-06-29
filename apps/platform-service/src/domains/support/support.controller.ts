@@ -5,7 +5,7 @@ import { SwaggerResponse } from '@/common/decorators';
 
 import { GetTicketPageContract } from './get-ticket-page/get-ticket-page.contract';
 import { GetTicketPageRequestDto } from './get-ticket-page/get-ticket-page.request.dto';
-import { GetTicketResponseDto } from './get-ticket-page/get-ticket-page.response.dto';
+import { GetTicketPageResponseDto } from './get-ticket-page/get-ticket-page.response.dto';
 
 @Controller('support')
 export class SupportController {
@@ -14,10 +14,10 @@ export class SupportController {
   ) {}
 
   @Get('tickets')
-  @SwaggerResponse([GetTicketResponseDto])
+  @SwaggerResponse(GetTicketPageResponseDto)
   async getTicketPage(
     @Query() query: GetTicketPageRequestDto,
-  ): Promise<GetTicketResponseDto[]> {
+  ): Promise<GetTicketPageResponseDto> {
     return this.queryBus.execute(new GetTicketPageContract(query));
   }
 }

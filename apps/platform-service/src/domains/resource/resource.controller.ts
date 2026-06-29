@@ -3,22 +3,22 @@ import { QueryBus } from '@nestjs/cqrs';
 
 import { SwaggerResponse } from '@/common/decorators';
 
-import { GetPermissionSetsContract } from './get-permission-sets/get-permission-sets.contract';
-import { GetPermissionSetResponseDto } from './get-permission-sets/get-permission-sets.response.dto';
 import { GetResourceContract } from './get-resource/get-resource.contract';
 import { GetResourceResponseDto } from './get-resource/get-resource.response.dto';
-import { GetResourcePageContract } from './get-resource-page/get-resource-page.contract';
-import { GetResourcePageRequestDto } from './get-resource-page/get-resource-page.request.dto';
-import { GetResourceResponseDto as GetResourcePageItemResponseDto } from './get-resource-page/get-resource-page.response.dto';
+import { GetResourceListContract } from './get-resource-list/get-resource-list.contract';
+import { GetResourceListRequestDto } from './get-resource-list/get-resource-list.request.dto';
+import { GetResourceListResponseDto } from './get-resource-list/get-resource-list.response.dto';
+import { GetRolePermissionListContract } from './get-role-permission-list/get-role-permission-list.contract';
+import { GetRolePermissionListResponseDto } from './get-role-permission-list/get-role-permission-list.response.dto';
 
 @Controller('resources')
 export class ResourceController {
   constructor(private readonly queryBus: QueryBus) {}
 
   @Get('permission-sets')
-  @SwaggerResponse([GetPermissionSetResponseDto])
-  async getPermissionSets(): Promise<GetPermissionSetResponseDto[]> {
-    return this.queryBus.execute(new GetPermissionSetsContract());
+  @SwaggerResponse(GetRolePermissionListResponseDto)
+  async getRolePermissionList(): Promise<GetRolePermissionListResponseDto> {
+    return this.queryBus.execute(new GetRolePermissionListContract());
   }
 
   @Get(':id')
@@ -30,10 +30,10 @@ export class ResourceController {
   }
 
   @Get()
-  @SwaggerResponse([GetResourcePageItemResponseDto])
-  async getResourcePage(
-    @Query() query: GetResourcePageRequestDto,
-  ): Promise<GetResourcePageItemResponseDto[]> {
-    return this.queryBus.execute(new GetResourcePageContract(query));
+  @SwaggerResponse(GetResourceListResponseDto)
+  async getResourceList(
+    @Query() query: GetResourceListRequestDto,
+  ): Promise<GetResourceListResponseDto> {
+    return this.queryBus.execute(new GetResourceListContract(query));
   }
 }

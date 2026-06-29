@@ -8,7 +8,7 @@ import type { BaseEntity, EntityManager, EntityName, FilterQuery, RequiredEntity
 import { Seeder } from '@mikro-orm/seeder';
 import bcrypt from 'bcrypt';
 
-import { MemberStatus } from '../domains/platform/member/member.constants';
+import { AccountStatus, MemberStatus } from '../domains/platform/member/member.constants';
 import { Member } from '../domains/platform/member/member.entity';
 import { MemberAccount } from '../domains/platform/member/member-account.entity';
 import { Organization, OrganizationMetadata } from '../domains/platform/organization/organization.entity';
@@ -19,14 +19,18 @@ type CodedEntityData<TEntity extends BaseEntity> = RequiredEntityData<TEntity> &
 type InitialMemberAccountData = Omit<RequiredEntityData<MemberAccount>, 'email' | 'member' | 'password' | 'passwordExpiresAt'> & {
   email: string
   password: string
-  passwordExpiresAt?: MemberAccount['passwordExpiresAt']
+  passwordExpiresAt?: Date
 };
 type CustomerOrganizationAdminSeed = {
   account: InitialMemberAccountData
   organizationCode: string
   roleCode: string
   name: string
+  memberStatus?: MemberStatus
 };
+
+const daysAgo = (days: number): Date => new Date(Date.now() - days * 24 * 60 * 60 * 1000);
+const daysLater = (days: number): Date => new Date(Date.now() + days * 24 * 60 * 60 * 1000);
 
 const CUSTOMER_ORGANIZATIONS = [
   {
@@ -63,7 +67,238 @@ const CUSTOMER_ORGANIZATION_ADMINS = [
     },
     organizationCode: 'acme',
     roleCode: 'OWNER',
-    name: 'Acme Admin',
+    name: 'Acme User 01',
+  },
+  {
+    account: {
+      email: 'manager@acme.example',
+      password: 'pass1234',
+      status: AccountStatus.ACTIVE,
+      passwordExpiresAt: daysLater(60),
+    },
+    organizationCode: 'acme',
+    roleCode: 'MANAGER',
+    name: 'Acme User 02',
+  },
+  {
+    account: {
+      email: 'viewer@acme.example',
+      password: 'pass1234',
+      status: AccountStatus.INACTIVE,
+      lastLoginAt: daysAgo(180),
+      passwordExpiresAt: daysAgo(5),
+    },
+    organizationCode: 'acme',
+    roleCode: 'VIEWER',
+    name: 'Acme User 03',
+    memberStatus: MemberStatus.INACTIVE,
+  },
+  {
+    account: {
+      email: 'owner2@acme.example',
+      password: 'pass1234',
+      status: AccountStatus.ACTIVE,
+      passwordExpiresAt: daysLater(75),
+    },
+    organizationCode: 'acme',
+    roleCode: 'OWNER',
+    name: 'Acme User 04',
+  },
+  {
+    account: {
+      email: 'owner3@acme.example',
+      password: 'pass1234',
+      status: AccountStatus.ACTIVE,
+      lastLoginAt: daysAgo(14),
+      passwordExpiresAt: daysLater(45),
+    },
+    organizationCode: 'acme',
+    roleCode: 'OWNER',
+    name: 'Acme User 05',
+  },
+  {
+    account: {
+      email: 'manager2@acme.example',
+      password: 'pass1234',
+      status: AccountStatus.ACTIVE,
+      lastLoginAt: daysAgo(3),
+      passwordExpiresAt: daysLater(55),
+    },
+    organizationCode: 'acme',
+    roleCode: 'MANAGER',
+    name: 'Acme User 06',
+  },
+  {
+    account: {
+      email: 'manager3@acme.example',
+      password: 'pass1234',
+      status: AccountStatus.ACTIVE,
+      lastLoginAt: daysAgo(21),
+      passwordExpiresAt: daysLater(30),
+    },
+    organizationCode: 'acme',
+    roleCode: 'MANAGER',
+    name: 'Acme User 07',
+  },
+  {
+    account: {
+      email: 'viewer2@acme.example',
+      password: 'pass1234',
+      status: AccountStatus.ACTIVE,
+      lastLoginAt: daysAgo(7),
+      passwordExpiresAt: daysLater(90),
+    },
+    organizationCode: 'acme',
+    roleCode: 'VIEWER',
+    name: 'Acme User 08',
+  },
+  {
+    account: {
+      email: 'viewer3@acme.example',
+      password: 'pass1234',
+      status: AccountStatus.INACTIVE,
+      lastLoginAt: daysAgo(95),
+      passwordExpiresAt: daysAgo(2),
+    },
+    organizationCode: 'acme',
+    roleCode: 'VIEWER',
+    name: 'Acme User 09',
+    memberStatus: MemberStatus.INACTIVE,
+  },
+  {
+    account: {
+      email: 'viewer4@acme.example',
+      password: 'pass1234',
+      status: AccountStatus.ACTIVE,
+      lastLoginAt: daysAgo(1),
+      passwordExpiresAt: daysLater(120),
+    },
+    organizationCode: 'acme',
+    roleCode: 'VIEWER',
+    name: 'Acme User 10',
+  },
+  {
+    account: {
+      email: 'staff2@acme.example',
+      password: 'pass1234',
+      status: AccountStatus.ACTIVE,
+      lastLoginAt: daysAgo(11),
+      passwordExpiresAt: daysLater(60),
+    },
+    organizationCode: 'acme',
+    roleCode: 'MANAGER',
+    name: 'Acme User 11',
+  },
+  {
+    account: {
+      email: 'staff3@acme.example',
+      password: 'pass1234',
+      status: AccountStatus.INACTIVE,
+      lastLoginAt: daysAgo(60),
+      passwordExpiresAt: daysAgo(1),
+    },
+    organizationCode: 'acme',
+    roleCode: 'MANAGER',
+    name: 'Acme User 12',
+    memberStatus: MemberStatus.INACTIVE,
+  },
+  {
+    account: {
+      email: 'auditor@acme.example',
+      password: 'pass1234',
+      status: AccountStatus.ACTIVE,
+      lastLoginAt: daysAgo(8),
+      passwordExpiresAt: daysLater(150),
+    },
+    organizationCode: 'acme',
+    roleCode: 'VIEWER',
+    name: 'Acme User 13',
+  },
+  {
+    account: {
+      email: 'test02@acme.example',
+      password: 'pass1234',
+      status: AccountStatus.ACTIVE,
+      lastLoginAt: daysAgo(2),
+      passwordExpiresAt: daysLater(100),
+    },
+    organizationCode: 'acme',
+    roleCode: 'VIEWER',
+    name: 'Acme User 14',
+  },
+  {
+    account: {
+      email: 'test03@acme.example',
+      password: 'pass1234',
+      status: AccountStatus.ACTIVE,
+      lastLoginAt: daysAgo(4),
+      passwordExpiresAt: daysLater(95),
+    },
+    organizationCode: 'acme',
+    roleCode: 'MANAGER',
+    name: 'Acme User 15',
+  },
+  {
+    account: {
+      email: 'test04@acme.example',
+      password: 'pass1234',
+      status: AccountStatus.INACTIVE,
+      lastLoginAt: daysAgo(30),
+      passwordExpiresAt: daysAgo(4),
+    },
+    organizationCode: 'acme',
+    roleCode: 'VIEWER',
+    name: 'Acme User 16',
+    memberStatus: MemberStatus.INACTIVE,
+  },
+  {
+    account: {
+      email: 'test05@acme.example',
+      password: 'pass1234',
+      status: AccountStatus.ACTIVE,
+      lastLoginAt: daysAgo(12),
+      passwordExpiresAt: daysLater(110),
+    },
+    organizationCode: 'acme',
+    roleCode: 'OWNER',
+    name: 'Acme User 17',
+  },
+  {
+    account: {
+      email: 'test06@acme.example',
+      password: 'pass1234',
+      status: AccountStatus.ACTIVE,
+      lastLoginAt: daysAgo(17),
+      passwordExpiresAt: daysLater(80),
+    },
+    organizationCode: 'acme',
+    roleCode: 'MANAGER',
+    name: 'Acme User 18',
+  },
+  {
+    account: {
+      email: 'test07@acme.example',
+      password: 'pass1234',
+      status: AccountStatus.INACTIVE,
+      lastLoginAt: daysAgo(42),
+      passwordExpiresAt: daysAgo(7),
+    },
+    organizationCode: 'acme',
+    roleCode: 'VIEWER',
+    name: 'Acme User 19',
+    memberStatus: MemberStatus.INACTIVE,
+  },
+  {
+    account: {
+      email: 'test08@acme.example',
+      password: 'pass1234',
+      status: AccountStatus.ACTIVE,
+      lastLoginAt: daysAgo(5),
+      passwordExpiresAt: daysLater(130),
+    },
+    organizationCode: 'acme',
+    roleCode: 'VIEWER',
+    name: 'Acme User 20',
   },
 ] satisfies readonly CustomerOrganizationAdminSeed[];
 
@@ -159,7 +394,7 @@ export class OrganizationSeeder extends Seeder {
 
     const member = em.create(Member, {
       organization,
-      status: MemberStatus.ACTIVE,
+      status: seed.memberStatus ?? MemberStatus.ACTIVE,
       name: seed.name,
       email: seed.account.email,
     });
@@ -170,7 +405,9 @@ export class OrganizationSeeder extends Seeder {
       email: seed.account.email,
       password,
       member,
-      passwordExpiresAt: seed.account.passwordExpiresAt ?? new Date(Date.now() + 90 * 24 * 60 * 60 * 1000),
+      status: seed.account.status ?? AccountStatus.ACTIVE,
+      lastLoginAt: seed.account.lastLoginAt,
+      passwordExpiresAt: seed.account.passwordExpiresAt ?? daysLater(90),
     });
     em.persist(account);
 
