@@ -1,13 +1,15 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { ErrorInfoMixin, ErrorInfoProps } from '@pkg/shared/server';
 
+import { ErrorCode } from './error-code';
+
 export interface TracerInfo {
   traceId: string
   requestId: string
 }
 
 class ErrorInfoBase implements ErrorInfoProps {
-  @ApiProperty({ description: '에러 코드' })
+  @ApiProperty({ description: '에러 코드', enum: ErrorCode })
   code!: string;
 
   @ApiProperty({
@@ -26,9 +28,15 @@ class ErrorInfoBase implements ErrorInfoProps {
     this.code = typeof init.code === 'string' && init.code.length > 0
       ? init.code
       : 'INTERNAL_ERROR';
-    this.message = Array.isArray(init.message) && init.message.length
-      ? init.message
-      : 'An unexpected error occurred';
+    if (typeof init.message === 'string' && init.message.length > 0) {
+      this.message = init.message;
+    }
+    else if (Array.isArray(init.message) && init.message.length > 0) {
+      this.message = init.message[0];
+    }
+    else {
+      this.message = 'An unexpected error occurred';
+    }
     this.details = init.details === null || init.details === undefined
       ? null
       : init.details;

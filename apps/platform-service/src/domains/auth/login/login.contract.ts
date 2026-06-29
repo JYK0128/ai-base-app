@@ -1,10 +1,10 @@
 import { Command } from '@nestjs/cqrs';
 
-import type { AuthLoginRequestDto } from './login.request.dto';
-import type { AuthLoginResponseDto } from './login.response.dto';
+import type { LoginRequestDto } from './login.request.dto';
+import type { LoginResponseDto } from './login.response.dto';
 
-export class AuthLoginContract extends Command<AuthLoginResponseDto> {
-  constructor(public readonly data: AuthLoginRequestDto) {
+export class LoginContract extends Command<LoginResponseDto> {
+  constructor(public readonly data: LoginRequestDto) {
     super();
   }
 }

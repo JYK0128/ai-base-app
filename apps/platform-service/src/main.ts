@@ -5,7 +5,6 @@ import { RequestMethod, ValidationPipe, VersioningType } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import cookieParser from 'cookie-parser';
 import { json, urlencoded } from 'express';
 import helmet from 'helmet';
 import { Logger } from 'nestjs-pino';
@@ -15,7 +14,6 @@ import { applySwaggerSchemas } from '@/common/decorators/swagger-schema.decorato
 import { ENV } from '@/env';
 
 export function configureApp(app: NestExpressApplication) {
-  const expressApp = app.getHttpAdapter().getInstance();
   const isProduction = ENV.NODE_ENV === 'production';
 
   if (isProduction) {
@@ -29,8 +27,6 @@ export function configureApp(app: NestExpressApplication) {
     ],
   });
 
-  expressApp.use(cookieParser());
-
   app.enableVersioning({
     type: VersioningType.URI,
     defaultVersion: '1',
@@ -38,6 +34,7 @@ export function configureApp(app: NestExpressApplication) {
 
   app.use(json({ limit: '10mb' }));
   app.use(urlencoded({ limit: '10mb', extended: true }));
+  app.set('query parser', 'extended');
 
   app.useGlobalPipes(
     new ValidationPipe({

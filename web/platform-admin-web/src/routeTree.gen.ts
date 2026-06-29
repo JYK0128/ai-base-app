@@ -12,9 +12,10 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as PublicRouteImport } from './routes/_public'
 import { Route as ProtectedRouteImport } from './routes/_protected'
 import { Route as PublicIndexRouteImport } from './routes/_public/index'
+import { Route as PublicTermAgreementRouteImport } from './routes/_public/term-agreement'
 import { Route as PublicLoginRouteImport } from './routes/_public/login'
+import { Route as PublicForgotPasswordRouteImport } from './routes/_public/forgot-password'
 import { Route as PublicChangePasswordRouteImport } from './routes/_public/change-password'
-import { Route as ProtectedAgreementRouteImport } from './routes/_protected/agreement'
 import { Route as ProtectedTermsIndexRouteImport } from './routes/_protected/terms/index'
 import { Route as ProtectedSupportIndexRouteImport } from './routes/_protected/support/index'
 import { Route as ProtectedResourcesIndexRouteImport } from './routes/_protected/resources/index'
@@ -38,20 +39,25 @@ const PublicIndexRoute = PublicIndexRouteImport.update({
   path: '/',
   getParentRoute: () => PublicRoute,
 } as any)
+const PublicTermAgreementRoute = PublicTermAgreementRouteImport.update({
+  id: '/term-agreement',
+  path: '/term-agreement',
+  getParentRoute: () => PublicRoute,
+} as any)
 const PublicLoginRoute = PublicLoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => PublicRoute,
+} as any)
+const PublicForgotPasswordRoute = PublicForgotPasswordRouteImport.update({
+  id: '/forgot-password',
+  path: '/forgot-password',
   getParentRoute: () => PublicRoute,
 } as any)
 const PublicChangePasswordRoute = PublicChangePasswordRouteImport.update({
   id: '/change-password',
   path: '/change-password',
   getParentRoute: () => PublicRoute,
-} as any)
-const ProtectedAgreementRoute = ProtectedAgreementRouteImport.update({
-  id: '/agreement',
-  path: '/agreement',
-  getParentRoute: () => ProtectedRoute,
 } as any)
 const ProtectedTermsIndexRoute = ProtectedTermsIndexRouteImport.update({
   id: '/terms/',
@@ -104,9 +110,10 @@ const ProtectedAnnouncementsIndexRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof PublicIndexRoute
-  '/agreement': typeof ProtectedAgreementRoute
   '/change-password': typeof PublicChangePasswordRoute
+  '/forgot-password': typeof PublicForgotPasswordRoute
   '/login': typeof PublicLoginRoute
+  '/term-agreement': typeof PublicTermAgreementRoute
   '/announcements/': typeof ProtectedAnnouncementsIndexRoute
   '/audit/': typeof ProtectedAuditIndexRoute
   '/dashboard/': typeof ProtectedDashboardIndexRoute
@@ -119,9 +126,10 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof PublicIndexRoute
-  '/agreement': typeof ProtectedAgreementRoute
   '/change-password': typeof PublicChangePasswordRoute
+  '/forgot-password': typeof PublicForgotPasswordRoute
   '/login': typeof PublicLoginRoute
+  '/term-agreement': typeof PublicTermAgreementRoute
   '/announcements': typeof ProtectedAnnouncementsIndexRoute
   '/audit': typeof ProtectedAuditIndexRoute
   '/dashboard': typeof ProtectedDashboardIndexRoute
@@ -136,9 +144,10 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_protected': typeof ProtectedRouteWithChildren
   '/_public': typeof PublicRouteWithChildren
-  '/_protected/agreement': typeof ProtectedAgreementRoute
   '/_public/change-password': typeof PublicChangePasswordRoute
+  '/_public/forgot-password': typeof PublicForgotPasswordRoute
   '/_public/login': typeof PublicLoginRoute
+  '/_public/term-agreement': typeof PublicTermAgreementRoute
   '/_public/': typeof PublicIndexRoute
   '/_protected/announcements/': typeof ProtectedAnnouncementsIndexRoute
   '/_protected/audit/': typeof ProtectedAuditIndexRoute
@@ -154,9 +163,10 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/agreement'
     | '/change-password'
+    | '/forgot-password'
     | '/login'
+    | '/term-agreement'
     | '/announcements/'
     | '/audit/'
     | '/dashboard/'
@@ -169,9 +179,10 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/agreement'
     | '/change-password'
+    | '/forgot-password'
     | '/login'
+    | '/term-agreement'
     | '/announcements'
     | '/audit'
     | '/dashboard'
@@ -185,9 +196,10 @@ export interface FileRouteTypes {
     | '__root__'
     | '/_protected'
     | '/_public'
-    | '/_protected/agreement'
     | '/_public/change-password'
+    | '/_public/forgot-password'
     | '/_public/login'
+    | '/_public/term-agreement'
     | '/_public/'
     | '/_protected/announcements/'
     | '/_protected/audit/'
@@ -228,11 +240,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PublicIndexRouteImport
       parentRoute: typeof PublicRoute
     }
+    '/_public/term-agreement': {
+      id: '/_public/term-agreement'
+      path: '/term-agreement'
+      fullPath: '/term-agreement'
+      preLoaderRoute: typeof PublicTermAgreementRouteImport
+      parentRoute: typeof PublicRoute
+    }
     '/_public/login': {
       id: '/_public/login'
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof PublicLoginRouteImport
+      parentRoute: typeof PublicRoute
+    }
+    '/_public/forgot-password': {
+      id: '/_public/forgot-password'
+      path: '/forgot-password'
+      fullPath: '/forgot-password'
+      preLoaderRoute: typeof PublicForgotPasswordRouteImport
       parentRoute: typeof PublicRoute
     }
     '/_public/change-password': {
@@ -241,13 +267,6 @@ declare module '@tanstack/react-router' {
       fullPath: '/change-password'
       preLoaderRoute: typeof PublicChangePasswordRouteImport
       parentRoute: typeof PublicRoute
-    }
-    '/_protected/agreement': {
-      id: '/_protected/agreement'
-      path: '/agreement'
-      fullPath: '/agreement'
-      preLoaderRoute: typeof ProtectedAgreementRouteImport
-      parentRoute: typeof ProtectedRoute
     }
     '/_protected/terms/': {
       id: '/_protected/terms/'
@@ -316,7 +335,6 @@ declare module '@tanstack/react-router' {
 }
 
 interface ProtectedRouteChildren {
-  ProtectedAgreementRoute: typeof ProtectedAgreementRoute
   ProtectedAnnouncementsIndexRoute: typeof ProtectedAnnouncementsIndexRoute
   ProtectedAuditIndexRoute: typeof ProtectedAuditIndexRoute
   ProtectedDashboardIndexRoute: typeof ProtectedDashboardIndexRoute
@@ -329,7 +347,6 @@ interface ProtectedRouteChildren {
 }
 
 const ProtectedRouteChildren: ProtectedRouteChildren = {
-  ProtectedAgreementRoute: ProtectedAgreementRoute,
   ProtectedAnnouncementsIndexRoute: ProtectedAnnouncementsIndexRoute,
   ProtectedAuditIndexRoute: ProtectedAuditIndexRoute,
   ProtectedDashboardIndexRoute: ProtectedDashboardIndexRoute,
@@ -347,13 +364,17 @@ const ProtectedRouteWithChildren = ProtectedRoute._addFileChildren(
 
 interface PublicRouteChildren {
   PublicChangePasswordRoute: typeof PublicChangePasswordRoute
+  PublicForgotPasswordRoute: typeof PublicForgotPasswordRoute
   PublicLoginRoute: typeof PublicLoginRoute
+  PublicTermAgreementRoute: typeof PublicTermAgreementRoute
   PublicIndexRoute: typeof PublicIndexRoute
 }
 
 const PublicRouteChildren: PublicRouteChildren = {
   PublicChangePasswordRoute: PublicChangePasswordRoute,
+  PublicForgotPasswordRoute: PublicForgotPasswordRoute,
   PublicLoginRoute: PublicLoginRoute,
+  PublicTermAgreementRoute: PublicTermAgreementRoute,
   PublicIndexRoute: PublicIndexRoute,
 }
 

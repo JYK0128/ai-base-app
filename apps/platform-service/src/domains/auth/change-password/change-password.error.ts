@@ -1,7 +1,7 @@
 import { BadRequestException, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { defineErrors, ExceptionGuard } from '@pkg/shared/server';
 
-const PASSWORD_ERROR_MESSAGES = defineErrors({
+const ERROR_MESSAGES = defineErrors({
   ACCOUNT_NOT_FOUND: {
     message: '계정을 찾을 수 없습니다.',
     exception: NotFoundException,
@@ -20,4 +20,4 @@ const PASSWORD_ERROR_MESSAGES = defineErrors({
   },
 });
 
-export const ChangePasswordAsserter = ExceptionGuard.setMessages(PASSWORD_ERROR_MESSAGES);
+export const ChangePasswordAsserter = ExceptionGuard.setMessages(ERROR_MESSAGES);

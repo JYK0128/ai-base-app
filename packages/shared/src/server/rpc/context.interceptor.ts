@@ -4,7 +4,7 @@ import pick from 'lodash/pick';
 import { ClsService } from 'nestjs-cls';
 import { firstValueFrom, from, Observable } from 'rxjs';
 
-import { CONTEXT_KEYS, type ServerContext } from '../utils/context';
+import { type AuthContext, CONTEXT_KEYS } from '../utils/context';
 
 @Injectable()
 export class RpcContextInterceptor implements NestInterceptor {
@@ -19,7 +19,7 @@ export class RpcContextInterceptor implements NestInterceptor {
     }
 
     const data = context.switchToRpc().getData<Record<string, unknown>>();
-    const contextData = pick(data, CONTEXT_KEYS) as ServerContext;
+    const contextData = pick(data, CONTEXT_KEYS) as AuthContext;
 
     return from(
       this.cls.runWith({ ...contextData }, () =>

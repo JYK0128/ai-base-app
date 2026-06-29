@@ -6,8 +6,8 @@
  * OpenAPI spec version: 1.0
  */
 import type { ApiResponse } from './apiResponse';
-import type { AuthLoginResponseDto } from './authLoginResponseDto';
+import type { LoginResponseDto } from './loginResponseDto';
 
 export type AuthControllerLoginV1201 = ApiResponse & {
-  data?: AuthLoginResponseDto;
+  data?: LoginResponseDto;
 };

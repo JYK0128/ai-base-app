@@ -1,3 +1,3 @@
-import type { PayloadResponseDto } from '@/common/interfaces';
+import { PayloadResponseDto } from '@/common/interfaces';
 
-export class AuthDeferPasswordChangeResponseDto implements PayloadResponseDto {}
+export class DeferPasswordChangeResponseDto extends PayloadResponseDto {}

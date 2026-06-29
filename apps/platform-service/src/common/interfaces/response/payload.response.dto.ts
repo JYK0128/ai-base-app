@@ -1,2 +1,1 @@
-export type PayloadResponseDto
-  = object;
+export abstract class PayloadResponseDto {}

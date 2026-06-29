@@ -1,57 +1,54 @@
 import { Transactional } from '@mikro-orm/decorators/legacy';
-import { InjectRepository } from '@mikro-orm/nestjs';
 import { UnauthorizedException } from '@nestjs/common';
 import { CommandHandler, type ICommandHandler } from '@nestjs/cqrs';
-import { CoreRepository, MemberAccount } from '@pkg/database';
+import { MemberAccount } from '@pkg/database';
+import type { AuthAccountContext } from '@pkg/shared/server';
 import { ClsService } from 'nestjs-cls';
 
 import { ENV } from '@/env';
 
-import { AuthChangePasswordContract } from './change-password.contract';
+import { ChangePasswordContract } from './change-password.contract';
 import { ChangePasswordAsserter } from './change-password.error';
-import { AuthChangePasswordResponseDto } from './change-password.response.dto';
+import { ChangePasswordResponseDto } from './change-password.response.dto';
 
-@CommandHandler(AuthChangePasswordContract)
-export class ChangePasswordHandler implements ICommandHandler<AuthChangePasswordContract> {
+@CommandHandler(ChangePasswordContract)
+export class ChangePasswordHandler implements ICommandHandler<ChangePasswordContract> {
   private readonly Asserter = ChangePasswordAsserter;
 
   constructor(
     private readonly cls: ClsService,
-    @InjectRepository(MemberAccount)
-    private readonly memberAccountRepository: CoreRepository<MemberAccount>,
   ) {}
 
   @Transactional()
-  async execute(command: AuthChangePasswordContract): Promise<AuthChangePasswordResponseDto> {
-    const { currentPassword, newPassword } = command.data;
+  async execute(command: ChangePasswordContract): Promise<ChangePasswordResponseDto> {
+    const { currentPassword } = command.data;
 
     const account = await this.identifyAccount();
-    await this.validatePolicies(account, currentPassword);
+    await this.verifyPolicies(account, currentPassword);
 
-    this.processPasswordUpdate(account, newPassword);
+    this.processChangePassword(command, account);
 
-    return new AuthChangePasswordResponseDto();
+    return new ChangePasswordResponseDto();
   }
 
   private async identifyAccount(): Promise<MemberAccount> {
-    const accountId = this.cls.get<string>('accountId');
-    if (!accountId) {
+    const account = this.cls.get<AuthAccountContext>('account');
+    if (!account) {
       throw new UnauthorizedException('인증 정보가 유효하지 않습니다.');
     }
 
     return await this.Asserter.assert(
-      this.memberAccountRepository.findOne(accountId),
+      MemberAccount.findOne(account.id),
       'ACCOUNT_NOT_FOUND',
     );
   }
 
-  private async validatePolicies(account: MemberAccount, currentPassword: string) {
-    await this.Asserter.throwIf(!account.isActive, 'INACTIVE_ACCOUNT');
-    await this.Asserter.throwIf(account.isLocked, 'ACCOUNT_LOCKED');
+  private async verifyPolicies(account: MemberAccount, currentPassword: string) {
     await this.Asserter.throwIf(!account.verifyPassword(currentPassword), 'INVALID_CURRENT_PASSWORD');
   }
 
-  private processPasswordUpdate(account: MemberAccount, newPassword: string) {
+  private processChangePassword(command: ChangePasswordContract, account: MemberAccount) {
+    const { newPassword } = command.data;
     account.updatePassword(newPassword, ENV.PASSWORD_EXPIRY_DAYS);
   }
 }

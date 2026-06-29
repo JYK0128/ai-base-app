@@ -3,9 +3,9 @@ import { hostname } from 'node:os';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
-import { JwtModule } from '@nestjs/jwt';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { databaseConfig, entities } from '@pkg/database';
+import cookieParser from 'cookie-parser';
 import { ClsModule } from 'nestjs-cls';
 import { LoggerModule } from 'nestjs-pino';
 
@@ -13,7 +13,19 @@ import { ExceptionFilter } from '@/common/filters/exception.filter';
 import { AuthGuard } from '@/common/guards/auth.guard';
 import { HttpInterceptor } from '@/common/interceptors/http.interceptor';
 import { ContextMiddleware } from '@/common/middlewares/context.middleware';
-import * as modules from '@/domains/modules';
+import { SessionMiddleware } from '@/common/middlewares/session.middleware';
+import { SessionModule } from '@/common/modules/session.module';
+import { doubleCsrfProtection } from '@/common/security/csrf';
+import { AnnouncementModule } from '@/domains/announcement/announcement.module';
+import { AuthModule } from '@/domains/auth/auth.module';
+import { HealthModule } from '@/domains/health/health.module';
+import { I18nModule } from '@/domains/i18n/i18n.module';
+import { MailModule } from '@/domains/mail/mail.module';
+import { MemberModule } from '@/domains/member/member.module';
+import { OrganizationModule } from '@/domains/organization/organization.module';
+import { ResourceModule } from '@/domains/resource/resource.module';
+import { SupportModule } from '@/domains/support/support.module';
+import { TermModule } from '@/domains/term/term.module';
 import { ENV } from '@/env';
 
 @Module({
@@ -50,13 +62,17 @@ import { ENV } from '@/env';
         limit: 100,
       },
     ]),
-    JwtModule.register({
-      global: true,
-      secret: ENV.JWT_ACCESS_SECRET,
-      signOptions: { expiresIn: ENV.JWT_ACCESS_EXPIRES_IN },
-    }),
-
-    ...Object.values(modules),
+    SessionModule,
+    AnnouncementModule,
+    AuthModule,
+    HealthModule,
+    I18nModule,
+    MailModule,
+    MemberModule,
+    OrganizationModule,
+    ResourceModule,
+    SupportModule,
+    TermModule,
   ],
   controllers: [],
   providers: [
@@ -84,6 +100,6 @@ import { ENV } from '@/env';
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(ContextMiddleware).forRoutes('*');
+    consumer.apply(SessionMiddleware, cookieParser(), doubleCsrfProtection, ContextMiddleware).forRoutes('*');
   }
 }

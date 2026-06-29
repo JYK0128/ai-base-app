@@ -1,62 +1,51 @@
-import { CanActivate, ExecutionContext, ForbiddenException, Injectable, UnauthorizedException } from '@nestjs/common';
+import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { JwtService } from '@nestjs/jwt';
-import { Request } from 'express';
-import type { JWTPayload } from 'jose';
+import { AccountStatus, MemberStatus, OrganizationStatus } from '@pkg/database';
+import type { AuthAccountContext, AuthMemberContext, AuthOrganizationContext, AuthTermsSnapshotContext } from '@pkg/shared/server';
 import { ClsService } from 'nestjs-cls';
 
 import { BYPASS_KEY, BYPASS_POLICIES } from '@/common/decorators/bypass.decorator';
 import { PERMISSIONS_KEY } from '@/common/decorators/permissions.decorator';
-import { IS_PERSONAL_KEY } from '@/common/decorators/personal.decorator';
 import { IS_PUBLIC_KEY } from '@/common/decorators/public.decorator';
+
+import { AuthGuardAsserter } from './auth.guard.error';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
   constructor(
-    private readonly jwtService: JwtService,
     private readonly reflector: Reflector,
     private readonly cls: ClsService,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     if (!this.checkPublic(context)) {
-      const request = context.switchToHttp().getRequest<Request & { user?: JWTPayload }>();
-      const payload = this.verifyToken(request);
-      request.user = payload;
+      const { account, member, organization, terms, permissions } = this.readAccountContext();
+      const bypassPolicies = this.readBypassPolicies(context);
 
-      this.handleBypass(context);
-      this.handlePersonal(context, request, payload);
-      this.handlePermissions(context);
+      // 계정 정책
+      await this.assertAccountIsActive(account.status);
+      await this.assertMemberIsActive(member.status);
+      await this.assertOrganizationIsActive(organization.status);
+      await this.assertAccountIsNotDormant(account.isDormant);
+
+      // 보호 예외 정책
+      if (!this.hasBypassPolicy(bypassPolicies, BYPASS_POLICIES.PASSWORD)) {
+        await this.assertPasswordIsNotExpired(account.isPasswordExpired);
+      }
+      if (!this.hasBypassPolicy(bypassPolicies, BYPASS_POLICIES.TERMS)) {
+        await this.assertTermsAreAgreed(terms);
+      }
+
+      // 리소스 정책
+      await this.assertPermissions(context, permissions);
     }
 
     return true;
   }
 
-  private verifyToken(request: Request): JWTPayload {
-    const authorizationHeader = request.headers['authorization'];
-
-    if (typeof authorizationHeader !== 'string') {
-      throw new UnauthorizedException('Authentication token is missing');
-    }
-
-    const [scheme, token] = authorizationHeader.split(' ');
-
-    if (scheme !== 'Bearer') {
-      throw new UnauthorizedException('Authentication token is missing');
-    }
-
-    if (!token) {
-      throw new UnauthorizedException('Authentication token is missing');
-    }
-
-    try {
-      return this.jwtService.verify<JWTPayload>(token);
-    }
-    catch {
-      throw new UnauthorizedException('Invalid or expired token');
-    }
-  }
-
+  /**
+   * 공개 라우트 여부를 판정한다.
+   */
   private checkPublic(context: ExecutionContext): boolean {
     return this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
       context.getHandler(),
@@ -64,111 +53,119 @@ export class AuthGuard implements CanActivate {
     ]);
   }
 
-  private handleBypass(context: ExecutionContext) {
-    const bypassPolicies = this.reflector.getAllAndOverride<string[]>(BYPASS_KEY, [
-      context.getHandler(),
-      context.getClass(),
-    ]);
-    const canBypassPassword = Array.isArray(bypassPolicies)
-      && bypassPolicies.some((policy) => policy === BYPASS_POLICIES.PASSWORD);
-    const canBypassTerms = Array.isArray(bypassPolicies)
-      && bypassPolicies.some((policy) => policy === BYPASS_POLICIES.TERMS);
-    const isPasswordExpired = this.cls.get('isPasswordExpired');
-    const mustAcceptTerms = this.cls.get('mustAcceptTerms');
+  /**
+   * 인증에 필요한 계정, 조직, 약관, 권한 컨텍스트를 한 번에 읽는다.
+   */
+  private readAccountContext(): {
+    account: AuthAccountContext
+    member: AuthMemberContext
+    organization: AuthOrganizationContext
+    terms: AuthTermsSnapshotContext[]
+    permissions: string[]
+  } {
+    const account = this.cls.get<AuthAccountContext>('account');
+    const member = this.cls.get<AuthMemberContext>('member');
+    const organization = this.cls.get<AuthOrganizationContext>('organization');
+    const terms = this.cls.get<AuthTermsSnapshotContext[]>('terms');
+    const permissions = this.cls.get<string[]>('permissions');
 
-    if (typeof isPasswordExpired !== 'boolean' || typeof mustAcceptTerms !== 'boolean') {
+    if (!account || !member || !organization || !terms || !permissions) {
       throw new UnauthorizedException('Request context is missing');
     }
 
-    // 비밀번호 변경이 필요한 토큰인데, 해당 정책 우회가 없는 경우
-    if (isPasswordExpired && !canBypassPassword) {
-      throw new ForbiddenException('Password change is required before accessing this resource');
-    }
+    return { account, member, organization, terms, permissions };
+  }
 
-    if (mustAcceptTerms && !canBypassTerms) {
-      throw new ForbiddenException('Terms agreement is required before accessing this resource');
+  /**
+   * 계정이 활성 상태인지 확인한다.
+   */
+  private async assertAccountIsActive(accountStatus: AuthAccountContext['status']) {
+    if (accountStatus !== AccountStatus.ACTIVE) {
+      await AuthGuardAsserter.throw('INACTIVE_ACCOUNT');
     }
   }
 
-  private handlePersonal(context: ExecutionContext, request: Request, payload: JWTPayload) {
-    const isPersonal = this.reflector.getAllAndOverride<boolean>(IS_PERSONAL_KEY, [
+  /**
+   * 멤버가 활성 상태인지 확인한다.
+   */
+  private async assertMemberIsActive(memberStatus: AuthMemberContext['status']) {
+    if (memberStatus !== MemberStatus.ACTIVE) {
+      await AuthGuardAsserter.throw('INACTIVE_MEMBER');
+    }
+  }
+
+  /**
+   * 조직이 활성 상태인지 확인한다.
+   */
+  private async assertOrganizationIsActive(organizationStatus: AuthOrganizationContext['status']) {
+    if (organizationStatus !== OrganizationStatus.ACTIVE) {
+      await AuthGuardAsserter.throw('INACTIVE_ORGANIZATION');
+    }
+  }
+
+  /**
+   * 휴면 계정인지 확인한다.
+   */
+  private async assertAccountIsNotDormant(isDormant: boolean) {
+    if (isDormant) {
+      await AuthGuardAsserter.throw('DORMANT_ACCOUNT');
+    }
+  }
+
+  /**
+   * bypass 정책 포함 여부를 확인한다.
+   */
+  private hasBypassPolicy(bypassPolicies: string[] | undefined, policy: string): boolean {
+    return Array.isArray(bypassPolicies) && bypassPolicies.some((value) => value === policy);
+  }
+
+  /**
+   * 비밀번호 만료 여부를 확인한다.
+   */
+  private async assertPasswordIsNotExpired(isPasswordExpired: boolean) {
+    if (isPasswordExpired) {
+      await AuthGuardAsserter.throw('PASSWORD_CHANGE_REQUIRED');
+    }
+  }
+
+  /**
+   * 약관 동의 여부를 확인한다.
+   */
+  private async assertTermsAreAgreed(terms: AuthTermsSnapshotContext[]) {
+    if (terms.some((term) => term.required && !term.agreed)) {
+      await AuthGuardAsserter.throw('TERMS_AGREEMENT_REQUIRED');
+    }
+  }
+
+  /**
+   * bypass 정책 목록을 읽는다.
+   */
+  private readBypassPolicies(context: ExecutionContext): string[] | undefined {
+    return this.reflector.getAllAndOverride<string[]>(BYPASS_KEY, [
       context.getHandler(),
       context.getClass(),
     ]);
-
-    if (isPersonal) {
-      const body = request.body as Record<string, unknown>;
-      const query = request.query as Record<string, unknown>;
-      const params = request.params as Record<string, unknown>;
-
-      // 요청에서 accountId(UUID)로 전송된 값 추출
-      const ownerId = this.pickFirstString(
-        params.id,
-        params.accountId,
-        body.id,
-        body.accountId,
-        query.id,
-        query.accountId,
-      );
-      const organizationId = this.pickFirstString(
-        params.organizationId,
-        body.organizationId,
-        query.organizationId,
-      );
-
-      if (!ownerId) {
-        throw new ForbiddenException('Resource owner identification (id) is required');
-      }
-
-      // 토큰의 sub(DB ID)와 요청의 ID가 일치하는지 확인
-      const accountId = payload.sub;
-      const isOwner = accountId === ownerId;
-
-      if (!isOwner) {
-        throw new ForbiddenException('You do not have permission to access this personal resource');
-      }
-
-      const userOrgId = this.cls.get<string | undefined>('organizationId');
-      if (organizationId && userOrgId && userOrgId !== organizationId) {
-        throw new ForbiddenException('You do not have permission to access this organization resource');
-      }
-    }
   }
 
-  private handlePermissions(context: ExecutionContext) {
+  /**
+   * 명시된 권한이 모두 있는지 확인한다.
+   */
+  private async assertPermissions(context: ExecutionContext, permissions: string[]) {
     const requiredPermissions = this.reflector.getAllAndOverride<string[]>(PERMISSIONS_KEY, [
       context.getHandler(),
       context.getClass(),
     ]);
 
-    if (!Array.isArray(requiredPermissions)) {
+    if (!Array.isArray(requiredPermissions) || requiredPermissions.length === 0) {
       return;
     }
 
-    if (requiredPermissions.length === 0) {
-      return;
-    }
-
-    const userPermissions = this.cls.get('permissions');
-    if (!Array.isArray(userPermissions)) {
-      throw new UnauthorizedException('Request context is missing');
-    }
     const hasPermission = requiredPermissions.every((required) =>
-      userPermissions.some((owned) => owned === required),
+      permissions.some((owned) => owned === required),
     );
 
     if (!hasPermission) {
-      throw new ForbiddenException('Insufficient permissions to access this resource');
+      await AuthGuardAsserter.throw('INSUFFICIENT_PERMISSIONS');
     }
-  }
-
-  private pickFirstString(...values: Array<unknown>): string | undefined {
-    for (const value of values) {
-      if (typeof value === 'string' && value.length > 0) {
-        return value;
-      }
-    }
-
-    return undefined;
   }
 }

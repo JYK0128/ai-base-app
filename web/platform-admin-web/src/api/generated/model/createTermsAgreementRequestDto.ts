@@ -5,8 +5,9 @@
  * The AI Base App Platform Service API documentation
  * OpenAPI spec version: 1.0
  */
+import type { CreateTermsAgreementItemRequestDto } from './createTermsAgreementItemRequestDto';
 
 export interface CreateTermsAgreementRequestDto {
-  /** 동의할 약관 버전 식별자 목록 */
-  termsVersionIds: string[];
+  /** 약관 버전별 동의 여부 목록 */
+  terms: CreateTermsAgreementItemRequestDto[];
 }

@@ -1,35 +1,26 @@
 import { randomUUID } from 'node:crypto';
 
-import { MikroORM } from '@mikro-orm/core';
+import { sql } from '@mikro-orm/core';
 import { Injectable, NestMiddleware } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
-import { MemberAccount } from '@pkg/database';
+import { MemberAccount, TermsConsent, TermsDocument, TermsVersion, TermsVersionStatus } from '@pkg/database';
+import type { AuthAccountContext, AuthMemberContext, AuthOrganizationContext, AuthTermsSnapshotContext } from '@pkg/shared/server';
 import { NextFunction, Response } from 'express';
-import type { JWTPayload } from 'jose';
 import { ClsService } from 'nestjs-cls';
 
-import { TermsAgreementService } from '@/domains/terms/terms-agreement.service';
-
 import type { AppRequest } from '../types/request.type';
-import { createCookieOptions } from '../utils/cookie';
 
 @Injectable()
 export class ContextMiddleware implements NestMiddleware {
   constructor(
     private readonly cls: ClsService,
-    private readonly jwtService: JwtService,
-    private readonly orm: MikroORM,
-    private readonly termsAgreementService: TermsAgreementService,
   ) {}
 
   async use(req: AppRequest, res: Response, next: NextFunction) {
-    if (!this.cls.isActive()) {
-      next();
-      return;
+    if (this.cls.isActive()) {
+      this.setTraceContext(req, res);
+      this.setClientContext(req, res);
+      await this.setUserContext(req, res);
     }
-    this.setTraceContext(req, res);
-    this.setClientContext(req);
-    await this.setUserContext(req);
 
     next();
   }
@@ -38,10 +29,7 @@ export class ContextMiddleware implements NestMiddleware {
    * 추적 컨텍스트 설정
    */
   private setTraceContext(req: AppRequest, res: Response) {
-    let sid = req.cookies?.['sid'];
-    if (!sid) {
-      sid = randomUUID();
-    }
+    const sid = req.sessionID ?? randomUUID();
 
     let traceId = req.headers['x-trace-id'];
     if (!traceId) {
@@ -55,16 +43,12 @@ export class ContextMiddleware implements NestMiddleware {
 
     res.setHeader('x-trace-id', traceId);
     res.setHeader('x-request-id', requestId);
-
-    if (!req.cookies?.['sid']) {
-      res.cookie('sid', sid, createCookieOptions());
-    }
   }
 
   /**
    * 클라이언트 컨텍스트 설정
    */
-  private setClientContext(req: AppRequest) {
+  private setClientContext(req: AppRequest, _res: Response) {
     // Accept-Language 헤더 분석 및 'ko' | 'en' 로케일 조기 결정
     const acceptLanguageHeader = req.headers['accept-language'];
     let acceptLanguage = 'en';
@@ -84,51 +68,115 @@ export class ContextMiddleware implements NestMiddleware {
   /**
    * 유저 컨텍스트 설정
    */
-  private async setUserContext(req: AppRequest) {
-    // 인증토큰 추출
-    const authHeader = req.headers['authorization'];
-    if (!authHeader) return;
-
-    const [scheme, token] = authHeader.split(' ');
-    if (scheme !== 'Bearer' || !token) return;
-
-    try {
-      // 토큰 검증 및 발급자 확인
-      const payload = this.jwtService.verify<JWTPayload>(token);
-      const accountId = payload.sub;
-      if (!accountId) return;
-
-      // 계정 및 추가정보 조회
-      const account = await MemberAccount.findOne(
-        { id: accountId },
-        { populate: ['member.organization'] },
-      );
-      if (!account) return;
-      if (account.member) {
-        await Promise.all([
-          account.populate(['member.roles.role.permissions.resource']),
-        ]);
-      }
-      // 권한 목록
-      const permissions = account.member.roles.map((role) => role.role.permissions.map((p) => p.code)).flat();
-
-      // ID 및 권한 캐시
-      this.cls.set('accountId', account.id);
-      this.cls.set('memberId', account.member.id);
-      this.cls.set('organizationId', account.member.organization.id);
-      this.cls.set('permissions', permissions);
-
-      const agreementState = await this.termsAgreementService.resolveAgreementState({
-        memberId: account.member.id,
-        organizationId: account.member.organization.id,
-      });
-
-      this.cls.set('agreedTermsVersionIds', agreementState.agreedTermsVersionIds);
-      this.cls.set('isPasswordExpired', account.isPasswordExpired);
-      this.cls.set('mustAcceptTerms', agreementState.mustAcceptTerms);
+  private async setUserContext(req: AppRequest, _res: Response) {
+    const accountId = req.session.accountId;
+    if (!accountId) {
+      return;
     }
-    catch {
-      // 검증 실패 시 무시 (AuthGuard에서 처리)
+
+    const account = await MemberAccount.findOne(
+      { id: accountId },
+      { populate: ['member.organization', 'member.roles.role.permissions.resource'] },
+    );
+
+    if (!account) {
+      return;
     }
+
+    const terms = await this.identifyTermsContext(account);
+
+    this.cls.set('account', this.toAccountContext(account));
+    this.cls.set('member', this.toMemberContext(account));
+    this.cls.set('organization', this.toOrganizationContext(account));
+    this.cls.set('permissions', this.toPermissionsContext(account));
+    this.cls.set('terms', terms);
+  }
+
+  private toAccountContext(account: MemberAccount): AuthAccountContext {
+    return {
+      id: account.id,
+      email: account.email,
+      status: account.status,
+      lastLoginAt: account.lastLoginAt ?? null,
+      passwordExpiresAt: account.passwordExpiresAt,
+      isDormant: account.isDormant,
+      isPasswordExpired: account.isPasswordExpired,
+    };
+  }
+
+  private toMemberContext(account: MemberAccount): AuthMemberContext {
+    return {
+      id: account.member.id,
+      name: account.member.name,
+      status: account.member.status,
+    };
+  }
+
+  private toPermissionsContext(account: MemberAccount): string[] {
+    return account.member.roles.map((role) => role.role.permissions.map((permission) => permission.code)).flat();
+  }
+
+  private toOrganizationContext(account: MemberAccount): AuthOrganizationContext {
+    const organization = account.member.organization;
+
+    return {
+      id: organization.id,
+      code: organization.code,
+      name: organization.name,
+      email: organization.email,
+      status: organization.status,
+    };
+  }
+
+  private async identifyTermsContext(account: MemberAccount): Promise<AuthTermsSnapshotContext[]> {
+    const memberId = account.member.id;
+    const organizationId = account.member.organization.id;
+
+    const latestVersionSubquery = TermsVersion
+      .getQueryBuilder('sub_tv')
+      .select(sql`MAX(sub_tv."effectiveAt")`)
+      .where({
+        'sub_tv.termsDocument': sql`td.id`,
+        'sub_tv.status': TermsVersionStatus.PUBLISHED,
+        'sub_tv.effectiveAt': { $lte: new Date() },
+      })
+      .getNativeQuery();
+
+    const latestConsentSubquery = TermsConsent
+      .getQueryBuilder('sub_tc')
+      .select(sql`MAX(sub_tc."createdAt")`)
+      .where({
+        'sub_tc.member': memberId,
+        'sub_tc.termsVersion': sql`tv.id`,
+      })
+      .getNativeQuery();
+
+    const result = TermsDocument
+      .getQueryBuilder('td')
+      .leftJoin('td.versions', 'tv')
+      .leftJoin('tv.consents', 'tc', {
+        'tc.member': memberId,
+        'tc.createdAt': { $in: latestConsentSubquery },
+      })
+      .where({
+        'metadata': { publishedAt: { $ne: null } },
+        '$or': [
+          { organization: null },
+          { organization: organizationId },
+        ],
+        'tv.effectiveAt': { $in: latestVersionSubquery },
+      })
+      .select([
+        `td.id as documentId`,
+        `tv.id as versionId`,
+        `td.required as required`,
+        `td.title as title`,
+        `tv.label as version`,
+        sql`COALESCE(tc.agreed, false)`.as('agreed'),
+      ])
+      .orderBy({ 'td.createdAt': 'DESC' })
+      .execute<AuthTermsSnapshotContext[]>();
+
+    return result;
   }
 }

@@ -1,27 +1,24 @@
 import { Transactional } from '@mikro-orm/decorators/legacy';
-import { InjectRepository } from '@mikro-orm/nestjs';
 import { CommandHandler, type ICommandHandler } from '@nestjs/cqrs';
-import { CoreRepository, MemberAccount } from '@pkg/database';
-import { JwtUtil } from '@pkg/shared';
+import { MemberAccount } from '@pkg/database';
+import { ClsService } from 'nestjs-cls';
 
+import { AppCacheService } from '@/common/services/app-cache.service';
 import { ENV } from '@/env';
 
-import { AuthCacheService } from '../auth.cache';
-import { AuthLoginContract } from './login.contract';
+import { LoginContract } from './login.contract';
 import { LoginAsserter } from './login.error';
-import type { AuthLoginRequestDto } from './login.request.dto';
-import type { AuthLoginResponseDto } from './login.response.dto';
+import type { LoginRequestDto } from './login.request.dto';
+import { LoginResponseDto } from './login.response.dto';
 
 type LoginMetadata = {
   attempts?: number
   maxAttempts?: number
   retryAfterSeconds?: number
-  accessToken?: string
 };
 
-@CommandHandler(AuthLoginContract)
-export class LoginHandler implements ICommandHandler<AuthLoginContract> {
-  private readonly loginKeys = AuthCacheService.for('login');
+@CommandHandler(LoginContract)
+export class LoginHandler implements ICommandHandler<LoginContract> {
   private readonly Asserter = LoginAsserter.onFail(async ({ code, metadata, context }) => {
     if (code === 'INVALID_CREDENTIALS' && context) {
       await this.handleLoginFailure(context, metadata);
@@ -29,23 +26,40 @@ export class LoginHandler implements ICommandHandler<AuthLoginContract> {
   });
 
   constructor(
-    @InjectRepository(MemberAccount)
-    private readonly memberAccountRepository: CoreRepository<MemberAccount>,
-    private readonly authCacheService: AuthCacheService,
+    private readonly cls: ClsService,
+    private readonly cacheService: AppCacheService,
   ) {}
 
   @Transactional()
-  async execute(command: AuthLoginContract): Promise<AuthLoginResponseDto> {
-    const { clientIp } = command.data;
+  async execute(command: LoginContract): Promise<LoginResponseDto> {
+    const clientIp = this.identifyClientIp();
     const account = await this.identifyAccount(command.data);
-    await this.validatePolicies(account, command.data);
+    await this.verifyLogin(account, command.data);
 
-    return this.processLoginSuccess(account, clientIp);
+    return this.processLogin(account, clientIp);
   }
 
-  private async identifyAccount(request: AuthLoginRequestDto) {
+  private identifyClientIp(): string {
+    return this.cls.get('clientIp') ?? '0.0.0.0';
+  }
+
+  private async verifyLogin(account: MemberAccount, request: LoginRequestDto): Promise<void> {
+    const violationCode = this.getAccountViolationCode(account);
+    if (violationCode) {
+      await this.Asserter.throw(violationCode);
+    }
+
+    const { password } = request;
+    const isPasswordValid = account.verifyPassword(password);
+    await this.Asserter.assert(isPasswordValid, 'INVALID_CREDENTIALS', {
+      context: request,
+      metadata: {},
+    });
+  }
+
+  private async identifyAccount(request: LoginRequestDto) {
     const { email } = request;
-    const lockUntil = await this.authCacheService.get<number>(this.loginKeys.build('lock', email));
+    const lockUntil = await this.cacheService.get<number>(this.buildLoginCacheKey('lock', email));
     const retryAfterSeconds = lockUntil
       ? Math.max(1, Math.ceil((lockUntil - Date.now()) / 1000))
       : -2;
@@ -59,7 +73,7 @@ export class LoginHandler implements ICommandHandler<AuthLoginContract> {
     });
 
     const account = await this.Asserter.assert(
-      this.memberAccountRepository.findOne(
+      MemberAccount.findOne(
         { email },
         { populate: ['member.organization', 'member.roles.role.permissions.resource'] },
       ),
@@ -70,75 +84,66 @@ export class LoginHandler implements ICommandHandler<AuthLoginContract> {
     return account;
   }
 
-  private async validatePolicies(account: MemberAccount, request: AuthLoginRequestDto) {
-    const { password } = request;
-    await this.Asserter.throwIf(!account.isActive, 'INACTIVE_ACCOUNT');
-    await this.Asserter.throwIf(!account.member.isActive, 'INACTIVE_MEMBER');
-
-    const organization = account.member.organization;
-    if (organization) {
-      await this.Asserter.throwIf(!organization.isActive, 'INACTIVE_ORGANIZATION');
-    }
-
-    await this.Asserter.throwIf(account.isDormant, 'DORMANT_ACCOUNT');
-
-    const isPasswordValid = account.verifyPassword(password);
-    await this.Asserter.assert(isPasswordValid, 'INVALID_CREDENTIALS', {
-      context: request,
-      metadata: {},
-    });
-  }
-
-  private async processLoginSuccess(account: MemberAccount, clientIp: string) {
+  private async processLogin(account: MemberAccount, clientIp: string): Promise<LoginResponseDto> {
     await Promise.all([
-      this.authCacheService.del(this.loginKeys.build('attempt', account.email)),
-      this.authCacheService.del(this.loginKeys.build('lock', account.email)),
+      this.cacheService.del(this.buildLoginCacheKey('attempt', account.email)),
+      this.cacheService.del(this.buildLoginCacheKey('lock', account.email)),
     ]);
 
     account.lastLoginAt = new Date();
     account.lastLoginIp = clientIp;
-
-    const accessExpiresAt = Math.floor(Date.now() / 1000) + ENV.JWT_ACCESS_EXPIRES_IN;
-    const refreshExpiresAt = Math.floor(Date.now() / 1000) + ENV.JWT_REFRESH_EXPIRES_IN;
-
-    const tokens = await JwtUtil.issuePair(
-      {
-        sub: account.id,
-      },
-      {
-        access: {
-          secret: ENV.JWT_ACCESS_SECRET,
-          expires: accessExpiresAt,
-        },
-        refresh: {
-          secret: ENV.JWT_REFRESH_SECRET,
-          expires: refreshExpiresAt,
-        },
-      },
-    );
-
-    await this.authCacheService.set(
-      `refresh:${account.id}`,
-      tokens.refreshToken,
-      ENV.JWT_REFRESH_EXPIRES_IN,
-    );
-
-    return tokens;
+    this.cls.set('account', {
+      email: account.email,
+      id: account.id,
+      isDormant: account.isDormant,
+      isPasswordExpired: account.isPasswordExpired,
+      lastLoginAt: account.lastLoginAt,
+      passwordExpiresAt: account.passwordExpiresAt,
+      status: account.status,
+    });
+    return new LoginResponseDto();
   }
 
-  private async handleLoginFailure(context: AuthLoginRequestDto, metadata: LoginMetadata = {}) {
-    const attemptKey = this.loginKeys.build('attempt', context.email);
-    const attempts = await this.authCacheService.incr(attemptKey, ENV.LOGIN_ATTEMPT_TTL);
+  private async handleLoginFailure(context: LoginRequestDto, metadata: LoginMetadata = {}) {
+    const attemptKey = this.buildLoginCacheKey('attempt', context.email);
+    const attempts = await this.cacheService.incr(attemptKey, ENV.LOGIN_ATTEMPT_TTL);
 
     metadata.attempts = attempts;
     metadata.maxAttempts = ENV.LOGIN_MAX_ATTEMPTS;
 
     if (attempts >= ENV.LOGIN_MAX_ATTEMPTS) {
       const lockUntil = Date.now() + (ENV.LOGIN_LOCK_TTL * 1000);
-      await this.authCacheService.set(this.loginKeys.build('lock', context.email), lockUntil, ENV.LOGIN_LOCK_TTL);
-      await this.authCacheService.del(attemptKey);
+      await this.cacheService.set(this.buildLoginCacheKey('lock', context.email), lockUntil, ENV.LOGIN_LOCK_TTL);
+      await this.cacheService.del(attemptKey);
 
       metadata.retryAfterSeconds = ENV.LOGIN_LOCK_TTL;
     }
+  }
+
+  private getAccountViolationCode(
+    account: MemberAccount,
+  ): 'INACTIVE_ACCOUNT' | 'INACTIVE_MEMBER' | 'INACTIVE_ORGANIZATION' | 'DORMANT_ACCOUNT' | undefined {
+    if (!account.isActive) {
+      return 'INACTIVE_ACCOUNT';
+    }
+
+    if (!account.member.isActive) {
+      return 'INACTIVE_MEMBER';
+    }
+
+    const organization = account.member.organization;
+    if (organization && !organization.isActive) {
+      return 'INACTIVE_ORGANIZATION';
+    }
+
+    if (account.isDormant) {
+      return 'DORMANT_ACCOUNT';
+    }
+
+    return undefined;
+  }
+
+  private buildLoginCacheKey(action: 'attempt' | 'lock', value: string): string {
+    return `login:${action}:${value}`;
   }
 }

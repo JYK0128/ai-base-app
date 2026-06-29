@@ -35,18 +35,19 @@ export type AsserterOptions<M, C> = {
  * 비즈니스 규칙을 검증하고 상황에 맞는 예외를 발생시키는 실무자 클래스입니다.
  */
 export class ExceptionAsserter<
-  T extends Record<string, ErrorDetail<M>>,
-  M = never,
-  C = unknown,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  T extends Record<string, ErrorDetail<Metadata>> = any,
+  Metadata = unknown,
+  Context = unknown,
 > {
-  private onFailHook?: (args: { code: keyof T, metadata?: M, context?: C }) => Promise<void> | void;
+  private onFailHook?: (args: { code: keyof T, metadata?: Metadata, context?: Context }) => Promise<void> | void;
 
-  constructor(private readonly messages: T) {}
+  constructor(public readonly messages: T) {}
 
   /**
    * 실패 시 실행할 부수 효과(Hook)를 등록합니다.
    */
-  onFail(hook: (args: { code: keyof T, metadata?: M, context?: C }) => Promise<void> | void): this {
+  onFail(hook: (args: { code: keyof T, metadata?: Metadata, context?: Context }) => Promise<void> | void): this {
     this.onFailHook = hook;
     return this;
   }
@@ -54,7 +55,7 @@ export class ExceptionAsserter<
   /**
    * 비즈니스 예외 객체를 생성합니다.
    */
-  private create(code: keyof T, metadata?: M): unknown {
+  private create(code: keyof T, metadata?: Metadata): unknown {
     const { message, exception = InternalServerErrorException } = this.messages[code];
 
     let lang = 'ko';
@@ -97,7 +98,7 @@ export class ExceptionAsserter<
   /**
    * 조건이 참(true)이면 예외를 발생시킵니다.
    */
-  async throwIf(condition: boolean, code: keyof T, options?: AsserterOptions<M, C>): Promise<void> {
+  async throwIf(condition: boolean, code: keyof T, options?: AsserterOptions<Metadata, Context>): Promise<void> {
     if (condition) {
       const { metadata, context } = options || {};
       await this.onFailHook?.({ code, metadata, context });
@@ -108,7 +109,7 @@ export class ExceptionAsserter<
   /**
    * 즉시 예외를 발생시킵니다.
    */
-  async throw(code: keyof T, options?: AsserterOptions<M, C>): Promise<never> {
+  async throw(code: keyof T, options?: AsserterOptions<Metadata, Context>): Promise<never> {
     const { metadata, context } = options || {};
     await this.onFailHook?.({ code, metadata, context });
     throw this.create(code, metadata) as Error;
@@ -120,7 +121,7 @@ export class ExceptionAsserter<
   async assert<V>(
     condition: Promise<V | null | undefined> | V | null | undefined,
     code: keyof T,
-    options?: AsserterOptions<M, C>,
+    options?: AsserterOptions<Metadata, Context>,
   ): Promise<V> {
     const value = await Promise.resolve(condition)
       .catch(async () => {

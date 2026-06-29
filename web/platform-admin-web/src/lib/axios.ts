@@ -1,7 +1,7 @@
-import axiosClient, { type AxiosError, AxiosRequestConfig, InternalAxiosRequestConfig } from 'axios';
-import { getDefaultStore } from 'jotai';
+import type { AxiosError, AxiosRequestConfig, InternalAxiosRequestConfig } from 'axios';
+import axiosClient, { AxiosHeaders } from 'axios';
 
-import { accessTokenAtom } from '../stores/auth.store';
+import type { ApiResponse } from '@/api/generated/model';
 
 const readEnvValue = (key: keyof ImportMetaEnv): string => {
   const value = (import.meta.env as Record<string, string | undefined>)[key];
@@ -9,90 +9,110 @@ const readEnvValue = (key: keyof ImportMetaEnv): string => {
 };
 
 const API_BASE_URL = readEnvValue('VITE_URL');
+const CSRF_ENDPOINT_PATH = '/api/v1/auth/csrf';
+const CSRF_HEADER_NAME = 'x-csrf-token';
 
-// 🌟 백엔드 공통 응답 구조 (내부 타입용)
-interface ApiResponse<T> {
+type CsrfApiResponse = {
   success: boolean
-  data: T
-  message?: string
-  traceId: string
-  requestId: string
-}
+  data?: {
+    csrfToken?: string
+  }
+};
 
-// 에러 객체 보장 헬퍼 함수
+const csrfClient = axiosClient.create({
+  baseURL: API_BASE_URL || undefined,
+  withCredentials: true,
+});
+
+let csrfToken: string | null = null;
+let csrfTokenPromise: Promise<string> | null = null;
+
 const ensureError = (error: unknown): Error => {
   if (error instanceof Error) return error;
   return new Error(String(error));
 };
 
+const isCsrfProtectedMethod = (method?: string): boolean => {
+  const httpMethod = method?.toLowerCase();
+  if (httpMethod) {
+    return ['post', 'put', 'patch', 'delete'].includes(httpMethod);
+  }
+  return false;
+};
+
+export const clearCsrfToken = (): void => {
+  csrfToken = null;
+  csrfTokenPromise = null;
+};
+
+const readCsrfToken = async (): Promise<string> => {
+  if (csrfToken) {
+    return csrfToken;
+  }
+
+  if (!csrfTokenPromise) {
+    csrfTokenPromise = csrfClient
+      .get<CsrfApiResponse>(CSRF_ENDPOINT_PATH)
+      .then(({ data }) => {
+        const token = data.data?.csrfToken?.trim();
+
+        if (!token) {
+          throw new Error('CSRF token was not returned by the server.');
+        }
+
+        csrfToken = token;
+        return token;
+      })
+      .finally(() => {
+        csrfTokenPromise = null;
+      });
+  }
+
+  return csrfTokenPromise;
+};
+
 /**
- * 🌟 내부 Axios 인스턴스
- * 실제 요청과 인터셉터 처리를 담당합니다.
+ * 내부 Axios 인스턴스
+ * 쿠키 기반 세션을 전송하고 응답 본문을 그대로 반환합니다.
  */
-export const axios = axiosClient.create({
+const axios = axiosClient.create({
   baseURL: API_BASE_URL || undefined,
   withCredentials: true,
 });
 
-// 1. 요청(Request) 인터셉터: accessToken 주입
 axios.interceptors.request.use(
-  (config) => {
-    const store = getDefaultStore();
-    const token = store.get(accessTokenAtom);
-
-    if (token) {
-      config.headers.set('Authorization', `Bearer ${token}`);
+  async (config: InternalAxiosRequestConfig) => {
+    if (!isCsrfProtectedMethod(config.method)) {
+      return config;
     }
 
+    const token = await readCsrfToken();
+    const headers = AxiosHeaders.from(config.headers);
+    headers.set(CSRF_HEADER_NAME, token);
+    config.headers = headers;
     return config;
   },
   (error: unknown) => Promise.reject(ensureError(error)),
 );
 
-// 2. 응답(Response) 인터셉터: 에러 처리 및 토큰 갱신
 axios.interceptors.response.use(
+  // AxiosResponse 객체에서 실제 서버 응답(response.data)을 꺼낸다.
   (response) => response.data,
-  async (error: unknown) => {
+  (error: unknown) => {
     if (!axiosClient.isAxiosError(error)) {
       return Promise.reject(ensureError(error));
     }
 
-    const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
-    const isAuthPath = originalRequest.url?.startsWith('/api/v1/auth');
-
-    // 401 에러(만료) 시 자동 갱신 로직
-    if (error.response?.status === 401 && !isAuthPath && !originalRequest._retry) {
-      originalRequest._retry = true;
-
-      try {
-        const res = await axiosClient.post<ApiResponse<{ accessToken: string }>>(
-          `${API_BASE_URL}/api/v1/auth/refresh`,
-          {},
-          { withCredentials: true },
-        );
-
-        const newAccessToken = res.data.data.accessToken;
-        const store = getDefaultStore();
-        store.set(accessTokenAtom, newAccessToken);
-
-        originalRequest.headers.set('Authorization', `Bearer ${newAccessToken}`);
-        return axios(originalRequest);
-      }
-      catch (refreshError) {
-        const store = getDefaultStore();
-        store.set(accessTokenAtom, null);
-        return Promise.reject(ensureError(refreshError));
-      }
-    }
-
-    throw error;
+    return Promise.reject(error);
   },
 );
 
-export const axiosInstance = <T>(config: AxiosRequestConfig): Promise<T> => {
-  return axios(config);
+const axiosInstance = <T extends { data?: unknown }>(config: AxiosRequestConfig): Promise<T['data']> => {
+  // 위 interceptor를 거친 뒤의 응답 본문에서 data 필드만 다시 꺼낸다.
+  return axios(config).then(({ data }) => data);
 };
 
-export type ErrorType<Error> = AxiosError<Error>;
+export type ErrorType<Error> = AxiosError<Error & ApiResponse>;
+export type BodyType<BodyData> = BodyData;
 
 export default axiosInstance;

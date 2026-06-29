@@ -6,8 +6,8 @@
  * OpenAPI spec version: 1.0
  */
 import type { ApiResponse } from './apiResponse';
-import type { AuthGetMeResponseDto } from './authGetMeResponseDto';
+import type { MeResponseDto } from './meResponseDto';
 
 export type AuthControllerMeV1200 = ApiResponse & {
-  data?: AuthGetMeResponseDto;
+  data?: MeResponseDto;
 };

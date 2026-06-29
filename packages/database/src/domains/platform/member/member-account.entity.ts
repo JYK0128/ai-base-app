@@ -7,7 +7,6 @@ import { AccountStatus } from './member.constants';
 import { Member } from './member.entity';
 import { isMemberAccountActive,
          isMemberAccountDormant,
-         isMemberAccountLocked,
          isMemberAccountPasswordExpired } from './member-account.policy-status';
 
 @Entity({ schema: 'platform' })
@@ -35,23 +34,12 @@ export class MemberAccount extends CoreEntity<MemberAccount> {
   @Enum(() => AccountStatus)
   status: Opt<AccountStatus> = AccountStatus.ACTIVE;
 
-  @Property({ type: Date, nullable: true })
-  lockUntil?: Date;
-
   /**
    * 비밀번호 만료 여부 확인
    */
   @Property({ persist: false })
   get isPasswordExpired(): Opt<boolean> {
     return isMemberAccountPasswordExpired(this.passwordExpiresAt);
-  }
-
-  /**
-   * 계정 잠금 여부 확인 (DB 기반)
-   */
-  @Property({ persist: false })
-  get isLocked(): Opt<boolean> {
-    return isMemberAccountLocked(this.lockUntil);
   }
 
   /**

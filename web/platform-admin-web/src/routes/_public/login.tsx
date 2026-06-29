@@ -6,16 +6,19 @@ import { Button,
          CardHeader,
          CardTitle,
          useAppForm } from '@pkg/ui';
-import { createFileRoute, Navigate } from '@tanstack/react-router';
+import { createFileRoute, redirect, useNavigate } from '@tanstack/react-router';
 import { ArrowRight, Lock, Mail } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { z } from 'zod';
 
 import { useAuthControllerLoginV1 } from '@/api/generated/endpoints';
 
-import { useAuth } from '../../hooks/useAuth';
-
 export const Route = createFileRoute('/_public/login')({
+  beforeLoad: ({ context }) => {
+    if (context.session.isAuthenticated) {
+      throw redirect({ to: '/dashboard', replace: true });
+    }
+  },
   validateSearch: z.object({
     redirect: z.string().optional(),
   }),
@@ -24,16 +27,10 @@ export const Route = createFileRoute('/_public/login')({
 
 function LoginPage() {
   const { redirect } = Route.useSearch();
-  const { login, isAuthenticated, isInitializing, mustChangePassword, mustAcceptTerms } = useAuth();
+  const { session } = Route.useRouteContext();
+  const navigate = useNavigate();
+  const { mutateAsync: loginMutate } = useAuthControllerLoginV1();
   const { t } = useTranslation('common');
-
-  const { mutateAsync: loginMutate } = useAuthControllerLoginV1({
-    mutation: {
-      onSuccess: ({ data }) => {
-        login(data.accessToken);
-      },
-    },
-  });
 
   const form = useAppForm({
     defaultValues: {
@@ -48,29 +45,10 @@ function LoginPage() {
     },
     onSubmit: async ({ value }) => {
       await loginMutate({ data: value });
+      await session.refresh();
+      await navigate({ to: redirect ?? '/dashboard', replace: true });
     },
   });
-
-  if (isAuthenticated && !isInitializing) {
-    let target = redirect || '/dashboard';
-
-    if (mustChangePassword) {
-      target = '/change-password';
-    }
-    else if (mustAcceptTerms) {
-      target = '/agreement';
-    }
-
-    return <Navigate to={target} />;
-  }
-
-  if (isAuthenticated && isInitializing) {
-    return (
-      <div className="grid min-h-screen place-items-center p-4">
-        <p className="text-sm text-muted-foreground">로그인 상태를 확인하는 중입니다...</p>
-      </div>
-    );
-  }
 
   return (
     <div className="grid min-h-screen place-items-center p-4">
@@ -129,8 +107,18 @@ function LoginPage() {
           </form.AppForm>
         </CardContent>
 
-        <CardFooter className="flex-col justify-between gap-2 sm:flex-row">
-          <Button type="button" variant="ghost">
+        <CardFooter className="
+          flex-col justify-between gap-2
+          sm:flex-row
+        "
+        >
+          <Button
+            type="button"
+            variant="ghost"
+            onClick={() => {
+              void navigate({ to: '/forgot-password' });
+            }}
+          >
             {t('loginForgotPassword')}
           </Button>
           <div className="flex items-center gap-2">

@@ -6,27 +6,32 @@ import { Button,
          CardHeader,
          CardTitle,
          useAppForm } from '@pkg/ui';
-import { createFileRoute, Navigate } from '@tanstack/react-router';
+import { createFileRoute, redirect, useNavigate } from '@tanstack/react-router';
 import { ArrowLeft, ArrowRight, Lock, ShieldCheck } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { z } from 'zod';
 
 import { useAuthControllerChangePasswordV1 } from '@/api/generated/endpoints';
 
-import { useAuth } from '../../hooks/useAuth';
-
 export const Route = createFileRoute('/_public/change-password')({
+  beforeLoad: ({ context }) => {
+    if (!context.session.requiredPasswordChange) {
+      throw redirect({ to: '/login', replace: true });
+    }
+  },
   component: ChangePassword,
 });
 
 function ChangePassword() {
-  const { logout: authLogout, isAuthenticated } = useAuth();
+  const navigate = useNavigate();
+  const { session } = Route.useRouteContext();
   const { t } = useTranslation('common');
 
   const { mutateAsync: changePassword, isPending: isChanging } = useAuthControllerChangePasswordV1({
     mutation: {
       onSuccess: async () => {
-        authLogout();
+        await session.refresh();
+        await navigate({ to: '/dashboard', replace: true });
       },
     },
   });
@@ -52,10 +57,6 @@ function ChangePassword() {
     },
   });
 
-  if (!isAuthenticated) {
-    return <Navigate to="/login" />;
-  }
-
   return (
     <div className="grid min-h-screen place-items-center p-4">
       <Card className="w-full max-w-md">
@@ -63,7 +64,9 @@ function ChangePassword() {
           <Button
             type="button"
             variant="ghost"
-            onClick={() => authLogout()}
+            onClick={() => {
+              void navigate({ to: '/login', replace: true });
+            }}
           >
             <ArrowLeft />
             {t('changePasswordBack')}

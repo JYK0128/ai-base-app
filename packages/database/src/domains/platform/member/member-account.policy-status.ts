@@ -4,10 +4,6 @@ export function isMemberAccountPasswordExpired(passwordExpiresAt?: Date | null, 
   return !passwordExpiresAt || passwordExpiresAt.getTime() < now;
 }
 
-export function isMemberAccountLocked(lockUntil?: Date | null, now: number = Date.now()): boolean {
-  return !!lockUntil && lockUntil.getTime() > now;
-}
-
 export function isMemberAccountActive(status: AccountStatus | undefined): boolean {
   return status === AccountStatus.ACTIVE;
 }

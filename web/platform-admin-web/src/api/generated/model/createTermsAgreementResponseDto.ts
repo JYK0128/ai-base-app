@@ -7,10 +7,6 @@
  */
 
 export interface CreateTermsAgreementResponseDto {
-  /** 동의 식별자 */
-  id: string;
-  /** 동의 여부 */
-  agreed: boolean;
-  /** 생성 일시 */
-  createdAt: string;
+  /** 식별자 목록 */
+  ids: string[];
 }

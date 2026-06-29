@@ -7,19 +7,19 @@
  */
 import * as zod from 'zod';
 
-export const announcementControllerGetAnnouncementPageV1QueryFilterIsPublishedDefault = false;
 export const announcementControllerGetAnnouncementPageV1QueryPageDefault = 1;
 export const announcementControllerGetAnnouncementPageV1QueryLimitDefault = 20;
+export const announcementControllerGetAnnouncementPageV1QueryFiltersIsPublishedDefault = false;
 
 export const AnnouncementControllerGetAnnouncementPageV1QueryParams = zod.object({
-  "filter": zod.object({
-  "isPublished": zod.boolean().default(announcementControllerGetAnnouncementPageV1QueryFilterIsPublishedDefault).describe('게시된 공지만 조회할지 여부'),
+  "page": zod.number().default(announcementControllerGetAnnouncementPageV1QueryPageDefault).describe('페이지 번호'),
+  "limit": zod.number().default(announcementControllerGetAnnouncementPageV1QueryLimitDefault).describe('페이지 크기'),
+  "filters": zod.object({
+  "isPublished": zod.boolean().default(announcementControllerGetAnnouncementPageV1QueryFiltersIsPublishedDefault).describe('게시된 공지만 조회할지 여부'),
   "status": zod.enum(['DRAFT', 'SCHEDULED', 'ACTIVE', 'EXPIRED']).optional().describe('게시 상태')
 }).describe('필터 조건'),
-  "sort": zod.array(zod.string()).optional().describe('정렬 필드'),
-  "direction": zod.array(zod.enum(['asc', 'desc'])).default([`desc`]).describe('정렬 방향'),
-  "page": zod.unknown().default(announcementControllerGetAnnouncementPageV1QueryPageDefault).describe('페이지 번호'),
-  "limit": zod.unknown().default(announcementControllerGetAnnouncementPageV1QueryLimitDefault).describe('페이지 크기')
+  "sort": zod.array(zod.enum(['createdAt'])).optional().describe('정렬 필드'),
+  "direction": zod.array(zod.enum(['asc', 'desc'])).optional().describe('정렬 방향')
 })
 
 export const AnnouncementControllerGetAnnouncementPageV1Response = zod.object({
@@ -28,7 +28,7 @@ export const AnnouncementControllerGetAnnouncementPageV1Response = zod.object({
 
 }).nullish().describe('응답 데이터'),
   "error": zod.object({
-  "code": zod.string().describe('에러 코드'),
+  "code": zod.enum(['INTERNAL_ERROR', 'INACTIVE_ACCOUNT', 'INACTIVE_MEMBER', 'INACTIVE_ORGANIZATION', 'DORMANT_ACCOUNT', 'PASSWORD_CHANGE_REQUIRED', 'TERMS_AGREEMENT_REQUIRED', 'INSUFFICIENT_PERMISSIONS', 'ANNOUNCEMENT_NOT_FOUND', 'REQUEST_CONTEXT_NOT_FOUND', 'MEMBER_MISMATCH', 'TERMS_VERSION_NOT_AVAILABLE', 'TERMS_VERSION_NOT_FOUND', 'ACCOUNT_NOT_FOUND', 'ACCOUNT_LOCKED', 'INVALID_CURRENT_PASSWORD', 'INVALID_CREDENTIALS', 'INVITE_NOT_FOUND', 'INVITE_MAIL_DELIVERY_NOT_READY', 'MAIL_SEND_FAILED', 'ORGANIZATION_NOT_FOUND', 'INVITER_NOT_FOUND', 'ROLE_NOT_FOUND', 'LOAD_FAILED', 'MEMBER_NOT_FOUND', 'CANNOT_MODIFY_SELF', 'LAST_OWNER_ROLE_CANNOT_BE_CHANGED', 'LAST_OWNER_STATUS_CANNOT_BE_CHANGED', 'RESOURCE_NOT_FOUND', 'DOCUMENT_NOT_FOUND']).describe('에러 코드'),
   "message": zod.union([zod.string(),zod.array(zod.string())]).describe('에러 메시지'),
   "details": zod.looseObject({
 
@@ -40,6 +40,12 @@ export const AnnouncementControllerGetAnnouncementPageV1Response = zod.object({
   "requestId": zod.string().optional().describe('요청 ID')
 }).and(zod.object({
   "data": zod.object({
+  "totalCount": zod.number().describe('전체 개수'),
+  "page": zod.number().describe('페이지 번호'),
+  "limit": zod.number().describe('페이지 크기'),
+  "totalPages": zod.number().describe('전체 페이지 수'),
+  "hasNextPage": zod.boolean().describe('다음 페이지 존재 여부'),
+  "hasPrevPage": zod.boolean().describe('이전 페이지 존재 여부'),
   "items": zod.array(zod.object({
   "id": zod.string().describe('공지사항 식별자'),
   "title": zod.string().describe('공지사항 제목'),
@@ -57,13 +63,7 @@ export const AnnouncementControllerGetAnnouncementPageV1Response = zod.object({
   "status": zod.enum(['DRAFT', 'SCHEDULED', 'ACTIVE', 'EXPIRED']).describe('게시 상태'),
   "isPublished": zod.boolean().describe('게시 확정 여부'),
   "author": zod.string().describe('작성자')
-})).describe('공지사항 목록'),
-  "totalCount": zod.number().describe('전체 개수'),
-  "page": zod.number().describe('페이지 번호'),
-  "limit": zod.number().describe('페이지 크기'),
-  "totalPages": zod.number().describe('전체 페이지 수'),
-  "hasNextPage": zod.boolean().describe('다음 페이지 존재 여부'),
-  "hasPrevPage": zod.boolean().describe('이전 페이지 존재 여부')
+})).describe('공지사항 목록')
 }).optional()
 }))
 
@@ -92,7 +92,7 @@ export const AnnouncementControllerGetAnnouncementV1Response = zod.object({
 
 }).nullish().describe('응답 데이터'),
   "error": zod.object({
-  "code": zod.string().describe('에러 코드'),
+  "code": zod.enum(['INTERNAL_ERROR', 'INACTIVE_ACCOUNT', 'INACTIVE_MEMBER', 'INACTIVE_ORGANIZATION', 'DORMANT_ACCOUNT', 'PASSWORD_CHANGE_REQUIRED', 'TERMS_AGREEMENT_REQUIRED', 'INSUFFICIENT_PERMISSIONS', 'ANNOUNCEMENT_NOT_FOUND', 'REQUEST_CONTEXT_NOT_FOUND', 'MEMBER_MISMATCH', 'TERMS_VERSION_NOT_AVAILABLE', 'TERMS_VERSION_NOT_FOUND', 'ACCOUNT_NOT_FOUND', 'ACCOUNT_LOCKED', 'INVALID_CURRENT_PASSWORD', 'INVALID_CREDENTIALS', 'INVITE_NOT_FOUND', 'INVITE_MAIL_DELIVERY_NOT_READY', 'MAIL_SEND_FAILED', 'ORGANIZATION_NOT_FOUND', 'INVITER_NOT_FOUND', 'ROLE_NOT_FOUND', 'LOAD_FAILED', 'MEMBER_NOT_FOUND', 'CANNOT_MODIFY_SELF', 'LAST_OWNER_ROLE_CANNOT_BE_CHANGED', 'LAST_OWNER_STATUS_CANNOT_BE_CHANGED', 'RESOURCE_NOT_FOUND', 'DOCUMENT_NOT_FOUND']).describe('에러 코드'),
   "message": zod.union([zod.string(),zod.array(zod.string())]).describe('에러 메시지'),
   "details": zod.looseObject({
 
@@ -149,7 +149,7 @@ export const AnnouncementControllerUpdateAnnouncementV1Response = zod.object({
 
 }).nullish().describe('응답 데이터'),
   "error": zod.object({
-  "code": zod.string().describe('에러 코드'),
+  "code": zod.enum(['INTERNAL_ERROR', 'INACTIVE_ACCOUNT', 'INACTIVE_MEMBER', 'INACTIVE_ORGANIZATION', 'DORMANT_ACCOUNT', 'PASSWORD_CHANGE_REQUIRED', 'TERMS_AGREEMENT_REQUIRED', 'INSUFFICIENT_PERMISSIONS', 'ANNOUNCEMENT_NOT_FOUND', 'REQUEST_CONTEXT_NOT_FOUND', 'MEMBER_MISMATCH', 'TERMS_VERSION_NOT_AVAILABLE', 'TERMS_VERSION_NOT_FOUND', 'ACCOUNT_NOT_FOUND', 'ACCOUNT_LOCKED', 'INVALID_CURRENT_PASSWORD', 'INVALID_CREDENTIALS', 'INVITE_NOT_FOUND', 'INVITE_MAIL_DELIVERY_NOT_READY', 'MAIL_SEND_FAILED', 'ORGANIZATION_NOT_FOUND', 'INVITER_NOT_FOUND', 'ROLE_NOT_FOUND', 'LOAD_FAILED', 'MEMBER_NOT_FOUND', 'CANNOT_MODIFY_SELF', 'LAST_OWNER_ROLE_CANNOT_BE_CHANGED', 'LAST_OWNER_STATUS_CANNOT_BE_CHANGED', 'RESOURCE_NOT_FOUND', 'DOCUMENT_NOT_FOUND']).describe('에러 코드'),
   "message": zod.union([zod.string(),zod.array(zod.string())]).describe('에러 메시지'),
   "details": zod.looseObject({
 
@@ -161,7 +161,7 @@ export const AnnouncementControllerUpdateAnnouncementV1Response = zod.object({
   "requestId": zod.string().optional().describe('요청 ID')
 }).and(zod.object({
   "data": zod.object({
-  "id": zod.string().describe('공지사항 식별자')
+  "id": zod.string().describe('식별자')
 }).optional()
 }))
 
@@ -176,7 +176,7 @@ export const AnnouncementControllerDeleteAnnouncementV1Response = zod.object({
 
 }).nullish().describe('응답 데이터'),
   "error": zod.object({
-  "code": zod.string().describe('에러 코드'),
+  "code": zod.enum(['INTERNAL_ERROR', 'INACTIVE_ACCOUNT', 'INACTIVE_MEMBER', 'INACTIVE_ORGANIZATION', 'DORMANT_ACCOUNT', 'PASSWORD_CHANGE_REQUIRED', 'TERMS_AGREEMENT_REQUIRED', 'INSUFFICIENT_PERMISSIONS', 'ANNOUNCEMENT_NOT_FOUND', 'REQUEST_CONTEXT_NOT_FOUND', 'MEMBER_MISMATCH', 'TERMS_VERSION_NOT_AVAILABLE', 'TERMS_VERSION_NOT_FOUND', 'ACCOUNT_NOT_FOUND', 'ACCOUNT_LOCKED', 'INVALID_CURRENT_PASSWORD', 'INVALID_CREDENTIALS', 'INVITE_NOT_FOUND', 'INVITE_MAIL_DELIVERY_NOT_READY', 'MAIL_SEND_FAILED', 'ORGANIZATION_NOT_FOUND', 'INVITER_NOT_FOUND', 'ROLE_NOT_FOUND', 'LOAD_FAILED', 'MEMBER_NOT_FOUND', 'CANNOT_MODIFY_SELF', 'LAST_OWNER_ROLE_CANNOT_BE_CHANGED', 'LAST_OWNER_STATUS_CANNOT_BE_CHANGED', 'RESOURCE_NOT_FOUND', 'DOCUMENT_NOT_FOUND']).describe('에러 코드'),
   "message": zod.union([zod.string(),zod.array(zod.string())]).describe('에러 메시지'),
   "details": zod.looseObject({
 
@@ -188,7 +188,30 @@ export const AnnouncementControllerDeleteAnnouncementV1Response = zod.object({
   "requestId": zod.string().optional().describe('요청 ID')
 }).and(zod.object({
   "data": zod.object({
-  "id": zod.string().describe('공지사항 식별자')
+  "id": zod.string().describe('식별자')
+}).optional()
+}))
+
+
+export const AuthControllerGetCsrfTokenV1Response = zod.object({
+  "success": zod.boolean().describe('성공 여부'),
+  "data": zod.looseObject({
+
+}).nullish().describe('응답 데이터'),
+  "error": zod.object({
+  "code": zod.enum(['INTERNAL_ERROR', 'INACTIVE_ACCOUNT', 'INACTIVE_MEMBER', 'INACTIVE_ORGANIZATION', 'DORMANT_ACCOUNT', 'PASSWORD_CHANGE_REQUIRED', 'TERMS_AGREEMENT_REQUIRED', 'INSUFFICIENT_PERMISSIONS', 'ANNOUNCEMENT_NOT_FOUND', 'REQUEST_CONTEXT_NOT_FOUND', 'MEMBER_MISMATCH', 'TERMS_VERSION_NOT_AVAILABLE', 'TERMS_VERSION_NOT_FOUND', 'ACCOUNT_NOT_FOUND', 'ACCOUNT_LOCKED', 'INVALID_CURRENT_PASSWORD', 'INVALID_CREDENTIALS', 'INVITE_NOT_FOUND', 'INVITE_MAIL_DELIVERY_NOT_READY', 'MAIL_SEND_FAILED', 'ORGANIZATION_NOT_FOUND', 'INVITER_NOT_FOUND', 'ROLE_NOT_FOUND', 'LOAD_FAILED', 'MEMBER_NOT_FOUND', 'CANNOT_MODIFY_SELF', 'LAST_OWNER_ROLE_CANNOT_BE_CHANGED', 'LAST_OWNER_STATUS_CANNOT_BE_CHANGED', 'RESOURCE_NOT_FOUND', 'DOCUMENT_NOT_FOUND']).describe('에러 코드'),
+  "message": zod.union([zod.string(),zod.array(zod.string())]).describe('에러 메시지'),
+  "details": zod.looseObject({
+
+}).optional().describe('상세 정보'),
+  "status": zod.number().describe('HTTP 상태 코드')
+}).optional().describe('에러 상세 정보'),
+  "message": zod.string().optional().describe('응답 메시지'),
+  "traceId": zod.string().optional().describe('추적 ID'),
+  "requestId": zod.string().optional().describe('요청 ID')
+}).and(zod.object({
+  "data": zod.object({
+  "csrfToken": zod.string().describe('CSRF 토큰')
 }).optional()
 }))
 
@@ -205,7 +228,7 @@ export const AuthControllerMeV1Response = zod.object({
 
 }).nullish().describe('응답 데이터'),
   "error": zod.object({
-  "code": zod.string().describe('에러 코드'),
+  "code": zod.enum(['INTERNAL_ERROR', 'INACTIVE_ACCOUNT', 'INACTIVE_MEMBER', 'INACTIVE_ORGANIZATION', 'DORMANT_ACCOUNT', 'PASSWORD_CHANGE_REQUIRED', 'TERMS_AGREEMENT_REQUIRED', 'INSUFFICIENT_PERMISSIONS', 'ANNOUNCEMENT_NOT_FOUND', 'REQUEST_CONTEXT_NOT_FOUND', 'MEMBER_MISMATCH', 'TERMS_VERSION_NOT_AVAILABLE', 'TERMS_VERSION_NOT_FOUND', 'ACCOUNT_NOT_FOUND', 'ACCOUNT_LOCKED', 'INVALID_CURRENT_PASSWORD', 'INVALID_CREDENTIALS', 'INVITE_NOT_FOUND', 'INVITE_MAIL_DELIVERY_NOT_READY', 'MAIL_SEND_FAILED', 'ORGANIZATION_NOT_FOUND', 'INVITER_NOT_FOUND', 'ROLE_NOT_FOUND', 'LOAD_FAILED', 'MEMBER_NOT_FOUND', 'CANNOT_MODIFY_SELF', 'LAST_OWNER_ROLE_CANNOT_BE_CHANGED', 'LAST_OWNER_STATUS_CANNOT_BE_CHANGED', 'RESOURCE_NOT_FOUND', 'DOCUMENT_NOT_FOUND']).describe('에러 코드'),
   "message": zod.union([zod.string(),zod.array(zod.string())]).describe('에러 메시지'),
   "details": zod.looseObject({
 
@@ -225,9 +248,6 @@ export const AuthControllerMeV1Response = zod.object({
 
 }).optional().describe('마지막 로그인 일시'),
   "passwordExpiresAt": zod.iso.datetime({"offset":true}).describe('비밀번호 만료 일시'),
-  "lockUntil": zod.looseObject({
-
-}).optional().describe('잠금 해제 일시'),
   "isDormant": zod.boolean().describe('휴면 여부'),
   "isPasswordExpired": zod.boolean().describe('비밀번호 만료 여부')
 }).describe('계정 정보'),
@@ -243,99 +263,18 @@ export const AuthControllerMeV1Response = zod.object({
   "email": zod.string().describe('조직 이메일'),
   "status": zod.enum(['PENDING', 'ACTIVE', 'INACTIVE', 'REJECTED']).describe('조직 상태')
 }).nullable().describe('조직 정보'),
-  "permissions": zod.array(zod.string()).describe('권한 목록'),
-  "agreedTermsVersionIds": zod.array(zod.string()).describe('현재 동의한 약관 버전 식별자 목록'),
-  "mustAcceptTerms": zod.boolean().describe('약관 재동의 필요 여부')
+  "permissions": zod.array(zod.string()).describe('권한 목록')
 }).optional()
 }))
 
 
-export const AuthControllerGetTermsV1Response = zod.object({
+export const AuthControllerGetPendingTermListV1Response = zod.object({
   "success": zod.boolean().describe('성공 여부'),
   "data": zod.looseObject({
 
 }).nullish().describe('응답 데이터'),
   "error": zod.object({
-  "code": zod.string().describe('에러 코드'),
-  "message": zod.union([zod.string(),zod.array(zod.string())]).describe('에러 메시지'),
-  "details": zod.looseObject({
-
-}).optional().describe('상세 정보'),
-  "status": zod.number().describe('HTTP 상태 코드')
-}).optional().describe('에러 상세 정보'),
-  "message": zod.string().optional().describe('응답 메시지'),
-  "traceId": zod.string().optional().describe('추적 ID'),
-  "requestId": zod.string().optional().describe('요청 ID')
-}).and(zod.object({
-  "data": zod.array(zod.object({
-  "document": zod.object({
-  "id": zod.string().describe('약관 문서 식별자'),
-  "code": zod.string().describe('약관 코드'),
-  "title": zod.string().describe('약관 제목'),
-  "required": zod.boolean().describe('필수 동의 여부'),
-  "terminatedAt": zod.iso.datetime({"offset":true}).optional().describe('종료 일시'),
-  "status": zod.enum(['DRAFT', 'PUBLISHED', 'TERMINATED']).describe('약관 상태'),
-  "organization": zod.string().optional().describe('조직 식별자')
-}).describe('약관 문서 정보'),
-  "currentVersion": zod.object({
-  "id": zod.string().describe('약관 버전 식별자'),
-  "label": zod.string().describe('버전 라벨'),
-  "content": zod.string().describe('약관 내용'),
-  "checksum": zod.string().describe('체크섬'),
-  "status": zod.enum(['DRAFT', 'PUBLISHED']).describe('버전 상태'),
-  "effectiveAt": zod.iso.datetime({"offset":true}).optional().describe('효력 일시')
-}).describe('현재 효력 중인 최신 버전 정보')
-})).optional()
-}))
-
-
-export const AuthControllerAgreeTermsV1Body = zod.object({
-  "termsVersionIds": zod.array(zod.string()).describe('동의할 약관 버전 식별자 목록')
-})
-
-
-export const AuthControllerChangePasswordV1Body = zod.object({
-  "currentPassword": zod.string().describe('현재 비밀번호'),
-  "newPassword": zod.string().describe('새 비밀번호'),
-  "confirmPassword": zod.string().describe('새 비밀번호 확인')
-})
-
-
-export const HealthControllerLiveResponse = zod.object({
-  "status": zod.string().optional(),
-  "info": zod.record(zod.string(), zod.object({
-  "status": zod.string()
-})).nullish(),
-  "error": zod.record(zod.string(), zod.object({
-  "status": zod.string()
-})).nullish(),
-  "details": zod.record(zod.string(), zod.object({
-  "status": zod.string()
-})).optional()
-})
-
-
-export const HealthControllerReadyResponse = zod.object({
-  "status": zod.string().optional(),
-  "info": zod.record(zod.string(), zod.object({
-  "status": zod.string()
-})).nullish(),
-  "error": zod.record(zod.string(), zod.object({
-  "status": zod.string()
-})).nullish(),
-  "details": zod.record(zod.string(), zod.object({
-  "status": zod.string()
-})).optional()
-})
-
-
-export const I18nControllerGetLocalesV1Response = zod.object({
-  "success": zod.boolean().describe('성공 여부'),
-  "data": zod.looseObject({
-
-}).nullish().describe('응답 데이터'),
-  "error": zod.object({
-  "code": zod.string().describe('에러 코드'),
+  "code": zod.enum(['INTERNAL_ERROR', 'INACTIVE_ACCOUNT', 'INACTIVE_MEMBER', 'INACTIVE_ORGANIZATION', 'DORMANT_ACCOUNT', 'PASSWORD_CHANGE_REQUIRED', 'TERMS_AGREEMENT_REQUIRED', 'INSUFFICIENT_PERMISSIONS', 'ANNOUNCEMENT_NOT_FOUND', 'REQUEST_CONTEXT_NOT_FOUND', 'MEMBER_MISMATCH', 'TERMS_VERSION_NOT_AVAILABLE', 'TERMS_VERSION_NOT_FOUND', 'ACCOUNT_NOT_FOUND', 'ACCOUNT_LOCKED', 'INVALID_CURRENT_PASSWORD', 'INVALID_CREDENTIALS', 'INVITE_NOT_FOUND', 'INVITE_MAIL_DELIVERY_NOT_READY', 'MAIL_SEND_FAILED', 'ORGANIZATION_NOT_FOUND', 'INVITER_NOT_FOUND', 'ROLE_NOT_FOUND', 'LOAD_FAILED', 'MEMBER_NOT_FOUND', 'CANNOT_MODIFY_SELF', 'LAST_OWNER_ROLE_CANNOT_BE_CHANGED', 'LAST_OWNER_STATUS_CANNOT_BE_CHANGED', 'RESOURCE_NOT_FOUND', 'DOCUMENT_NOT_FOUND']).describe('에러 코드'),
   "message": zod.union([zod.string(),zod.array(zod.string())]).describe('에러 메시지'),
   "details": zod.looseObject({
 
@@ -347,6 +286,97 @@ export const I18nControllerGetLocalesV1Response = zod.object({
   "requestId": zod.string().optional().describe('요청 ID')
 }).and(zod.object({
   "data": zod.object({
+  "offset": zod.number().optional().describe('조회 시작 오프셋'),
+  "limit": zod.number().optional().describe('조회 개수 제한'),
+  "items": zod.array(zod.object({
+  "documentId": zod.string().describe('약관 문서 식별자'),
+  "versionId": zod.string().describe('약관 버전 식별자'),
+  "organizationId": zod.looseObject({
+
+}).nullable().describe('조직 식별자'),
+  "scope": zod.enum(['platform', 'organization']).describe('약관 적용 범위'),
+  "version": zod.string().describe('약관 버전 태그'),
+  "required": zod.boolean().describe('필수 동의 여부'),
+  "title": zod.string().describe('약관 제목'),
+  "content": zod.string().describe('약관 내용'),
+  "agreed": zod.boolean().describe('동의 여부')
+})).describe('동의 대기 약관 목록')
+}).optional()
+}))
+
+
+export const AuthControllerGetAllowedResourceListV1Response = zod.object({
+  "success": zod.boolean().describe('성공 여부'),
+  "data": zod.looseObject({
+
+}).nullish().describe('응답 데이터'),
+  "error": zod.object({
+  "code": zod.enum(['INTERNAL_ERROR', 'INACTIVE_ACCOUNT', 'INACTIVE_MEMBER', 'INACTIVE_ORGANIZATION', 'DORMANT_ACCOUNT', 'PASSWORD_CHANGE_REQUIRED', 'TERMS_AGREEMENT_REQUIRED', 'INSUFFICIENT_PERMISSIONS', 'ANNOUNCEMENT_NOT_FOUND', 'REQUEST_CONTEXT_NOT_FOUND', 'MEMBER_MISMATCH', 'TERMS_VERSION_NOT_AVAILABLE', 'TERMS_VERSION_NOT_FOUND', 'ACCOUNT_NOT_FOUND', 'ACCOUNT_LOCKED', 'INVALID_CURRENT_PASSWORD', 'INVALID_CREDENTIALS', 'INVITE_NOT_FOUND', 'INVITE_MAIL_DELIVERY_NOT_READY', 'MAIL_SEND_FAILED', 'ORGANIZATION_NOT_FOUND', 'INVITER_NOT_FOUND', 'ROLE_NOT_FOUND', 'LOAD_FAILED', 'MEMBER_NOT_FOUND', 'CANNOT_MODIFY_SELF', 'LAST_OWNER_ROLE_CANNOT_BE_CHANGED', 'LAST_OWNER_STATUS_CANNOT_BE_CHANGED', 'RESOURCE_NOT_FOUND', 'DOCUMENT_NOT_FOUND']).describe('에러 코드'),
+  "message": zod.union([zod.string(),zod.array(zod.string())]).describe('에러 메시지'),
+  "details": zod.looseObject({
+
+}).optional().describe('상세 정보'),
+  "status": zod.number().describe('HTTP 상태 코드')
+}).optional().describe('에러 상세 정보'),
+  "message": zod.string().optional().describe('응답 메시지'),
+  "traceId": zod.string().optional().describe('추적 ID'),
+  "requestId": zod.string().optional().describe('요청 ID')
+}).and(zod.object({
+  "data": zod.object({
+  "offset": zod.number().optional().describe('조회 시작 오프셋'),
+  "limit": zod.number().optional().describe('조회 개수 제한'),
+  "items": zod.array(zod.object({
+  "id": zod.string().describe('리소스 식별자'),
+  "code": zod.string().describe('리소스 코드'),
+  "name": zod.string().describe('리소스 이름'),
+  "type": zod.enum(['MENU', 'COMPONENT']).describe('리소스 유형'),
+  "scope": zod.enum(['PLATFORM', 'ORGANIZATION']).describe('리소스 관리 범위'),
+  "path": zod.string().optional().describe('리소스 경로'),
+  "icon": zod.string().optional().describe('아이콘'),
+  "sortOrder": zod.number().optional().describe('정렬 순서'),
+  "actions": zod.array(zod.enum(['CREATE', 'READ', 'UPDATE', 'DELETE'])).describe('리소스 액션 목록'),
+  "parent": zod.string().optional().describe('부모 리소스 식별자'),
+  "children": zod.array(zod.unknown()).describe('하위 리소스 목록')
+})).describe('권한이 부여된 리소스 목록')
+}).optional()
+}))
+
+
+export const AuthControllerAgreeTermsV1Body = zod.object({
+  "terms": zod.array(zod.object({
+  "termsVersionId": zod.string().describe('약관 버전 식별자'),
+  "agreed": zod.boolean().describe('동의 여부')
+})).describe('약관 버전별 동의 여부 목록')
+})
+
+
+export const AuthControllerChangePasswordV1Body = zod.object({
+  "currentPassword": zod.string().describe('현재 비밀번호'),
+  "newPassword": zod.string().describe('새 비밀번호'),
+  "confirmPassword": zod.string().describe('새 비밀번호 확인')
+})
+
+
+export const I18nControllerGetLocaleListV1Response = zod.object({
+  "success": zod.boolean().describe('성공 여부'),
+  "data": zod.looseObject({
+
+}).nullish().describe('응답 데이터'),
+  "error": zod.object({
+  "code": zod.enum(['INTERNAL_ERROR', 'INACTIVE_ACCOUNT', 'INACTIVE_MEMBER', 'INACTIVE_ORGANIZATION', 'DORMANT_ACCOUNT', 'PASSWORD_CHANGE_REQUIRED', 'TERMS_AGREEMENT_REQUIRED', 'INSUFFICIENT_PERMISSIONS', 'ANNOUNCEMENT_NOT_FOUND', 'REQUEST_CONTEXT_NOT_FOUND', 'MEMBER_MISMATCH', 'TERMS_VERSION_NOT_AVAILABLE', 'TERMS_VERSION_NOT_FOUND', 'ACCOUNT_NOT_FOUND', 'ACCOUNT_LOCKED', 'INVALID_CURRENT_PASSWORD', 'INVALID_CREDENTIALS', 'INVITE_NOT_FOUND', 'INVITE_MAIL_DELIVERY_NOT_READY', 'MAIL_SEND_FAILED', 'ORGANIZATION_NOT_FOUND', 'INVITER_NOT_FOUND', 'ROLE_NOT_FOUND', 'LOAD_FAILED', 'MEMBER_NOT_FOUND', 'CANNOT_MODIFY_SELF', 'LAST_OWNER_ROLE_CANNOT_BE_CHANGED', 'LAST_OWNER_STATUS_CANNOT_BE_CHANGED', 'RESOURCE_NOT_FOUND', 'DOCUMENT_NOT_FOUND']).describe('에러 코드'),
+  "message": zod.union([zod.string(),zod.array(zod.string())]).describe('에러 메시지'),
+  "details": zod.looseObject({
+
+}).optional().describe('상세 정보'),
+  "status": zod.number().describe('HTTP 상태 코드')
+}).optional().describe('에러 상세 정보'),
+  "message": zod.string().optional().describe('응답 메시지'),
+  "traceId": zod.string().optional().describe('추적 ID'),
+  "requestId": zod.string().optional().describe('요청 ID')
+}).and(zod.object({
+  "data": zod.object({
+  "offset": zod.number().optional().describe('조회 시작 오프셋'),
+  "limit": zod.number().optional().describe('조회 개수 제한'),
   "items": zod.array(zod.object({
   "code": zod.string().describe('로케일 코드'),
   "name": zod.string().describe('로케일 이름'),
@@ -367,40 +397,23 @@ export const MembersControllerCreateInviteV1Body = zod.object({
 })
 
 
-export const MembersControllerToggleMemberStatusV1Body = zod.object({
-  "id": zod.string().describe('멤버 식별자'),
-  "status": zod.enum(['ACTIVE', 'INACTIVE']).describe('변경할 상태')
-})
-
-
-export const MembersControllerUpdateMemberRoleV1Body = zod.object({
-  "id": zod.string().describe('멤버 식별자'),
-  "role": zod.looseObject({
-
-}).describe('변경할 역할')
-})
-
-
-export const membersControllerGetMemberPageV1QueryPageDefault = 1;
-export const membersControllerGetMemberPageV1QueryLimitDefault = 20;
-
-export const MembersControllerGetMemberPageV1QueryParams = zod.object({
-  "sort": zod.array(zod.string()).optional().describe('정렬 필드'),
-  "direction": zod.array(zod.enum(['asc', 'desc'])).default([`desc`]).describe('정렬 방향'),
-  "page": zod.number().default(membersControllerGetMemberPageV1QueryPageDefault).describe('페이지 번호'),
-  "limit": zod.number().default(membersControllerGetMemberPageV1QueryLimitDefault).describe('페이지 크기'),
+export const MembersControllerGetInviteListV1QueryParams = zod.object({
+  "cursor": zod.string().optional().describe('커서'),
+  "limit": zod.number().optional().describe('페이지 크기'),
   "filters": zod.looseObject({
 
-}).optional().describe('필터 조건')
+}).optional().describe('필터 조건'),
+  "sort": zod.array(zod.enum(['createdAt'])).optional().describe('정렬 필드'),
+  "direction": zod.array(zod.enum(['asc', 'desc'])).optional().describe('정렬 방향')
 })
 
-export const MembersControllerGetMemberPageV1Response = zod.object({
+export const MembersControllerGetInviteListV1Response = zod.object({
   "success": zod.boolean().describe('성공 여부'),
   "data": zod.looseObject({
 
 }).nullish().describe('응답 데이터'),
   "error": zod.object({
-  "code": zod.string().describe('에러 코드'),
+  "code": zod.enum(['INTERNAL_ERROR', 'INACTIVE_ACCOUNT', 'INACTIVE_MEMBER', 'INACTIVE_ORGANIZATION', 'DORMANT_ACCOUNT', 'PASSWORD_CHANGE_REQUIRED', 'TERMS_AGREEMENT_REQUIRED', 'INSUFFICIENT_PERMISSIONS', 'ANNOUNCEMENT_NOT_FOUND', 'REQUEST_CONTEXT_NOT_FOUND', 'MEMBER_MISMATCH', 'TERMS_VERSION_NOT_AVAILABLE', 'TERMS_VERSION_NOT_FOUND', 'ACCOUNT_NOT_FOUND', 'ACCOUNT_LOCKED', 'INVALID_CURRENT_PASSWORD', 'INVALID_CREDENTIALS', 'INVITE_NOT_FOUND', 'INVITE_MAIL_DELIVERY_NOT_READY', 'MAIL_SEND_FAILED', 'ORGANIZATION_NOT_FOUND', 'INVITER_NOT_FOUND', 'ROLE_NOT_FOUND', 'LOAD_FAILED', 'MEMBER_NOT_FOUND', 'CANNOT_MODIFY_SELF', 'LAST_OWNER_ROLE_CANNOT_BE_CHANGED', 'LAST_OWNER_STATUS_CANNOT_BE_CHANGED', 'RESOURCE_NOT_FOUND', 'DOCUMENT_NOT_FOUND']).describe('에러 코드'),
   "message": zod.union([zod.string(),zod.array(zod.string())]).describe('에러 메시지'),
   "details": zod.looseObject({
 
@@ -412,6 +425,77 @@ export const MembersControllerGetMemberPageV1Response = zod.object({
   "requestId": zod.string().optional().describe('요청 ID')
 }).and(zod.object({
   "data": zod.object({
+  "startCursor": zod.string().nullish().describe('시작 커서'),
+  "endCursor": zod.string().nullish().describe('종료 커서'),
+  "hasNextPage": zod.boolean().describe('다음 페이지 존재 여부'),
+  "hasPrevPage": zod.boolean().describe('이전 페이지 존재 여부'),
+  "totalCount": zod.number().optional().describe('전체 개수'),
+  "length": zod.number().describe('조회된 항목 수'),
+  "items": zod.array(zod.object({
+  "id": zod.string().describe('초대 식별자'),
+  "name": zod.string().describe('초대 대상 이름'),
+  "email": zod.string().describe('초대 대상 이메일'),
+  "status": zod.enum(['QUEUED', 'PENDING', 'EXPIRED', 'CANCELED', 'ACCEPTED', 'REJECTED']).describe('초대 상태'),
+  "roleId": zod.string().describe('권한 식별자'),
+  "roleCode": zod.string().describe('권한 코드'),
+  "roleName": zod.string().describe('권한 이름'),
+  "note": zod.string().optional().describe('초대 메모'),
+  "createdAt": zod.iso.datetime({"offset":true}).describe('생성 일시')
+})).describe('초대 이력 목록')
+}).optional()
+}))
+
+
+export const MembersControllerUpdateMemberStatusV1Body = zod.object({
+  "id": zod.string().describe('멤버 식별자'),
+  "status": zod.enum(['ACTIVE', 'INACTIVE']).describe('변경할 상태')
+})
+
+
+export const MembersControllerUpdateMemberRoleV1Body = zod.object({
+  "id": zod.string().describe('멤버 식별자'),
+  "role": zod.string().describe('변경할 역할')
+})
+
+
+export const membersControllerGetMemberPageV1QueryPageDefault = 1;
+export const membersControllerGetMemberPageV1QueryLimitDefault = 20;
+
+export const MembersControllerGetMemberPageV1QueryParams = zod.object({
+  "page": zod.number().default(membersControllerGetMemberPageV1QueryPageDefault).describe('페이지 번호'),
+  "limit": zod.number().default(membersControllerGetMemberPageV1QueryLimitDefault).describe('페이지 크기'),
+  "filters": zod.object({
+  "status": zod.enum(['ACTIVE', 'INACTIVE']).optional().describe('멤버 상태 필터'),
+  "search": zod.string().optional().describe('검색어')
+}).optional().describe('필터 조건'),
+  "sort": zod.array(zod.enum(['createdAt', 'name', 'status', 'lastLoginAt'])).optional().describe('정렬 필드'),
+  "direction": zod.array(zod.enum(['asc', 'desc'])).optional().describe('정렬 방향')
+})
+
+export const MembersControllerGetMemberPageV1Response = zod.object({
+  "success": zod.boolean().describe('성공 여부'),
+  "data": zod.looseObject({
+
+}).nullish().describe('응답 데이터'),
+  "error": zod.object({
+  "code": zod.enum(['INTERNAL_ERROR', 'INACTIVE_ACCOUNT', 'INACTIVE_MEMBER', 'INACTIVE_ORGANIZATION', 'DORMANT_ACCOUNT', 'PASSWORD_CHANGE_REQUIRED', 'TERMS_AGREEMENT_REQUIRED', 'INSUFFICIENT_PERMISSIONS', 'ANNOUNCEMENT_NOT_FOUND', 'REQUEST_CONTEXT_NOT_FOUND', 'MEMBER_MISMATCH', 'TERMS_VERSION_NOT_AVAILABLE', 'TERMS_VERSION_NOT_FOUND', 'ACCOUNT_NOT_FOUND', 'ACCOUNT_LOCKED', 'INVALID_CURRENT_PASSWORD', 'INVALID_CREDENTIALS', 'INVITE_NOT_FOUND', 'INVITE_MAIL_DELIVERY_NOT_READY', 'MAIL_SEND_FAILED', 'ORGANIZATION_NOT_FOUND', 'INVITER_NOT_FOUND', 'ROLE_NOT_FOUND', 'LOAD_FAILED', 'MEMBER_NOT_FOUND', 'CANNOT_MODIFY_SELF', 'LAST_OWNER_ROLE_CANNOT_BE_CHANGED', 'LAST_OWNER_STATUS_CANNOT_BE_CHANGED', 'RESOURCE_NOT_FOUND', 'DOCUMENT_NOT_FOUND']).describe('에러 코드'),
+  "message": zod.union([zod.string(),zod.array(zod.string())]).describe('에러 메시지'),
+  "details": zod.looseObject({
+
+}).optional().describe('상세 정보'),
+  "status": zod.number().describe('HTTP 상태 코드')
+}).optional().describe('에러 상세 정보'),
+  "message": zod.string().optional().describe('응답 메시지'),
+  "traceId": zod.string().optional().describe('추적 ID'),
+  "requestId": zod.string().optional().describe('요청 ID')
+}).and(zod.object({
+  "data": zod.object({
+  "totalCount": zod.number().describe('전체 개수'),
+  "page": zod.number().describe('페이지 번호'),
+  "limit": zod.number().describe('페이지 크기'),
+  "totalPages": zod.number().describe('전체 페이지 수'),
+  "hasNextPage": zod.boolean().describe('다음 페이지 존재 여부'),
+  "hasPrevPage": zod.boolean().describe('이전 페이지 존재 여부'),
   "items": zod.array(zod.object({
   "id": zod.string().describe('멤버 식별자'),
   "name": zod.string().describe('멤버 이름'),
@@ -420,13 +504,7 @@ export const MembersControllerGetMemberPageV1Response = zod.object({
   "roles": zod.array(zod.string()).optional().describe('권한 목록'),
   "lastLoginAt": zod.iso.datetime({"offset":true}).optional().describe('최근 로그인'),
   "createdAt": zod.iso.datetime({"offset":true}).describe('생성 일시')
-})).describe('멤버 목록'),
-  "totalCount": zod.number().describe('전체 개수'),
-  "page": zod.number().describe('페이지 번호'),
-  "limit": zod.number().describe('페이지 크기'),
-  "totalPages": zod.number().describe('전체 페이지 수'),
-  "hasNextPage": zod.boolean().describe('다음 페이지 존재 여부'),
-  "hasPrevPage": zod.boolean().describe('이전 페이지 존재 여부')
+})).describe('멤버 목록')
 }).optional()
 }))
 
@@ -441,7 +519,7 @@ export const MembersControllerGetMemberV1Response = zod.object({
 
 }).nullish().describe('응답 데이터'),
   "error": zod.object({
-  "code": zod.string().describe('에러 코드'),
+  "code": zod.enum(['INTERNAL_ERROR', 'INACTIVE_ACCOUNT', 'INACTIVE_MEMBER', 'INACTIVE_ORGANIZATION', 'DORMANT_ACCOUNT', 'PASSWORD_CHANGE_REQUIRED', 'TERMS_AGREEMENT_REQUIRED', 'INSUFFICIENT_PERMISSIONS', 'ANNOUNCEMENT_NOT_FOUND', 'REQUEST_CONTEXT_NOT_FOUND', 'MEMBER_MISMATCH', 'TERMS_VERSION_NOT_AVAILABLE', 'TERMS_VERSION_NOT_FOUND', 'ACCOUNT_NOT_FOUND', 'ACCOUNT_LOCKED', 'INVALID_CURRENT_PASSWORD', 'INVALID_CREDENTIALS', 'INVITE_NOT_FOUND', 'INVITE_MAIL_DELIVERY_NOT_READY', 'MAIL_SEND_FAILED', 'ORGANIZATION_NOT_FOUND', 'INVITER_NOT_FOUND', 'ROLE_NOT_FOUND', 'LOAD_FAILED', 'MEMBER_NOT_FOUND', 'CANNOT_MODIFY_SELF', 'LAST_OWNER_ROLE_CANNOT_BE_CHANGED', 'LAST_OWNER_STATUS_CANNOT_BE_CHANGED', 'RESOURCE_NOT_FOUND', 'DOCUMENT_NOT_FOUND']).describe('에러 코드'),
   "message": zod.union([zod.string(),zod.array(zod.string())]).describe('에러 메시지'),
   "details": zod.looseObject({
 
@@ -464,26 +542,23 @@ export const MembersControllerGetMemberV1Response = zod.object({
 }))
 
 
-export const organizationControllerGetOrganizationPageV1QueryOffsetDefault = 0;
-export const organizationControllerGetOrganizationPageV1QueryLimitDefault = 20;
-
-export const OrganizationControllerGetOrganizationPageV1QueryParams = zod.object({
-  "sort": zod.array(zod.string()).optional().describe('정렬 필드'),
-  "direction": zod.array(zod.enum(['asc', 'desc'])).default([`desc`]).describe('정렬 방향'),
-  "offset": zod.number().default(organizationControllerGetOrganizationPageV1QueryOffsetDefault).describe('오프셋'),
-  "limit": zod.number().default(organizationControllerGetOrganizationPageV1QueryLimitDefault).describe('페이지 크기'),
+export const OrganizationControllerGetOrganizationListV1QueryParams = zod.object({
+  "offset": zod.number().optional().describe('오프셋'),
+  "limit": zod.number().optional().describe('페이지 크기'),
   "filters": zod.object({
   "status": zod.enum(['PENDING', 'ACTIVE', 'INACTIVE', 'REJECTED']).optional().describe('메타데이터 날짜로 유추되는 조직 상태 필터')
-}).optional().describe('필터 조건')
+}).optional().describe('필터 조건'),
+  "sort": zod.array(zod.enum(['createdAt'])).optional().describe('정렬 필드'),
+  "direction": zod.array(zod.enum(['asc', 'desc'])).optional().describe('정렬 방향')
 })
 
-export const OrganizationControllerGetOrganizationPageV1Response = zod.object({
+export const OrganizationControllerGetOrganizationListV1Response = zod.object({
   "success": zod.boolean().describe('성공 여부'),
   "data": zod.looseObject({
 
 }).nullish().describe('응답 데이터'),
   "error": zod.object({
-  "code": zod.string().describe('에러 코드'),
+  "code": zod.enum(['INTERNAL_ERROR', 'INACTIVE_ACCOUNT', 'INACTIVE_MEMBER', 'INACTIVE_ORGANIZATION', 'DORMANT_ACCOUNT', 'PASSWORD_CHANGE_REQUIRED', 'TERMS_AGREEMENT_REQUIRED', 'INSUFFICIENT_PERMISSIONS', 'ANNOUNCEMENT_NOT_FOUND', 'REQUEST_CONTEXT_NOT_FOUND', 'MEMBER_MISMATCH', 'TERMS_VERSION_NOT_AVAILABLE', 'TERMS_VERSION_NOT_FOUND', 'ACCOUNT_NOT_FOUND', 'ACCOUNT_LOCKED', 'INVALID_CURRENT_PASSWORD', 'INVALID_CREDENTIALS', 'INVITE_NOT_FOUND', 'INVITE_MAIL_DELIVERY_NOT_READY', 'MAIL_SEND_FAILED', 'ORGANIZATION_NOT_FOUND', 'INVITER_NOT_FOUND', 'ROLE_NOT_FOUND', 'LOAD_FAILED', 'MEMBER_NOT_FOUND', 'CANNOT_MODIFY_SELF', 'LAST_OWNER_ROLE_CANNOT_BE_CHANGED', 'LAST_OWNER_STATUS_CANNOT_BE_CHANGED', 'RESOURCE_NOT_FOUND', 'DOCUMENT_NOT_FOUND']).describe('에러 코드'),
   "message": zod.union([zod.string(),zod.array(zod.string())]).describe('에러 메시지'),
   "details": zod.looseObject({
 
@@ -495,6 +570,8 @@ export const OrganizationControllerGetOrganizationPageV1Response = zod.object({
   "requestId": zod.string().optional().describe('요청 ID')
 }).and(zod.object({
   "data": zod.object({
+  "offset": zod.number().optional().describe('조회 시작 오프셋'),
+  "limit": zod.number().optional().describe('조회 개수 제한'),
   "items": zod.array(zod.object({
   "id": zod.string().describe('조직 식별자'),
   "name": zod.string().describe('조직 이름'),
@@ -506,13 +583,18 @@ export const OrganizationControllerGetOrganizationPageV1Response = zod.object({
 }))
 
 
-export const OrganizationControllerGetOrganizationRolesV1Response = zod.object({
+export const OrganizationControllerUpdateOrganizationV1Body = zod.object({
+  "name": zod.string().describe('조직 이름'),
+  "email": zod.string().describe('대표 이메일')
+})
+
+export const OrganizationControllerUpdateOrganizationV1Response = zod.object({
   "success": zod.boolean().describe('성공 여부'),
   "data": zod.looseObject({
 
 }).nullish().describe('응답 데이터'),
   "error": zod.object({
-  "code": zod.string().describe('에러 코드'),
+  "code": zod.enum(['INTERNAL_ERROR', 'INACTIVE_ACCOUNT', 'INACTIVE_MEMBER', 'INACTIVE_ORGANIZATION', 'DORMANT_ACCOUNT', 'PASSWORD_CHANGE_REQUIRED', 'TERMS_AGREEMENT_REQUIRED', 'INSUFFICIENT_PERMISSIONS', 'ANNOUNCEMENT_NOT_FOUND', 'REQUEST_CONTEXT_NOT_FOUND', 'MEMBER_MISMATCH', 'TERMS_VERSION_NOT_AVAILABLE', 'TERMS_VERSION_NOT_FOUND', 'ACCOUNT_NOT_FOUND', 'ACCOUNT_LOCKED', 'INVALID_CURRENT_PASSWORD', 'INVALID_CREDENTIALS', 'INVITE_NOT_FOUND', 'INVITE_MAIL_DELIVERY_NOT_READY', 'MAIL_SEND_FAILED', 'ORGANIZATION_NOT_FOUND', 'INVITER_NOT_FOUND', 'ROLE_NOT_FOUND', 'LOAD_FAILED', 'MEMBER_NOT_FOUND', 'CANNOT_MODIFY_SELF', 'LAST_OWNER_ROLE_CANNOT_BE_CHANGED', 'LAST_OWNER_STATUS_CANNOT_BE_CHANGED', 'RESOURCE_NOT_FOUND', 'DOCUMENT_NOT_FOUND']).describe('에러 코드'),
   "message": zod.union([zod.string(),zod.array(zod.string())]).describe('에러 메시지'),
   "details": zod.looseObject({
 
@@ -523,12 +605,39 @@ export const OrganizationControllerGetOrganizationRolesV1Response = zod.object({
   "traceId": zod.string().optional().describe('추적 ID'),
   "requestId": zod.string().optional().describe('요청 ID')
 }).and(zod.object({
-  "data": zod.array(zod.object({
+  "data": zod.object({
+  "id": zod.string().describe('식별자')
+}).optional()
+}))
+
+
+export const OrganizationControllerGetOrganizationRoleListV1Response = zod.object({
+  "success": zod.boolean().describe('성공 여부'),
+  "data": zod.looseObject({
+
+}).nullish().describe('응답 데이터'),
+  "error": zod.object({
+  "code": zod.enum(['INTERNAL_ERROR', 'INACTIVE_ACCOUNT', 'INACTIVE_MEMBER', 'INACTIVE_ORGANIZATION', 'DORMANT_ACCOUNT', 'PASSWORD_CHANGE_REQUIRED', 'TERMS_AGREEMENT_REQUIRED', 'INSUFFICIENT_PERMISSIONS', 'ANNOUNCEMENT_NOT_FOUND', 'REQUEST_CONTEXT_NOT_FOUND', 'MEMBER_MISMATCH', 'TERMS_VERSION_NOT_AVAILABLE', 'TERMS_VERSION_NOT_FOUND', 'ACCOUNT_NOT_FOUND', 'ACCOUNT_LOCKED', 'INVALID_CURRENT_PASSWORD', 'INVALID_CREDENTIALS', 'INVITE_NOT_FOUND', 'INVITE_MAIL_DELIVERY_NOT_READY', 'MAIL_SEND_FAILED', 'ORGANIZATION_NOT_FOUND', 'INVITER_NOT_FOUND', 'ROLE_NOT_FOUND', 'LOAD_FAILED', 'MEMBER_NOT_FOUND', 'CANNOT_MODIFY_SELF', 'LAST_OWNER_ROLE_CANNOT_BE_CHANGED', 'LAST_OWNER_STATUS_CANNOT_BE_CHANGED', 'RESOURCE_NOT_FOUND', 'DOCUMENT_NOT_FOUND']).describe('에러 코드'),
+  "message": zod.union([zod.string(),zod.array(zod.string())]).describe('에러 메시지'),
+  "details": zod.looseObject({
+
+}).optional().describe('상세 정보'),
+  "status": zod.number().describe('HTTP 상태 코드')
+}).optional().describe('에러 상세 정보'),
+  "message": zod.string().optional().describe('응답 메시지'),
+  "traceId": zod.string().optional().describe('추적 ID'),
+  "requestId": zod.string().optional().describe('요청 ID')
+}).and(zod.object({
+  "data": zod.object({
+  "offset": zod.number().optional().describe('조회 시작 오프셋'),
+  "limit": zod.number().optional().describe('조회 개수 제한'),
+  "items": zod.array(zod.object({
   "id": zod.string().describe('조직 역할 식별자'),
   "code": zod.string().describe('조직 역할 코드'),
   "name": zod.string().describe('조직 역할 이름'),
   "description": zod.string().optional().describe('조직 역할 설명')
-})).optional()
+})).describe('조직 역할 목록')
+}).optional()
 }))
 
 
@@ -547,7 +656,7 @@ export const OrganizationControllerApproveOrganizationV1Response = zod.object({
 
 }).nullish().describe('응답 데이터'),
   "error": zod.object({
-  "code": zod.string().describe('에러 코드'),
+  "code": zod.enum(['INTERNAL_ERROR', 'INACTIVE_ACCOUNT', 'INACTIVE_MEMBER', 'INACTIVE_ORGANIZATION', 'DORMANT_ACCOUNT', 'PASSWORD_CHANGE_REQUIRED', 'TERMS_AGREEMENT_REQUIRED', 'INSUFFICIENT_PERMISSIONS', 'ANNOUNCEMENT_NOT_FOUND', 'REQUEST_CONTEXT_NOT_FOUND', 'MEMBER_MISMATCH', 'TERMS_VERSION_NOT_AVAILABLE', 'TERMS_VERSION_NOT_FOUND', 'ACCOUNT_NOT_FOUND', 'ACCOUNT_LOCKED', 'INVALID_CURRENT_PASSWORD', 'INVALID_CREDENTIALS', 'INVITE_NOT_FOUND', 'INVITE_MAIL_DELIVERY_NOT_READY', 'MAIL_SEND_FAILED', 'ORGANIZATION_NOT_FOUND', 'INVITER_NOT_FOUND', 'ROLE_NOT_FOUND', 'LOAD_FAILED', 'MEMBER_NOT_FOUND', 'CANNOT_MODIFY_SELF', 'LAST_OWNER_ROLE_CANNOT_BE_CHANGED', 'LAST_OWNER_STATUS_CANNOT_BE_CHANGED', 'RESOURCE_NOT_FOUND', 'DOCUMENT_NOT_FOUND']).describe('에러 코드'),
   "message": zod.union([zod.string(),zod.array(zod.string())]).describe('에러 메시지'),
   "details": zod.looseObject({
 
@@ -559,18 +668,18 @@ export const OrganizationControllerApproveOrganizationV1Response = zod.object({
   "requestId": zod.string().optional().describe('요청 ID')
 }).and(zod.object({
   "data": zod.object({
-  "id": zod.string().describe('조직 식별자')
+  "id": zod.string().describe('식별자')
 }).optional()
 }))
 
 
-export const ResourceControllerGetPermissionSetsV1Response = zod.object({
+export const ResourceControllerGetRolePermissionListV1Response = zod.object({
   "success": zod.boolean().describe('성공 여부'),
   "data": zod.looseObject({
 
 }).nullish().describe('응답 데이터'),
   "error": zod.object({
-  "code": zod.string().describe('에러 코드'),
+  "code": zod.enum(['INTERNAL_ERROR', 'INACTIVE_ACCOUNT', 'INACTIVE_MEMBER', 'INACTIVE_ORGANIZATION', 'DORMANT_ACCOUNT', 'PASSWORD_CHANGE_REQUIRED', 'TERMS_AGREEMENT_REQUIRED', 'INSUFFICIENT_PERMISSIONS', 'ANNOUNCEMENT_NOT_FOUND', 'REQUEST_CONTEXT_NOT_FOUND', 'MEMBER_MISMATCH', 'TERMS_VERSION_NOT_AVAILABLE', 'TERMS_VERSION_NOT_FOUND', 'ACCOUNT_NOT_FOUND', 'ACCOUNT_LOCKED', 'INVALID_CURRENT_PASSWORD', 'INVALID_CREDENTIALS', 'INVITE_NOT_FOUND', 'INVITE_MAIL_DELIVERY_NOT_READY', 'MAIL_SEND_FAILED', 'ORGANIZATION_NOT_FOUND', 'INVITER_NOT_FOUND', 'ROLE_NOT_FOUND', 'LOAD_FAILED', 'MEMBER_NOT_FOUND', 'CANNOT_MODIFY_SELF', 'LAST_OWNER_ROLE_CANNOT_BE_CHANGED', 'LAST_OWNER_STATUS_CANNOT_BE_CHANGED', 'RESOURCE_NOT_FOUND', 'DOCUMENT_NOT_FOUND']).describe('에러 코드'),
   "message": zod.union([zod.string(),zod.array(zod.string())]).describe('에러 메시지'),
   "details": zod.looseObject({
 
@@ -581,13 +690,17 @@ export const ResourceControllerGetPermissionSetsV1Response = zod.object({
   "traceId": zod.string().optional().describe('추적 ID'),
   "requestId": zod.string().optional().describe('요청 ID')
 }).and(zod.object({
-  "data": zod.array(zod.object({
-  "id": zod.string().describe('권한 세트 식별자'),
-  "code": zod.string().describe('권한 세트 코드'),
-  "name": zod.string().describe('권한 세트 이름'),
-  "description": zod.string().optional().describe('권한 세트 설명'),
+  "data": zod.object({
+  "offset": zod.number().optional().describe('조회 시작 오프셋'),
+  "limit": zod.number().optional().describe('조회 개수 제한'),
+  "items": zod.array(zod.object({
+  "id": zod.string().describe('역할 권한 식별자'),
+  "code": zod.string().describe('역할 코드'),
+  "name": zod.string().describe('역할 권한 이름'),
+  "description": zod.string().optional().describe('역할 권한 설명'),
   "permissions": zod.array(zod.string()).describe('권한 코드 목록')
-})).optional()
+})).describe('역할 권한 목록')
+}).optional()
 }))
 
 
@@ -601,7 +714,7 @@ export const ResourceControllerGetResourceV1Response = zod.object({
 
 }).nullish().describe('응답 데이터'),
   "error": zod.object({
-  "code": zod.string().describe('에러 코드'),
+  "code": zod.enum(['INTERNAL_ERROR', 'INACTIVE_ACCOUNT', 'INACTIVE_MEMBER', 'INACTIVE_ORGANIZATION', 'DORMANT_ACCOUNT', 'PASSWORD_CHANGE_REQUIRED', 'TERMS_AGREEMENT_REQUIRED', 'INSUFFICIENT_PERMISSIONS', 'ANNOUNCEMENT_NOT_FOUND', 'REQUEST_CONTEXT_NOT_FOUND', 'MEMBER_MISMATCH', 'TERMS_VERSION_NOT_AVAILABLE', 'TERMS_VERSION_NOT_FOUND', 'ACCOUNT_NOT_FOUND', 'ACCOUNT_LOCKED', 'INVALID_CURRENT_PASSWORD', 'INVALID_CREDENTIALS', 'INVITE_NOT_FOUND', 'INVITE_MAIL_DELIVERY_NOT_READY', 'MAIL_SEND_FAILED', 'ORGANIZATION_NOT_FOUND', 'INVITER_NOT_FOUND', 'ROLE_NOT_FOUND', 'LOAD_FAILED', 'MEMBER_NOT_FOUND', 'CANNOT_MODIFY_SELF', 'LAST_OWNER_ROLE_CANNOT_BE_CHANGED', 'LAST_OWNER_STATUS_CANNOT_BE_CHANGED', 'RESOURCE_NOT_FOUND', 'DOCUMENT_NOT_FOUND']).describe('에러 코드'),
   "message": zod.union([zod.string(),zod.array(zod.string())]).describe('에러 메시지'),
   "details": zod.looseObject({
 
@@ -622,33 +735,28 @@ export const ResourceControllerGetResourceV1Response = zod.object({
   "icon": zod.string().optional().describe('아이콘'),
   "sortOrder": zod.number().optional().describe('정렬 순서'),
   "actions": zod.array(zod.enum(['CREATE', 'READ', 'UPDATE', 'DELETE'])).describe('리소스 액션 목록'),
-  "parent": zod.string().optional().describe('부모 리소스 식별자'),
-  "children": zod.array(zod.unknown()).describe('하위 리소스 목록')
+  "parent": zod.string().optional().describe('부모 리소스 식별자')
 }).optional()
 }))
 
 
-export const resourceControllerGetResourcePageV1QuerySortDefault = [`sortOrder`, `code`];
-export const resourceControllerGetResourcePageV1QueryOffsetDefault = 0;
-export const resourceControllerGetResourcePageV1QueryLimitDefault = 20;
-
-export const ResourceControllerGetResourcePageV1QueryParams = zod.object({
-  "sort": zod.array(zod.string()).default(resourceControllerGetResourcePageV1QuerySortDefault).describe('정렬 필드'),
-  "direction": zod.array(zod.enum(['asc', 'desc'])).default([`asc`, `asc`]).describe('정렬 방향'),
-  "offset": zod.number().default(resourceControllerGetResourcePageV1QueryOffsetDefault).describe('오프셋'),
-  "limit": zod.number().default(resourceControllerGetResourcePageV1QueryLimitDefault).describe('페이지 크기'),
+export const ResourceControllerGetResourceListV1QueryParams = zod.object({
+  "offset": zod.number().optional().describe('오프셋'),
+  "limit": zod.number().optional().describe('페이지 크기'),
   "filters": zod.object({
   "scope": zod.enum(['PLATFORM', 'ORGANIZATION']).describe('리소스 관리 범위')
-}).describe('필터 조건')
+}).describe('필터 조건'),
+  "sort": zod.array(zod.enum(['sortOrder', 'code'])).optional().describe('정렬 필드'),
+  "direction": zod.array(zod.enum(['asc', 'desc'])).optional().describe('정렬 방향')
 })
 
-export const ResourceControllerGetResourcePageV1Response = zod.object({
+export const ResourceControllerGetResourceListV1Response = zod.object({
   "success": zod.boolean().describe('성공 여부'),
   "data": zod.looseObject({
 
 }).nullish().describe('응답 데이터'),
   "error": zod.object({
-  "code": zod.string().describe('에러 코드'),
+  "code": zod.enum(['INTERNAL_ERROR', 'INACTIVE_ACCOUNT', 'INACTIVE_MEMBER', 'INACTIVE_ORGANIZATION', 'DORMANT_ACCOUNT', 'PASSWORD_CHANGE_REQUIRED', 'TERMS_AGREEMENT_REQUIRED', 'INSUFFICIENT_PERMISSIONS', 'ANNOUNCEMENT_NOT_FOUND', 'REQUEST_CONTEXT_NOT_FOUND', 'MEMBER_MISMATCH', 'TERMS_VERSION_NOT_AVAILABLE', 'TERMS_VERSION_NOT_FOUND', 'ACCOUNT_NOT_FOUND', 'ACCOUNT_LOCKED', 'INVALID_CURRENT_PASSWORD', 'INVALID_CREDENTIALS', 'INVITE_NOT_FOUND', 'INVITE_MAIL_DELIVERY_NOT_READY', 'MAIL_SEND_FAILED', 'ORGANIZATION_NOT_FOUND', 'INVITER_NOT_FOUND', 'ROLE_NOT_FOUND', 'LOAD_FAILED', 'MEMBER_NOT_FOUND', 'CANNOT_MODIFY_SELF', 'LAST_OWNER_ROLE_CANNOT_BE_CHANGED', 'LAST_OWNER_STATUS_CANNOT_BE_CHANGED', 'RESOURCE_NOT_FOUND', 'DOCUMENT_NOT_FOUND']).describe('에러 코드'),
   "message": zod.union([zod.string(),zod.array(zod.string())]).describe('에러 메시지'),
   "details": zod.looseObject({
 
@@ -659,7 +767,10 @@ export const ResourceControllerGetResourcePageV1Response = zod.object({
   "traceId": zod.string().optional().describe('추적 ID'),
   "requestId": zod.string().optional().describe('요청 ID')
 }).and(zod.object({
-  "data": zod.array(zod.object({
+  "data": zod.object({
+  "offset": zod.number().optional().describe('조회 시작 오프셋'),
+  "limit": zod.number().optional().describe('조회 개수 제한'),
+  "items": zod.array(zod.object({
   "id": zod.string().describe('리소스 식별자'),
   "code": zod.string().describe('리소스 코드'),
   "name": zod.string().describe('리소스 이름'),
@@ -671,7 +782,8 @@ export const ResourceControllerGetResourcePageV1Response = zod.object({
   "actions": zod.array(zod.enum(['CREATE', 'READ', 'UPDATE', 'DELETE'])).describe('리소스 액션 목록'),
   "parent": zod.string().optional().describe('부모 리소스 식별자'),
   "children": zod.array(zod.unknown()).describe('하위 리소스 목록')
-})).optional()
+})).describe('리소스 목록')
+}).optional()
 }))
 
 
@@ -679,16 +791,14 @@ export const supportControllerGetTicketPageV1QueryPageDefault = 1;
 export const supportControllerGetTicketPageV1QueryLimitDefault = 20;
 
 export const SupportControllerGetTicketPageV1QueryParams = zod.object({
-  "sort": zod.array(zod.string()).optional().describe('정렬 필드'),
-  "direction": zod.array(zod.enum(['asc', 'desc'])).default([`desc`]).describe('정렬 방향'),
   "page": zod.number().default(supportControllerGetTicketPageV1QueryPageDefault).describe('페이지 번호'),
   "limit": zod.number().default(supportControllerGetTicketPageV1QueryLimitDefault).describe('페이지 크기'),
   "filters": zod.object({
-  "organization": zod.looseObject({
-
-}).optional().describe('조직 필터'),
+  "organization": zod.string().optional().describe('조직 필터'),
   "status": zod.enum(['OPEN', 'IN_PROGRESS', 'RESOLVED', 'CLOSED']).optional().describe('티켓 상태 필터')
-}).optional().describe('필터 조건')
+}).optional().describe('필터 조건'),
+  "sort": zod.array(zod.enum(['createdAt'])).optional().describe('정렬 필드'),
+  "direction": zod.array(zod.enum(['asc', 'desc'])).optional().describe('정렬 방향')
 })
 
 export const SupportControllerGetTicketPageV1Response = zod.object({
@@ -697,7 +807,7 @@ export const SupportControllerGetTicketPageV1Response = zod.object({
 
 }).nullish().describe('응답 데이터'),
   "error": zod.object({
-  "code": zod.string().describe('에러 코드'),
+  "code": zod.enum(['INTERNAL_ERROR', 'INACTIVE_ACCOUNT', 'INACTIVE_MEMBER', 'INACTIVE_ORGANIZATION', 'DORMANT_ACCOUNT', 'PASSWORD_CHANGE_REQUIRED', 'TERMS_AGREEMENT_REQUIRED', 'INSUFFICIENT_PERMISSIONS', 'ANNOUNCEMENT_NOT_FOUND', 'REQUEST_CONTEXT_NOT_FOUND', 'MEMBER_MISMATCH', 'TERMS_VERSION_NOT_AVAILABLE', 'TERMS_VERSION_NOT_FOUND', 'ACCOUNT_NOT_FOUND', 'ACCOUNT_LOCKED', 'INVALID_CURRENT_PASSWORD', 'INVALID_CREDENTIALS', 'INVITE_NOT_FOUND', 'INVITE_MAIL_DELIVERY_NOT_READY', 'MAIL_SEND_FAILED', 'ORGANIZATION_NOT_FOUND', 'INVITER_NOT_FOUND', 'ROLE_NOT_FOUND', 'LOAD_FAILED', 'MEMBER_NOT_FOUND', 'CANNOT_MODIFY_SELF', 'LAST_OWNER_ROLE_CANNOT_BE_CHANGED', 'LAST_OWNER_STATUS_CANNOT_BE_CHANGED', 'RESOURCE_NOT_FOUND', 'DOCUMENT_NOT_FOUND']).describe('에러 코드'),
   "message": zod.union([zod.string(),zod.array(zod.string())]).describe('에러 메시지'),
   "details": zod.looseObject({
 
@@ -708,7 +818,14 @@ export const SupportControllerGetTicketPageV1Response = zod.object({
   "traceId": zod.string().optional().describe('추적 ID'),
   "requestId": zod.string().optional().describe('요청 ID')
 }).and(zod.object({
-  "data": zod.array(zod.object({
+  "data": zod.object({
+  "totalCount": zod.number().describe('전체 개수'),
+  "page": zod.number().describe('페이지 번호'),
+  "limit": zod.number().describe('페이지 크기'),
+  "totalPages": zod.number().describe('전체 페이지 수'),
+  "hasNextPage": zod.boolean().describe('다음 페이지 존재 여부'),
+  "hasPrevPage": zod.boolean().describe('이전 페이지 존재 여부'),
+  "items": zod.array(zod.object({
   "id": zod.string().describe('티켓 식별자'),
   "title": zod.string().describe('티켓 제목'),
   "content": zod.string().describe('티켓 내용'),
@@ -716,31 +833,29 @@ export const SupportControllerGetTicketPageV1Response = zod.object({
   "priority": zod.enum(['LOW', 'MEDIUM', 'HIGH', 'URGENT']).describe('티켓 우선순위'),
   "createdAt": zod.iso.datetime({"offset":true}).describe('생성 일시'),
   "organization": zod.string().describe('조직 식별자')
-})).optional()
+})).describe('티켓 목록')
+}).optional()
 }))
 
 
-export const termsControllerGetTermsDocumentPageV1QueryOffsetDefault = 0;
-export const termsControllerGetTermsDocumentPageV1QueryLimitDefault = 20;
-
-export const TermsControllerGetTermsDocumentPageV1QueryParams = zod.object({
-  "sort": zod.array(zod.string()).optional().describe('정렬 필드'),
-  "direction": zod.array(zod.enum(['asc', 'desc'])).default([`desc`]).describe('정렬 방향'),
-  "offset": zod.number().default(termsControllerGetTermsDocumentPageV1QueryOffsetDefault).describe('오프셋'),
-  "limit": zod.number().default(termsControllerGetTermsDocumentPageV1QueryLimitDefault).describe('페이지 크기'),
+export const TermsControllerGetTermsDocumentListV1QueryParams = zod.object({
+  "offset": zod.number().optional().describe('오프셋'),
+  "limit": zod.number().optional().describe('페이지 크기'),
   "filters": zod.object({
   "scope": zod.enum(['platform', 'organization']).optional().describe('조회 scope'),
   "status": zod.enum(['DRAFT', 'PUBLISHED', 'TERMINATED']).optional().describe('약관 상태 필터')
-}).optional().describe('필터 조건')
+}).optional().describe('필터 조건'),
+  "sort": zod.array(zod.enum(['createdAt'])).optional().describe('정렬 필드'),
+  "direction": zod.array(zod.enum(['asc', 'desc'])).optional().describe('정렬 방향')
 })
 
-export const TermsControllerGetTermsDocumentPageV1Response = zod.object({
+export const TermsControllerGetTermsDocumentListV1Response = zod.object({
   "success": zod.boolean().describe('성공 여부'),
   "data": zod.looseObject({
 
 }).nullish().describe('응답 데이터'),
   "error": zod.object({
-  "code": zod.string().describe('에러 코드'),
+  "code": zod.enum(['INTERNAL_ERROR', 'INACTIVE_ACCOUNT', 'INACTIVE_MEMBER', 'INACTIVE_ORGANIZATION', 'DORMANT_ACCOUNT', 'PASSWORD_CHANGE_REQUIRED', 'TERMS_AGREEMENT_REQUIRED', 'INSUFFICIENT_PERMISSIONS', 'ANNOUNCEMENT_NOT_FOUND', 'REQUEST_CONTEXT_NOT_FOUND', 'MEMBER_MISMATCH', 'TERMS_VERSION_NOT_AVAILABLE', 'TERMS_VERSION_NOT_FOUND', 'ACCOUNT_NOT_FOUND', 'ACCOUNT_LOCKED', 'INVALID_CURRENT_PASSWORD', 'INVALID_CREDENTIALS', 'INVITE_NOT_FOUND', 'INVITE_MAIL_DELIVERY_NOT_READY', 'MAIL_SEND_FAILED', 'ORGANIZATION_NOT_FOUND', 'INVITER_NOT_FOUND', 'ROLE_NOT_FOUND', 'LOAD_FAILED', 'MEMBER_NOT_FOUND', 'CANNOT_MODIFY_SELF', 'LAST_OWNER_ROLE_CANNOT_BE_CHANGED', 'LAST_OWNER_STATUS_CANNOT_BE_CHANGED', 'RESOURCE_NOT_FOUND', 'DOCUMENT_NOT_FOUND']).describe('에러 코드'),
   "message": zod.union([zod.string(),zod.array(zod.string())]).describe('에러 메시지'),
   "details": zod.looseObject({
 
@@ -751,7 +866,10 @@ export const TermsControllerGetTermsDocumentPageV1Response = zod.object({
   "traceId": zod.string().optional().describe('추적 ID'),
   "requestId": zod.string().optional().describe('요청 ID')
 }).and(zod.object({
-  "data": zod.array(zod.object({
+  "data": zod.object({
+  "offset": zod.number().optional().describe('조회 시작 오프셋'),
+  "limit": zod.number().optional().describe('조회 개수 제한'),
+  "items": zod.array(zod.object({
   "id": zod.string().describe('약관 문서 식별자'),
   "code": zod.string().describe('약관 코드'),
   "title": zod.string().describe('약관 제목'),
@@ -759,7 +877,8 @@ export const TermsControllerGetTermsDocumentPageV1Response = zod.object({
   "terminatedAt": zod.iso.datetime({"offset":true}).optional().describe('종료 일시'),
   "status": zod.enum(['DRAFT', 'PUBLISHED', 'TERMINATED']).describe('약관 상태'),
   "organization": zod.string().optional().describe('조직 식별자')
-})).optional()
+})).describe('약관 문서 목록')
+}).optional()
 }))
 
 
@@ -773,7 +892,7 @@ export const TermsControllerGetTermsDocumentV1Response = zod.object({
 
 }).nullish().describe('응답 데이터'),
   "error": zod.object({
-  "code": zod.string().describe('에러 코드'),
+  "code": zod.enum(['INTERNAL_ERROR', 'INACTIVE_ACCOUNT', 'INACTIVE_MEMBER', 'INACTIVE_ORGANIZATION', 'DORMANT_ACCOUNT', 'PASSWORD_CHANGE_REQUIRED', 'TERMS_AGREEMENT_REQUIRED', 'INSUFFICIENT_PERMISSIONS', 'ANNOUNCEMENT_NOT_FOUND', 'REQUEST_CONTEXT_NOT_FOUND', 'MEMBER_MISMATCH', 'TERMS_VERSION_NOT_AVAILABLE', 'TERMS_VERSION_NOT_FOUND', 'ACCOUNT_NOT_FOUND', 'ACCOUNT_LOCKED', 'INVALID_CURRENT_PASSWORD', 'INVALID_CREDENTIALS', 'INVITE_NOT_FOUND', 'INVITE_MAIL_DELIVERY_NOT_READY', 'MAIL_SEND_FAILED', 'ORGANIZATION_NOT_FOUND', 'INVITER_NOT_FOUND', 'ROLE_NOT_FOUND', 'LOAD_FAILED', 'MEMBER_NOT_FOUND', 'CANNOT_MODIFY_SELF', 'LAST_OWNER_ROLE_CANNOT_BE_CHANGED', 'LAST_OWNER_STATUS_CANNOT_BE_CHANGED', 'RESOURCE_NOT_FOUND', 'DOCUMENT_NOT_FOUND']).describe('에러 코드'),
   "message": zod.union([zod.string(),zod.array(zod.string())]).describe('에러 메시지'),
   "details": zod.looseObject({
 
@@ -799,7 +918,7 @@ export const TermsControllerGetTermsDocumentV1Response = zod.object({
   "content": zod.string().describe('약관 내용'),
   "checksum": zod.string().describe('체크섬'),
   "status": zod.enum(['DRAFT', 'PUBLISHED']).describe('버전 상태'),
-  "effectiveAt": zod.iso.datetime({"offset":true}).optional().describe('효력 일시'),
+  "effectiveAt": zod.iso.datetime({"offset":true}).describe('효력 일시'),
   "label": zod.string().describe('버전 라벨')
 })).describe('버전 목록'),
   "currentVersion": zod.object({
@@ -807,7 +926,7 @@ export const TermsControllerGetTermsDocumentV1Response = zod.object({
   "content": zod.string().describe('약관 내용'),
   "checksum": zod.string().describe('체크섬'),
   "status": zod.enum(['DRAFT', 'PUBLISHED']).describe('버전 상태'),
-  "effectiveAt": zod.iso.datetime({"offset":true}).optional().describe('효력 일시'),
+  "effectiveAt": zod.iso.datetime({"offset":true}).describe('효력 일시'),
   "label": zod.string().describe('버전 라벨')
 }).nullish().describe('현재 효력 중인 버전')
 }).optional()
@@ -818,14 +937,14 @@ export const TermsControllerGetTermsDocumentVersionsV1Params = zod.object({
   "id": zod.string()
 })
 
-export const termsControllerGetTermsDocumentVersionsV1QueryOffsetDefault = 0;
-export const termsControllerGetTermsDocumentVersionsV1QueryLimitDefault = 20;
-
 export const TermsControllerGetTermsDocumentVersionsV1QueryParams = zod.object({
-  "sort": zod.array(zod.string()).optional().describe('정렬 필드'),
-  "direction": zod.array(zod.enum(['asc', 'desc'])).default([`desc`, `desc`]).describe('정렬 방향'),
-  "offset": zod.number().default(termsControllerGetTermsDocumentVersionsV1QueryOffsetDefault).describe('오프셋'),
-  "limit": zod.number().default(termsControllerGetTermsDocumentVersionsV1QueryLimitDefault).describe('페이지 크기')
+  "offset": zod.number().optional().describe('오프셋'),
+  "limit": zod.number().optional().describe('페이지 크기'),
+  "filters": zod.looseObject({
+
+}).optional().describe('필터 조건'),
+  "sort": zod.array(zod.enum(['effectiveAt', 'createdAt'])).optional().describe('정렬 필드'),
+  "direction": zod.array(zod.enum(['asc', 'desc'])).optional().describe('정렬 방향')
 })
 
 export const TermsControllerGetTermsDocumentVersionsV1Response = zod.object({
@@ -834,7 +953,7 @@ export const TermsControllerGetTermsDocumentVersionsV1Response = zod.object({
 
 }).nullish().describe('응답 데이터'),
   "error": zod.object({
-  "code": zod.string().describe('에러 코드'),
+  "code": zod.enum(['INTERNAL_ERROR', 'INACTIVE_ACCOUNT', 'INACTIVE_MEMBER', 'INACTIVE_ORGANIZATION', 'DORMANT_ACCOUNT', 'PASSWORD_CHANGE_REQUIRED', 'TERMS_AGREEMENT_REQUIRED', 'INSUFFICIENT_PERMISSIONS', 'ANNOUNCEMENT_NOT_FOUND', 'REQUEST_CONTEXT_NOT_FOUND', 'MEMBER_MISMATCH', 'TERMS_VERSION_NOT_AVAILABLE', 'TERMS_VERSION_NOT_FOUND', 'ACCOUNT_NOT_FOUND', 'ACCOUNT_LOCKED', 'INVALID_CURRENT_PASSWORD', 'INVALID_CREDENTIALS', 'INVITE_NOT_FOUND', 'INVITE_MAIL_DELIVERY_NOT_READY', 'MAIL_SEND_FAILED', 'ORGANIZATION_NOT_FOUND', 'INVITER_NOT_FOUND', 'ROLE_NOT_FOUND', 'LOAD_FAILED', 'MEMBER_NOT_FOUND', 'CANNOT_MODIFY_SELF', 'LAST_OWNER_ROLE_CANNOT_BE_CHANGED', 'LAST_OWNER_STATUS_CANNOT_BE_CHANGED', 'RESOURCE_NOT_FOUND', 'DOCUMENT_NOT_FOUND']).describe('에러 코드'),
   "message": zod.union([zod.string(),zod.array(zod.string())]).describe('에러 메시지'),
   "details": zod.looseObject({
 
@@ -845,12 +964,16 @@ export const TermsControllerGetTermsDocumentVersionsV1Response = zod.object({
   "traceId": zod.string().optional().describe('추적 ID'),
   "requestId": zod.string().optional().describe('요청 ID')
 }).and(zod.object({
-  "data": zod.array(zod.object({
+  "data": zod.object({
+  "offset": zod.number().optional().describe('조회 시작 오프셋'),
+  "limit": zod.number().optional().describe('조회 개수 제한'),
+  "items": zod.array(zod.object({
   "id": zod.string().describe('약관 버전 식별자'),
   "content": zod.string().describe('약관 내용'),
   "checksum": zod.string().describe('체크섬'),
   "status": zod.enum(['DRAFT', 'PUBLISHED']).describe('버전 상태'),
-  "effectiveAt": zod.iso.datetime({"offset":true}).optional().describe('효력 일시'),
+  "effectiveAt": zod.iso.datetime({"offset":true}).describe('효력 일시'),
   "label": zod.string().describe('버전 라벨')
-})).optional()
+})).describe('약관 버전 목록')
+}).optional()
 }))
