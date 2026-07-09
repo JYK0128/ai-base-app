@@ -8,7 +8,7 @@
 
 export interface UpdateOrganizationRequestDto {
   /** 조직 이름 */
-  name: string;
+  name?: string;
   /** 대표 이메일 */
-  email: string;
+  email?: string;
 }

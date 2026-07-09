@@ -12,7 +12,7 @@ import { Organization, OrganizationMetadata } from './domains/platform/organizat
 import { OrganizationPermission } from './domains/platform/organization/organization-permission.entity.js';
 import { OrganizationRole } from './domains/platform/organization/organization-role.entity.js';
 import { OrganizationRoleAssignment } from './domains/platform/organization/organization-role-assignment.entity.js';
-import { Resource, ResourceMetadata } from './domains/platform/resource/resource.entity.js';
+import { Resource } from './domains/platform/resource/resource.entity.js';
 import { SupportTicket } from './domains/platform/support/support-ticket.entity.js';
 import { TermsConsent } from './domains/platform/terms/terms-consent.entity.js';
 import { TermsDocument, TermsDocumentMetadata } from './domains/platform/terms/terms-document.entity.js';
@@ -35,7 +35,6 @@ export const entities = [
   OrganizationRole,
   OrganizationRoleAssignment,
   Resource,
-  ResourceMetadata,
   SupportTicket,
   TermsConsent,
   TermsDocument,

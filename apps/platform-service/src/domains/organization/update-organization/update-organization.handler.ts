@@ -20,9 +20,8 @@ export class UpdateOrganizationHandler implements ICommandHandler<UpdateOrganiza
   async execute(command: UpdateOrganizationContract): Promise<UpdateOrganizationResponseDto> {
     const account = await this.identifyRequestAccount();
     const organization = await this.identifyOrganization();
-    const email = command.data.email.trim();
 
-    await this.verifyEmailAvailability(organization, email);
+    await this.verifyEmailAvailability(organization, command.data.email);
     await this.processUpdate(command, organization, account.id);
 
     return new UpdateOrganizationResponseDto(organization.id);
@@ -51,9 +50,13 @@ export class UpdateOrganizationHandler implements ICommandHandler<UpdateOrganiza
     );
   }
 
-  private async verifyEmailAvailability(organization: Organization, email: string): Promise<void> {
+  private async verifyEmailAvailability(organization: Organization, email?: string): Promise<void> {
+    if (email === undefined) {
+      return;
+    }
+
     const existingOrganization = await Organization.findOne({
-      email,
+      email: email.trim(),
       id: { $ne: organization.id },
     });
 
@@ -68,14 +71,21 @@ export class UpdateOrganizationHandler implements ICommandHandler<UpdateOrganiza
     accountId: string,
   ): Promise<void> {
     const { name, email } = command.data;
+    const updates: Record<string, unknown> = {
+      updatedAt: new Date(),
+      updatedBy: accountId,
+    };
+
+    if (name !== undefined) {
+      updates.name = name.trim();
+    }
+    if (email !== undefined) {
+      updates.email = email.trim();
+    }
+
     const result = await Organization
       .getQueryBuilder()
-      .update({
-        name,
-        email,
-        updatedAt: new Date(),
-        updatedBy: accountId,
-      })
+      .update(updates)
       .where({ id: organization.id })
       .execute();
 

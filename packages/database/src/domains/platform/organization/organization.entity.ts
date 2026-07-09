@@ -18,13 +18,13 @@ export class OrganizationMetadata {
   }
 
   @Property({ type: Date, nullable: true })
-  approvedAt?: Date | null;
+  approvedAt: Date | null = null;
 
   @Property({ type: Date, nullable: true })
-  deactivatedAt?: Date | null;
+  deactivatedAt: Date | null = null;
 
   @Property({ type: Date, nullable: true })
-  rejectedAt?: Date | null;
+  rejectedAt: Date | null = null;
 }
 
 @Entity({ schema: 'platform' })

@@ -13,8 +13,11 @@ export interface RolePermissionListItem {
   code: string;
   /** 역할 권한 이름 */
   name: string;
-  /** 역할 권한 설명 */
-  description?: string;
+  /**
+     * 역할 권한 설명
+     * @nullable
+     */
+  description: string | null;
   /** 권한 코드 목록 */
   permissions: string[];
 }

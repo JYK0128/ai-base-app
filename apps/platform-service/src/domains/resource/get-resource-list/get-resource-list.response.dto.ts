@@ -1,11 +1,7 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { Resource,
-         ResourceAction,
-         ResourceScope,
-         ResourceType } from '@pkg/database';
+import { ApiProperty } from '@nestjs/swagger';
+import { Resource, ResourceAction, ResourceScope, ResourceType } from '@pkg/database';
 
 import { EntityResponseType, ListResponseDto } from '@/common/interfaces';
-
 export class GetResourceListItem extends EntityResponseType(Resource) {
   constructor(resource: Resource) {
     super();
@@ -14,91 +10,53 @@ export class GetResourceListItem extends EntityResponseType(Resource) {
     this.name = resource.name;
     this.type = resource.type;
     this.scope = resource.scope;
-    if (resource.path !== undefined) {
-      this.path = resource.path;
-    }
-    if (resource.icon !== undefined) {
-      this.icon = resource.icon;
-    }
-    if (resource.sortOrder !== undefined) {
-      this.sortOrder = resource.sortOrder;
-    }
+    this.path = resource.path;
+    this.icon = resource.icon;
+    this.sortOrder = resource.sortOrder;
     this.actions = (resource.actions ?? []) as ResourceAction[];
     this.children = [];
-    if (resource.parent?.id !== undefined) {
-      this.parent = resource.parent.id;
-    }
+    this.parent = resource.parent?.id ?? null;
   }
 
-  @ApiProperty({
-    example: '019e5236-adae-70d7-a8f7-2dc90bdf7098',
-    description: '리소스 식별자',
-  })
+  @ApiProperty({ type: String, description: '리소스 식별자' })
   override id!: string;
 
-  @ApiProperty({ example: 'DASHBOARD', description: '리소스 코드' })
+  @ApiProperty({ type: String, description: '리소스 코드' })
   override code!: string;
 
-  @ApiProperty({ example: '대시보드', description: '리소스 이름' })
+  @ApiProperty({ type: String, description: '리소스 이름' })
   override name!: string;
 
-  @ApiProperty({
-    enum: ResourceType,
-    example: ResourceType.MENU,
-    description: '리소스 유형',
-  })
+  @ApiProperty({ enum: ResourceType, description: '리소스 유형' })
   override type!: ResourceType;
 
-  @ApiProperty({
-    enum: ResourceScope,
-    example: ResourceScope.PLATFORM,
-    description: '리소스 관리 범위',
-  })
+  @ApiProperty({ enum: ResourceScope, description: '리소스 관리 범위' })
   override scope!: ResourceScope;
 
-  @ApiPropertyOptional({ example: '/dashboard', description: '리소스 경로' })
-  override path?: string;
+  @ApiProperty({ type: String, nullable: true, description: '리소스 경로' })
+  override path!: string | null;
 
-  @ApiPropertyOptional({ example: 'dashboard', description: '아이콘' })
-  override icon?: string;
+  @ApiProperty({ type: String, nullable: true, description: '아이콘' })
+  override icon!: string | null;
 
-  @ApiPropertyOptional({ example: 1, description: '정렬 순서' })
-  override sortOrder?: number;
+  @ApiProperty({ type: Number, nullable: true, description: '정렬 순서' })
+  override sortOrder!: number | null;
 
-  @ApiProperty({
-    enum: ResourceAction,
-    isArray: true,
-    example: [ResourceAction.CREATE, ResourceAction.READ],
-    description: '리소스 액션 목록',
-  })
+  @ApiProperty({ type: String, isArray: true, enum: ResourceAction, description: '리소스 액션 목록' })
   override actions!: ResourceAction[];
 
-  @ApiPropertyOptional({
-    example: '019e5236-adae-70d7-a8f7-2dc90bdf7100',
-    description: '부모 리소스 식별자',
-  })
-  override parent?: string;
+  @ApiProperty({ type: String, nullable: true, description: '부모 리소스 식별자' })
+  override parent!: string | null;
 
-  @ApiProperty({
-    type: () => [GetResourceListItem],
-    example: [],
-    description: '하위 리소스 목록',
-  })
+  @ApiProperty({ type: () => [GetResourceListItem], description: '하위 리소스 목록' })
   override children!: GetResourceListItem[];
 }
-
 export class GetResourceListResponseDto extends ListResponseDto<GetResourceListItem> {
-  constructor(args: ListResponseDto<GetResourceListItem>) {
+  constructor(args: GetResourceListResponseDto) {
     super();
     this.items = args.items;
-    this.offset = args.offset;
-    this.limit = args.limit;
   }
 
-  @ApiProperty({
-    type: () => [GetResourceListItem],
-    example: [],
-    description: '리소스 목록',
-  })
+  @ApiProperty({ type: () => [GetResourceListItem], description: '리소스 목록' })
   items!: GetResourceListItem[];
 }

@@ -8,10 +8,6 @@
 import type { RolePermissionListItem } from './rolePermissionListItem';
 
 export interface GetRolePermissionListResponseDto {
-  /** 조회 시작 오프셋 */
-  offset?: number;
-  /** 조회 개수 제한 */
-  limit?: number;
   /** 역할 권한 목록 */
   items: RolePermissionListItem[];
 }

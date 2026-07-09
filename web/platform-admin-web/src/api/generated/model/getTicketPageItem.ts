@@ -22,5 +22,5 @@ export interface GetTicketPageItem {
   /** 생성 일시 */
   createdAt: string;
   /** 조직 식별자 */
-  organization: string;
+  organizationId: string;
 }

@@ -9,7 +9,7 @@ import type { GetTicketPageFiltersDtoStatus } from './getTicketPageFiltersDtoSta
 
 export interface GetTicketPageFiltersDto {
   /** 조직 필터 */
-  organization?: string;
+  organizationId?: string;
   /** 티켓 상태 필터 */
   status?: GetTicketPageFiltersDtoStatus;
 }

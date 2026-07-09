@@ -1,0 +1,73 @@
+import { Badge } from '@pkg/ui';
+
+import { ConsolePanel } from '../../-components/ConsolePanel';
+import { type OrganizationActivityMock } from '../-helpers/organizations.helper';
+
+export function OrganizationActivitySection({ activity }: Readonly<{ activity: OrganizationActivityMock[] }>) {
+  return (
+    <div className="flex h-full min-h-0 flex-col">
+      <ConsolePanel
+        title="활동 기록"
+        description="조직에 영향을 준 최근 이벤트를 시간순으로 확인합니다."
+        icon="activity"
+      >
+        <div className="space-y-4">
+          {activity.map((item, index) => (
+            <div key={item.title} className="relative pl-6">
+              {index < activity.length - 1
+                ? (
+                  <div className="
+                    absolute top-7 bottom-0 left-2.75 w-px bg-slate-200
+                  "
+                  />
+                )
+                : null}
+              <div className="
+                absolute top-1 left-0 flex size-6 items-center justify-center
+                rounded-full border border-slate-200 bg-white
+              "
+              >
+                <div className={getActivityToneClass(item.tone)}>
+                  <item.icon className="size-3.5" />
+                </div>
+              </div>
+              <div className="
+                rounded-2xl border border-slate-200 bg-slate-50/80 p-4
+              "
+              >
+                <div
+                  className="flex flex-wrap items-center justify-between gap-2"
+                >
+                  <p className="font-semibold text-slate-900">{item.title}</p>
+                  <Badge
+                    variant="outline"
+                    className="border-slate-200 bg-white text-slate-600"
+                  >
+                    {item.when}
+                  </Badge>
+                </div>
+                <p className="mt-2 text-sm/6 text-slate-600">{item.description}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </ConsolePanel>
+    </div>
+  );
+}
+
+function getActivityToneClass(tone: OrganizationActivityMock['tone']) {
+  if (tone === 'emerald') {
+    return 'flex size-8 items-center justify-center rounded-xl bg-emerald-100 text-emerald-700';
+  }
+
+  if (tone === 'sky') {
+    return 'flex size-8 items-center justify-center rounded-xl bg-sky-100 text-sky-700';
+  }
+
+  if (tone === 'amber') {
+    return 'flex size-8 items-center justify-center rounded-xl bg-amber-100 text-amber-700';
+  }
+
+  return 'flex size-8 items-center justify-center rounded-xl bg-slate-100 text-slate-600';
+}

@@ -1,5 +1,5 @@
 import { Collection, EntityName, type Rel } from '@mikro-orm/core';
-import { Entity, ManyToOne, OneToMany, Property } from '@mikro-orm/decorators/legacy';
+import { Entity, ManyToOne, OneToMany, Property, Unique } from '@mikro-orm/decorators/legacy';
 
 import { CoreEntity } from '../../core/core.entity';
 import { Organization } from './organization.entity';
@@ -7,6 +7,7 @@ import { OrganizationPermission } from './organization-permission.entity';
 import { OrganizationRoleAssignment } from './organization-role-assignment.entity';
 
 @Entity({ schema: 'platform' })
+@Unique({ properties: ['organization', 'code'] })
 export class OrganizationRole extends CoreEntity<OrganizationRole> {
   [EntityName]?: 'OrganizationRole';
 
@@ -26,5 +27,8 @@ export class OrganizationRole extends CoreEntity<OrganizationRole> {
   name!: string;
 
   @Property({ type: 'string', nullable: true })
-  description?: string;
+  description: string | null = null;
+
+  @Property({ type: 'number', nullable: true })
+  sortOrder: number | null = null;
 }

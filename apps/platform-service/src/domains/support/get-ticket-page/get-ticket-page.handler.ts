@@ -20,10 +20,13 @@ export class GetTicketPageHandler implements IQueryHandler<GetTicketPageContract
 
   private async processPage(query: GetTicketPageContract): Promise<GetTicketPageResponseDto> {
     const ticketsPage = await this.Asserter.assert(
-      SupportTicket.findByPage(query.data.toFilterQuery(), {
-        populate: ['organization'],
-        ...query.data.toPageOptions(),
-      }),
+      SupportTicket.findByPage(
+        query.data.toFilterQuery(),
+        {
+          populate: ['organization'],
+          ...query.data.toPageOptions(),
+        },
+      ),
       'LOAD_FAILED',
     );
 

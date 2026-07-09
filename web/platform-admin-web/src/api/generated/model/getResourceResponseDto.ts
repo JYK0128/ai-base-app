@@ -20,14 +20,26 @@ export interface GetResourceResponseDto {
   type: GetResourceResponseDtoType;
   /** 리소스 관리 범위 */
   scope: GetResourceResponseDtoScope;
-  /** 리소스 경로 */
-  path?: string;
-  /** 아이콘 */
-  icon?: string;
-  /** 정렬 순서 */
-  sortOrder?: number;
+  /**
+     * 리소스 경로
+     * @nullable
+     */
+  path: string | null;
+  /**
+     * 아이콘
+     * @nullable
+     */
+  icon: string | null;
+  /**
+     * 정렬 순서
+     * @nullable
+     */
+  sortOrder: number | null;
   /** 리소스 액션 목록 */
   actions: GetResourceResponseDtoActionsItem[];
-  /** 부모 리소스 식별자 */
-  parent?: string;
+  /**
+     * 부모 리소스 식별자
+     * @nullable
+     */
+  parent: string | null;
 }

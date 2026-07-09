@@ -1,11 +1,12 @@
 import { Activity, Bell, BookOpen, Box, Briefcase, Calendar, Database, FileText,
-         Folder, Globe, Heart, Home, Image, Key, LayoutDashboard, Lock,
+         Folder, Globe, Heart, Home, Image, Key, Layers, LayoutDashboard, Lock,
          type LucideIcon, Mail, MessageSquare, Server, Settings, Shield, ShoppingBag,
          ShoppingCart, Star, Users } from 'lucide-react';
 
 export const COMMON_ICONS: Array<{ name: string, icon: LucideIcon }> = [
   { name: 'Home', icon: Home },
   { name: 'LayoutDashboard', icon: LayoutDashboard },
+  { name: 'Layers', icon: Layers },
   { name: 'Users', icon: Users },
   { name: 'Settings', icon: Settings },
   { name: 'Folder', icon: Folder },

@@ -8,10 +8,6 @@
 import type { OrganizationRoleListItem } from './organizationRoleListItem';
 
 export interface GetOrganizationRoleListResponseDto {
-  /** 조회 시작 오프셋 */
-  offset?: number;
-  /** 조회 개수 제한 */
-  limit?: number;
   /** 조직 역할 목록 */
   items: OrganizationRoleListItem[];
 }

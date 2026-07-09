@@ -9,7 +9,7 @@ import { FilterableRequestDto, ListRequestDto, SortDirection, type SortKey } fro
 const ORGANIZATION_LIST_SORT = ['createdAt'] as const;
 
 class GetOrganizationListFiltersDto extends FilterableRequestDto<Organization> {
-  @ApiPropertyOptional({ enum: OrganizationStatus, example: OrganizationStatus.ACTIVE, description: '메타데이터 날짜로 유추되는 조직 상태 필터' })
+  @ApiPropertyOptional({ example: OrganizationStatus.ACTIVE, enum: OrganizationStatus, description: '메타데이터 날짜로 유추되는 조직 상태 필터' })
   @IsOptional()
   @Type(() => String)
   @IsEnum(OrganizationStatus)
@@ -37,19 +37,19 @@ class GetOrganizationListFiltersDto extends FilterableRequestDto<Organization> {
 }
 
 export class GetOrganizationListRequestDto extends ListRequestDto<Organization> {
-  @ApiPropertyOptional({ type: () => GetOrganizationListFiltersDto, description: '필터 조건' })
+  @ApiPropertyOptional({ example: { status: OrganizationStatus.ACTIVE }, type: () => GetOrganizationListFiltersDto, description: '필터 조건' })
   @IsOptional()
   @ValidateNested()
   @Type(() => GetOrganizationListFiltersDto)
   filters: GetOrganizationListFiltersDto = new GetOrganizationListFiltersDto();
 
-  @ApiPropertyOptional({ description: '정렬 필드', isArray: true, enum: ORGANIZATION_LIST_SORT })
+  @ApiPropertyOptional({ example: ['createdAt'], isArray: true, enum: ORGANIZATION_LIST_SORT, description: '정렬 필드' })
   @IsOptional()
   @IsIn(ORGANIZATION_LIST_SORT, { each: true })
   @Type(() => String)
   sort: Array<SortKey<Organization>> = ['createdAt'];
 
-  @ApiPropertyOptional({ description: '정렬 방향', isArray: true, enum: SortDirection })
+  @ApiPropertyOptional({ example: ['desc'], isArray: true, enum: SortDirection, description: '정렬 방향' })
   @IsOptional()
   @IsEnum(SortDirection, { each: true })
   @Type(() => String)

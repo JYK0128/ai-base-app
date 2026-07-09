@@ -94,7 +94,6 @@ describe('Database Playground', () => {
         ])
         .where({
           organization,
-          deletedAt: null,
         })
         .groupBy('role.id')
         .execute();
@@ -104,7 +103,6 @@ describe('Database Playground', () => {
         .leftJoinAndSelect('permission.resource', 'resource')
         .where({
           organization,
-          deletedAt: null,
         })
         .getResultList();
     });

@@ -1,6 +1,8 @@
 import { createFileRoute } from '@tanstack/react-router';
 
-import { PermissionManagementTab } from '../resources/-tabs/PermissionManagementTab';
+import { ConsoleFrame } from '../-components/ConsoleFrame';
+import { ConsoleSections } from '../-components/ConsoleSections';
+import { PermissionManagementSection } from './-sections/PermissionManagementSection';
 
 export const Route = createFileRoute('/_protected/permissions/')({
   component: PermissionManagementPage,
@@ -8,20 +10,13 @@ export const Route = createFileRoute('/_protected/permissions/')({
 
 function PermissionManagementPage() {
   return (
-    <div className="
-      mx-auto flex size-full max-w-300 flex-col gap-6 overflow-hidden p-6
-    "
+    <ConsoleFrame
+      title="권한 관리"
+      description="조직 내 역할과 리소스 권한을 매핑하고, 역할 권한을 관리합니다."
     >
-      <header className="space-y-2 border-b border-slate-200 pb-4">
-        <h1 className="text-2xl font-bold tracking-tight text-slate-950">권한 관리</h1>
-        <p className="max-w-3xl text-sm text-slate-500">
-          조직 내 역할과 리소스 권한을 매핑하고, 역할 권한을 관리합니다.
-        </p>
-      </header>
-
-      <div className="flex flex-1 flex-col">
-        <PermissionManagementTab />
-      </div>
-    </div>
+      <ConsoleSections>
+        <PermissionManagementSection />
+      </ConsoleSections>
+    </ConsoleFrame>
   );
 }

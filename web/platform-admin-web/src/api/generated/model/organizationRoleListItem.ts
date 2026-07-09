@@ -13,6 +13,14 @@ export interface OrganizationRoleListItem {
   code: string;
   /** 조직 역할 이름 */
   name: string;
-  /** 조직 역할 설명 */
-  description?: string;
+  /**
+     * 조직 역할 설명
+     * @nullable
+     */
+  description: string | null;
+  /**
+     * 조직 역할 정렬 순서
+     * @nullable
+     */
+  sortOrder: number | null;
 }

@@ -8,10 +8,6 @@
 import type { OrganizationListItem } from './organizationListItem';
 
 export interface GetOrganizationListResponseDto {
-  /** 조회 시작 오프셋 */
-  offset?: number;
-  /** 조회 개수 제한 */
-  limit?: number;
   /** 조직 목록 */
   items: OrganizationListItem[];
 }

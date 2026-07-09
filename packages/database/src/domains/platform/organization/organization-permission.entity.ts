@@ -1,4 +1,4 @@
-import { EntityName, type Rel } from '@mikro-orm/core';
+import { EntityName, type Opt, type Rel } from '@mikro-orm/core';
 import { Entity, ManyToOne, Property } from '@mikro-orm/decorators/legacy';
 
 import { CoreEntity } from '../../core/core.entity';
@@ -19,7 +19,7 @@ export class OrganizationPermission extends CoreEntity<OrganizationPermission> {
   action!: string;
 
   @Property({ persist: false })
-  get code(): string {
+  get code(): Opt<string> {
     if (!this.resource.isInitialized()) {
       throw new Error('OrganizationPermission.resource is not populated');
     }

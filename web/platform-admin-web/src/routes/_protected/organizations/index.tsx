@@ -1,58 +1,36 @@
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@pkg/ui';
 import { createFileRoute } from '@tanstack/react-router';
-import { useState } from 'react';
 
-import { MOCK_ACTIVITY, type OrganizationTab } from './-helpers/organizations.helper';
-import { OrganizationActivityTab } from './-tabs/OrganizationActivityTab';
-import { OrganizationOverviewTab } from './-tabs/OrganizationOverviewTab';
+import { ConsoleFrame } from '../-components/ConsoleFrame';
+import { ConsoleTabs } from '../-components/ConsoleTabs';
+import { MOCK_ACTIVITY } from './-helpers/organizations.helper';
+import { OrganizationActivitySection } from './-sections/OrganizationActivitySection';
+import { OrganizationOverviewSection } from './-sections/OrganizationOverviewSection';
 
 export const Route = createFileRoute('/_protected/organizations/')({
   component: OrganizationsPage,
 });
 
 function OrganizationsPage() {
-  const [activeTab, setActiveTab] = useState<OrganizationTab>('overview');
-
   return (
-    <div className="
-      mx-auto flex size-full max-w-300 flex-col gap-6 overflow-hidden p-6
-    "
+    <ConsoleFrame
+      title="조직 관리"
+      description="내 조직의 식별 정보와 운영 현황을 확인합니다."
     >
-      <header className="space-y-2 border-b border-slate-200 pb-4">
-        <h1 className="text-2xl font-bold tracking-tight text-slate-950">조직 관리</h1>
-        <p className="max-w-3xl text-sm text-slate-500">
-          내 조직의 식별 정보와 운영 현황을 확인합니다.
-        </p>
-      </header>
-
-      <Tabs
-        value={activeTab}
-        onValueChange={(value) => setActiveTab(value as OrganizationTab)}
-        className="flex flex-1 flex-col gap-4 overflow-hidden"
-      >
-        <TabsList className="w-fit justify-start" variant="line">
-          <TabsTrigger value="overview" className="flex-none px-4">
-            기본 정보
-          </TabsTrigger>
-          <TabsTrigger value="activity" className="flex-none px-4">
-            활동 기록
-          </TabsTrigger>
-        </TabsList>
-
-        <TabsContent
-          value="overview"
-          className="mt-0 flex flex-1 flex-col overflow-hidden"
-        >
-          <OrganizationOverviewTab />
-        </TabsContent>
-
-        <TabsContent
-          value="activity"
-          className="mt-0 flex flex-1 flex-col overflow-hidden"
-        >
-          <OrganizationActivityTab activity={MOCK_ACTIVITY} />
-        </TabsContent>
-      </Tabs>
-    </div>
+      <ConsoleTabs
+        defaultValue="overview"
+        items={[
+          {
+            value: 'overview',
+            label: '기본 정보',
+            content: () => <OrganizationOverviewSection />,
+          },
+          {
+            value: 'activity',
+            label: '활동 기록',
+            content: () => <OrganizationActivitySection activity={MOCK_ACTIVITY} />,
+          },
+        ]}
+      />
+    </ConsoleFrame>
   );
 }

@@ -16,7 +16,6 @@ export class GetOrganizationListHandler implements IQueryHandler<GetOrganization
   }
 
   private async processList(query: GetOrganizationListContract): Promise<GetOrganizationListResponseDto> {
-    const { offset, limit } = query.data.toListOptions();
     const organizations = await Organization.find(
       query.data.toFilterQuery(),
       {
@@ -26,8 +25,7 @@ export class GetOrganizationListHandler implements IQueryHandler<GetOrganization
 
     return new GetOrganizationListResponseDto({
       items: organizations.map((organization) => new OrganizationListItem(organization)),
-      offset,
-      limit,
+
     });
   }
 }

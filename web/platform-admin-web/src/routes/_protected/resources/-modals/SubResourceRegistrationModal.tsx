@@ -1,36 +1,42 @@
 import { Button, Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, useAppForm } from '@pkg/ui';
 import { z } from 'zod';
 
-import type { GetResourceResponseDto } from '@/api/generated/model';
+import { ResourceActionPicker } from '../-components/ResourceActionPicker';
+import { RESOURCE_ACTION_OPTIONS, type ResourceAction } from '../-helpers/resource-actions.helper';
 
-export type CreateSubResourceInput = Pick<GetResourceResponseDto, 'code' | 'name' | 'type'>;
+export type CreateSubResourceInput = {
+  code: string
+  name: string
+  actions: ResourceAction[]
+};
 
 interface SubResourceRegistrationModalProps {
   readonly open: boolean
   readonly onOpenChange: (open: boolean) => void
   readonly parentName?: string
-  readonly onSave: (resource: CreateSubResourceInput) => void
+  readonly availableActions: ResourceAction[]
+  readonly onSave: (resource: CreateSubResourceInput) => void | Promise<void>
 }
 
-export function SubResourceRegistrationModal({ open, onOpenChange, parentName, onSave }: SubResourceRegistrationModalProps) {
+export function SubResourceRegistrationModal({ open, onOpenChange, parentName, availableActions, onSave }: SubResourceRegistrationModalProps) {
   const form = useAppForm({
     defaultValues: {
-      type: 'COMPONENT' as const,
       code: '',
       name: '',
+      actions: availableActions.length > 0 ? [availableActions[0]] : [],
     },
     validators: {
       onSubmit: z.object({
-        type: z.literal('COMPONENT'),
         code: z.string().trim().min(1, '리소스 코드를 입력해주세요.'),
         name: z.string().trim().min(1, '리소스 이름을 입력해주세요.'),
+        actions: z.array(z.enum(RESOURCE_ACTION_OPTIONS)),
       }),
     },
     onSubmit: async ({ value }) => {
-      onSave({
+      await onSave({
         code: value.code,
         name: value.name,
-        type: 'COMPONENT',
+        actions: value.actions,
       });
       onOpenChange(false);
     },
@@ -71,6 +77,20 @@ export function SubResourceRegistrationModal({ open, onOpenChange, parentName, o
                   required
                   orientation="vertical"
                   labelWidth="auto"
+                />
+              )}
+            </form.AppField>
+
+            <form.AppField name="actions">
+              {(field) => (
+                <ResourceActionPicker
+                  name="sub-resource-actions"
+                  label="허용 기능"
+                  description="컴포넌트 리소스에서 사용할 기능을 선택합니다."
+                  availableActions={availableActions}
+                  selectionMode="single"
+                  value={field.state.value}
+                  onChange={(actions) => field.handleChange(actions)}
                 />
               )}
             </form.AppField>

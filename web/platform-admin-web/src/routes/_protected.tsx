@@ -1,17 +1,24 @@
+import { Button,
+         DropdownMenu,
+         DropdownMenuContent,
+         DropdownMenuItem,
+         DropdownMenuTrigger } from '@pkg/ui';
 import { createFileRoute, Link, Outlet, redirect, useNavigate } from '@tanstack/react-router';
-import { Bell,
-         BookOpen,
+import { BookOpen,
          Building2,
          Gauge,
          Globe,
+         KeyRound,
          LifeBuoy,
          LogOut,
          type LucideIcon,
+         Megaphone,
          ScrollText,
          Shield,
          SquareKanban,
+         UserRoundCog,
          Users } from 'lucide-react';
-import type { ChangeEventHandler, MouseEventHandler } from 'react';
+import type { ChangeEventHandler } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { getAuthControllerGetAllowedResourceListV1QueryOptions } from '../api/generated/endpoints';
@@ -45,19 +52,20 @@ function ProtectedLayout() {
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
 
-  const handleLogout: MouseEventHandler<HTMLButtonElement> = () => {
+  const handleChangeLanguage: ChangeEventHandler<HTMLSelectElement> = (e) => {
+    void i18n.changeLanguage(e.target.value);
+  };
+
+  const handleLogout = () => {
     void (async () => {
       await session.clear();
       await navigate({ to: '/login' });
     })();
   };
-  const handleChangeLanguage: ChangeEventHandler<HTMLSelectElement> = (e) => {
-    void i18n.changeLanguage(e.target.value);
-  };
 
   const iconByCode: Record<string, LucideIcon> = {
     DASHBOARD: Gauge,
-    ANNOUNCEMENT: Bell,
+    ANNOUNCEMENT: Megaphone,
     ORGANIZATION: Building2,
     MEMBER: Users,
     RESOURCE: SquareKanban,
@@ -66,6 +74,15 @@ function ProtectedLayout() {
     SUPPORT: LifeBuoy,
     AUDIT: ScrollText,
   };
+
+  const getInitials = (value: string) => value
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((word) => word[0]?.toUpperCase() ?? '')
+    .join('');
+  const sessionData = session.data;
 
   const renderMenuItems = (items: AllowedResourceListItem[], depth = 0) =>
     items
@@ -142,23 +159,54 @@ function ProtectedLayout() {
 
         <nav className="flex-1 space-y-1 p-4">{renderMenuItems(menuItems)}</nav>
 
-        <div className="border-t p-4">
-          <button
-            onClick={handleLogout}
-            className="
-              flex w-full items-center space-x-3 rounded-lg px-3 py-2
-              text-red-600 transition-colors
-              hover:bg-red-50
-            "
-          >
-            <LogOut className="size-5" />
-            <span className="font-medium">{t('logout')}</span>
-          </button>
-        </div>
       </aside>
 
       {/* Main Content */}
-      <main className="scroll flex-1 bg-slate-50">
+      <main className="grid flex-1 grid-rows-[auto_1fr] bg-slate-50">
+        <div className="
+          flex h-9 items-center justify-between border-b border-slate-200
+          bg-white px-6
+        "
+        >
+          <div className="flex min-w-0 items-center gap-2">
+            <div className="
+              flex size-6 shrink-0 items-center justify-center rounded-full
+              bg-slate-900 text-[10px] leading-none font-semibold text-white
+            "
+            >
+              {sessionData ? getInitials(sessionData.member.name) : 'U'}
+            </div>
+            <h1 className="
+              truncate text-sm leading-none font-medium text-slate-900
+            "
+            >
+              {sessionData?.member.name ?? t('userSummary')}
+            </h1>
+          </div>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon-xs"
+                className="rounded-full"
+              >
+                <UserRoundCog className="size-4" />
+                <span className="sr-only">메뉴 열기</span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-44">
+              <DropdownMenuItem onClick={() => void navigate({ to: '/change-password' })}>
+                <KeyRound className="size-4" />
+                {t('changePasswordAction')}
+              </DropdownMenuItem>
+              <DropdownMenuItem variant="destructive" onClick={handleLogout}>
+                <LogOut className="size-4" />
+                {t('logout')}
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
         <Outlet />
       </main>
     </div>

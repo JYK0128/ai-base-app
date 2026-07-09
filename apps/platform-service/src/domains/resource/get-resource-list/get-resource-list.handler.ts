@@ -34,17 +34,13 @@ export class GetResourceListHandler implements IQueryHandler<GetResourceListCont
     query: GetResourceListContract,
     organization: AuthOrganizationContext | undefined,
   ): Promise<GetResourceListResponseDto> {
-    const { offset, limit } = query.data.toListOptions();
+    const { orderBy } = query.data.toListOptions();
     const scope = query.data.filters.scope;
-    const orderBy = query.data.toListOptions().orderBy;
-
-    const scopes = organization?.code === 'platform' && scope === ResourceScope.ORGANIZATION
-      ? [ResourceScope.PLATFORM, ResourceScope.ORGANIZATION]
-      : [scope];
+    const scopes = this.resolveScopes(scope, organization);
 
     const resources = await this.Asserter.assert(
       Resource.find(
-        scopes.length === 1 ? { scope: scopes[0] } : { scope: { $in: scopes } },
+        { scope: { $in: scopes } },
         {
           populate: ['parent'],
           orderBy,
@@ -54,7 +50,22 @@ export class GetResourceListHandler implements IQueryHandler<GetResourceListCont
     );
 
     const tree = this.buildResourceTreeResponse(resources);
-    return new GetResourceListResponseDto({ items: tree, offset, limit });
+    return new GetResourceListResponseDto({
+      items: tree,
+    });
+  }
+
+  private resolveScopes(
+    scope: ResourceScope | undefined,
+    organization: AuthOrganizationContext | undefined,
+  ): ResourceScope[] {
+    const nextScope = scope ?? ResourceScope.ORGANIZATION;
+
+    if (organization?.code === 'platform' && nextScope === ResourceScope.ORGANIZATION) {
+      return [ResourceScope.PLATFORM, ResourceScope.ORGANIZATION];
+    }
+
+    return [nextScope];
   }
 
   private buildResourceTreeResponse(resources: Resource[]): GetResourceListItem[] {
@@ -87,13 +98,13 @@ export class GetResourceListHandler implements IQueryHandler<GetResourceListCont
 
   private sortResourceNodes(nodes: GetResourceListItem[]) {
     nodes.sort((left, right) => {
-      if (left.sortOrder === undefined && right.sortOrder === undefined) {
+      if (left.sortOrder === null && right.sortOrder === null) {
         return left.code.localeCompare(right.code);
       }
-      if (left.sortOrder === undefined) {
+      if (left.sortOrder === null) {
         return 1;
       }
-      if (right.sortOrder === undefined) {
+      if (right.sortOrder === null) {
         return -1;
       }
 

@@ -3,7 +3,9 @@ import { Seeder } from '@mikro-orm/seeder';
 
 import { I18nTranslation } from '../domains/platform/i18n/i18n-translation.entity';
 import { ResourceScope, ResourceType } from '../domains/platform/resource/resource.constants';
-import { Resource, ResourceMetadata } from '../domains/platform/resource/resource.entity';
+import { Resource } from '../domains/platform/resource/resource.entity';
+
+type ResourcePermissionSeed = Partial<Pick<Resource, 'creatable' | 'readable' | 'updatable' | 'deletable'>>;
 
 interface ResourceSeedDto {
   code: string
@@ -14,7 +16,7 @@ interface ResourceSeedDto {
   path?: string
   icon?: string
   sortOrder?: number
-  metadata: Partial<ResourceMetadata>
+  permissions: ResourcePermissionSeed
   parentCode?: string
 }
 
@@ -28,7 +30,7 @@ const RESOURCES_SEEDS: ResourceSeedDto[] = [
     path: '/dashboard',
     icon: 'LayoutDashboard',
     sortOrder: 1,
-    metadata: {
+    permissions: {
       creatable: false,
       readable: true,
       updatable: false,
@@ -44,7 +46,7 @@ const RESOURCES_SEEDS: ResourceSeedDto[] = [
     path: '/organizations',
     icon: 'Building2',
     sortOrder: 2,
-    metadata: {
+    permissions: {
       creatable: true,
       readable: true,
       updatable: true,
@@ -60,7 +62,7 @@ const RESOURCES_SEEDS: ResourceSeedDto[] = [
     path: '/members',
     icon: 'Users',
     sortOrder: 3,
-    metadata: {
+    permissions: {
       creatable: true,
       readable: true,
       updatable: true,
@@ -75,8 +77,8 @@ const RESOURCES_SEEDS: ResourceSeedDto[] = [
     scope: ResourceScope.ORGANIZATION,
     path: '/permissions',
     icon: 'Shield',
-    sortOrder: 4,
-    metadata: {
+    sortOrder: 5,
+    permissions: {
       creatable: true,
       readable: true,
       updatable: true,
@@ -92,8 +94,8 @@ const RESOURCES_SEEDS: ResourceSeedDto[] = [
     scope: ResourceScope.PLATFORM,
     path: '/announcements',
     icon: 'Megaphone',
-    sortOrder: 5,
-    metadata: {
+    sortOrder: 7,
+    permissions: {
       creatable: true,
       readable: true,
       updatable: true,
@@ -110,7 +112,7 @@ const RESOURCES_SEEDS: ResourceSeedDto[] = [
     path: '/terms',
     icon: 'FileText',
     sortOrder: 6,
-    metadata: {
+    permissions: {
       creatable: true,
       readable: true,
       updatable: true,
@@ -125,8 +127,8 @@ const RESOURCES_SEEDS: ResourceSeedDto[] = [
     scope: ResourceScope.PLATFORM,
     path: '/resources',
     icon: 'Key',
-    sortOrder: 7,
-    metadata: {
+    sortOrder: 4,
+    permissions: {
       creatable: true,
       readable: true,
       updatable: true,
@@ -141,7 +143,7 @@ const RESOURCES_SEEDS: ResourceSeedDto[] = [
     scope: ResourceScope.PLATFORM,
     parentCode: 'RESOURCE',
     sortOrder: 1,
-    metadata: {
+    permissions: {
       creatable: false,
       readable: true,
       updatable: false,
@@ -156,7 +158,7 @@ const RESOURCES_SEEDS: ResourceSeedDto[] = [
     scope: ResourceScope.PLATFORM,
     parentCode: 'RESOURCE',
     sortOrder: 2,
-    metadata: {
+    permissions: {
       creatable: false,
       readable: true,
       updatable: false,
@@ -173,7 +175,7 @@ const RESOURCES_SEEDS: ResourceSeedDto[] = [
     path: '/support',
     icon: 'LifeBuoy',
     sortOrder: 8,
-    metadata: {
+    permissions: {
       creatable: true,
       readable: true,
       updatable: true,
@@ -189,7 +191,7 @@ const RESOURCES_SEEDS: ResourceSeedDto[] = [
     path: '/audit',
     icon: 'ScrollText',
     sortOrder: 9,
-    metadata: {
+    permissions: {
       creatable: false,
       readable: true,
       updatable: false,
@@ -247,7 +249,7 @@ export class ResourceSeeder extends Seeder {
         ...(seed.path === undefined ? {} : { path: seed.path }),
         ...(seed.icon === undefined ? {} : { icon: seed.icon }),
         ...(seed.sortOrder === undefined ? {} : { sortOrder: seed.sortOrder }),
-        metadata: this.createMetadata(seed.metadata),
+        ...this.buildPermissionColumns(seed.permissions),
       });
       em.persist(resource);
       return resource;
@@ -266,33 +268,33 @@ export class ResourceSeeder extends Seeder {
     resource.type = seed.type;
     resource.scope = seed.scope;
     if (seed.path === undefined) {
-      delete resource.path;
+      resource.path = null;
     }
     else {
       resource.path = seed.path;
     }
 
     if (seed.icon === undefined) {
-      delete resource.icon;
+      resource.icon = null;
     }
     else {
       resource.icon = seed.icon;
     }
 
     if (seed.sortOrder === undefined) {
-      delete resource.sortOrder;
+      resource.sortOrder = null;
     }
     else {
       resource.sortOrder = seed.sortOrder;
     }
 
-    resource.metadata = this.createMetadata(seed.metadata);
+    Object.assign(resource, this.buildPermissionColumns(seed.permissions));
 
     if (parent !== undefined) {
       resource.parent = parent;
     }
     else {
-      delete resource.parent;
+      resource.parent = null;
     }
   }
 
@@ -334,7 +336,7 @@ export class ResourceSeeder extends Seeder {
     }
   }
 
-  private createMetadata(metadata: Partial<ResourceMetadata>): ResourceMetadata {
-    return new ResourceMetadata(metadata);
+  private buildPermissionColumns(permissions: ResourcePermissionSeed): ResourcePermissionSeed {
+    return permissions;
   }
 }

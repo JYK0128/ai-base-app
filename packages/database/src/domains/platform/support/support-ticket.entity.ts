@@ -14,7 +14,7 @@ export class SupportTicket extends CoreEntity<SupportTicket> {
   author!: Rel<Member>;
 
   @ManyToOne(() => Member, { nullable: true })
-  assignedTo?: Rel<Member>;
+  assignedTo: Rel<Member> | null = null;
 
   @ManyToOne(() => Organization)
   organization!: Rel<Organization>;

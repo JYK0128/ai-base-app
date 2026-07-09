@@ -10,13 +10,13 @@ import { FilterableRequestDto, PageRequestDto, SortDirection, type SortKey } fro
 const TICKET_PAGE_SORT = ['createdAt'] as const;
 
 class GetTicketPageFiltersDto extends FilterableRequestDto<SupportTicket> {
-  @ApiPropertyOptional({ example: '019e5236-adae-70d7-a8f7-2dc90bdf7088', description: '조직 필터' })
+  @ApiPropertyOptional({ example: '019e5236-adae-70d7-a8f7-2dc90bdf7088', type: String, description: '조직 필터' })
   @IsOptional()
   @Type(() => String)
   @IsUUID()
-  organization?: string;
+  organizationId?: string;
 
-  @ApiPropertyOptional({ enum: TicketStatus, example: TicketStatus.OPEN, description: '티켓 상태 필터' })
+  @ApiPropertyOptional({ example: TicketStatus.OPEN, enum: TicketStatus, description: '티켓 상태 필터' })
   @IsOptional()
   @Type(() => String)
   @IsEnum(TicketStatus)
@@ -26,8 +26,8 @@ class GetTicketPageFiltersDto extends FilterableRequestDto<SupportTicket> {
     const queries: ObjectQuery<SupportTicket>[] = [];
     let queryFilter: ObjectQuery<SupportTicket>;
 
-    if (this.organization) {
-      queries.push({ organization: { id: this.organization } });
+    if (this.organizationId) {
+      queries.push({ organization: { id: this.organizationId } } as ObjectQuery<SupportTicket>);
     }
 
     if (this.status) {
@@ -49,19 +49,19 @@ class GetTicketPageFiltersDto extends FilterableRequestDto<SupportTicket> {
 }
 
 export class GetTicketPageRequestDto extends PageRequestDto<SupportTicket> {
-  @ApiPropertyOptional({ type: () => GetTicketPageFiltersDto, description: '필터 조건' })
+  @ApiPropertyOptional({ example: { organizationId: '019e5236-adae-70d7-a8f7-2dc90bdf7088', status: TicketStatus.OPEN }, type: () => GetTicketPageFiltersDto, description: '필터 조건' })
   @IsOptional()
   @ValidateNested()
   @Type(() => GetTicketPageFiltersDto)
   filters: GetTicketPageFiltersDto = new GetTicketPageFiltersDto();
 
-  @ApiPropertyOptional({ description: '정렬 필드', isArray: true, enum: TICKET_PAGE_SORT })
+  @ApiPropertyOptional({ example: ['createdAt'], isArray: true, enum: TICKET_PAGE_SORT, description: '정렬 필드' })
   @IsOptional()
   @IsIn(TICKET_PAGE_SORT, { each: true })
   @Type(() => String)
   sort: Array<SortKey<SupportTicket>> = ['createdAt'];
 
-  @ApiPropertyOptional({ description: '정렬 방향', isArray: true, enum: SortDirection })
+  @ApiPropertyOptional({ example: ['desc'], isArray: true, enum: SortDirection, description: '정렬 방향' })
   @IsOptional()
   @IsEnum(SortDirection, { each: true })
   @Type(() => String)

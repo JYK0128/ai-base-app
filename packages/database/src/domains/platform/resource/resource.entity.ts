@@ -1,41 +1,20 @@
 import { Collection, EntityName, type Opt, type Rel } from '@mikro-orm/core';
-import { Embeddable, Embedded, Entity, Enum, ManyToOne, OneToMany, Property } from '@mikro-orm/decorators/legacy';
+import { Entity, Enum, ManyToOne, OneToMany, Property } from '@mikro-orm/decorators/legacy';
 
 import { CoreEntity } from '../../core/core.entity';
 import { ResourceAction, ResourceScope, ResourceType } from './resource.constants';
-
-@Embeddable()
-export class ResourceMetadata {
-  [key: string]: unknown;
-
-  constructor(data?: Partial<ResourceMetadata>) {
-    Object.assign(this, data);
-  }
-
-  @Property({ type: 'boolean' })
-  creatable = false;
-
-  @Property({ type: 'boolean' })
-  readable = false;
-
-  @Property({ type: 'boolean' })
-  updatable = false;
-
-  @Property({ type: 'boolean' })
-  deletable = false;
-}
 
 @Entity({ schema: 'platform' })
 export class Resource extends CoreEntity<Resource> {
   [EntityName]?: 'Resource';
 
   @ManyToOne(() => Resource, { nullable: true })
-  parent?: Rel<Resource>;
+  parent: Rel<Resource> | null = null;
 
   @OneToMany(() => Resource, (res) => res.parent)
   children = new Collection<Resource>(this);
 
-  @Property({ type: 'string' })
+  @Property({ type: 'string', unique: true })
   code!: string;
 
   @Property({ type: 'string' })
@@ -48,31 +27,40 @@ export class Resource extends CoreEntity<Resource> {
   scope: Opt<ResourceScope> = ResourceScope.PLATFORM;
 
   @Property({ type: 'string', nullable: true })
-  path?: string;
+  path: string | null = null;
 
   @Property({ type: 'string', nullable: true })
-  icon?: string;
+  icon: string | null = null;
 
   @Property({ type: 'number', nullable: true })
-  sortOrder?: number;
+  sortOrder: number | null = null;
 
-  @Embedded({ entity: () => ResourceMetadata, object: true })
-  override metadata: Opt<ResourceMetadata> = new ResourceMetadata();
+  @Property({ type: 'boolean' })
+  creatable: Opt<boolean> = false;
+
+  @Property({ type: 'boolean' })
+  readable: Opt<boolean> = false;
+
+  @Property({ type: 'boolean' })
+  updatable: Opt<boolean> = false;
+
+  @Property({ type: 'boolean' })
+  deletable: Opt<boolean> = false;
 
   @Property({ persist: false })
-  get actions(): Opt<string[]> | null {
+  get actions(): Opt<string[]> {
     const actions: string[] = [];
 
-    if (this.metadata?.creatable) {
+    if (this.creatable) {
       actions.push(ResourceAction.CREATE);
     }
-    if (this.metadata?.readable) {
+    if (this.readable) {
       actions.push(ResourceAction.READ);
     }
-    if (this.metadata?.updatable) {
+    if (this.updatable) {
       actions.push(ResourceAction.UPDATE);
     }
-    if (this.metadata?.deletable) {
+    if (this.deletable) {
       actions.push(ResourceAction.DELETE);
     }
 
@@ -94,14 +82,10 @@ export class Resource extends CoreEntity<Resource> {
       throw new Error('Resource.set is only available for component resources');
     }
 
-    if (!this.metadata) {
-      this.metadata = new ResourceMetadata();
-    }
-
-    this.metadata.creatable = action === ResourceAction.CREATE;
-    this.metadata.readable = action === ResourceAction.READ;
-    this.metadata.updatable = action === ResourceAction.UPDATE;
-    this.metadata.deletable = action === ResourceAction.DELETE;
+    this.creatable = action === ResourceAction.CREATE;
+    this.readable = action === ResourceAction.READ;
+    this.updatable = action === ResourceAction.UPDATE;
+    this.deletable = action === ResourceAction.DELETE;
   }
 
   grant(...actions: ResourceAction[]): void {
@@ -113,23 +97,19 @@ export class Resource extends CoreEntity<Resource> {
       return;
     }
 
-    if (!this.metadata) {
-      this.metadata = new ResourceMetadata();
-    }
-
     for (const action of actions) {
       switch (action) {
         case 'CREATE':
-          this.metadata.creatable = true;
+          this.creatable = true;
           break;
         case 'READ':
-          this.metadata.readable = true;
+          this.readable = true;
           break;
         case 'UPDATE':
-          this.metadata.updatable = true;
+          this.updatable = true;
           break;
         case 'DELETE':
-          this.metadata.deletable = true;
+          this.deletable = true;
           break;
       }
     }
@@ -144,23 +124,19 @@ export class Resource extends CoreEntity<Resource> {
       throw new Error('Resource.revoke requires at least one action');
     }
 
-    if (!this.metadata) {
-      this.metadata = new ResourceMetadata();
-    }
-
     for (const action of actions) {
       switch (action) {
         case 'CREATE':
-          this.metadata.creatable = false;
+          this.creatable = false;
           break;
         case 'READ':
-          this.metadata.readable = false;
+          this.readable = false;
           break;
         case 'UPDATE':
-          this.metadata.updatable = false;
+          this.updatable = false;
           break;
         case 'DELETE':
-          this.metadata.deletable = false;
+          this.deletable = false;
           break;
       }
     }

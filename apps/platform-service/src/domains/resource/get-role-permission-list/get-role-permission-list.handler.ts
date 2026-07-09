@@ -40,7 +40,6 @@ export class GetRolePermissionListHandler implements IQueryHandler<GetRolePermis
         .leftJoinAndSelect('permission.resource', 'resource')
         .where({
           organization,
-          deletedAt: null,
         })
         .getResultList(),
       'LOAD_FAILED',

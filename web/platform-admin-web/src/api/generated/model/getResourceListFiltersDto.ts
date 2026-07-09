@@ -9,5 +9,5 @@ import type { GetResourceListFiltersDtoScope } from './getResourceListFiltersDto
 
 export interface GetResourceListFiltersDto {
   /** 리소스 관리 범위 */
-  scope: GetResourceListFiltersDtoScope;
+  scope?: GetResourceListFiltersDtoScope;
 }

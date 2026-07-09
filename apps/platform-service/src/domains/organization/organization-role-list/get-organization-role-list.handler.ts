@@ -41,9 +41,9 @@ export class GetOrganizationRoleListHandler implements IQueryHandler<GetOrganiza
   private async processList(organization: Organization): Promise<GetOrganizationRoleListResponseDto> {
     const roles = await this.Asserter.assert(
       OrganizationRole.find(
-        { organization, deletedAt: null },
+        { organization },
         {
-          orderBy: { createdAt: 'ASC' },
+          orderBy: [{ sortOrder: 'ASC' }, { code: 'ASC' }, { createdAt: 'ASC' }],
         },
       ),
       'LOAD_FAILED',

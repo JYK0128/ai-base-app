@@ -1,5 +1,5 @@
 import type { ObjectQuery } from '@mikro-orm/core';
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiPropertyOptional } from '@nestjs/swagger';
 import type { Resource } from '@pkg/database';
 import { ResourceScope } from '@pkg/database';
 import { Type } from 'class-transformer';
@@ -10,10 +10,11 @@ import { FilterableRequestDto, ListRequestDto, SortDirection, type SortKey } fro
 const RESOURCE_LIST_SORT = ['sortOrder', 'code'] as const;
 
 class GetResourceListFiltersDto extends FilterableRequestDto<Resource> {
-  @ApiProperty({ enum: ResourceScope, example: ResourceScope.PLATFORM, description: '리소스 관리 범위' })
+  @ApiPropertyOptional({ example: ResourceScope.PLATFORM, enum: ResourceScope, description: '리소스 관리 범위' })
+  @IsOptional()
   @Type(() => String)
   @IsEnum(ResourceScope)
-  scope!: ResourceScope;
+  scope?: ResourceScope;
 
   toFilterQuery(): ObjectQuery<Resource> {
     return { scope: this.scope };
@@ -21,19 +22,19 @@ class GetResourceListFiltersDto extends FilterableRequestDto<Resource> {
 }
 
 export class GetResourceListRequestDto extends ListRequestDto<Resource> {
-  @ApiProperty({ type: () => GetResourceListFiltersDto, description: '필터 조건' })
+  @ApiPropertyOptional({ example: { scope: ResourceScope.PLATFORM }, type: () => GetResourceListFiltersDto, description: '필터 조건' })
   @IsOptional()
   @ValidateNested()
   @Type(() => GetResourceListFiltersDto)
   filters: GetResourceListFiltersDto = new GetResourceListFiltersDto();
 
-  @ApiPropertyOptional({ description: '정렬 필드', isArray: true, enum: RESOURCE_LIST_SORT })
+  @ApiPropertyOptional({ example: ['sortOrder', 'code'], isArray: true, enum: RESOURCE_LIST_SORT, description: '정렬 필드' })
   @IsOptional()
   @IsIn(RESOURCE_LIST_SORT, { each: true })
   @Type(() => String)
   sort: Array<SortKey<Resource>> = ['sortOrder', 'code'];
 
-  @ApiPropertyOptional({ description: '정렬 방향', isArray: true, enum: SortDirection })
+  @ApiPropertyOptional({ example: ['asc', 'asc'], isArray: true, enum: SortDirection, description: '정렬 방향' })
   @IsOptional()
   @IsEnum(SortDirection, { each: true })
   @Type(() => String)

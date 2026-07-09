@@ -46,16 +46,19 @@ const ORGANIZATION_ROLE_TEMPLATES = [
     code: 'OWNER',
     name: 'Owner',
     description: '조직 최고 관리자',
+    sortOrder: 1,
   },
   {
     code: 'MANAGER',
     name: 'Member',
     description: '조직 운영 관리자',
+    sortOrder: 2,
   },
   {
     code: 'VIEWER',
     name: 'Viewer',
     description: '조직 읽기 전용 계정',
+    sortOrder: 3,
   },
 ] satisfies readonly Omit<CodedEntityData<OrganizationRole>, 'organization'>[];
 
@@ -374,6 +377,7 @@ export class OrganizationSeeder extends Seeder {
         code: seed.code,
         name: seed.name,
         ...(seed.description === undefined ? {} : { description: seed.description }),
+        ...(seed.sortOrder === undefined ? {} : { sortOrder: seed.sortOrder }),
       });
       em.persist(created);
       record[seed.code] = created;
