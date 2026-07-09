@@ -42,14 +42,11 @@ export class GetMemberPageHandler implements IQueryHandler<GetMemberPageContract
     query: GetMemberPageContract,
     organization: Organization,
   ): Promise<GetMemberPageResponseDto> {
-    const filter = {
-      organization,
-      deletedAt: null,
-      ...query.data.toFilterQuery(),
-    } as FilterQuery<Member>;
-
-    const membersPage = await Member.findByPage<Member, 'accounts' | 'roles.role'>(
-      filter,
+    const membersPage = await Member.findByPage(
+      {
+        organization,
+        ...query.data.toFilterQuery(),
+      } as FilterQuery<Member>,
       {
         populate: ['accounts', 'roles.role'],
         ...query.data.toPageOptions((pageOptions) => {

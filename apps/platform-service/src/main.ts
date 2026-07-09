@@ -3,6 +3,7 @@ import 'reflect-metadata';
 import { MikroORM } from '@mikro-orm/core';
 import { RequestMethod, ValidationPipe, VersioningType } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
+import { Transport } from '@nestjs/microservices';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { json, urlencoded } from 'express';
@@ -11,6 +12,7 @@ import { Logger } from 'nestjs-pino';
 
 import { AppModule } from '@/app.module';
 import { applySwaggerSchemas } from '@/common/decorators/swagger-schema.decorator';
+import { MAIL_QUEUE_NAMES } from '@/domains/mail/mail.contract';
 import { ENV } from '@/env';
 
 export function configureApp(app: NestExpressApplication) {
@@ -69,6 +71,35 @@ async function bootstrap() {
   const orm = app.get(MikroORM);
   await orm.connect();
 
+  app.connectMicroservice({
+    transport: Transport.RMQ,
+    options: {
+      urls: [ENV.RABBITMQ_URL],
+      queue: MAIL_QUEUE_NAMES.INVITE_SEND,
+      queueOptions: {
+        durable: true,
+      },
+      socketOptions: {
+        frameMax: 8192,
+      },
+    },
+  });
+  app.connectMicroservice({
+    transport: Transport.RMQ,
+    options: {
+      urls: [ENV.RABBITMQ_URL],
+      queue: MAIL_QUEUE_NAMES.INVITE_DELIVERY_RESULT,
+      noAck: false,
+      prefetchCount: 100,
+      queueOptions: {
+        durable: true,
+      },
+      socketOptions: {
+        frameMax: 8192,
+      },
+    },
+  });
+
   if (ENV.NODE_ENV !== 'production') {
     const config = new DocumentBuilder()
       .setTitle('AI Base App Platform Service API')
@@ -87,6 +118,7 @@ async function bootstrap() {
   }
 
   const port = ENV.PORT;
+  await app.startAllMicroservices();
   await app.listen(port, '0.0.0.0');
   logger.log(`Platform Service is running on: http://localhost:${port}`);
 }

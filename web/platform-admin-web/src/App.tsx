@@ -1,6 +1,6 @@
 import './index.css';
 
-import { alert, Popup, Toaster } from '@pkg/ui';
+import { alert, SystemDialog, Toaster } from '@pkg/ui';
 import { keepPreviousData, QueryCache, QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { createRouter, RouterProvider } from '@tanstack/react-router';
 import { isAxiosError } from 'axios';
@@ -8,6 +8,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { getAuthControllerMeV1QueryKey } from './api/generated/endpoints';
+import { AuthLoadingScreen } from './components/AuthLoadingScreen';
 import { NotFound } from './components/NotFound';
 import { useSession } from './hooks/useSession';
 import { useWheelScroll } from './hooks/useWheelScroll';
@@ -102,14 +103,7 @@ function AppInner() {
   useWheelScroll();
 
   if (session.isPending) {
-    return (
-      <div className="
-        flex h-screen items-center justify-center bg-slate-50 font-sans
-      "
-      >
-        <div className="font-medium text-slate-400">{t('loadingAuth')}</div>
-      </div>
-    );
+    return <AuthLoadingScreen message={t('loadingAuth')} />;
   }
 
   return (
@@ -132,9 +126,8 @@ function AppInner() {
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-
       <AppInner />
-      <Popup />
+      <SystemDialog />
       <Toaster position="top-center" richColors />
     </QueryClientProvider>
 

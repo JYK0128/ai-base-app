@@ -20,6 +20,7 @@ import { AnnouncementModule } from '@/domains/announcement/announcement.module';
 import { AuthModule } from '@/domains/auth/auth.module';
 import { HealthModule } from '@/domains/health/health.module';
 import { I18nModule } from '@/domains/i18n/i18n.module';
+import { JoinModule } from '@/domains/join/join.module';
 import { MailModule } from '@/domains/mail/mail.module';
 import { MemberModule } from '@/domains/member/member.module';
 import { OrganizationModule } from '@/domains/organization/organization.module';
@@ -67,6 +68,7 @@ import { ENV } from '@/env';
     AuthModule,
     HealthModule,
     I18nModule,
+    JoinModule,
     MailModule,
     MemberModule,
     OrganizationModule,

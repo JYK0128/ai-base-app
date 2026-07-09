@@ -6,10 +6,12 @@ import { Member, MemberInvite, MemberInviteMetadata, Organization, OrganizationR
 import type { AuthMemberContext, AuthOrganizationContext } from '@pkg/shared/server';
 import { ClsService } from 'nestjs-cls';
 
+import { ENV } from '@/env';
+
+import { InviteEmailPublisher } from '../../mail/invite-email/invite-email.publisher';
 import { CreateInviteContract } from './create-invite.contract';
 import { CreateInviteAsserter } from './create-invite.error';
 import { CreateInviteResponseDto } from './create-invite.response.dto';
-import { InviteEmailPublisher } from './invite-email.publisher';
 
 @CommandHandler(CreateInviteContract)
 export class CreateInviteHandler implements ICommandHandler<CreateInviteContract> {
@@ -32,7 +34,6 @@ export class CreateInviteHandler implements ICommandHandler<CreateInviteContract
 
     this.inviteEmailPublisher.publishInviteEmail({
       inviteId: invite.id,
-      attemptId: invite.metadata?.attemptId ?? '',
       email: invite.email,
       organizationName: organization.name,
       inviterName: inviter.name,
@@ -86,13 +87,12 @@ export class CreateInviteHandler implements ICommandHandler<CreateInviteContract
   ): Promise<MemberInvite> {
     const { name, email, note } = command.data;
     const metadata = new MemberInviteMetadata();
-    if (note !== undefined) {
-      metadata.note = note;
-    }
+    metadata.expiredAt = new Date(Date.now() + (ENV.MEMBER_INVITE_EXPIRY_DAYS * 24 * 60 * 60 * 1000));
 
     return MemberInvite.create({
       name,
       email,
+      note: note ?? null,
       role,
       organization,
       token: randomUUID(),

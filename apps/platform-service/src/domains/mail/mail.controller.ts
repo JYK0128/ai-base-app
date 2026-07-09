@@ -1,9 +1,10 @@
 import { Controller, Logger } from '@nestjs/common';
 import { CommandBus } from '@nestjs/cqrs';
-import { EventPattern, Payload } from '@nestjs/microservices';
+import { Ctx, EventPattern, Payload, RmqContext } from '@nestjs/microservices';
 
-import { MAIL_EVENT_PATTERNS, type SendInviteEmailPayload } from './mail.contract';
-import { SendInviteEmailContract } from './send-invite-email/send-invite-email.contract';
+import { InviteEmailContract } from './invite-email/invite-email.contract';
+import { InviteEmailDeliveryResultBatcher } from './invite-email/invite-email-delivery-result.batcher';
+import { type InviteEmailDeliveryResultPayload, type InviteEmailPayload, MAIL_EVENT_PATTERNS } from './mail.contract';
 
 @Controller()
 export class MailController {
@@ -11,11 +12,12 @@ export class MailController {
 
   constructor(
     private readonly commandBus: CommandBus,
+    private readonly deliveryResultBatcher: InviteEmailDeliveryResultBatcher,
   ) {}
 
   @EventPattern(MAIL_EVENT_PATTERNS.INVITE.SEND)
-  async handleSendInviteEmail(@Payload() data: SendInviteEmailPayload): Promise<void> {
-    await this.commandBus.execute(new SendInviteEmailContract(data)).catch((error: unknown) => {
+  async handleSendInviteEmail(@Payload() data: InviteEmailPayload): Promise<void> {
+    await this.commandBus.execute(new InviteEmailContract(data)).catch((error: unknown) => {
       if (this.isExpectedMailEventError(error)) {
         this.logger.warn(`Handled ${MAIL_EVENT_PATTERNS.INVITE.SEND} event for invite ${data.inviteId} with expected error: ${this.describeError(error)}`);
         return;
@@ -23,6 +25,14 @@ export class MailController {
 
       throw error;
     });
+  }
+
+  @EventPattern(MAIL_EVENT_PATTERNS.INVITE.DELIVERY_RESULT)
+  handleInviteEmailDeliveryResult(
+    @Payload() data: InviteEmailDeliveryResultPayload,
+    @Ctx() context: RmqContext,
+  ): void {
+    this.deliveryResultBatcher.enqueue(data, context);
   }
 
   private isExpectedMailEventError(error: unknown): boolean {

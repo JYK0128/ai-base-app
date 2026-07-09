@@ -6,12 +6,15 @@ import { Member, MemberInvite, Organization, OrganizationRole } from '@pkg/datab
 
 import { ENV } from '@/env';
 
+import { InviteEmailPublisher } from '../mail/invite-email/invite-email.publisher';
+import { MAIL_QUEUE_NAMES } from '../mail/mail.contract';
+import { CancelInviteHandler } from './cancel-invite/cancel-invite.handler';
 import { CreateInviteHandler } from './create-invite/create-invite.handler';
-import { InviteEmailPublisher } from './create-invite/invite-email.publisher';
-import { GetInviteListHandler } from './get-invite-list/get-invite-list.handler';
+import { GetInvitePageHandler } from './get-invite-page/get-invite-page.handler';
 import { GetMemberHandler } from './get-member/get-member.handler';
 import { GetMemberPageHandler } from './get-member-page/get-member-page.handler';
 import { MembersController } from './member.controller';
+import { ResendInviteHandler } from './resend-invite/resend-invite.handler';
 import { UpdateMemberRoleHandler } from './update-member-role/update-member-role.handler';
 import { UpdateMemberStatusHandler } from './update-member-status/update-member-status.handler';
 
@@ -25,7 +28,7 @@ import { UpdateMemberStatusHandler } from './update-member-status/update-member-
         transport: Transport.RMQ,
         options: {
           urls: [ENV.RABBITMQ_URL],
-          queue: 'mail_queue',
+          queue: MAIL_QUEUE_NAMES.INVITE_SEND,
           queueOptions: {
             durable: true,
           },
@@ -37,6 +40,6 @@ import { UpdateMemberStatusHandler } from './update-member-status/update-member-
     ]),
   ],
   controllers: [MembersController],
-  providers: [GetMemberHandler, GetMemberPageHandler, GetInviteListHandler, CreateInviteHandler, UpdateMemberRoleHandler, UpdateMemberStatusHandler, InviteEmailPublisher],
+  providers: [GetMemberHandler, GetMemberPageHandler, GetInvitePageHandler, CreateInviteHandler, CancelInviteHandler, ResendInviteHandler, UpdateMemberRoleHandler, UpdateMemberStatusHandler, InviteEmailPublisher],
 })
 export class MemberModule {}

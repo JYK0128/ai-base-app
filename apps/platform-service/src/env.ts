@@ -21,6 +21,7 @@ const envSchema = z.object({
   LOGIN_ATTEMPT_TTL: z.coerce.number().int(),
   LOGIN_LOCK_TTL: z.coerce.number().int(),
   PASSWORD_EXPIRY_DAYS: z.coerce.number().int().positive(),
+  MEMBER_INVITE_EXPIRY_DAYS: z.coerce.number().int().positive(),
 });
 
 const env = envSchema.parse(process.env);
@@ -47,4 +48,5 @@ export const ENV = {
   LOGIN_ATTEMPT_TTL: env.LOGIN_ATTEMPT_TTL,
   LOGIN_LOCK_TTL: env.LOGIN_LOCK_TTL,
   PASSWORD_EXPIRY_DAYS: env.PASSWORD_EXPIRY_DAYS,
+  MEMBER_INVITE_EXPIRY_DAYS: env.MEMBER_INVITE_EXPIRY_DAYS,
 } as const;

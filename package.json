@@ -12,6 +12,7 @@
     "// --- Local Development & Utility --- //": "",
     "web:dev": "pnpm --filter=platform-admin-web dev",
     "gen:api": "pnpm --filter=platform-admin-web gen:api",
+    "gen:routes": "pnpm --filter=platform-admin-web gen:routes",
     "db:build": "pnpm --filter=@pkg/database build",
     "db:seed": "pnpm --filter=@pkg/database seed",
     "db:meta": "pnpm --filter=@pkg/database cache:build",

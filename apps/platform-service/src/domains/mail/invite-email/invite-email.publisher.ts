@@ -1,0 +1,23 @@
+import { Inject, Injectable, Logger } from '@nestjs/common';
+import { ClientProxy } from '@nestjs/microservices';
+
+import { type InviteEmailPayload, MAIL_EVENT_PATTERNS } from '@/domains/mail/mail.contract';
+
+@Injectable()
+export class InviteEmailPublisher {
+  private readonly logger = new Logger(InviteEmailPublisher.name);
+
+  constructor(
+    @Inject('RABBITMQ_CLIENT') private readonly client: ClientProxy,
+  ) {}
+
+  publishInviteEmail(payload: InviteEmailPayload): void {
+    const inviteSendPattern = MAIL_EVENT_PATTERNS.INVITE.SEND;
+    this.logger.log(`Publishing ${inviteSendPattern} event to RabbitMQ for invite ${payload.inviteId} (${payload.email})`);
+    this.client.emit(inviteSendPattern, payload).subscribe({
+      error: (error) => {
+        this.logger.error(`Failed to publish ${inviteSendPattern} event for invite ${payload.inviteId}: ${error instanceof Error ? error.message : String(error)}`);
+      },
+    });
+  }
+}

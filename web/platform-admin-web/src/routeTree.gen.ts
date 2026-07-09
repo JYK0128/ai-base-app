@@ -14,6 +14,7 @@ import { Route as ProtectedRouteImport } from './routes/_protected'
 import { Route as PublicIndexRouteImport } from './routes/_public/index'
 import { Route as PublicTermAgreementRouteImport } from './routes/_public/term-agreement'
 import { Route as PublicLoginRouteImport } from './routes/_public/login'
+import { Route as PublicInviteRouteImport } from './routes/_public/invite'
 import { Route as PublicForgotPasswordRouteImport } from './routes/_public/forgot-password'
 import { Route as PublicChangePasswordRouteImport } from './routes/_public/change-password'
 import { Route as ProtectedTermsIndexRouteImport } from './routes/_protected/terms/index'
@@ -47,6 +48,11 @@ const PublicTermAgreementRoute = PublicTermAgreementRouteImport.update({
 const PublicLoginRoute = PublicLoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => PublicRoute,
+} as any)
+const PublicInviteRoute = PublicInviteRouteImport.update({
+  id: '/invite',
+  path: '/invite',
   getParentRoute: () => PublicRoute,
 } as any)
 const PublicForgotPasswordRoute = PublicForgotPasswordRouteImport.update({
@@ -112,6 +118,7 @@ export interface FileRoutesByFullPath {
   '/': typeof PublicIndexRoute
   '/change-password': typeof PublicChangePasswordRoute
   '/forgot-password': typeof PublicForgotPasswordRoute
+  '/invite': typeof PublicInviteRoute
   '/login': typeof PublicLoginRoute
   '/term-agreement': typeof PublicTermAgreementRoute
   '/announcements/': typeof ProtectedAnnouncementsIndexRoute
@@ -128,6 +135,7 @@ export interface FileRoutesByTo {
   '/': typeof PublicIndexRoute
   '/change-password': typeof PublicChangePasswordRoute
   '/forgot-password': typeof PublicForgotPasswordRoute
+  '/invite': typeof PublicInviteRoute
   '/login': typeof PublicLoginRoute
   '/term-agreement': typeof PublicTermAgreementRoute
   '/announcements': typeof ProtectedAnnouncementsIndexRoute
@@ -146,6 +154,7 @@ export interface FileRoutesById {
   '/_public': typeof PublicRouteWithChildren
   '/_public/change-password': typeof PublicChangePasswordRoute
   '/_public/forgot-password': typeof PublicForgotPasswordRoute
+  '/_public/invite': typeof PublicInviteRoute
   '/_public/login': typeof PublicLoginRoute
   '/_public/term-agreement': typeof PublicTermAgreementRoute
   '/_public/': typeof PublicIndexRoute
@@ -165,6 +174,7 @@ export interface FileRouteTypes {
     | '/'
     | '/change-password'
     | '/forgot-password'
+    | '/invite'
     | '/login'
     | '/term-agreement'
     | '/announcements/'
@@ -181,6 +191,7 @@ export interface FileRouteTypes {
     | '/'
     | '/change-password'
     | '/forgot-password'
+    | '/invite'
     | '/login'
     | '/term-agreement'
     | '/announcements'
@@ -198,6 +209,7 @@ export interface FileRouteTypes {
     | '/_public'
     | '/_public/change-password'
     | '/_public/forgot-password'
+    | '/_public/invite'
     | '/_public/login'
     | '/_public/term-agreement'
     | '/_public/'
@@ -252,6 +264,13 @@ declare module '@tanstack/react-router' {
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof PublicLoginRouteImport
+      parentRoute: typeof PublicRoute
+    }
+    '/_public/invite': {
+      id: '/_public/invite'
+      path: '/invite'
+      fullPath: '/invite'
+      preLoaderRoute: typeof PublicInviteRouteImport
       parentRoute: typeof PublicRoute
     }
     '/_public/forgot-password': {
@@ -365,6 +384,7 @@ const ProtectedRouteWithChildren = ProtectedRoute._addFileChildren(
 interface PublicRouteChildren {
   PublicChangePasswordRoute: typeof PublicChangePasswordRoute
   PublicForgotPasswordRoute: typeof PublicForgotPasswordRoute
+  PublicInviteRoute: typeof PublicInviteRoute
   PublicLoginRoute: typeof PublicLoginRoute
   PublicTermAgreementRoute: typeof PublicTermAgreementRoute
   PublicIndexRoute: typeof PublicIndexRoute
@@ -373,6 +393,7 @@ interface PublicRouteChildren {
 const PublicRouteChildren: PublicRouteChildren = {
   PublicChangePasswordRoute: PublicChangePasswordRoute,
   PublicForgotPasswordRoute: PublicForgotPasswordRoute,
+  PublicInviteRoute: PublicInviteRoute,
   PublicLoginRoute: PublicLoginRoute,
   PublicTermAgreementRoute: PublicTermAgreementRoute,
   PublicIndexRoute: PublicIndexRoute,

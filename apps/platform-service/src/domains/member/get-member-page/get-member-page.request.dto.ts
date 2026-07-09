@@ -10,13 +10,13 @@ const MEMBER_PAGE_SORT = ['createdAt', 'name', 'status', 'lastLoginAt'] as const
 type MemberPageSortKey = SortKey<Member> | 'lastLoginAt';
 
 class GetMemberPageFiltersDto extends FilterableRequestDto<Member> {
-  @ApiPropertyOptional({ enum: MemberStatus, description: '멤버 상태 필터', example: MemberStatus.ACTIVE })
+  @ApiPropertyOptional({ example: MemberStatus.ACTIVE, enum: MemberStatus, description: '멤버 상태 필터' })
   @IsOptional()
   @Type(() => String)
   @IsEnum(MemberStatus)
   status?: MemberStatus;
 
-  @ApiPropertyOptional({ description: '검색어', example: 'kim' })
+  @ApiPropertyOptional({ example: 'kim', type: String, description: '검색어' })
   @IsOptional()
   @Transform(({ value }) => (typeof value === 'string' ? value.trim() : value))
   @Type(() => String)
@@ -56,19 +56,19 @@ class GetMemberPageFiltersDto extends FilterableRequestDto<Member> {
 }
 
 export class GetMemberPageRequestDto extends PageRequestDto<Member, MemberPageSortKey> {
-  @ApiPropertyOptional({ type: () => GetMemberPageFiltersDto, description: '필터 조건' })
+  @ApiPropertyOptional({ example: { status: MemberStatus.ACTIVE, search: 'kim' }, type: () => GetMemberPageFiltersDto, description: '필터 조건' })
   @IsOptional()
   @ValidateNested()
   @Type(() => GetMemberPageFiltersDto)
   filters: GetMemberPageFiltersDto = new GetMemberPageFiltersDto();
 
-  @ApiPropertyOptional({ description: '정렬 필드', isArray: true, enum: MEMBER_PAGE_SORT })
+  @ApiPropertyOptional({ example: ['createdAt'], isArray: true, enum: MEMBER_PAGE_SORT, description: '정렬 필드' })
   @IsOptional()
   @IsIn(MEMBER_PAGE_SORT, { each: true })
   @Type(() => String)
   sort: MemberPageSortKey[] = ['createdAt'];
 
-  @ApiPropertyOptional({ description: '정렬 방향', isArray: true, enum: SortDirection })
+  @ApiPropertyOptional({ example: ['desc'], isArray: true, enum: SortDirection, description: '정렬 방향' })
   @IsOptional()
   @IsEnum(SortDirection, { each: true })
   @Type(() => String)

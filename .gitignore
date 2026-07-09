@@ -50,3 +50,6 @@ coverage/
 .k8s/overlays/prod/secrets/*.env
 .k8s/overlays/prod/secrets/*.conf
 !.k8s/overlays/prod/secrets/*.example
+
+# --- Kubernetes ---
+.k8s/apps/**/*-secret.yaml

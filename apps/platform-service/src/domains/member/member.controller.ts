@@ -3,18 +3,24 @@ import { CommandBus, QueryBus } from '@nestjs/cqrs';
 
 import { SwaggerResponse } from '@/common/decorators';
 
+import { CancelInviteContract } from './cancel-invite/cancel-invite.contract';
+import { CancelInviteRequestDto } from './cancel-invite/cancel-invite.request.dto';
+import { CancelInviteResponseDto } from './cancel-invite/cancel-invite.response.dto';
 import { CreateInviteContract } from './create-invite/create-invite.contract';
 import { CreateInviteRequestDto } from './create-invite/create-invite.request.dto';
 import { CreateInviteResponseDto } from './create-invite/create-invite.response.dto';
-import { GetInviteListContract } from './get-invite-list/get-invite-list.contract';
-import { GetInviteListRequestDto } from './get-invite-list/get-invite-list.request.dto';
-import { GetInviteListResponseDto } from './get-invite-list/get-invite-list.response.dto';
+import { GetInvitePageContract } from './get-invite-page/get-invite-page.contract';
+import { GetInvitePageRequestDto } from './get-invite-page/get-invite-page.request.dto';
+import { GetInvitePageResponseDto } from './get-invite-page/get-invite-page.response.dto';
 import { GetMemberContract } from './get-member/get-member.contract';
 import { GetMemberRequestDto } from './get-member/get-member.request.dto';
 import { GetMemberResponseDto } from './get-member/get-member.response.dto';
 import { GetMemberPageContract } from './get-member-page/get-member-page.contract';
 import { GetMemberPageRequestDto } from './get-member-page/get-member-page.request.dto';
 import { GetMemberPageResponseDto } from './get-member-page/get-member-page.response.dto';
+import { ResendInviteContract } from './resend-invite/resend-invite.contract';
+import { ResendInviteRequestDto } from './resend-invite/resend-invite.request.dto';
+import { ResendInviteResponseDto } from './resend-invite/resend-invite.response.dto';
 import { UpdateMemberRoleContract } from './update-member-role/update-member-role.contract';
 import { UpdateMemberRoleRequestDto } from './update-member-role/update-member-role.request.dto';
 import { UpdateMemberRoleResponseDto } from './update-member-role/update-member-role.response.dto';
@@ -38,11 +44,27 @@ export class MembersController {
   }
 
   @Get('invites')
-  @SwaggerResponse(GetInviteListResponseDto)
-  async getInviteList(
-    @Query() query: GetInviteListRequestDto,
-  ): Promise<GetInviteListResponseDto> {
-    return this.queryBus.execute(new GetInviteListContract(query));
+  @SwaggerResponse(GetInvitePageResponseDto)
+  async getInvitePage(
+    @Query() query: GetInvitePageRequestDto,
+  ): Promise<GetInvitePageResponseDto> {
+    return this.queryBus.execute(new GetInvitePageContract(query));
+  }
+
+  @Post('invites/:id/cancel')
+  @SwaggerResponse(CancelInviteResponseDto)
+  async cancelInvite(
+    @Param('id') id: string,
+  ): Promise<CancelInviteResponseDto> {
+    return this.commandBus.execute(new CancelInviteContract({ id } satisfies CancelInviteRequestDto));
+  }
+
+  @Post('invites/:id/resend')
+  @SwaggerResponse(ResendInviteResponseDto)
+  async resendInvite(
+    @Param('id') id: string,
+  ): Promise<ResendInviteResponseDto> {
+    return this.commandBus.execute(new ResendInviteContract({ id } satisfies ResendInviteRequestDto));
   }
 
   @Post('status')
