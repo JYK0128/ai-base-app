@@ -17,5 +17,5 @@ export interface GetTermDocumentDetailResponseDto {
      * 현재 효력 중인 버전
      * @nullable
      */
-  currentVersion?: GetTermDocumentVersionItem | null;
+  currentVersion: GetTermDocumentVersionItem | null;
 }

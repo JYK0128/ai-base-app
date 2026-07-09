@@ -2,7 +2,7 @@ import { EntityName, type Opt } from '@mikro-orm/core';
 import { Embeddable, Embedded, Entity, Enum, Property } from '@mikro-orm/decorators/legacy';
 
 import { CoreEntity } from '../../core/core.entity';
-import { AnnouncementAudience, AnnouncementCategory, AnnouncementChannel, AnnouncementPriority, AnnouncementStatus } from './announcement.constants';
+import { AnnouncementAudience, AnnouncementCategory, AnnouncementPriority, AnnouncementStatus } from './announcement.constants';
 import { isAnnouncementPublished } from './announcement.policy-publication';
 import { getAnnouncementStatus } from './announcement.policy-status';
 
@@ -14,29 +14,14 @@ export class AnnouncementMetadata {
     Object.assign(this, data);
   }
 
-  @Enum({ items: () => AnnouncementCategory })
-  category: AnnouncementCategory = AnnouncementCategory.NOTICE;
-
-  @Enum({ items: () => AnnouncementAudience })
-  audience: AnnouncementAudience = AnnouncementAudience.ORGANIZATION;
-
-  @Enum({ items: () => AnnouncementChannel })
-  channel: AnnouncementChannel = AnnouncementChannel.IN_APP;
-
-  @Enum({ items: () => AnnouncementPriority })
-  priority: AnnouncementPriority = AnnouncementPriority.NORMAL;
-
-  @Property({ type: 'boolean' })
-  pinned: boolean = false;
-
   @Property({ type: Date, nullable: true })
-  publishedAt?: Date | null;
+  publishedAt: Date | null = null;
 
   @Property({ type: Date })
-  startAt?: Date;
+  startAt!: Date;
 
   @Property({ type: Date })
-  endAt?: Date;
+  endAt!: Date;
 }
 
 @Entity({ schema: 'platform' })
@@ -49,47 +34,34 @@ export class Announcement extends CoreEntity<Announcement> {
   @Property({ type: 'text' })
   content!: string;
 
+  @Enum(() => AnnouncementCategory)
+  category: Opt<AnnouncementCategory> = AnnouncementCategory.NOTICE;
+
+  @Enum(() => AnnouncementAudience)
+  audience: Opt<AnnouncementAudience> = AnnouncementAudience.ORGANIZATION;
+
+  @Enum(() => AnnouncementPriority)
+  priority: Opt<AnnouncementPriority> = AnnouncementPriority.NORMAL;
+
+  @Property({ type: 'boolean' })
+  pinned: Opt<boolean> = false;
+
   @Embedded({ entity: () => AnnouncementMetadata, object: true })
   override metadata: Opt<AnnouncementMetadata> = new AnnouncementMetadata();
 
   @Property({ persist: false })
-  get category(): Opt<AnnouncementCategory> {
-    return this.metadata.category;
-  }
-
-  @Property({ persist: false })
-  get audience(): Opt<AnnouncementAudience> {
-    return this.metadata.audience;
-  }
-
-  @Property({ persist: false })
-  get channel(): Opt<AnnouncementChannel> {
-    return this.metadata.channel;
-  }
-
-  @Property({ persist: false })
-  get priority(): Opt<AnnouncementPriority> {
-    return this.metadata.priority;
-  }
-
-  @Property({ persist: false })
-  get pinned(): Opt<boolean> {
-    return this.metadata.pinned;
-  }
-
-  @Property({ persist: false })
   get publishedAt(): Opt<Date> | null {
-    return this.metadata.publishedAt ?? null;
+    return this.metadata.publishedAt;
   }
 
   @Property({ persist: false })
   get startAt(): Opt<Date> | null {
-    return this.metadata.startAt ?? null;
+    return this.metadata.startAt;
   }
 
   @Property({ persist: false })
   get endAt(): Opt<Date> | null {
-    return this.metadata.endAt ?? null;
+    return this.metadata.endAt;
   }
 
   @Property({ persist: false })

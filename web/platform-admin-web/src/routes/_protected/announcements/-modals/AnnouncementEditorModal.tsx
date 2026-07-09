@@ -35,6 +35,7 @@ const ANNOUNCEMENT_EDITOR_SCHEMA = z.object({
   category: z.enum(['NOTICE', 'MAINTENANCE', 'SECURITY', 'EVENT']),
   audience: z.enum(['ALL', 'PLATFORM', 'ORGANIZATION']),
   priority: z.enum(['LOW', 'NORMAL', 'HIGH']),
+  pinned: z.boolean(),
   isPublished: z.boolean(),
   startAt: z.string().trim().min(1, '시작일을 입력해주세요.'),
   endAt: z.string().trim().min(1, '종료일을 입력해주세요.'),
@@ -186,27 +187,65 @@ export function AnnouncementEditorModal({
                       </form.AppField>
                     </div>
 
-                    <form.AppField name="isPublished">
-                      {(field) => (
-                        <div className="
-                          flex items-center justify-between rounded-xl border
-                          border-slate-200 bg-white px-4 py-3 shadow-sm
-                        "
-                        >
-                          <div className="space-y-1">
-                            <div className="text-sm font-medium text-slate-900">게시 유무</div>
-                            <div className="text-xs text-slate-500">
-                              토글을 켜면 저장 시 게시 상태로 반영됩니다.
+                    <div className="
+                      grid gap-4
+                      lg:grid-cols-2
+                    "
+                    >
+                      <form.AppField name="pinned">
+                        {(field) => (
+                          <div className="
+                            flex items-center justify-between rounded-xl border
+                            border-slate-200 bg-white px-4 py-3 shadow-sm
+                          "
+                          >
+                            <div className="space-y-1">
+                              <div className="
+                                text-sm font-medium text-slate-900
+                              "
+                              >
+                                상단 고정
+                              </div>
+                              <div className="text-xs text-slate-500">
+                                중요 공지를 목록 상단에 우선 노출합니다.
+                              </div>
                             </div>
+                            <Switch
+                              aria-label="상단 고정"
+                              checked={Boolean(field.state.value)}
+                              onCheckedChange={(checked) => field.handleChange(Boolean(checked))}
+                            />
                           </div>
-                          <Switch
-                            aria-label="게시 유무"
-                            checked={Boolean(field.state.value)}
-                            onCheckedChange={(checked) => field.handleChange(Boolean(checked))}
-                          />
-                        </div>
-                      )}
-                    </form.AppField>
+                        )}
+                      </form.AppField>
+
+                      <form.AppField name="isPublished">
+                        {(field) => (
+                          <div className="
+                            flex items-center justify-between rounded-xl border
+                            border-slate-200 bg-white px-4 py-3 shadow-sm
+                          "
+                          >
+                            <div className="space-y-1">
+                              <div className="
+                                text-sm font-medium text-slate-900
+                              "
+                              >
+                                게시 유무
+                              </div>
+                              <div className="text-xs text-slate-500">
+                                토글을 켜면 저장 시 게시 상태로 반영됩니다.
+                              </div>
+                            </div>
+                            <Switch
+                              aria-label="게시 유무"
+                              checked={Boolean(field.state.value)}
+                              onCheckedChange={(checked) => field.handleChange(Boolean(checked))}
+                            />
+                          </div>
+                        )}
+                      </form.AppField>
+                    </div>
                   </form.FieldGroup>
                 </form.FieldSet>
 

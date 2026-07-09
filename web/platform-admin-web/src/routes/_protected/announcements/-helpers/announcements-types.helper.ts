@@ -1,11 +1,10 @@
-import type { AnnouncementPageItemAudience, AnnouncementPageItemCategory, AnnouncementPageItemChannel, AnnouncementPageItemPriority, AnnouncementPageItemStatus } from '@/api/generated/model';
+import type { AnnouncementPageItemAudience, AnnouncementPageItemCategory, AnnouncementPageItemPriority, AnnouncementPageItemStatus } from '@/api/generated/model';
 
 export interface AnnouncementEditorSeed {
   id?: string
   title: string
   category: AnnouncementPageItemCategory
   audience: AnnouncementPageItemAudience
-  channel: AnnouncementPageItemChannel
   priority: AnnouncementPageItemPriority
   pinned: boolean
   publishedAt: string
@@ -20,6 +19,7 @@ export interface AnnouncementEditorState {
   category: AnnouncementPageItemCategory
   audience: AnnouncementPageItemAudience
   priority: AnnouncementPageItemPriority
+  pinned: boolean
   isPublished: boolean
   startAt: string
   endAt: string
@@ -38,12 +38,6 @@ export const ANNOUNCEMENT_AUDIENCE_LABELS = {
   PLATFORM: '플랫폼 조직',
   ORGANIZATION: '일반 조직',
 } as const satisfies Record<AnnouncementPageItemAudience, string>;
-
-export const ANNOUNCEMENT_CHANNEL_LABELS = {
-  IN_APP: '앱 내 알림',
-  EMAIL: '이메일',
-  PUSH: '푸시 알림',
-} as const satisfies Record<AnnouncementPageItemChannel, string>;
 
 export const ANNOUNCEMENT_PRIORITY_LABELS = {
   LOW: '낮음',

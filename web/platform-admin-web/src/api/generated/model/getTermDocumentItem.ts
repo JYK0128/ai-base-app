@@ -16,10 +16,16 @@ export interface GetTermDocumentItem {
   title: string;
   /** 필수 동의 여부 */
   required: boolean;
-  /** 종료 일시 */
-  terminatedAt?: string;
+  /**
+     * 종료 일시
+     * @nullable
+     */
+  terminatedAt: string | null;
   /** 약관 상태 */
   status: GetTermDocumentItemStatus;
-  /** 조직 식별자 */
-  organization?: string;
+  /**
+     * 조직 식별자
+     * @nullable
+     */
+  organizationId: string | null;
 }

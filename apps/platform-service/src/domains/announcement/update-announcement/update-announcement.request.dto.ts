@@ -1,6 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Announcement } from '@pkg/database';
-import { AnnouncementAudience, AnnouncementCategory, AnnouncementChannel, AnnouncementPriority } from '@pkg/database';
+import { AnnouncementAudience, AnnouncementCategory, AnnouncementPriority } from '@pkg/database';
 import { Type } from 'class-transformer';
 import { IsBoolean, IsDate, IsEnum, IsOptional, IsUUID } from 'class-validator';
 
@@ -8,72 +8,62 @@ import { IsNotEmptyString } from '@/common/decorators/is-not-empty-string.decora
 import { EntityRequestType } from '@/common/interfaces';
 
 export class UpdateAnnouncementRequestDto extends EntityRequestType(Announcement) {
-  @ApiProperty({ example: '019e5236-adae-70d7-a8f7-2dc90bdf7098', description: '공지사항 식별자' })
+  @ApiProperty({ example: '019e5236-adae-70d7-a8f7-2dc90bdf7098', type: String, description: '공지사항 식별자' })
   @Type(() => String)
   @IsUUID()
   override id!: string;
 
-  @ApiProperty({ example: '공지 제목', description: '공지사항 제목' })
+  @ApiPropertyOptional({ example: '공지 제목', type: String, description: '공지사항 제목' })
+  @IsOptional()
   @Type(() => String)
   @IsNotEmptyString({ message: '제목은 공백만으로 구성될 수 없습니다.' })
-  override title!: string;
+  override title?: string;
 
-  @ApiProperty({ example: '공지 본문', description: '공지사항 본문' })
+  @ApiPropertyOptional({ example: '공지 본문', type: String, description: '공지사항 본문' })
+  @IsOptional()
   @Type(() => String)
   @IsNotEmptyString({ message: '본문은 공백만으로 구성될 수 없습니다.' })
-  override content!: string;
+  override content?: string;
 
-  @ApiPropertyOptional({ enum: AnnouncementCategory, example: AnnouncementCategory.NOTICE, description: '공지 분류' })
+  @ApiPropertyOptional({ example: AnnouncementCategory.NOTICE, enum: AnnouncementCategory, description: '공지 분류' })
   @IsOptional()
   @Type(() => String)
   @IsEnum(AnnouncementCategory)
   override category?: AnnouncementCategory;
 
-  @ApiPropertyOptional({ enum: AnnouncementAudience, example: AnnouncementAudience.ORGANIZATION, description: '공지 대상' })
+  @ApiPropertyOptional({ example: AnnouncementAudience.ORGANIZATION, enum: AnnouncementAudience, description: '공지 대상' })
   @IsOptional()
   @Type(() => String)
   @IsEnum(AnnouncementAudience)
   override audience?: AnnouncementAudience;
 
-  @ApiPropertyOptional({ enum: AnnouncementChannel, example: AnnouncementChannel.IN_APP, description: '공지 채널' })
-  @IsOptional()
-  @Type(() => String)
-  @IsEnum(AnnouncementChannel)
-  override channel?: AnnouncementChannel;
-
-  @ApiPropertyOptional({ enum: AnnouncementPriority, example: AnnouncementPriority.NORMAL, description: '공지 우선순위' })
+  @ApiPropertyOptional({ example: AnnouncementPriority.NORMAL, enum: AnnouncementPriority, description: '공지 우선순위' })
   @IsOptional()
   @Type(() => String)
   @IsEnum(AnnouncementPriority)
   override priority?: AnnouncementPriority;
 
-  @ApiPropertyOptional({ example: false, description: '게시 유무' })
-  @IsOptional()
-  @Type(() => Boolean)
-  @IsBoolean()
-  override isPublished?: boolean;
-
-  @ApiPropertyOptional({ example: true, description: '공지 목록에서 우선 노출할지 여부' })
+  @ApiPropertyOptional({ example: true, type: Boolean, description: '공지 목록에서 우선 노출할지 여부' })
   @IsOptional()
   @Type(() => Boolean)
   @IsBoolean()
   override pinned?: boolean;
 
-  @ApiPropertyOptional({ example: '2026-06-13T03:11:56.000Z', description: '게시 확정 일시' })
-  @IsOptional()
-  @Type(() => Date)
-  @IsDate()
-  override publishedAt?: Date;
-
-  @ApiPropertyOptional({ example: '2026-06-13T03:11:56.000Z', description: '게시 시작일' })
+  @ApiPropertyOptional({ example: '2026-06-13T03:11:56.000Z', type: String, description: '게시 시작일' })
   @IsOptional()
   @Type(() => Date)
   @IsDate()
   override startAt?: Date;
 
-  @ApiPropertyOptional({ example: '2026-06-20T03:11:56.000Z', description: '게시 종료일' })
+  @ApiPropertyOptional({ example: '2026-06-20T03:11:56.000Z', type: String, description: '게시 종료일' })
   @IsOptional()
   @Type(() => Date)
   @IsDate()
   override endAt?: Date;
+
+  @ApiPropertyOptional({ example: '2026-06-13T03:11:56.000Z', type: String, nullable: true, description: '게시 확정 일시' })
+  @IsOptional()
+  @Type(() => Date)
+  @IsDate()
+  override publishedAt?: Date | null;
 }

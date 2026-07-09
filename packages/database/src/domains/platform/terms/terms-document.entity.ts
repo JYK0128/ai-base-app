@@ -31,7 +31,7 @@ export class TermsDocument extends CoreEntity<TermsDocument> {
   [EntityName]?: 'TermsDocument';
 
   @ManyToOne(() => Organization, { nullable: true })
-  organization?: Rel<Organization>;
+  organization: Rel<Organization> | null = null;
 
   @OneToMany(() => TermsVersion, (version) => version.termsDocument)
   versions = new Collection<TermsVersion>(this);

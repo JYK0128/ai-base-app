@@ -129,7 +129,7 @@ export class TermsSeeder extends Seeder {
       persistedDocument.organization = organization;
     }
     else {
-      delete persistedDocument.organization;
+      persistedDocument.organization = null;
     }
 
     persistedDocument.title = seed.title;

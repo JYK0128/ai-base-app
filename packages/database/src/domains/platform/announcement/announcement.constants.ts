@@ -15,14 +15,6 @@ export const AnnouncementAudience = {
 
 export type AnnouncementAudience = typeof AnnouncementAudience[keyof typeof AnnouncementAudience];
 
-export const AnnouncementChannel = {
-  IN_APP: 'IN_APP',
-  EMAIL: 'EMAIL',
-  PUSH: 'PUSH',
-} as const;
-
-export type AnnouncementChannel = typeof AnnouncementChannel[keyof typeof AnnouncementChannel];
-
 export const AnnouncementPriority = {
   LOW: 'LOW',
   NORMAL: 'NORMAL',

@@ -21,11 +21,6 @@ export class CreateAnnouncementHandler implements ICommandHandler<CreateAnnounce
 
   private identifyMetadata(command: CreateAnnouncementContract): AnnouncementMetadata {
     return new AnnouncementMetadata({
-      category: command.data.category,
-      channel: command.data.channel,
-      audience: command.data.audience,
-      priority: command.data.priority,
-      pinned: command.data.pinned,
       publishedAt: command.data.publishedAt,
       startAt: command.data.startAt,
       endAt: command.data.endAt,
@@ -41,8 +36,12 @@ export class CreateAnnouncementHandler implements ICommandHandler<CreateAnnounce
     metadata: AnnouncementMetadata,
   ): Announcement {
     return Announcement.create({
-      title: command.data.title.trim(),
-      content: command.data.content.trim(),
+      title: command.data.title,
+      content: command.data.content,
+      category: command.data.category,
+      audience: command.data.audience,
+      priority: command.data.priority,
+      pinned: command.data.pinned,
       metadata,
     });
   }

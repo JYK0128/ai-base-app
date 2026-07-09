@@ -98,13 +98,13 @@ export class AllowedResourceListHandler implements IQueryHandler<AllowedResource
 
   private sortResourceNodes(nodes: AllowedResourceListItem[]) {
     nodes.sort((left, right) => {
-      if (left.sortOrder === undefined && right.sortOrder === undefined) {
+      if (left.sortOrder === null && right.sortOrder === null) {
         return left.code.localeCompare(right.code);
       }
-      if (left.sortOrder === undefined) {
+      if (left.sortOrder === null) {
         return 1;
       }
-      if (right.sortOrder === undefined) {
+      if (right.sortOrder === null) {
         return -1;
       }
 

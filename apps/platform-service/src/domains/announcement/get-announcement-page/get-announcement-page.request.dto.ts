@@ -1,5 +1,5 @@
 import type { ObjectQuery } from '@mikro-orm/core';
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiPropertyOptional } from '@nestjs/swagger';
 import type { Announcement } from '@pkg/database';
 import { AnnouncementStatus } from '@pkg/database';
 import { Type } from 'class-transformer';
@@ -10,12 +10,12 @@ import { FilterableRequestDto, PageRequestDto, SortDirection, type SortKey } fro
 const ANNOUNCEMENT_PAGE_SORT = ['createdAt'] as const;
 
 class GetAnnouncementPageFilters extends FilterableRequestDto<Announcement> {
-  @ApiPropertyOptional({ description: '게시된 공지만 조회할지 여부', example: true, default: false })
+  @ApiPropertyOptional({ example: true, type: Boolean, description: '게시된 공지만 조회할지 여부', default: false })
   @IsOptional()
   @IsBoolean()
   isPublished?: boolean;
 
-  @ApiPropertyOptional({ enum: AnnouncementStatus, description: '게시 상태', example: AnnouncementStatus.ACTIVE })
+  @ApiPropertyOptional({ example: AnnouncementStatus.ACTIVE, enum: AnnouncementStatus, description: '게시 상태' })
   @IsOptional()
   @Type(() => String)
   @IsEnum(AnnouncementStatus)
@@ -67,18 +67,18 @@ class GetAnnouncementPageFilters extends FilterableRequestDto<Announcement> {
 }
 
 export class GetAnnouncementPageRequestDto extends PageRequestDto<Announcement> {
-  @ApiProperty({ type: () => GetAnnouncementPageFilters, description: '필터 조건' })
+  @ApiPropertyOptional({ example: { isPublished: true, status: AnnouncementStatus.ACTIVE }, type: () => GetAnnouncementPageFilters, description: '필터 조건' })
   @ValidateNested()
   @Type(() => GetAnnouncementPageFilters)
   filters: GetAnnouncementPageFilters = new GetAnnouncementPageFilters();
 
-  @ApiPropertyOptional({ description: '정렬 필드', isArray: true, enum: ANNOUNCEMENT_PAGE_SORT })
+  @ApiPropertyOptional({ example: ['createdAt'], isArray: true, enum: ANNOUNCEMENT_PAGE_SORT, description: '정렬 필드' })
   @IsOptional()
   @IsIn(ANNOUNCEMENT_PAGE_SORT, { each: true })
   @Type(() => String)
   sort: Array<SortKey<Announcement>> = ['createdAt'];
 
-  @ApiPropertyOptional({ description: '정렬 방향', isArray: true, enum: SortDirection })
+  @ApiPropertyOptional({ example: ['desc'], isArray: true, enum: SortDirection, description: '정렬 방향' })
   @IsOptional()
   @IsEnum(SortDirection, { each: true })
   @Type(() => String)

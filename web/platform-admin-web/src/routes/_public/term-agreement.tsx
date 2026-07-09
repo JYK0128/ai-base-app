@@ -1,4 +1,4 @@
-import { Button, Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle, Checkbox, Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Label, ScrollArea, Separator } from '@pkg/ui';
+import { Button, Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle, Checkbox, Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Label, ScrollArea } from '@pkg/ui';
 import { createFileRoute, redirect, useNavigate } from '@tanstack/react-router';
 import { ShieldCheck } from 'lucide-react';
 import { type MouseEventHandler, useState } from 'react';
@@ -127,44 +127,30 @@ function TermAgreement() {
           </CardDescription>
         </CardHeader>
 
-        <CardContent className="scroll-y space-y-4">
-          <div className="rounded-xl border border-slate-200 bg-white p-4">
-            <Separator className="mb-4" />
+        <CardContent className="scroll-y space-y-6">
+          <AgreementSection
+            title="플랫폼 약관"
+            description="플랫폼 전체에 적용되는 약관입니다."
+            terms={platformTerms}
+            scope="platform"
+            allChecked={isPlatformAllRequiredAgreed}
+            onToggleAll={handleTogglePlatformAllRequired}
+            activeSelectedVersionIds={selectedVersionIds}
+            onSelect={handleSelect}
+            onDeselect={handleDeselect}
+          />
 
-            <div className="space-y-6">
-              <AgreementSection
-                title="플랫폼 약관"
-                description="플랫폼 전체에 적용되는 약관입니다."
-                terms={platformTerms}
-                scope="platform"
-                allChecked={isPlatformAllRequiredAgreed}
-                onToggleAll={handleTogglePlatformAllRequired}
-                activeSelectedVersionIds={selectedVersionIds}
-                onSelect={handleSelect}
-                onDeselect={handleDeselect}
-              />
-
-              <AgreementSection
-                title="조직 약관"
-                description="현재 소속 조직에 적용되는 약관입니다."
-                terms={organizationTerms}
-                scope="organization"
-                allChecked={isOrganizationAllRequiredAgreed}
-                onToggleAll={handleToggleOrganizationAllRequired}
-                activeSelectedVersionIds={selectedVersionIds}
-                onSelect={handleSelect}
-                onDeselect={handleDeselect}
-              />
-            </div>
-          </div>
-
-          <div className="
-            rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm
-            text-emerald-800
-          "
-          >
-            필수 약관 동의 후 대시보드로 이동합니다.
-          </div>
+          <AgreementSection
+            title="조직 약관"
+            description="현재 소속 조직에 적용되는 약관입니다."
+            terms={organizationTerms}
+            scope="organization"
+            allChecked={isOrganizationAllRequiredAgreed}
+            onToggleAll={handleToggleOrganizationAllRequired}
+            activeSelectedVersionIds={selectedVersionIds}
+            onSelect={handleSelect}
+            onDeselect={handleDeselect}
+          />
         </CardContent>
 
         <CardFooter className="justify-between gap-3">
@@ -203,64 +189,72 @@ function AgreementTermRow({
 }) {
   return (
     <div className="
-      flex items-start justify-between gap-4 rounded-lg border border-slate-200
-      p-4
+      flex w-full items-start gap-3 rounded-lg border border-slate-200 p-4
     "
     >
-      <div className="flex items-start gap-3">
-        <Checkbox
-          id={versionId}
-          checked={checked}
-          onCheckedChange={(next) => (next ? onSelect(versionId) : onDeselect(versionId))}
-          className="mt-1"
-        />
-        <div className="space-y-1.5">
-          <Label
-            htmlFor={versionId}
-            className="cursor-pointer text-sm font-semibold text-slate-800"
-          >
-            {title}
-            <span className="ml-2 text-xs text-slate-500">{required ? '(필수)' : '(선택)'}</span>
-          </Label>
-          <div className="
-            flex flex-wrap items-center gap-2 text-xs text-slate-500
-          "
-          >
-            <span>
-              버전
-              {versionLabel}
-            </span>
-            {effectiveAt && <span>{new Date(effectiveAt).toLocaleString()}</span>}
-          </div>
-          {content && (
-            <p className="
-              line-clamp-2 max-w-xl text-sm text-slate-500
-              hover:bg-blue-50
+      <Checkbox
+        id={versionId}
+        checked={checked}
+        onCheckedChange={(next) => (next ? onSelect(versionId) : onDeselect(versionId))}
+        className="mt-1 shrink-0"
+      />
+
+      <div className="min-w-0 flex-1 space-y-1.5">
+        <Label
+          htmlFor={versionId}
+          className="cursor-pointer text-sm font-semibold text-slate-800"
+        >
+          {title}
+          <span className="ml-2 text-xs text-slate-500">{required ? '(필수)' : '(선택)'}</span>
+        </Label>
+        <div className="
+          flex flex-wrap items-center gap-2 text-xs text-slate-500
+        "
+        >
+          <span>
+            버전
+            {versionLabel}
+          </span>
+          {effectiveAt && <span>{new Date(effectiveAt).toLocaleString()}</span>}
+        </div>
+        {content && (
+          <Dialog>
+            <DialogTrigger asChild>
+              <button
+                type="button"
+                className="
+                  block h-10 w-full min-w-0 overflow-hidden rounded-md text-left
+                  text-sm text-slate-500 transition-colors
+                  hover:bg-blue-50 hover:text-slate-700
+                  focus-visible:ring-2 focus-visible:ring-blue-500
+                  focus-visible:outline-none
+                "
+              >
+                <span className="
+                  line-clamp-2 block w-full min-w-0 overflow-hidden
+                "
+                >
+                  {content}
+                </span>
+              </button>
+            </DialogTrigger>
+            <DialogContent className="
+              grid h-[70vh] grid-rows-[auto_1fr]
+              sm:max-w-2xl
             "
             >
-              {content}
-            </p>
-          )}
-        </div>
+              <DialogHeader>
+                <DialogTitle>{title}</DialogTitle>
+              </DialogHeader>
+              <ScrollArea className="mt-4 h-full rounded-lg border p-4">
+                <div className="text-sm/7 whitespace-pre-wrap text-slate-600">
+                  {content}
+                </div>
+              </ScrollArea>
+            </DialogContent>
+          </Dialog>
+        )}
       </div>
-
-      <Dialog>
-        <DialogTrigger asChild>
-          <Button type="button" variant="ghost" size="sm">
-            보기
-          </Button>
-        </DialogTrigger>
-        <DialogContent className="sm:max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>{title}</DialogTitle>
-          </DialogHeader>
-          <ScrollArea className="mt-4 max-h-105 rounded-lg border p-4">
-            <div className="text-sm/7 whitespace-pre-wrap text-slate-600">
-              {content}
-            </div>
-          </ScrollArea>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }

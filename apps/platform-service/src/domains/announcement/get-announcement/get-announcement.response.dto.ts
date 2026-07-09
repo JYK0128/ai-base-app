@@ -1,123 +1,69 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { Announcement,
-         AnnouncementAudience,
-         AnnouncementCategory,
-         AnnouncementChannel,
-         AnnouncementMetadata,
-         AnnouncementPriority,
-         AnnouncementStatus } from '@pkg/database';
+import { ApiProperty } from '@nestjs/swagger';
+import { Announcement, AnnouncementAudience, AnnouncementCategory, AnnouncementPriority, AnnouncementStatus } from '@pkg/database';
 
 import { EntityResponseType } from '@/common/interfaces';
-
 export class GetAnnouncementResponseDto extends EntityResponseType(Announcement) {
   constructor(announcement: Announcement) {
     super();
-    const metadata = announcement.metadata ?? new AnnouncementMetadata();
-
     this.id = announcement.id;
     this.title = announcement.title;
     this.content = announcement.content;
     this.createdAt = announcement.createdAt;
-    this.updatedAt = announcement.updatedAt ?? announcement.createdAt;
-    this.category = metadata.category;
-    this.audience = metadata.audience;
-    this.channel = metadata.channel;
-    this.priority = metadata.priority;
-    this.pinned = metadata.pinned;
-    this.publishedAt = metadata.publishedAt ?? undefined;
-    this.startAt = metadata.startAt;
-    this.endAt = metadata.endAt;
+    this.updatedAt = announcement.updatedAt ?? null;
+    this.category = announcement.category;
+    this.audience = announcement.audience;
+    this.priority = announcement.priority;
+    this.pinned = announcement.pinned;
+    this.publishedAt = announcement.publishedAt ?? null;
+    this.startAt = announcement.startAt ?? null;
+    this.endAt = announcement.endAt ?? null;
     this.status = announcement.status;
-    this.isPublished = Boolean(announcement.isPublished);
+    this.isPublished = announcement.isPublished;
     this.author = announcement.author;
   }
 
-  @ApiProperty({
-    example: '019e5236-adae-70d7-a8f7-2dc90bdf7080',
-    description: '공지사항 식별자',
-  })
+  @ApiProperty({ type: String, description: '공지사항 식별자' })
   override id!: string;
 
-  @ApiProperty({ example: '시스템 점검 안내', description: '공지사항 제목' })
+  @ApiProperty({ type: String, description: '공지사항 제목' })
   override title!: string;
 
-  @ApiProperty({
-    example: '더 나은 서비스 제공을 위해 시스템 점검을 진행합니다.',
-    description: '공지사항 본문 내용',
-  })
+  @ApiProperty({ type: String, description: '공지사항 본문 내용' })
   override content!: string;
 
-  @ApiProperty({
-    example: '2026-06-06T13:00:00.000Z',
-    description: '생성 일시',
-  })
+  @ApiProperty({ type: String, description: '생성 일시' })
   override createdAt!: Date;
 
-  @ApiProperty({
-    example: '2026-06-06T14:00:00.000Z',
-    description: '수정 일시',
-  })
-  override updatedAt?: Date;
+  @ApiProperty({ type: String, nullable: true, description: '수정 일시' })
+  override updatedAt!: Date | null;
 
-  @ApiProperty({
-    enum: AnnouncementCategory,
-    example: AnnouncementCategory.NOTICE,
-    description: '공지 분류',
-  })
+  @ApiProperty({ enum: AnnouncementCategory, description: '공지 분류' })
   override category!: AnnouncementCategory;
 
-  @ApiProperty({
-    enum: AnnouncementAudience,
-    example: AnnouncementAudience.ORGANIZATION,
-    description: '공지 대상',
-  })
+  @ApiProperty({ enum: AnnouncementAudience, description: '공지 대상' })
   override audience!: AnnouncementAudience;
 
-  @ApiProperty({
-    enum: AnnouncementChannel,
-    example: AnnouncementChannel.IN_APP,
-    description: '공지 채널',
-  })
-  override channel!: AnnouncementChannel;
-
-  @ApiProperty({
-    enum: AnnouncementPriority,
-    example: AnnouncementPriority.NORMAL,
-    description: '공지 우선순위',
-  })
+  @ApiProperty({ enum: AnnouncementPriority, description: '공지 우선순위' })
   override priority!: AnnouncementPriority;
 
-  @ApiProperty({ example: true, description: '상단 고정 여부' })
+  @ApiProperty({ type: Boolean, description: '상단 고정 여부' })
   override pinned!: boolean;
 
-  @ApiPropertyOptional({
-    example: '2026-06-06T15:00:00.000Z',
-    description: '게시 확정 일시',
-  })
-  override publishedAt?: Date;
+  @ApiProperty({ type: String, nullable: true, description: '게시 확정 일시' })
+  override publishedAt!: Date | null;
 
-  @ApiPropertyOptional({
-    example: '2026-06-07T00:00:00.000Z',
-    description: '게시 시작일',
-  })
-  override startAt?: Date;
+  @ApiProperty({ type: String, nullable: true, description: '게시 시작일' })
+  override startAt!: Date | null;
 
-  @ApiPropertyOptional({
-    example: '2026-06-30T23:59:59.000Z',
-    description: '게시 종료일',
-  })
-  override endAt?: Date;
+  @ApiProperty({ type: String, nullable: true, description: '게시 종료일' })
+  override endAt!: Date | null;
 
-  @ApiProperty({
-    enum: AnnouncementStatus,
-    example: AnnouncementStatus.ACTIVE,
-    description: '게시 상태',
-  })
+  @ApiProperty({ enum: AnnouncementStatus, description: '게시 상태' })
   override status!: AnnouncementStatus;
 
-  @ApiProperty({ example: true, description: '게시 확정 여부' })
+  @ApiProperty({ type: Boolean, description: '게시 확정 여부' })
   override isPublished!: boolean;
 
-  @ApiProperty({ example: 'system', description: '작성자', readOnly: true })
+  @ApiProperty({ type: String, description: '작성자', readOnly: true })
   override author!: string;
 }

@@ -20,4 +20,14 @@ export interface GetTermDocumentVersionItem {
   effectiveAt: string;
   /** 버전 라벨 */
   label: string;
+  /**
+     * 개정 요약
+     * @nullable
+     */
+  summary: string | null;
+  /**
+     * 변경 사유
+     * @nullable
+     */
+  reason: string | null;
 }

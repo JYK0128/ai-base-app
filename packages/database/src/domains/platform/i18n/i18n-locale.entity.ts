@@ -15,7 +15,7 @@ export class I18nLocale extends CoreEntity<I18nLocale> {
   name!: string;
 
   @Property({ type: 'string', nullable: true })
-  regionCode?: string;
+  regionCode: string | null = null;
 
   @Enum(() => I18nLocaleDirection)
   direction: Opt<I18nLocaleDirection> = I18nLocaleDirection.LTR;
@@ -27,5 +27,5 @@ export class I18nLocale extends CoreEntity<I18nLocale> {
   isDefault: Opt<boolean> = false;
 
   @Property({ type: 'number', nullable: true })
-  sortOrder?: number;
+  sortOrder: number | null = null;
 }

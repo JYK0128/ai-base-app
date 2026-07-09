@@ -7,7 +7,6 @@
  */
 import type { GetAnnouncementResponseDtoAudience } from './getAnnouncementResponseDtoAudience';
 import type { GetAnnouncementResponseDtoCategory } from './getAnnouncementResponseDtoCategory';
-import type { GetAnnouncementResponseDtoChannel } from './getAnnouncementResponseDtoChannel';
 import type { GetAnnouncementResponseDtoPriority } from './getAnnouncementResponseDtoPriority';
 import type { GetAnnouncementResponseDtoStatus } from './getAnnouncementResponseDtoStatus';
 
@@ -20,24 +19,34 @@ export interface GetAnnouncementResponseDto {
   content: string;
   /** 생성 일시 */
   createdAt: string;
-  /** 수정 일시 */
-  updatedAt: string;
+  /**
+     * 수정 일시
+     * @nullable
+     */
+  updatedAt: string | null;
   /** 공지 분류 */
   category: GetAnnouncementResponseDtoCategory;
   /** 공지 대상 */
   audience: GetAnnouncementResponseDtoAudience;
-  /** 공지 채널 */
-  channel: GetAnnouncementResponseDtoChannel;
   /** 공지 우선순위 */
   priority: GetAnnouncementResponseDtoPriority;
   /** 상단 고정 여부 */
   pinned: boolean;
-  /** 게시 확정 일시 */
-  publishedAt?: string;
-  /** 게시 시작일 */
-  startAt?: string;
-  /** 게시 종료일 */
-  endAt?: string;
+  /**
+     * 게시 확정 일시
+     * @nullable
+     */
+  publishedAt: string | null;
+  /**
+     * 게시 시작일
+     * @nullable
+     */
+  startAt: string | null;
+  /**
+     * 게시 종료일
+     * @nullable
+     */
+  endAt: string | null;
   /** 게시 상태 */
   status: GetAnnouncementResponseDtoStatus;
   /** 게시 확정 여부 */

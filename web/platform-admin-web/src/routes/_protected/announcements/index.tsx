@@ -1,6 +1,8 @@
 import { createFileRoute } from '@tanstack/react-router';
 
-import { AnnouncementListTab } from './-tabs/AnnouncementListTab';
+import { ConsoleFrame } from '../-components/ConsoleFrame';
+import { ConsoleSections } from '../-components/ConsoleSections';
+import { AnnouncementListSection } from './-sections/AnnouncementListSection';
 
 export const Route = createFileRoute('/_protected/announcements/')({
   component: AnnouncementsPage,
@@ -8,16 +10,13 @@ export const Route = createFileRoute('/_protected/announcements/')({
 
 function AnnouncementsPage() {
   return (
-    <div className="
-      mx-auto flex size-full max-w-300 flex-col gap-6 overflow-hidden p-6
-    "
+    <ConsoleFrame
+      title="공지사항 관리"
+      description="운영 공지의 작성, 게시 일정, 상단 고정과 미리보기를 한 화면에서 관리합니다."
     >
-      <header className="space-y-2 border-b border-slate-200 pb-4">
-        <h1 className="text-2xl font-bold tracking-tight text-slate-950">공지사항 관리</h1>
-        <p className="max-w-3xl text-sm text-slate-500">공지 목록과 검색을 확인합니다.</p>
-      </header>
-
-      <AnnouncementListTab />
-    </div>
+      <ConsoleSections>
+        <AnnouncementListSection />
+      </ConsoleSections>
+    </ConsoleFrame>
   );
 }

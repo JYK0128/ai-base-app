@@ -63,19 +63,19 @@ class GetTermDocumentListFiltersDto extends FilterableRequestDto<TermsDocument> 
 }
 
 export class GetTermDocumentListRequestDto extends ListRequestDto<TermsDocument> {
-  @ApiPropertyOptional({ type: () => GetTermDocumentListFiltersDto, description: '필터 조건' })
+  @ApiPropertyOptional({ example: { scope: TermsDocumentScope.PLATFORM, status: TermsDocumentStatus.PUBLISHED }, type: () => GetTermDocumentListFiltersDto, description: '필터 조건' })
   @IsOptional()
   @ValidateNested()
   @Type(() => GetTermDocumentListFiltersDto)
   filters: GetTermDocumentListFiltersDto = new GetTermDocumentListFiltersDto();
 
-  @ApiPropertyOptional({ description: '정렬 필드', isArray: true, enum: TERM_DOCUMENT_LIST_SORT })
+  @ApiPropertyOptional({ example: ['createdAt'], isArray: true, enum: TERM_DOCUMENT_LIST_SORT, description: '정렬 필드' })
   @IsOptional()
   @IsIn(TERM_DOCUMENT_LIST_SORT, { each: true })
   @Type(() => String)
   sort: Array<SortKey<TermsDocument>> = ['createdAt'];
 
-  @ApiPropertyOptional({ description: '정렬 방향', isArray: true, enum: SortDirection })
+  @ApiPropertyOptional({ example: ['desc'], isArray: true, enum: SortDirection, description: '정렬 방향' })
   @IsOptional()
   @IsEnum(SortDirection, { each: true })
   @Type(() => String)

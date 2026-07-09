@@ -19,7 +19,7 @@ export class GetTermDocumentVersionListHandler implements IQueryHandler<GetTermD
   }
 
   private async processList(query: GetTermDocumentVersionListContract): Promise<GetTermDocumentVersionListResponseDto> {
-    const { offset, limit } = query.data.toListOptions();
+    const listOptions = query.data.toListOptions();
     const termsDocument = await this.Asserter.assert(
       TermsDocument.findOne({ id: query.documentId }),
       'DOCUMENT_NOT_FOUND',
@@ -29,14 +29,12 @@ export class GetTermDocumentVersionListHandler implements IQueryHandler<GetTermD
       { termsDocument: termsDocument.id },
       {
         populate: ['termsDocument'],
-        ...query.data.toListOptions(),
+        ...listOptions,
       },
     );
 
     return new GetTermDocumentVersionListResponseDto({
       items: versions.map((version) => new GetTermDocumentVersionItem(version)),
-      offset,
-      limit,
     });
   }
 }

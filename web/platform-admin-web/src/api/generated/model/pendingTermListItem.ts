@@ -5,7 +5,6 @@
  * The AI Base App Platform Service API documentation
  * OpenAPI spec version: 1.0
  */
-import type { PendingTermListItemOrganizationId } from './pendingTermListItemOrganizationId';
 import type { PendingTermListItemScope } from './pendingTermListItemScope';
 
 export interface PendingTermListItem {
@@ -17,7 +16,7 @@ export interface PendingTermListItem {
      * 조직 식별자
      * @nullable
      */
-  organizationId: PendingTermListItemOrganizationId;
+  organizationId: string | null;
   /** 약관 적용 범위 */
   scope: PendingTermListItemScope;
   /** 약관 버전 태그 */

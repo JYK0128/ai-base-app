@@ -21,7 +21,7 @@ limit?: number;
 /**
  * 필터 조건
  */
-filters: GetAnnouncementPageFilters;
+filters?: GetAnnouncementPageFilters;
 /**
  * 정렬 필드
  */

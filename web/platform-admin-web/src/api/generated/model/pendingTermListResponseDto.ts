@@ -8,10 +8,6 @@
 import type { PendingTermListItem } from './pendingTermListItem';
 
 export interface PendingTermListResponseDto {
-  /** 조회 시작 오프셋 */
-  offset?: number;
-  /** 조회 개수 제한 */
-  limit?: number;
   /** 동의 대기 약관 목록 */
   items: PendingTermListItem[];
 }

@@ -1,5 +1,5 @@
 import { Collection, EntityName, type Opt, type Rel } from '@mikro-orm/core';
-import { Entity, Enum, ManyToOne, OneToMany, Property } from '@mikro-orm/decorators/legacy';
+import { Entity, Enum, ManyToOne, OneToMany, Property, Unique } from '@mikro-orm/decorators/legacy';
 
 import { CoreEntity } from '../../core/core.entity';
 import { TermsConsent } from './terms-consent.entity';
@@ -11,6 +11,7 @@ import { isTermsVersionCurrentlyEffective,
          isTermsVersionScheduledForActivation } from './terms-version.policy-status';
 
 @Entity({ schema: 'platform' })
+@Unique({ properties: ['termsDocument', 'label'] })
 export class TermsVersion extends CoreEntity<TermsVersion> {
   [EntityName]?: 'TermsVersion';
 

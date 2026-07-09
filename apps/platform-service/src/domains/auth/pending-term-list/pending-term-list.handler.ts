@@ -39,6 +39,7 @@ export class PendingTermListHandler implements IQueryHandler<PendingTermListCont
     organization: AuthOrganizationContext,
     member: AuthMemberContext,
   ): Promise<PendingTermListResponseDto> {
+    const now = new Date();
     const latestVersionSubquery = TermsVersion
       .getQueryBuilder('sub_tv')
       .select(sql`MAX(sub_tv."effectiveAt")`)
@@ -66,13 +67,23 @@ export class PendingTermListHandler implements IQueryHandler<PendingTermListCont
         'tc.createdAt': { $in: latestConsentSubquery },
       })
       .where({
-        'required': true,
-        'metadata': { publishedAt: { $ne: null } },
-        '$or': [
-          { organization: null },
-          { organization: organization.id },
+        $and: [
+          { required: true },
+          { metadata: { publishedAt: { $ne: null } } },
+          {
+            $or: [
+              { metadata: { terminatedAt: null } },
+              { metadata: { terminatedAt: { $gt: now } } },
+            ],
+          },
+          {
+            $or: [
+              { organization: null },
+              { organization: organization.id },
+            ],
+          },
+          { 'tv.effectiveAt': { $in: latestVersionSubquery } },
         ],
-        'tv.effectiveAt': { $in: latestVersionSubquery },
       })
       .select([
         `td.id as documentId`,

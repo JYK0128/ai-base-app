@@ -1,12 +1,12 @@
 import { Badge, Button, type ColumnDef, confirm, DataTable, toast } from '@pkg/ui';
 import { useQueryClient } from '@tanstack/react-query';
-import { Megaphone, Pin, Plus } from 'lucide-react';
+import { Pin, Plus } from 'lucide-react';
 import { useState } from 'react';
 
 import { useAnnouncementControllerCreateAnnouncementV1, useAnnouncementControllerDeleteAnnouncementV1, useAnnouncementControllerGetAnnouncementPageV1, useAnnouncementControllerUpdateAnnouncementV1 } from '@/api/generated/endpoints';
 import type { AnnouncementPageItem, AnnouncementPageItemAudience, AnnouncementPageItemCategory, AnnouncementPageItemStatus, CreateAnnouncementRequestDto, UpdateAnnouncementRequestDto } from '@/api/generated/model';
 
-import { ManagementPanel } from '../../-components/ManagementPanel';
+import { ConsolePanel } from '../../-components/ConsolePanel';
 import { buildAnnouncementPreviewText, createBlankAnnouncement, formatDateTime, toAnnouncementEditorSeed } from '../-helpers/announcements.helper';
 import { ANNOUNCEMENT_AUDIENCE_LABELS, ANNOUNCEMENT_CATEGORY_LABELS, ANNOUNCEMENT_STATUS_LABELS, type AnnouncementEditorSeed } from '../-helpers/announcements-types.helper';
 import { AnnouncementEditorModal } from '../-modals/AnnouncementEditorModal';
@@ -54,6 +54,7 @@ const ANNOUNCEMENT_COLUMNS = [
             </button>
           </div>
           <p className="line-clamp-2 text-xs text-slate-500">{buildAnnouncementPreviewText(row.original.content)}</p>
+          <p className="text-[11px] text-slate-400">{`작성자 ${row.original.author}`}</p>
         </div>
       );
     },
@@ -150,7 +151,7 @@ const ANNOUNCEMENT_COLUMNS = [
   },
 ] satisfies ColumnDef<AnnouncementPageItem>[];
 
-export function AnnouncementListTab() {
+export function AnnouncementListSection() {
   const queryClient = useQueryClient();
   const announcementsQuery = useAnnouncementControllerGetAnnouncementPageV1({
     filters: {},
@@ -169,9 +170,6 @@ export function AnnouncementListTab() {
       onSuccess: () => {
         void queryClient.invalidateQueries({ queryKey: announcementsQuery.queryKey });
       },
-      onError: () => {
-        toast.error('공지사항 저장에 실패했습니다.');
-      },
     },
   });
 
@@ -180,9 +178,6 @@ export function AnnouncementListTab() {
       onSuccess: () => {
         void queryClient.invalidateQueries({ queryKey: announcementsQuery.queryKey });
       },
-      onError: () => {
-        toast.error('공지사항 수정에 실패했습니다.');
-      },
     },
   });
 
@@ -190,9 +185,6 @@ export function AnnouncementListTab() {
     mutation: {
       onSuccess: () => {
         void queryClient.invalidateQueries({ queryKey: announcementsQuery.queryKey });
-      },
-      onError: () => {
-        toast.error('공지사항 삭제에 실패했습니다.');
       },
     },
   });
@@ -273,28 +265,26 @@ export function AnnouncementListTab() {
   };
 
   return (
-    <>
-      <ManagementPanel
-        icon={<Megaphone className="size-4" />}
+    <div className="flex min-h-0 flex-1 flex-col">
+      <ConsolePanel
+        icon="megaphone"
         title="공지 목록"
         description="운영 공지를 한 화면에서 확인하고 새 공지를 추가할 수 있습니다."
-        actions={(
-          <Button type="button" size="sm" onClick={handleOpenCreateEditor}>
+        actions={[
+          <Button key="create" type="button" size="sm" onClick={handleOpenCreateEditor}>
             <Plus className="size-3.5" />
             추가
-          </Button>
-        )}
+          </Button>,
+        ]}
       >
-        <div className="scroll flex-1">
-          <DataTable
-            columns={ANNOUNCEMENT_COLUMNS}
-            data={announcements}
-            filterColumns={['title', 'content', 'category', 'audience', 'status']}
-            filterPlaceholder="제목, 내용, 분류, 대상으로 검색"
-            meta={metaValue}
-          />
-        </div>
-      </ManagementPanel>
+        <DataTable
+          columns={ANNOUNCEMENT_COLUMNS}
+          data={announcements}
+          filterColumns={['title', 'content', 'category', 'audience', 'status']}
+          filterPlaceholder="제목, 내용, 분류, 대상으로 검색"
+          meta={metaValue}
+        />
+      </ConsolePanel>
 
       {draftAnnouncement
         ? (
@@ -319,6 +309,6 @@ export function AnnouncementListTab() {
           />
         )
         : null}
-    </>
+    </div>
   );
 }

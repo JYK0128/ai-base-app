@@ -38,20 +38,53 @@ export class UpdateAnnouncementHandler implements ICommandHandler<UpdateAnnounce
     command: UpdateAnnouncementContract,
     account: AuthAccountContext,
   ): Promise<UpdateAnnouncementResponseDto> {
-    const metadataExpression = new JsonbSetQueryBuilder<{ metadata: AnnouncementMetadata }>().build(
-      'metadata',
-      this.buildAnnouncementMetadataPatch(command.data),
-    );
+    const announcement = await Announcement.findOne({ id: command.data.id });
+
+    if (!announcement) {
+      throw new NotFoundException('ANNOUNCEMENT_NOT_FOUND');
+    }
+
+    const metadataPatch: Partial<AnnouncementMetadata> = {};
+    if (command.data.publishedAt !== undefined) {
+      metadataPatch.publishedAt = command.data.publishedAt;
+    }
+    if (command.data.startAt !== undefined) {
+      metadataPatch.startAt = command.data.startAt;
+    }
+    if (command.data.endAt !== undefined) {
+      metadataPatch.endAt = command.data.endAt;
+    }
+
+    const updates: Record<string, unknown> = {
+      updatedAt: new Date(),
+      updatedBy: account.id,
+    };
+
+    if (command.data.title !== undefined) {
+      updates.title = command.data.title.trim();
+    }
+    if (command.data.content !== undefined) {
+      updates.content = command.data.content.trim();
+    }
+    if (command.data.category !== undefined) {
+      updates.category = command.data.category;
+    }
+    if (command.data.audience !== undefined) {
+      updates.audience = command.data.audience;
+    }
+    if (command.data.priority !== undefined) {
+      updates.priority = command.data.priority;
+    }
+    if (command.data.pinned !== undefined) {
+      updates.pinned = command.data.pinned;
+    }
+    if (Object.keys(metadataPatch).length > 0) {
+      updates.metadata = new JsonbSetQueryBuilder<{ metadata: AnnouncementMetadata }>().build('metadata', metadataPatch);
+    }
 
     const result = await Announcement
       .getQueryBuilder()
-      .update({
-        title: command.data.title.trim(),
-        content: command.data.content.trim(),
-        updatedAt: new Date(),
-        updatedBy: account.id,
-        metadata: metadataExpression,
-      })
+      .update(updates)
       .where({ id: command.data.id })
       .execute();
 
@@ -60,51 +93,5 @@ export class UpdateAnnouncementHandler implements ICommandHandler<UpdateAnnounce
     }
 
     return new UpdateAnnouncementResponseDto(command.data.id);
-  }
-
-  private buildAnnouncementMetadataPatch(
-    data: UpdateAnnouncementContract['data'],
-  ): Partial<AnnouncementMetadata> {
-    const patch: Partial<AnnouncementMetadata> = {};
-
-    if (data.category !== undefined) {
-      patch.category = data.category;
-    }
-
-    if (data.audience !== undefined) {
-      patch.audience = data.audience;
-    }
-
-    if (data.channel !== undefined) {
-      patch.channel = data.channel;
-    }
-
-    if (data.priority !== undefined) {
-      patch.priority = data.priority;
-    }
-
-    if (data.pinned !== undefined) {
-      patch.pinned = data.pinned;
-    }
-
-    if (data.publishedAt !== undefined) {
-      patch.publishedAt = new Date(data.publishedAt);
-    }
-    else if (data.isPublished === true) {
-      patch.publishedAt = new Date();
-    }
-    else if (data.isPublished === false) {
-      patch.publishedAt = null;
-    }
-
-    if (data.startAt !== undefined) {
-      patch.startAt = new Date(data.startAt);
-    }
-
-    if (data.endAt !== undefined) {
-      patch.endAt = new Date(data.endAt);
-    }
-
-    return patch;
   }
 }

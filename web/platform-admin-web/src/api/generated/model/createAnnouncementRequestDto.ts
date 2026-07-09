@@ -7,7 +7,6 @@
  */
 import type { CreateAnnouncementRequestDtoAudience } from './createAnnouncementRequestDtoAudience';
 import type { CreateAnnouncementRequestDtoCategory } from './createAnnouncementRequestDtoCategory';
-import type { CreateAnnouncementRequestDtoChannel } from './createAnnouncementRequestDtoChannel';
 import type { CreateAnnouncementRequestDtoPriority } from './createAnnouncementRequestDtoPriority';
 
 export interface CreateAnnouncementRequestDto {
@@ -16,19 +15,20 @@ export interface CreateAnnouncementRequestDto {
   /** 공지사항 본문 */
   content: string;
   /** 공지 분류 */
-  category?: CreateAnnouncementRequestDtoCategory;
+  category: CreateAnnouncementRequestDtoCategory;
   /** 공지 대상 */
-  audience?: CreateAnnouncementRequestDtoAudience;
-  /** 공지 채널 */
-  channel?: CreateAnnouncementRequestDtoChannel;
+  audience: CreateAnnouncementRequestDtoAudience;
   /** 공지 우선순위 */
-  priority?: CreateAnnouncementRequestDtoPriority;
+  priority: CreateAnnouncementRequestDtoPriority;
   /** 공지 목록에서 우선 노출할지 여부 */
-  pinned?: boolean;
-  /** 게시 확정 일시 */
-  publishedAt?: string;
+  pinned: boolean;
   /** 게시 시작일 */
-  startAt?: string;
+  startAt: string;
   /** 게시 종료일 */
-  endAt?: string;
+  endAt: string;
+  /**
+     * 게시 확정 일시
+     * @nullable
+     */
+  publishedAt: string | null;
 }

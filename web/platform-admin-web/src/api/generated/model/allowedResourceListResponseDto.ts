@@ -8,10 +8,6 @@
 import type { AllowedResourceListItem } from './allowedResourceListItem';
 
 export interface AllowedResourceListResponseDto {
-  /** 조회 시작 오프셋 */
-  offset?: number;
-  /** 조회 개수 제한 */
-  limit?: number;
   /** 권한이 부여된 리소스 목록 */
   items: AllowedResourceListItem[];
 }

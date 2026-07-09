@@ -16,8 +16,9 @@ export type TermsControllerGetTermsDocumentListV1Params = {
 offset?: number;
 /**
  * 페이지 크기
+ * @nullable
  */
-limit?: number;
+limit?: number | null;
 /**
  * 필터 조건
  */

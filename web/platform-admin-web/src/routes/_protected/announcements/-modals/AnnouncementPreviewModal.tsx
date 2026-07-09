@@ -7,7 +7,7 @@ import { Eye } from 'lucide-react';
 import type { AnnouncementPageItem } from '@/api/generated/model';
 
 import { buildAnnouncementPreviewText, formatDateTime } from '../-helpers/announcements.helper';
-import { ANNOUNCEMENT_AUDIENCE_LABELS, ANNOUNCEMENT_CATEGORY_LABELS, ANNOUNCEMENT_STATUS_LABELS } from '../-helpers/announcements-types.helper';
+import { ANNOUNCEMENT_AUDIENCE_LABELS, ANNOUNCEMENT_CATEGORY_LABELS, ANNOUNCEMENT_PRIORITY_LABELS, ANNOUNCEMENT_STATUS_LABELS } from '../-helpers/announcements-types.helper';
 
 interface AnnouncementPreviewModalProps {
   readonly announcement: AnnouncementPageItem
@@ -92,9 +92,36 @@ export function AnnouncementPreviewModal({ announcement, open, onOpenChange, onE
                     text-[11px] tracking-[0.2em] text-slate-400 uppercase
                   "
                   >
+                    작성자
+                  </div>
+                  <div>{announcement.author}</div>
+                </div>
+                <div className="space-y-1">
+                  <div className="
+                    text-[11px] tracking-[0.2em] text-slate-400 uppercase
+                  "
+                  >
                     대상
                   </div>
                   <div>{ANNOUNCEMENT_AUDIENCE_LABELS[announcement.audience]}</div>
+                </div>
+                <div className="space-y-1">
+                  <div className="
+                    text-[11px] tracking-[0.2em] text-slate-400 uppercase
+                  "
+                  >
+                    우선순위
+                  </div>
+                  <div>{ANNOUNCEMENT_PRIORITY_LABELS[announcement.priority]}</div>
+                </div>
+                <div className="space-y-1">
+                  <div className="
+                    text-[11px] tracking-[0.2em] text-slate-400 uppercase
+                  "
+                  >
+                    상단 고정
+                  </div>
+                  <div>{announcement.pinned ? '사용' : '미사용'}</div>
                 </div>
                 <div className="space-y-1">
                   <div className="

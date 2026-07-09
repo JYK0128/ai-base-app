@@ -34,9 +34,11 @@ export class GetTermDocumentListHandler implements IQueryHandler<GetTermDocument
     query: GetTermDocumentListContract,
     organization: AuthOrganizationContext | undefined,
   ): Promise<GetTermDocumentListResponseDto> {
-    const { offset, limit } = query.data.toListOptions();
+    const listOptions = query.data.toListOptions();
     if (!organization) {
-      return new GetTermDocumentListResponseDto({ items: [], offset, limit });
+      return new GetTermDocumentListResponseDto({
+        items: [],
+      });
     }
 
     let scopeFilter: FilterQuery<TermsDocument>;
@@ -56,23 +58,19 @@ export class GetTermDocumentListHandler implements IQueryHandler<GetTermDocument
       };
     }
 
-    const filter = {
-      ...scopeFilter,
-      ...query.data.toFilterQuery(),
-    } as FilterQuery<TermsDocument>;
-
     const documents = await TermsDocument.find(
-      filter,
+      {
+        ...scopeFilter,
+        ...query.data.toFilterQuery(),
+      } as FilterQuery<TermsDocument>,
       {
         populate: ['organization', 'versions'],
-        orderBy: query.data.toListOptions().orderBy,
+        orderBy: listOptions.orderBy,
       },
     );
 
     return new GetTermDocumentListResponseDto({
       items: documents.map((document) => new GetTermDocumentItem(document)),
-      offset,
-      limit,
     });
   }
 }

@@ -97,7 +97,6 @@ export function createBlankAnnouncement(): AnnouncementEditorSeed {
     title: '',
     category: 'NOTICE',
     audience: 'ALL',
-    channel: 'IN_APP',
     priority: 'NORMAL',
     pinned: false,
     publishedAt: '',
@@ -114,7 +113,6 @@ export function toAnnouncementEditorSeed(announcement: AnnouncementPageItem): An
     title: announcement.title,
     category: announcement.category,
     audience: announcement.audience,
-    channel: announcement.channel,
     priority: announcement.priority,
     pinned: announcement.pinned,
     publishedAt: announcement.publishedAt ?? '',
@@ -131,6 +129,7 @@ export function toEditorState(announcement: AnnouncementEditorSeed): Announcemen
     category: announcement.category,
     audience: normalizeEditorAudience(announcement.audience),
     priority: announcement.priority,
+    pinned: announcement.pinned,
     isPublished: announcement.isPublished ?? Boolean(announcement.publishedAt),
     startAt: toDateTimeInputValue(announcement.startAt),
     endAt: toDateTimeInputValue(announcement.endAt),
@@ -149,9 +148,8 @@ export function buildCreateAnnouncementDto(
     content,
     category: state.category,
     audience: state.audience,
-    channel: original.channel,
     priority: state.priority,
-    pinned: original.pinned,
+    pinned: state.pinned,
     publishedAt: state.isPublished
       ? (original.publishedAt || new Date().toISOString())
       : undefined,
@@ -170,10 +168,9 @@ export function buildUpdateAnnouncementDto(
     content: state.content.trim(),
     category: state.category,
     audience: state.audience,
-    channel: original.channel,
     priority: state.priority,
     isPublished: state.isPublished,
-    pinned: original.pinned,
+    pinned: state.pinned,
     publishedAt: state.isPublished
       ? (original.publishedAt || new Date().toISOString())
       : undefined,
