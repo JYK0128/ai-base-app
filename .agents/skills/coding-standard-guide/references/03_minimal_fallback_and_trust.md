@@ -12,6 +12,9 @@
   * `*.contract.ts` 클래스 정의를 외부 API 통신의 단일 신뢰 원천(Source)으로 설정함.
   * 입력값 검증 DTO(`*.request.dto.ts`) 및 응답 DTO(`*.response.dto.ts`)는 이 계약 클래스의 제네릭 사양을 엄격히 추종하여 작성함.
   * 생성형 API 모델은 사용 지점에서 원본 이름을 직접 참조함. `AnnouncementItem = AnnouncementPageItem` 같은 이름 재매핑 별칭은 생성하지 않음.
+  * `web/**/api/generated/**` 및 `web/**/api/zod.ts`는 단일 신뢰 원천이 아니라 서버 OpenAPI 계약의 파생 산출물로 취급함.
+  * 파생 산출물은 서버 계약 변경 후 API 생성 명령으로만 갱신함. 수동 편집은 계약 불일치를 숨기는 임시 우회로 간주하고 사용하지 않음.
+  * API 생성 명령을 실행할 수 없는 상황에서는 파생 산출물을 직접 보정하지 않고, 서버 계약 변경 상태와 생성 실패 사유를 보고함.
 * **Database 스키마 체계**:
   * `CoreEntity`를 상속하여 데코레이터가 작성된 MikroORM 엔티티 클래스를 데이터베이스 모델의 단일 신뢰 원천(Source)으로 관리함.
   * Kysely Query Builder의 static 타입 추론 및 DB 마이그레이션 파일은 이 엔티티의 메타데이터 정의를 기반으로 자동 갱신 및 참조되도록 유지함.

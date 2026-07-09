@@ -3,7 +3,8 @@
 ## 1. 개요
 
 * 플랫폼 내 각 화면(Menu), 하위 상세 자원(Button/Action), API Endpoint에 연계되는 전체 리소스 트리 구조의 조회/수정 기능 제공.
-* 이에 매핑된 역할별 권한 매트릭스 구성 기능 제공.
+* 리소스 트리의 생성, 수정, 삭제, 정렬 순서 갱신 기능 제공.
+* 역할별 권한 매트릭스 구성은 별도 `/permissions` 메뉴에서 제공함.
 * 구현 파일: `web/platform-admin-web/src/routes/_protected/resources/index.tsx` (라우트 경로: `/resources`).
 
 ## 2. 메뉴 식별 정보
@@ -130,4 +131,4 @@
 | 권한 세트 퍼미션 수정 | `POST` | `/api/v1/resources/permission-sets/update-permissions` | `UpdatePermissionSetPermissionsDto` | 권한 코드 배열 매핑 수정 수행 |
 
 ---
-*최종 업데이트: 2026-06-15*
+*최종 업데이트: 2026-07-05*

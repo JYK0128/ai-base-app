@@ -34,12 +34,18 @@
 
 ---
 
-## 2. Getter / Setter 및 Policy 분리 규칙
+## 2. Getter / Setter 및 Policy 정의 규칙
 
-- **비즈니스 상태 분리**:
-  - 비즈니스 연산, 동적 계산 또는 상태(Status) 판별 로직은 엔티티 내부 getter에 직접 코딩하지 않고, `[domain]-[name].policy-status.ts` 등 **순수 함수 형태의 정책 파일로 분리**하여 개발함
+- **엔티티 내부 표현 우선**:
+  - 엔티티의 현재 필드만으로 즉시 판단 가능한 단순 파생값은 getter로 노출함
+  - getter는 외부 인터페이스를 안정적으로 제공하는 용도로 사용하고, DB 저장 필드가 아닌 값은 `@Property({ persist: false })`를 명시함
+- **Policy 파일 분리 기준**:
+  - 엔티티가 직접 보유한 값을 단순히 반환하거나 null/undefined를 정규화하는 getter는 엔티티 안에 유지함
+  - 상태 산출, 가입 가능 여부, 만료 여부처럼 여러 필드 조건이 결합되고 여러 곳에서 재사용되는 도메인 판단 규칙은 policy 파일로 분리함
+  - policy 파일은 도메인 용어를 드러내는 함수 이름을 사용하고, 엔티티/metadata 등 필요한 값만 인자로 받는 순수 판단 함수로 작성함
+  - 모든 getter와 모든 조건식을 policy로 분리하지 않음
 - **readonly getter 노출**:
-  - 분리된 정책 함수를 Aggregate Root 엔티티에서 readonly getter로 호출하여 외부 인터페이스에 일관되게 노출함
+  - 분리된 policy 함수가 존재하는 경우 Aggregate Root 엔티티의 readonly getter에서 호출하여 외부 인터페이스를 일관되게 노출할 수 있음
 - **예시 코드**:
   - `member-invite.policy-status.ts`:
 

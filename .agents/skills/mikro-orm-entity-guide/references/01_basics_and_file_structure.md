@@ -14,7 +14,7 @@
 ## 2. 파일 구조
 
 - **엔티티 파일**: `[domain]-[name].entity.ts` 규격 준수 (예: `member-invite.entity.ts`)
-- **정책(Policy) 파일**: `[domain]-[name].policy-status.ts` 규격 준수 (비즈니스 상태 판별 함수 분리)
+- **정책(Policy) 파일**: `[domain]-[name].policy-[purpose].ts` 또는 `[domain]-[name].policy-status.ts` 규격 사용 (복잡하거나 재사용되는 도메인 판단 규칙이 있을 때 분리)
 - **상수(Constants) 파일**: `[domain].constants.ts` 규격 준수 (도메인 범위 상수/Enum 분리)
 - **경로 표준**: `packages/database/src/domains/[schema]/[sub-domain]/`
   - 예시:
@@ -45,4 +45,3 @@
 - **임포트 가이드**:
   - `Collection`, `EntityName` 등 런타임 클래스 및 심볼: 일반 `import` 구문 사용
   - `Opt`, `Rel` 등 순수 타입 정보: `type-only import` 사용 권장
-

@@ -1,6 +1,6 @@
 ---
 name: nest-cqrs-guide
-description: NestJS CQRS message, handler, event, and error structure guidance. Use when working on command/query/event classes, handlers, contracts, DTOs, ExceptionGuard-based errors, CQRS tests, and identify/verify/process handler flow.
+description: NestJS CQRS message, handler, event, error, and DTO structure guidance. Use when working on command/query/event classes, handlers, contracts, request/response DTOs, sort request DTOs, ExceptionGuard-based errors, CQRS tests, and identify/verify/process handler flow.
 ---
 
 # NestJS CQRS Guide
@@ -22,6 +22,7 @@ description: NestJS CQRS message, handler, event, and error structure guidance. 
 | 🛠️ 3. 핵심 구성 요소 구현 | 메시지 클래스, 핸들러, 에러/어서터, 이벤트, DTO/contract 작성 기준 | `references/03_implementation_details.md` |
 | 🧪 4. 테스트 및 린트 | CQRS 테스트 방식, import 정리, 타입체크/린트 검증 기준 | `references/04_testing_and_lint.md` |
 | 🔄 5. 핸들러 단계 규칙 | `command/query` 기준 `identify - verify - process` 흐름, `process` 인자 순서, query DTO wrapping 규칙 | `references/05_handler_flow_contracts.md` |
+| 🧾 6. DTO 패턴 | request/response/sort DTO 작성 규칙, optional/nullable/enum/예시 기준 | `references/06_dto_patterns.md` |
 
 ---
 
