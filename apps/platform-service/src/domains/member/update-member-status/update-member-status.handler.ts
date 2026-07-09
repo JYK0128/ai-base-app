@@ -65,11 +65,15 @@ export class UpdateMemberStatusHandler implements ICommandHandler<UpdateMemberSt
   }
 
   private async processStatusUpdate(
-    status: MemberStatus,
+    status: MemberStatus | undefined,
     member: Member,
     requestMember: Member,
     organization: Organization,
   ): Promise<void> {
+    if (status === undefined) {
+      return;
+    }
+
     const currentAssignment = await this.identifyCurrentAssignment(member, organization);
     const ownerCount = await OrganizationRoleAssignment.count({
       organization: { id: organization.id },

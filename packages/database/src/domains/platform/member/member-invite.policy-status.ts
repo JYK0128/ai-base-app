@@ -16,7 +16,7 @@ export function getMemberInviteStatus(
     return MemberInviteStatus.CANCELED;
   }
 
-  if (metadata?.expiredAt) {
+  if (metadata?.expiredAt && new Date(metadata.expiredAt).getTime() <= Date.now()) {
     return MemberInviteStatus.EXPIRED;
   }
 

@@ -15,13 +15,25 @@ export interface ApiResponse {
      * 응답 데이터
      * @nullable
      */
-  data?: ApiResponseData;
-  /** 에러 상세 정보 */
-  error?: ErrorInfo;
-  /** 응답 메시지 */
-  message?: string;
-  /** 추적 ID */
-  traceId?: string;
-  /** 요청 ID */
-  requestId?: string;
+  data: ApiResponseData;
+  /**
+     * 에러 상세 정보
+     * @nullable
+     */
+  error: ErrorInfo | null;
+  /**
+     * 응답 메시지
+     * @nullable
+     */
+  message: string | null;
+  /**
+     * 추적 ID
+     * @nullable
+     */
+  traceId: string | null;
+  /**
+     * 요청 ID
+     * @nullable
+     */
+  requestId: string | null;
 }

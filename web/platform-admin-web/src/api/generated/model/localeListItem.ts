@@ -16,7 +16,7 @@ export interface LocaleListItem {
      * 지역 코드
      * @nullable
      */
-  regionCode?: string | null;
+  regionCode: string | null;
   /** 문자 방향 */
   direction: LocaleListItemDirection;
   /** 활성화 여부 */
@@ -25,5 +25,5 @@ export interface LocaleListItem {
      * 정렬 순서
      * @nullable
      */
-  sortOrder?: number | null;
+  sortOrder: number | null;
 }

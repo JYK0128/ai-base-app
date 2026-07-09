@@ -12,17 +12,17 @@ export abstract class CursorRequestDto<
 > extends SortableRequestDto<TEntity, TSortKey> {
   abstract filters: TFilters;
 
-  @ApiPropertyOptional({ description: '커서', example: 'eyJpZCI6IjAxOWU1MjM2LWFkYWUtNzBkNy1hOGY3LTJkYzkwYmRmNzA4MSJ9', type: String })
+  @ApiPropertyOptional({ example: 'eyJpZCI6IjAxOWU1MjM2LWFkYWUtNzBkNy1hOGY3LTJkYzkwYmRmNzA4MSJ9', type: String, nullable: true, description: '커서' })
   @IsOptional()
   @Type(() => String)
-  cursor?: string;
+  cursor: string | null = null;
 
-  @ApiPropertyOptional({ description: '페이지 크기', example: 20, type: Number })
+  @ApiPropertyOptional({ example: 20, type: Number, description: '페이지 크기' })
   @IsOptional()
   @Type(() => Number)
   @IsInt()
   @Min(1)
-  limit = 20;
+  limit: number = 20;
 
   toFilterQuery() {
     return this.filters.toFilterQuery();

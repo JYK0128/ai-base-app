@@ -21,7 +21,9 @@ export class UpdateMemberRoleHandler implements ICommandHandler<UpdateMemberRole
     const organization = await this.identifyOrganization();
     const member = await this.identifyMember(organization, command.data.id);
     const requestMember = await this.identifyRequestMember();
-    const role = await this.identifyRole(organization, command.data.role);
+    const role = command.data.role === undefined
+      ? undefined
+      : await this.identifyRole(organization, command.data.role);
 
     await this.verifySelfMutation(member, requestMember);
     await this.processRoleUpdate(member, requestMember, organization, role);
@@ -76,8 +78,12 @@ export class UpdateMemberRoleHandler implements ICommandHandler<UpdateMemberRole
     member: Member,
     requestMember: Member,
     organization: Organization,
-    role: OrganizationRole,
+    role: OrganizationRole | undefined,
   ): Promise<void> {
+    if (!role) {
+      return;
+    }
+
     const currentAssignment = await this.identifyCurrentAssignment(member, organization);
     if (currentAssignment?.role.code === role.code) {
       return;

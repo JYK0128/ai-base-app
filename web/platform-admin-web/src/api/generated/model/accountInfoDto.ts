@@ -5,7 +5,6 @@
  * The AI Base App Platform Service API documentation
  * OpenAPI spec version: 1.0
  */
-import type { AccountInfoDtoLastLoginAt } from './accountInfoDtoLastLoginAt';
 import type { AccountInfoDtoStatus } from './accountInfoDtoStatus';
 
 export interface AccountInfoDto {
@@ -15,8 +14,11 @@ export interface AccountInfoDto {
   email: string;
   /** 계정 상태 */
   status: AccountInfoDtoStatus;
-  /** 마지막 로그인 일시 */
-  lastLoginAt?: AccountInfoDtoLastLoginAt;
+  /**
+     * 마지막 로그인 일시
+     * @nullable
+     */
+  lastLoginAt: string | null;
   /** 비밀번호 만료 일시 */
   passwordExpiresAt: string;
   /** 휴면 여부 */

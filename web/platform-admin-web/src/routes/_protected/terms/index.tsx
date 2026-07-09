@@ -1,6 +1,8 @@
 import { createFileRoute } from '@tanstack/react-router';
 
-import { TermsManagementTab } from './-tabs/TermsManagementTab';
+import { ConsoleFrame } from '../-components/ConsoleFrame';
+import { ConsoleSections } from '../-components/ConsoleSections';
+import { TermsManagementSection } from './-sections/TermsManagementSection';
 
 export const Route = createFileRoute('/_protected/terms/')({
   component: TermsPage,
@@ -8,20 +10,13 @@ export const Route = createFileRoute('/_protected/terms/')({
 
 function TermsPage() {
   return (
-    <div className="
-      mx-auto flex size-full max-w-300 flex-col gap-6 overflow-hidden p-6
-    "
+    <ConsoleFrame
+      title="약관 관리"
+      description="플랫폼과 조직별 활성 약관 문서와 버전을 관리합니다."
     >
-      <header className="space-y-2 border-b border-slate-200 pb-4">
-        <h1 className="text-2xl font-bold tracking-tight text-slate-950">약관 관리</h1>
-        <p className="max-w-3xl text-sm text-slate-500">
-          플랫폼 또는 조직에 연결된 활성 약관 문서와 버전을 관리합니다.
-        </p>
-      </header>
-
-      <div className="flex flex-1 flex-col">
-        <TermsManagementTab isActive />
-      </div>
-    </div>
+      <ConsoleSections>
+        <TermsManagementSection isActive />
+      </ConsoleSections>
+    </ConsoleFrame>
   );
 }

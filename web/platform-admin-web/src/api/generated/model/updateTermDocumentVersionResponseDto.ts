@@ -6,8 +6,7 @@
  * OpenAPI spec version: 1.0
  */
 
-/**
- * 조직 식별자
- * @nullable
- */
-export type PendingTermListItemOrganizationId = { [key: string]: unknown } | null;
+export interface UpdateTermDocumentVersionResponseDto {
+  /** 식별자 */
+  id: string;
+}

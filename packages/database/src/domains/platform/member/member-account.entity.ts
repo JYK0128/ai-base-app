@@ -26,10 +26,10 @@ export class MemberAccount extends CoreEntity<MemberAccount> {
   passwordExpiresAt!: Date;
 
   @Property({ type: Date, nullable: true })
-  lastLoginAt?: Date;
+  lastLoginAt: Date | null = null;
 
   @Property({ type: 'string', nullable: true })
-  lastLoginIp?: string;
+  lastLoginIp: string | null = null;
 
   @Enum(() => AccountStatus)
   status: Opt<AccountStatus> = AccountStatus.ACTIVE;

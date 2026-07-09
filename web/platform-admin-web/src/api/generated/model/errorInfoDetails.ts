@@ -8,5 +8,6 @@
 
 /**
  * 상세 정보
+ * @nullable
  */
-export type ErrorInfoDetails = { [key: string]: unknown };
+export type ErrorInfoDetails = { [key: string]: unknown } | null;

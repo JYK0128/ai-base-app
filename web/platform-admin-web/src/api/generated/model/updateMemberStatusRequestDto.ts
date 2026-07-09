@@ -11,5 +11,5 @@ export interface UpdateMemberStatusRequestDto {
   /** 멤버 식별자 */
   id: string;
   /** 변경할 상태 */
-  status: UpdateMemberStatusRequestDtoStatus;
+  status?: UpdateMemberStatusRequestDtoStatus;
 }

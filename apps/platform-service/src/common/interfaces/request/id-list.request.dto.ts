@@ -3,7 +3,7 @@ import { Type } from 'class-transformer';
 import { ArrayNotEmpty, IsArray, IsUUID } from 'class-validator';
 
 export abstract class IdListRequestDto<_TEntity extends object> {
-  @ApiProperty({ isArray: true, type: String, description: '식별자 목록' })
+  @ApiProperty({ example: ['019e5236-adae-70d7-a8f7-2dc90bdf7081', '019e5236-adae-70d7-a8f7-2dc90bdf7082'], type: String, isArray: true, description: '식별자 목록' })
   @IsArray()
   @ArrayNotEmpty()
   @Type(() => String)

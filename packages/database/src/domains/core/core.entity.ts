@@ -1,4 +1,4 @@
-import { BaseEntity, ConnectionType, type CountByOptions, type CountOptions, type CreateOptions, type Cursor, type DeleteOptions, type Dictionary, type EntityClass, type EntityData, type EntityKey, EntityRepositoryType, type FilterQuery, type FindByCursorOptions, type FindOneOptions, type FindOneOrFailOptions, type FindOptions, type Loaded, LoggingOptions, type NativeInsertUpdateOptions, OptionalProps, type Primary, type RequiredEntityData, type UpdateOptions, type UpsertManyOptions, type UpsertOptions, type WithUsingOptions } from '@mikro-orm/core';
+import { BaseEntity, ConnectionType, type CountByOptions, type CountOptions, type CreateOptions, type Cursor, type DeleteOptions, type Dictionary, type EntityClass, type EntityData, type EntityKey, EntityRepositoryType, type FilterQuery, type FindByCursorOptions, type FindOneOptions, type FindOneOrFailOptions, type FindOptions, type Loaded, LoggingOptions, type NativeInsertUpdateOptions, type Opt, type Primary, type RequiredEntityData, type UpdateOptions, type UpsertManyOptions, type UpsertOptions, type WithUsingOptions } from '@mikro-orm/core';
 import { PrimaryKey, Property } from '@mikro-orm/decorators/legacy';
 import { QueryBuilder } from '@mikro-orm/postgresql';
 import { uuidv7 } from 'uuidv7';
@@ -8,39 +8,36 @@ import type { EntityManager as SqlEntityManager } from '@/entities.generated';
 import { QueryEngine } from './core.query';
 import { CoreRepository } from './core.repository';
 export abstract class CoreEntity<
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  TEntity extends object = any,
-  Optional extends keyof TEntity = never,
+  Entity extends BaseEntity = BaseEntity,
 > extends BaseEntity {
-  [EntityRepositoryType]?: CoreRepository<TEntity>;
-  [OptionalProps]?: 'createdAt' | 'updatedAt' | 'isDeleted' | Optional;
+  [EntityRepositoryType]?: CoreRepository<Entity>;
 
   @PrimaryKey()
   id: string = uuidv7();
 
   @Property({ type: Date })
-  createdAt: Date = new Date();
+  createdAt: Opt<Date> = new Date();
 
   @Property({ type: 'string', nullable: true })
-  createdBy?: string;
+  createdBy: Opt<string> | null = null;
 
   @Property({ type: Date, nullable: true })
-  updatedAt?: Date;
+  updatedAt: Opt<Date> | null = null;
 
   @Property({ type: 'string', nullable: true })
-  updatedBy?: string;
+  updatedBy: Opt<string> | null = null;
 
   @Property({ type: Date, nullable: true })
-  deletedAt?: Date;
+  deletedAt: Opt<Date> | null = null;
 
   @Property({ type: 'string', nullable: true })
-  deletedBy?: string;
+  deletedBy: Opt<string> | null = null;
 
   @Property({ type: 'json', nullable: true })
-  metadata?: Record<string, unknown>;
+  metadata: Opt<Record<string, unknown>> | null = null;
 
   @Property({ persist: false })
-  get isDeleted(): boolean {
+  get isDeleted(): Opt<boolean> {
     return !!this.deletedAt;
   }
 
@@ -53,14 +50,14 @@ export abstract class CoreEntity<
   }
 
   // === Others ===
-  static getRepository<T extends CoreEntity>(
+  static getRepository<T extends CoreEntity<T>>(
     this: EntityClass<T>,
   ): CoreRepository<T> {
     return QueryEngine.em.getRepository<T>(this) as CoreRepository<T>;
   }
 
   static getQueryBuilder<
-    T extends CoreEntity,
+    T extends BaseEntity,
     RootAlias extends string = never,
   >(
     this: EntityClass<T>,
@@ -72,162 +69,166 @@ export abstract class CoreEntity<
   }
 
   // === Helper ===
-  static getReference<T extends CoreEntity>(
-    this: EntityClass<T>,
-    id: Primary<T>,
-  ): T {
-    return QueryEngine.getReference(this, id);
+  static getReference<Entity extends BaseEntity>(
+    this: EntityClass<Entity>,
+    id: Primary<Entity>,
+  ): Entity {
+    return QueryEngine.getReference<Entity>(this, id);
   }
 
   // === Count ===
-  static count<T extends CoreEntity>(
-    this: EntityClass<T>,
-    where?: FilterQuery<T>,
-    options?: CountOptions<T>,
+  static count<Entity extends BaseEntity>(
+    this: EntityClass<Entity>,
+    where?: FilterQuery<Entity>,
+    options?: CountOptions<Entity>,
   ): Promise<number> {
     return QueryEngine.count(this, where, options);
   }
 
-  static countBy<T extends CoreEntity>(
-    this: EntityClass<T>,
-    groupBy: EntityKey<T> | readonly EntityKey<T>[],
-    options?: CountByOptions<T>,
+  static countBy<Entity extends BaseEntity>(
+    this: EntityClass<Entity>,
+    groupBy: EntityKey<Entity> | readonly EntityKey<Entity>[],
+    options?: CountByOptions<Entity>,
   ): Promise<Dictionary<number>> {
     return QueryEngine.countBy(this, groupBy, options);
   }
 
   // === Create ===
-  static create<T extends CoreEntity, Convert extends boolean = false>(
-    this: EntityClass<T>,
-    data: RequiredEntityData<T, never, Convert>,
+  static create<
+    Entity extends BaseEntity,
+    Convert extends boolean = false,
+  >(
+    this: EntityClass<Entity>,
+    data: RequiredEntityData<Entity, never, Convert>,
     options?: CreateOptions<Convert>,
-  ): T {
+  ): Entity {
     return QueryEngine.create(this, data, options);
   }
 
-  static createMany<T extends CoreEntity>(
-    this: EntityClass<T>,
-    data: RequiredEntityData<T>[],
-  ): T[] {
+  static createMany<Entity extends BaseEntity>(
+    this: EntityClass<Entity>,
+    data: RequiredEntityData<Entity>[],
+  ): Entity[] {
     return QueryEngine.createMany(this, data);
   }
 
   // === Read ===
-  static find<T extends CoreEntity, Hint extends string = never, Fields extends string = never, Excludes extends string = never, Using extends string = never>(
-    this: EntityClass<T>,
-    where: [Using] extends [never] ? FilterQuery<T> : never,
-    options?: FindOptions<T, Hint, Fields, Excludes> & { using?: Using | Using[] },
-  ): Promise<Loaded<T, Hint, Fields, Excludes>[]> {
-    return QueryEngine.find<T, Hint, Fields, Excludes, Using>(this, where as never, options as never);
+  static find<Entity extends BaseEntity, Hint extends string = never, Fields extends string = never, Excludes extends string = never, Using extends string = never>(
+    this: EntityClass<Entity>,
+    where: [Using] extends [never] ? FilterQuery<Entity> : never,
+    options?: FindOptions<Entity, Hint, Fields, Excludes> & { using?: Using | Using[] },
+  ): Promise<Loaded<Entity, Hint, Fields, Excludes>[]> {
+    return QueryEngine.find<Entity, Hint, Fields, Excludes, Using>(this, where, options);
   }
 
-  static findAndCount<T extends CoreEntity, Hint extends string = never, Fields extends string = never, Excludes extends string = never, Using extends string = never>(
-    this: EntityClass<T>,
-    where: [Using] extends [never] ? FilterQuery<T> : never,
-    options?: FindOptions<T, Hint, Fields, Excludes> & { using?: Using | Using[] },
-  ): Promise<[Loaded<T, Hint, Fields, Excludes>[], number]> {
-    return QueryEngine.findAndCount<T, Hint, Fields, Excludes, Using>(this, where as never, options as never);
+  static findAndCount<Entity extends BaseEntity, Hint extends string = never, Fields extends string = never, Excludes extends string = never, Using extends string = never>(
+    this: EntityClass<Entity>,
+    where: [Using] extends [never] ? FilterQuery<Entity> : never,
+    options?: FindOptions<Entity, Hint, Fields, Excludes> & { using?: Using | Using[] },
+  ): Promise<[Loaded<Entity, Hint, Fields, Excludes>[], number]> {
+    return QueryEngine.findAndCount<Entity, Hint, Fields, Excludes, Using>(this, where, options);
   }
 
-  static findByCursor<T extends CoreEntity, Hint extends string = never, Fields extends string = never, Excludes extends string = never, IncludeCount extends boolean = true, Using extends string = never>(
-    this: EntityClass<T>,
-    options: WithUsingOptions<FindByCursorOptions<T, Hint, Fields, Excludes, IncludeCount>, T, Using>,
-  ): Promise<Cursor<T, Hint, Fields, Excludes, IncludeCount>> {
-    return QueryEngine.findByCursor<T, Hint, Fields, Excludes, IncludeCount, Using>(this, options as never);
+  static findOne<Entity extends BaseEntity, Hint extends string = never, Fields extends string = never, Excludes extends string = never, Using extends string = never>(
+    this: EntityClass<Entity>,
+    where: [Using] extends [never] ? FilterQuery<Entity> : never,
+    options?: FindOneOptions<Entity, Hint, Fields, Excludes> & { using?: Using | Using[] },
+  ): Promise<Loaded<Entity, Hint, Fields, Excludes> | null> {
+    return QueryEngine.findOne<Entity, Hint, Fields, Excludes, Using>(this, where, options);
   }
 
-  static findById<T extends CoreEntity, Hint extends string = never, Fields extends string = never, Excludes extends string = never, Using extends string = never>(
-    this: EntityClass<T>,
-    id: Primary<T>,
-    options?: FindOneOptions<T, Hint, Fields, Excludes> & { using?: Using | Using[] },
-  ): Promise<Loaded<T, Hint, Fields, Excludes> | null> {
-    return QueryEngine.findById<T, Hint, Fields, Excludes, Using>(this, id, options as never);
+  static findOneOrFail<Entity extends BaseEntity, Hint extends string = never, Fields extends string = never, Excludes extends string = never, Using extends string = never>(
+    this: EntityClass<Entity>,
+    where: [Using] extends [never] ? FilterQuery<Entity> : never,
+    options?: FindOneOrFailOptions<Entity, Hint, Fields, Excludes> & { using?: Using | Using[] },
+  ): Promise<Loaded<Entity, Hint, Fields, Excludes>> {
+    return QueryEngine.findOneOrFail<Entity, Hint, Fields, Excludes, Using>(this, where, options);
   }
 
-  static findOne<T extends CoreEntity, Hint extends string = never, Fields extends string = never, Excludes extends string = never, Using extends string = never>(
-    this: EntityClass<T>,
-    where: [Using] extends [never] ? FilterQuery<T> : never,
-    options?: FindOneOptions<T, Hint, Fields, Excludes> & { using?: Using | Using[] },
-  ): Promise<Loaded<T, Hint, Fields, Excludes> | null> {
-    return QueryEngine.findOne<T, Hint, Fields, Excludes, Using>(this, where as never, options as never);
+  static findById<Entity extends BaseEntity, Hint extends string = never, Fields extends string = never, Excludes extends string = never, Using extends string = never>(
+    this: EntityClass<Entity>,
+    id: Primary<Entity>,
+    options?: FindOneOptions<Entity, Hint, Fields, Excludes> & { using?: Using | Using[] },
+  ): Promise<Loaded<Entity, Hint, Fields, Excludes> | null> {
+    return QueryEngine.findById<Entity, Hint, Fields, Excludes, Using>(this, id, options);
   }
 
-  static findOneOrFail<T extends CoreEntity, Hint extends string = never, Fields extends string = never, Excludes extends string = never, Using extends string = never>(
-    this: EntityClass<T>,
-    where: [Using] extends [never] ? FilterQuery<T> : never,
-    options?: FindOneOrFailOptions<T, Hint, Fields, Excludes> & { using?: Using | Using[] },
-  ): Promise<Loaded<T, Hint, Fields, Excludes>> {
-    return QueryEngine.findOneOrFail<T, Hint, Fields, Excludes, Using>(this, where as never, options as never);
+  static findByCursor<Entity extends BaseEntity, Hint extends string = never, Fields extends string = never, Excludes extends string = never, IncludeCount extends boolean = true, Using extends string = never>(
+    this: EntityClass<Entity>,
+    options: WithUsingOptions<FindByCursorOptions<Entity, Hint, Fields, Excludes, IncludeCount>, Entity, Using>,
+  ): Promise<Cursor<Entity, Hint, Fields, Excludes, IncludeCount>> {
+    return QueryEngine.findByCursor<Entity, Hint, Fields, Excludes, IncludeCount, Using>(this, options);
   }
 
-  static findByPage<T extends CoreEntity, Hint extends string = never, Fields extends string = never, Excludes extends string = never, Using extends string = never>(
-    this: EntityClass<T>,
-    where: [Using] extends [never] ? FilterQuery<T> : never,
-    options: Omit<FindOptions<T, Hint, Fields, Excludes> & { using?: Using | Using[] }, 'offset'> & { page?: number },
+  static findByPage<Entity extends BaseEntity, Hint extends string = never, Fields extends string = never, Excludes extends string = never, Using extends string = never>(
+    this: EntityClass<Entity>,
+    where: [Using] extends [never] ? FilterQuery<Entity> : never,
+    options: Omit<FindOptions<Entity, Hint, Fields, Excludes> & { using?: Using | Using[] }, 'offset'> & { page: number, limit: number },
   ): Promise<{
-    items: Loaded<T, Hint, Fields, Excludes>[]
+    items: Loaded<Entity, Hint, Fields, Excludes>[]
     totalCount: number
     hasNextPage: boolean
     hasPrevPage: boolean
     page: number
-    limit: number
     totalPages: number
   }> {
-    return QueryEngine.findByPage<T, Hint, Fields, Excludes, Using>(this, where as never, options as never);
+    return QueryEngine.findByPage<Entity, Hint, Fields, Excludes, Using>(this, where, options);
   }
 
   // === Entity ===
-
   remove() {
     QueryEngine.remove(this);
   }
 
-  // === Native Query - Helper ===
-  static nativeInsert<T extends CoreEntity>(
-    this: EntityClass<T>,
-    data: RequiredEntityData<T>,
-    options?: NativeInsertUpdateOptions<T>,
-  ): Promise<Primary<T>> {
+  // === Insert ===
+  static nativeInsert<Entity extends BaseEntity>(
+    this: EntityClass<Entity>,
+    data: RequiredEntityData<Entity>,
+    options?: NativeInsertUpdateOptions<Entity>,
+  ): Promise<Primary<Entity>> {
     return QueryEngine.nativeInsert(this, data, options);
   }
 
-  static nativeInsertMany<T extends CoreEntity>(
-    this: EntityClass<T>,
-    data: RequiredEntityData<T>[],
-    options?: NativeInsertUpdateOptions<T>,
-  ): Promise<Primary<T>[]> {
+  static nativeInsertMany<Entity extends BaseEntity>(
+    this: EntityClass<Entity>,
+    data: RequiredEntityData<Entity>[],
+    options?: NativeInsertUpdateOptions<Entity>,
+  ): Promise<Primary<Entity>[]> {
     return QueryEngine.nativeInsertMany(this, data, options);
   }
 
-  static nativeUpsert<T extends CoreEntity, Fields extends string = never>(
-    this: EntityClass<T>,
-    data: EntityData<T> | T,
-    options?: UpsertOptions<T, Fields>,
-  ): Promise<T> {
-    return QueryEngine.nativeUpsert<T, Fields>(this, data, options);
+  // === Upsert ===
+  static nativeUpsert<Entity extends BaseEntity, Fields extends string = never>(
+    this: EntityClass<Entity>,
+    data: EntityData<Entity> | Entity,
+    options?: UpsertOptions<Entity, Fields>,
+  ): Promise<Entity> {
+    return QueryEngine.nativeUpsert<Entity, Fields>(this, data, options);
   }
 
-  static nativeUpsertMany<T extends CoreEntity, Fields extends string = never>(
-    this: EntityClass<T>,
-    data: (EntityData<T> | T)[],
-    options?: UpsertManyOptions<T, Fields>,
-  ): Promise<T[]> {
-    return QueryEngine.nativeUpsertMany<T, Fields>(this, data, options);
+  static nativeUpsertMany<Entity extends BaseEntity, Fields extends string = never>(
+    this: EntityClass<Entity>,
+    data: (EntityData<Entity> | Entity)[],
+    options?: UpsertManyOptions<Entity, Fields>,
+  ): Promise<Entity[]> {
+    return QueryEngine.nativeUpsertMany<Entity, Fields>(this, data, options);
   }
 
-  static nativeUpdate<T extends CoreEntity>(
-    this: EntityClass<T>,
-    where: FilterQuery<T>,
-    data: EntityData<T>,
-    options?: UpdateOptions<T>,
+  // === Update ===
+  static nativeUpdate<Entity extends BaseEntity>(
+    this: EntityClass<Entity>,
+    where: FilterQuery<Entity>,
+    data: EntityData<Entity>,
+    options?: UpdateOptions<Entity>,
   ): Promise<number> {
     return QueryEngine.nativeUpdate(this, where, data, options);
   }
 
-  static nativeDelete<T extends CoreEntity>(
-    this: EntityClass<T>,
-    where: FilterQuery<T>,
-    options?: DeleteOptions<T>,
+  // === Delete ===
+  static nativeDelete<Entity extends BaseEntity>(
+    this: EntityClass<Entity>,
+    where: FilterQuery<Entity>,
+    options?: DeleteOptions<Entity>,
   ): Promise<number> {
     return QueryEngine.nativeDelete(this, where, options);
   }
@@ -238,7 +239,6 @@ export abstract class CoreEntity<
     options?: UpdateOptions<this>,
   ): Promise<number> {
     const where = { id: this.id } as FilterQuery<this>;
-
     return QueryEngine.nativeUpdate<this>(
       this.constructor,
       where,
@@ -251,7 +251,6 @@ export abstract class CoreEntity<
     options?: DeleteOptions<this>,
   ): Promise<number> {
     const where = { id: this.id } as FilterQuery<this>;
-
     return QueryEngine.nativeDelete<this>(
       this.constructor,
       where,

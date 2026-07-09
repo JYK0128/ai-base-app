@@ -4,24 +4,21 @@ import { ErrorInfoMixin, ErrorInfoProps } from '@pkg/shared/server';
 import { ErrorCode } from './error-code';
 
 export interface TracerInfo {
-  traceId: string
-  requestId: string
+  traceId: string | null
+  requestId: string | null
 }
 
 class ErrorInfoBase implements ErrorInfoProps {
-  @ApiProperty({ description: '에러 코드', enum: ErrorCode })
+  @ApiProperty({ type: String, description: '에러 코드', enum: ErrorCode })
   code!: string;
 
-  @ApiProperty({
-    description: '에러 메시지',
-    oneOf: [{ type: 'string' }, { type: 'array', items: { type: 'string' } }],
-  })
+  @ApiProperty({ oneOf: [{ type: 'string' }, { type: 'array', items: { type: 'string' } }], description: '에러 메시지' })
   message!: string | string[];
 
-  @ApiProperty({ description: '상세 정보', required: false })
-  details: unknown;
+  @ApiProperty({ type: Object, nullable: true, description: '상세 정보' })
+  details!: unknown;
 
-  @ApiProperty({ description: 'HTTP 상태 코드' })
+  @ApiProperty({ type: Number, description: 'HTTP 상태 코드' })
   status!: number;
 
   constructor(init: Partial<ErrorInfoProps>) {
@@ -49,26 +46,31 @@ class ErrorInfoBase implements ErrorInfoProps {
 export class ErrorInfo extends ErrorInfoMixin(ErrorInfoBase) {}
 
 export class ApiResponse<T = null> implements TracerInfo {
-  @ApiProperty({ description: '성공 여부' })
+  @ApiProperty({ type: Boolean, description: '성공 여부' })
   success!: boolean;
 
-  @ApiProperty({ description: '응답 데이터', required: false, nullable: true })
-  data!: T;
+  @ApiProperty({ type: Object, nullable: true, description: '응답 데이터' })
+  data!: T | null;
 
-  @ApiProperty({ description: '에러 상세 정보', required: false })
-  error?: ErrorInfo;
+  @ApiProperty({ type: () => ErrorInfo, nullable: true, description: '에러 상세 정보' })
+  error!: ErrorInfo | null;
 
-  @ApiProperty({ description: '응답 메시지', required: false })
-  message?: string;
+  @ApiProperty({ type: String, nullable: true, description: '응답 메시지' })
+  message!: string | null;
 
-  @ApiProperty({ description: '추적 ID', required: false })
-  traceId!: string;
+  @ApiProperty({ type: String, nullable: true, description: '추적 ID' })
+  traceId!: string | null;
 
-  @ApiProperty({ description: '요청 ID', required: false })
-  requestId!: string;
+  @ApiProperty({ type: String, nullable: true, description: '요청 ID' })
+  requestId!: string | null;
 
   constructor(params: Partial<ApiResponse<T>>) {
-    Object.assign(this, params);
+    this.success = params.success ?? false;
+    this.data = params.data ?? null;
+    this.error = params.error ?? null;
+    this.message = params.message ?? null;
+    this.traceId = params.traceId ?? null;
+    this.requestId = params.requestId ?? null;
   }
 
   static success<T>(data: T): ApiResponse<T>;
@@ -84,7 +86,8 @@ export class ApiResponse<T = null> implements TracerInfo {
       response.message = messageOrTracer;
     }
     else if (messageOrTracer) {
-      Object.assign(response, messageOrTracer);
+      response.traceId = messageOrTracer.traceId ?? null;
+      response.requestId = messageOrTracer.requestId ?? null;
     }
 
     return response;
@@ -110,7 +113,8 @@ export class ApiResponse<T = null> implements TracerInfo {
       response.message = messageOrTracer;
     }
     else if (messageOrTracer) {
-      Object.assign(response, messageOrTracer);
+      response.traceId = messageOrTracer.traceId ?? null;
+      response.requestId = messageOrTracer.requestId ?? null;
     }
 
     return response;

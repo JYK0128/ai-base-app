@@ -6,7 +6,7 @@ import { ChangePasswordAsserter } from '@/domains/auth/change-password/change-pa
 import { DeferPasswordChangeAsserter } from '@/domains/auth/defer-password-change/defer-password-change.error';
 import { LoginAsserter } from '@/domains/auth/login/login.error';
 import { MeAsserter } from '@/domains/auth/me/me.error';
-import { SendInviteEmailAsserter } from '@/domains/mail/send-invite-email/send-invite-email.error';
+import { InviteEmailAsserter } from '@/domains/mail/invite-email/invite-email.error';
 import { CreateInviteAsserter } from '@/domains/member/create-invite/create-invite.error';
 import { GetMemberAsserter } from '@/domains/member/get-member/get-member.error';
 import { GetMemberPageAsserter } from '@/domains/member/get-member-page/get-member-page.error';
@@ -40,7 +40,7 @@ export const ErrorCode = {
   ...toCodeMap(DeferPasswordChangeAsserter),
   ...toCodeMap(LoginAsserter),
   ...toCodeMap(MeAsserter),
-  ...toCodeMap(SendInviteEmailAsserter),
+  ...toCodeMap(InviteEmailAsserter),
   ...toCodeMap(CreateInviteAsserter),
   ...toCodeMap(GetMemberPageAsserter),
   ...toCodeMap(GetMemberAsserter),
@@ -54,6 +54,8 @@ export const ErrorCode = {
   ...toCodeMap(GetTicketPageAsserter),
   ...toCodeMap(GetTermDocumentVersionListAsserter),
   ...toCodeMap(GetTermDocumentAsserter),
+  TERMINATED_DOCUMENT_CANNOT_CREATE_VERSION: 'TERMINATED_DOCUMENT_CANNOT_CREATE_VERSION',
+  TERMINATED_DOCUMENT_CANNOT_UPDATE_VERSION: 'TERMINATED_DOCUMENT_CANNOT_UPDATE_VERSION',
 } as const;
 
 export type ErrorCode = typeof ErrorCode[keyof typeof ErrorCode];

@@ -8,10 +8,6 @@
 import type { LocaleListItem } from './localeListItem';
 
 export interface GetLocaleListResponseDto {
-  /** 조회 시작 오프셋 */
-  offset?: number;
-  /** 조회 개수 제한 */
-  limit?: number;
   /** 활성 로케일 목록 */
   items: LocaleListItem[];
 }

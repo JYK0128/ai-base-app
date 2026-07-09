@@ -1,4 +1,4 @@
-import { BaseEntity, CountByOptions, CountOptions, CreateOptions, Cursor, DeleteOptions, Dictionary, EntityData, EntityKey, EntityManager, EntityName, FilterQuery, FindByCursorOptions, FindOneOptions, FindOneOrFailOptions, FindOptions, Loaded, NativeInsertUpdateOptions, Primary, RequestContext, RequiredEntityData, UpdateOptions, UpsertManyOptions, UpsertOptions, WithUsingOptions } from '@mikro-orm/core';
+import { type BaseEntity, CountByOptions, CountOptions, CreateOptions, Cursor, DeleteOptions, Dictionary, EntityData, EntityKey, EntityManager, EntityName, FilterQuery, FindByCursorOptions, FindOneOptions, FindOneOrFailOptions, FindOptions, type IndexFilterQuery, Loaded, NativeInsertUpdateOptions, Primary, RequestContext, RequiredEntityData, UpdateOptions, UpsertManyOptions, UpsertOptions, WithUsingOptions } from '@mikro-orm/core';
 import { AuthContext } from '@pkg/shared/server';
 
 export const QueryEngine = {
@@ -13,23 +13,24 @@ export const QueryEngine = {
     return context;
   },
 
-  // === helper ===
-  getReference<Entity extends object>(
+  // === Helper ===
+  getReference<Entity extends BaseEntity>(
     clz: EntityName<Entity>,
     id: Primary<Entity>,
   ): Entity {
     return this.em.getReference<Entity>(clz, id);
   },
 
-  // === COUNT ===
-  count<Entity extends object>(
+  // === Count ===
+  count<Entity extends BaseEntity, Hint extends string = never>(
     clz: EntityName<Entity>,
     where?: FilterQuery<Entity>,
-    options?: CountOptions<Entity>,
+    options?: CountOptions<Entity, Hint>,
   ): Promise<number> {
-    return this.em.count(clz, where as FilterQuery<NoInfer<Entity>>, options);
+    return this.em.count(clz, where, options);
   },
-  countBy<Entity extends object>(
+
+  countBy<Entity extends BaseEntity>(
     clz: EntityName<Entity>,
     groupBy: EntityKey<Entity> | readonly EntityKey<Entity>[],
     options?: CountByOptions<Entity>,
@@ -37,9 +38,9 @@ export const QueryEngine = {
     return this.em.countBy(clz, groupBy, options);
   },
 
-  // === CREATE ===
+  // === Create ===
   create<
-    Entity extends object,
+    Entity extends BaseEntity,
     Convert extends boolean = false,
   >(
     clz: EntityName<Entity>,
@@ -50,7 +51,10 @@ export const QueryEngine = {
     this.em.persist(entity);
     return entity;
   },
-  createMany<Entity extends object>(
+
+  createMany<
+    Entity extends BaseEntity,
+  >(
     clz: EntityName<Entity>,
     data: RequiredEntityData<Entity>[],
   ): Entity[] {
@@ -59,124 +63,108 @@ export const QueryEngine = {
     return entities;
   },
 
-  // === READ ===
-  find<Entity extends object, Hint extends string = never, Fields extends string = never, Excludes extends string = never, Using extends string = never>(
+  // === Read ===
+  find<Entity extends BaseEntity, Hint extends string = never, Fields extends string = never, Excludes extends string = never, Using extends string = never>(
     clz: EntityName<Entity>,
-    where: [Using] extends [never] ? FilterQuery<Entity> : never,
+    where: [Using] extends [never] ? FilterQuery<Entity> : IndexFilterQuery<Entity, Using>,
     options?: FindOptions<Entity, Hint, Fields, Excludes> & { using?: Using | Using[] },
   ): Promise<Loaded<Entity, Hint, Fields, Excludes>[]> {
-    return this.em.find<Entity, Hint, Fields, Excludes, Using>(
-      clz,
-      where as never,
-      options as never,
-    );
+    return this.em.find<Entity, Hint, Fields, Excludes, Using>(clz, where, options);
   },
-  findAndCount<Entity extends object, Hint extends string = never, Fields extends string = never, Excludes extends string = never, Using extends string = never>(
+
+  findAndCount<Entity extends BaseEntity, Hint extends string = never, Fields extends string = never, Excludes extends string = never, Using extends string = never>(
     clz: EntityName<Entity>,
-    where: [Using] extends [never] ? FilterQuery<Entity> : never,
+    where: [Using] extends [never] ? FilterQuery<Entity> : IndexFilterQuery<Entity, Using>,
     options?: FindOptions<Entity, Hint, Fields, Excludes> & { using?: Using | Using[] },
   ): Promise<[Loaded<Entity, Hint, Fields, Excludes>[], number]> {
-    return this.em.findAndCount<Entity, Hint, Fields, Excludes, Using>(
-      clz,
-      where as never,
-      options as never,
-    );
+    return this.em.findAndCount<Entity, Hint, Fields, Excludes, Using>(clz, where, options);
   },
-  findByCursor<Entity extends object, Hint extends string = never, Fields extends string = never, Excludes extends string = never, IncludeCount extends boolean = true, Using extends string = never>(
+
+  findOne<Entity extends BaseEntity, Hint extends string = never, Fields extends string = never, Excludes extends string = never, Using extends string = never>(
     clz: EntityName<Entity>,
-    options: WithUsingOptions<FindByCursorOptions<Entity, Hint, Fields, Excludes, IncludeCount>, Entity, Using>,
-  ): Promise<Cursor<Entity, Hint, Fields, Excludes, IncludeCount>> {
-    return this.em.findByCursor<Entity, Hint, Fields, Excludes, IncludeCount, Using>(clz, options as never);
+    where: [Using] extends [never] ? FilterQuery<Entity> : IndexFilterQuery<Entity, Using>,
+    options?: FindOneOptions<Entity, Hint, Fields, Excludes> & { using?: Using | Using[] },
+  ): Promise<Loaded<Entity, Hint, Fields, Excludes> | null> {
+    return this.em.findOne<Entity, Hint, Fields, Excludes, Using>(clz, where, options);
   },
-  findById<Entity extends object, Hint extends string = never, Fields extends string = never, Excludes extends string = never, Using extends string = never>(
+
+  findOneOrFail<Entity extends BaseEntity, Hint extends string = never, Fields extends string = never, Excludes extends string = never, Using extends string = never>(
+    clz: EntityName<Entity>,
+    where: [Using] extends [never] ? FilterQuery<Entity> : IndexFilterQuery<Entity, Using>,
+    options?: FindOneOrFailOptions<Entity, Hint, Fields, Excludes> & { using?: Using | Using[] },
+  ): Promise<Loaded<Entity, Hint, Fields, Excludes>> {
+    return this.em.findOneOrFail<Entity, Hint, Fields, Excludes, Using>(clz, where, options);
+  },
+
+  findById<Entity extends BaseEntity, Hint extends string = never, Fields extends string = never, Excludes extends string = never, Using extends string = never>(
     clz: EntityName<Entity>,
     id: Primary<Entity>,
     options?: FindOneOptions<Entity, Hint, Fields, Excludes> & { using?: Using | Using[] },
   ): Promise<Loaded<Entity, Hint, Fields, Excludes> | null> {
-    const where = this.em.getReference(clz, id);
-    return this.em.findOne<Entity, Hint, Fields, Excludes, Using>(clz, where, options as never);
+    const where = { id } as [Using] extends [never] ? FilterQuery<Entity> : IndexFilterQuery<Entity, Using>;
+    return this.em.findOne<Entity, Hint, Fields, Excludes, Using>(clz, where, options);
   },
-  findOne<Entity extends object, Hint extends string = never, Fields extends string = never, Excludes extends string = never, Using extends string = never>(
+
+  findByCursor<Entity extends BaseEntity, Hint extends string = never, Fields extends string = never, Excludes extends string = never, IncludeCount extends boolean = true, Using extends string = never>(
     clz: EntityName<Entity>,
-    where: [Using] extends [never] ? FilterQuery<Entity> : never,
-    options?: FindOneOptions<Entity, Hint, Fields, Excludes> & { using?: Using | Using[] },
-  ): Promise<Loaded<Entity, Hint, Fields, Excludes> | null> {
-    return this.em.findOne<Entity, Hint, Fields, Excludes, Using>(
-      clz,
-      where as never,
-      options as never,
-    );
+    options: WithUsingOptions<FindByCursorOptions<Entity, Hint, Fields, Excludes, IncludeCount>, Entity, Using>,
+  ): Promise<Cursor<Entity, Hint, Fields, Excludes, IncludeCount>> {
+    return this.em.findByCursor<Entity, Hint, Fields, Excludes, IncludeCount, Using>(clz, options);
   },
-  findOneOrFail<Entity extends object, Hint extends string = never, Fields extends string = never, Excludes extends string = never, Using extends string = never>(
+
+  async findByPage<Entity extends BaseEntity, Hint extends string = never, Fields extends string = never, Excludes extends string = never, Using extends string = never>(
     clz: EntityName<Entity>,
-    where: [Using] extends [never] ? FilterQuery<Entity> : never,
-    options?: FindOneOrFailOptions<Entity, Hint, Fields, Excludes> & { using?: Using | Using[] },
-  ): Promise<Loaded<Entity, Hint, Fields, Excludes>> {
-    return this.em.findOneOrFail<Entity, Hint, Fields, Excludes, Using>(
-      clz,
-      where as never,
-      options as never,
-    );
-  },
-  async findByPage<Entity extends object, Hint extends string = never, Fields extends string = never, Excludes extends string = never, Using extends string = never>(
-    clz: EntityName<Entity>,
-    where: [Using] extends [never] ? FilterQuery<Entity> : never,
-    options: Omit<FindOptions<Entity, Hint, Fields, Excludes> & { using?: Using | Using[] }, 'offset'> & { page?: number },
+    where: [Using] extends [never] ? FilterQuery<Entity> : IndexFilterQuery<Entity, Using>,
+    options: Omit<FindOptions<Entity, Hint, Fields, Excludes> & { using?: Using | Using[] }, 'offset'> & { page: number, limit: number },
   ): Promise<{
     items: Loaded<Entity, Hint, Fields, Excludes>[]
     totalCount: number
     hasNextPage: boolean
     hasPrevPage: boolean
     page: number
-    limit: number
     totalPages: number
   }> {
-    const { page = 1, limit = 10, ...restOptions } = options || {};
-    const safePage = Math.max(1, page);
-    const safeLimit = Math.max(1, limit);
-    const safeOffset = (safePage - 1) * safeLimit;
+    const { page, limit, ...restOptions } = options || {};
+    const offset = (page - 1) * limit;
 
-    const [items, totalCount] = await this.em.findAndCount<Entity, Hint, Fields, Excludes, Using>(clz, where as never, {
-      ...restOptions,
-      limit: safeLimit,
-      offset: safeOffset,
-    } as never);
-    const totalPages = Math.ceil(totalCount / safeLimit);
+    const [items, totalCount] = await this.em.findAndCount<Entity, Hint, Fields, Excludes, Using>(
+      clz,
+      where,
+      {
+        ...restOptions,
+        limit: limit,
+        offset: offset,
+      },
+    );
+    const totalPages = Math.ceil(totalCount / limit);
 
     return {
       items: items,
       totalCount: totalCount,
-      hasNextPage: safePage < totalPages,
-      hasPrevPage: safePage > 1,
-      page: safePage,
-      limit: safeLimit,
+      hasNextPage: page < totalPages,
+      hasPrevPage: page > 1,
+      page: page,
       totalPages: totalPages,
     };
   },
 
-  // === entity ===
-  /** @deprecated - 엔티티 내부함수 사용 */
-  assign(_data: unknown) {
-    throw new Error('Not implemented');
-  },
-
+  // === Entity ===
   remove<Entity extends BaseEntity>(
     entity: Entity,
   ): void {
-    if (!entity.isInitialized) throw new Error('Entity is not initialized.');
     this.em.remove(entity);
   },
 
-  // === INSERT ===
-  nativeInsert<Entity extends object>(
+  // === Insert ===
+  nativeInsert<Entity extends BaseEntity>(
     clz: EntityName<Entity>,
     data: RequiredEntityData<Entity>,
     options?: NativeInsertUpdateOptions<Entity>,
   ): Promise<Primary<Entity>> {
-    return this.em.insert<Entity>(clz, data, options);
+    return this.em.insert(clz, data, options);
   },
 
-  nativeInsertMany<Entity extends object>(
+  nativeInsertMany<Entity extends BaseEntity>(
     clz: EntityName<Entity>,
     data: RequiredEntityData<Entity>[],
     options?: NativeInsertUpdateOptions<Entity>,
@@ -184,8 +172,8 @@ export const QueryEngine = {
     return this.em.insertMany<Entity>(clz, data, options);
   },
 
-  // === UPSERT ===
-  nativeUpsert<Entity extends object, Fields extends string = never>(
+  // === Upsert ===
+  nativeUpsert<Entity extends BaseEntity, Fields extends string = never>(
     clz: EntityName<Entity>,
     data: EntityData<Entity> | Entity,
     options?: UpsertOptions<Entity, Fields>,
@@ -193,7 +181,7 @@ export const QueryEngine = {
     return this.em.upsert<Entity, Fields>(clz, data, options);
   },
 
-  nativeUpsertMany<Entity extends object, Fields extends string = never>(
+  nativeUpsertMany<Entity extends BaseEntity, Fields extends string = never>(
     clz: EntityName<Entity>,
     data: (EntityData<Entity> | Entity)[],
     options?: UpsertManyOptions<Entity, Fields>,
@@ -201,26 +189,26 @@ export const QueryEngine = {
     return this.em.upsertMany<Entity, Fields>(clz, data, options);
   },
 
-  // === UPDATE ===
-  nativeUpdate<Entity extends object>(
+  // === Update ===
+  nativeUpdate<Entity extends BaseEntity>(
     clz: EntityName<Entity>,
     where: FilterQuery<Entity>,
     data: EntityData<Entity>,
     options?: UpdateOptions<Entity>,
   ): Promise<number> {
-    return this.em.nativeUpdate(clz, where as FilterQuery<NoInfer<Entity>>, {
+    return this.em.nativeUpdate(clz, where, {
       ...data,
       updatedAt: new Date(),
       updatedBy: this.context.account?.id,
     }, options);
   },
 
-  // === DELETE ===
-  nativeDelete<Entity extends object>(
+  // === Delete ===
+  nativeDelete<Entity extends BaseEntity>(
     clz: EntityName<Entity>,
     where: FilterQuery<Entity>,
     options?: DeleteOptions<Entity>,
   ): Promise<number> {
-    return this.em.nativeDelete(clz, where as FilterQuery<NoInfer<Entity>>, options);
+    return this.em.nativeDelete(clz, where, options);
   },
 };

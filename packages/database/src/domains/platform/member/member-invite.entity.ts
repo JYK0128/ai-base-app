@@ -1,6 +1,5 @@
 import { EntityName, type Opt, type Rel } from '@mikro-orm/core';
 import { Embeddable, Embedded, Entity, ManyToOne, Property } from '@mikro-orm/decorators/legacy';
-import { randomUUID } from 'crypto';
 
 import { CoreEntity } from '../../core/core.entity';
 import { Organization } from '../organization/organization.entity';
@@ -16,32 +15,26 @@ export class MemberInviteMetadata {
     Object.assign(this, data);
   }
 
-  @Property({ type: 'string', nullable: true })
-  note?: string;
-
-  @Property({ type: 'string' })
-  attemptId: Opt<string> = randomUUID();
-
   @Property({ type: Date })
-  queuedAt: Opt<Date> = new Date();
+  queuedAt: Date = new Date();
 
   @Property({ type: Date, nullable: true })
-  sentAt?: Date | null;
+  sentAt: Date | null = null;
 
   @Property({ type: Date, nullable: true })
-  failedAt?: Date | null;
+  failedAt: Date | null = null;
 
   @Property({ type: Date, nullable: true })
-  cancelAt?: Date | null;
+  cancelAt: Date | null = null;
 
   @Property({ type: Date, nullable: true })
-  acceptedAt?: Date | null;
+  acceptedAt: Date | null = null;
 
   @Property({ type: Date, nullable: true })
-  rejectedAt?: Date | null;
+  rejectedAt: Date | null = null;
 
   @Property({ type: Date, nullable: true })
-  expiredAt?: Date | null;
+  expiredAt: Date | null = null;
 }
 
 @Entity({ schema: 'platform' })
@@ -63,10 +56,11 @@ export class MemberInvite extends CoreEntity<MemberInvite> {
   @Property({ type: 'string' })
   email!: string;
 
-  @Property({ persist: false })
-  get note(): string | undefined {
-    return this.metadata?.note;
-  }
+  @Property({ type: 'string', nullable: true })
+  note: string | null = null;
+
+  @Embedded({ entity: () => MemberInviteMetadata, object: true })
+  override metadata: Opt<MemberInviteMetadata> = new MemberInviteMetadata();
 
   @Property({ persist: false })
   get status(): Opt<MemberInviteStatus> {
@@ -102,7 +96,4 @@ export class MemberInvite extends CoreEntity<MemberInvite> {
   get isRejected(): Opt<boolean> {
     return this.status === MemberInviteStatus.REJECTED;
   }
-
-  @Embedded({ entity: () => MemberInviteMetadata, object: true })
-  override metadata: Opt<MemberInviteMetadata> = new MemberInviteMetadata();
 }

@@ -10,5 +10,5 @@ export interface UpdateMemberRoleRequestDto {
   /** 멤버 식별자 */
   id: string;
   /** 변경할 역할 */
-  role: string;
+  role?: string;
 }

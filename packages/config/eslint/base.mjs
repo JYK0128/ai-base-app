@@ -94,7 +94,7 @@ export default defineConfig([
       'sonarjs/no-small-switch': 'warn',
       'sonarjs/no-nested-functions': 'warn',
       'sonarjs/no-unused-vars': 'off',
-      'sonarjs/no-dead-store': 'warn',
+      'sonarjs/no-dead-store': 'off',
       'sonarjs/no-nested-conditional': 'warn',
       'sonarjs/table-header': 'warn',
       'sonarjs/pseudo-random': 'warn',

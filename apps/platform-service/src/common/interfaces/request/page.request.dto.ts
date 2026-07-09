@@ -1,4 +1,4 @@
-import type { FindOptions } from '@mikro-orm/core';
+import type { QueryOrderMap } from '@mikro-orm/core';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { IsInt, IsOptional, Min } from 'class-validator';
@@ -6,7 +6,11 @@ import { IsInt, IsOptional, Min } from 'class-validator';
 import { FilterableRequestDto } from './filterable.request.dto';
 import { SortableRequestDto, type SortKey } from './sortable.request.dto';
 
-export type PageFindOptions<TEntity extends object> = Omit<FindOptions<TEntity>, 'offset' | 'using'> & { page: number };
+export type PageFindOptions<TEntity extends object> = {
+  orderBy?: QueryOrderMap<TEntity> | QueryOrderMap<TEntity>[]
+  limit: number
+  page: number
+};
 
 export abstract class PageRequestDto<
   TEntity extends object,
@@ -14,35 +18,35 @@ export abstract class PageRequestDto<
 > extends SortableRequestDto<TEntity, TSortKey> {
   abstract filters: FilterableRequestDto<TEntity>;
 
-  @ApiPropertyOptional({ type: Number, description: '페이지 번호', example: 1, default: 1 })
+  @ApiPropertyOptional({ example: 1, type: Number, description: '페이지 번호', default: 1 })
   @IsOptional()
   @Type(() => Number)
   @IsInt()
   @Min(1)
-  page = 1;
+  page: number = 1;
 
-  @ApiPropertyOptional({ type: Number, description: '페이지 크기', example: 20, default: 20 })
+  @ApiPropertyOptional({ example: 20, type: Number, description: '페이지 크기', default: 20 })
   @IsOptional()
   @Type(() => Number)
   @IsInt()
   @Min(1)
-  limit = 20;
+  limit: number = 20;
 
   toFilterQuery() {
     return this.filters.toFilterQuery();
   }
 
-  toPageOptions<TResolved extends PageFindOptions<TEntity> = PageFindOptions<TEntity>>(
-    resolvePageOptions?: (options: PageFindOptions<TEntity>) => TResolved,
-  ): TResolved {
-    const pageOptions = {
-      orderBy: this.toOrderBy(),
+  toPageOptions(
+    resolvePageOptions?: (options: PageFindOptions<TEntity>) => PageFindOptions<TEntity>,
+  ): PageFindOptions<TEntity> {
+    const pageOptions: PageFindOptions<TEntity> = {
+      orderBy: this.toOrderBy() as PageFindOptions<TEntity>['orderBy'],
       page: this.page,
       limit: this.limit,
-    } as PageFindOptions<TEntity>;
+    };
 
     return resolvePageOptions
       ? resolvePageOptions(pageOptions)
-      : pageOptions as TResolved;
+      : pageOptions;
   }
 }

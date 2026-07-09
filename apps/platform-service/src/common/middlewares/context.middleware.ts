@@ -131,6 +131,7 @@ export class ContextMiddleware implements NestMiddleware {
   private async identifyTermsContext(account: MemberAccount): Promise<AuthTermsSnapshotContext[]> {
     const memberId = account.member.id;
     const organizationId = account.member.organization.id;
+    const now = new Date();
 
     const latestVersionSubquery = TermsVersion
       .getQueryBuilder('sub_tv')
@@ -159,12 +160,22 @@ export class ContextMiddleware implements NestMiddleware {
         'tc.createdAt': { $in: latestConsentSubquery },
       })
       .where({
-        'metadata': { publishedAt: { $ne: null } },
-        '$or': [
-          { organization: null },
-          { organization: organizationId },
+        $and: [
+          { metadata: { publishedAt: { $ne: null } } },
+          {
+            $or: [
+              { metadata: { terminatedAt: null } },
+              { metadata: { terminatedAt: { $gt: now } } },
+            ],
+          },
+          {
+            $or: [
+              { organization: null },
+              { organization: organizationId },
+            ],
+          },
+          { 'tv.effectiveAt': { $in: latestVersionSubquery } },
         ],
-        'tv.effectiveAt': { $in: latestVersionSubquery },
       })
       .select([
         `td.id as documentId`,

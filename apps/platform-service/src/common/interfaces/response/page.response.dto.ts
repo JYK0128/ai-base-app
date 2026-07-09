@@ -1,23 +1,18 @@
 import { ApiProperty } from '@nestjs/swagger';
-
 export abstract class PageResponseDto<TEntity extends object> {
   abstract items: TEntity[];
-
-  @ApiProperty({ description: '전체 개수', example: 0 })
-  totalCount!: number;
-
-  @ApiProperty({ description: '페이지 번호', example: 1 })
+  @ApiProperty({ type: Number, description: '페이지 번호' })
   page!: number;
 
-  @ApiProperty({ description: '페이지 크기', example: 20 })
-  limit!: number;
-
-  @ApiProperty({ description: '전체 페이지 수', example: 0 })
+  @ApiProperty({ type: Number, description: '전체 페이지 수' })
   totalPages!: number;
 
-  @ApiProperty({ description: '다음 페이지 존재 여부', example: false })
+  @ApiProperty({ type: Boolean, description: '다음 페이지 존재 여부' })
   hasNextPage!: boolean;
 
-  @ApiProperty({ description: '이전 페이지 존재 여부', example: false })
+  @ApiProperty({ type: Boolean, description: '이전 페이지 존재 여부' })
   hasPrevPage!: boolean;
+
+  @ApiProperty({ type: Number, description: '전체 개수' })
+  totalCount!: number;
 }

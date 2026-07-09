@@ -13,6 +13,9 @@ export interface CreateInviteRequestDto {
   email: string;
   /** 부여할 역할 */
   role: string;
-  /** 메모/메모사항 */
-  note?: string;
+  /**
+     * 메모/메모사항
+     * @nullable
+     */
+  note: string | null;
 }

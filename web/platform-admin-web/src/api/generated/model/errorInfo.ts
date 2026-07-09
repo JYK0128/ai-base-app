@@ -13,8 +13,11 @@ export interface ErrorInfo {
   code: ErrorInfoCode;
   /** 에러 메시지 */
   message: string | string[];
-  /** 상세 정보 */
-  details?: ErrorInfoDetails;
+  /**
+     * 상세 정보
+     * @nullable
+     */
+  details: ErrorInfoDetails;
   /** HTTP 상태 코드 */
   status: number;
 }

@@ -16,10 +16,16 @@ export interface MemberPageItem {
   email: string;
   /** 멤버 상태 */
   status: MemberPageItemStatus;
-  /** 권한 목록 */
-  roles?: string[];
-  /** 최근 로그인 */
-  lastLoginAt?: string;
+  /**
+     * 권한 목록
+     * @nullable
+     */
+  roles: string[] | null;
+  /**
+     * 최근 로그인
+     * @nullable
+     */
+  lastLoginAt: string | null;
   /** 생성 일시 */
   createdAt: string;
 }

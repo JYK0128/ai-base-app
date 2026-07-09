@@ -136,8 +136,15 @@ export function getVersionStatusPresentation(
   };
 }
 
-export function isEditableVersion(version?: GetTermDocumentVersionItem): boolean {
+export function isEditableVersion(
+  version?: GetTermDocumentVersionItem,
+  document?: GetTermDocumentItem | null,
+): boolean {
   if (!version) return false;
+
+  if (document && getDocumentLifecycle(document) === 'TERMINATED') {
+    return false;
+  }
 
   if (version.status === GetTermDocumentVersionItemStatus.DRAFT) {
     return true;

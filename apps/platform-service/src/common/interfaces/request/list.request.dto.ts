@@ -12,14 +12,14 @@ export abstract class ListRequestDto<
 > extends SortableRequestDto<TEntity, TSortKey> {
   abstract filters: TFilters;
 
-  @ApiPropertyOptional({ description: '오프셋', example: 0 })
+  @ApiPropertyOptional({ example: 0, type: Number, description: '오프셋' })
   @IsOptional()
   @Type(() => Number)
   @IsInt()
   @Min(0)
-  offset?: number;
+  offset: number = 0;
 
-  @ApiPropertyOptional({ description: '페이지 크기', example: 20 })
+  @ApiPropertyOptional({ example: 20, type: Number, nullable: true, description: '페이지 크기' })
   @IsOptional()
   @Type(() => Number)
   @IsInt()

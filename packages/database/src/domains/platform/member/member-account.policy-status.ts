@@ -1,6 +1,6 @@
 import { AccountStatus } from './member.constants';
 
-export function isMemberAccountPasswordExpired(passwordExpiresAt?: Date | null, now: number = Date.now()): boolean {
+export function isMemberAccountPasswordExpired(passwordExpiresAt: Date | null, now: number = Date.now()): boolean {
   return !passwordExpiresAt || passwordExpiresAt.getTime() < now;
 }
 
@@ -8,7 +8,7 @@ export function isMemberAccountActive(status: AccountStatus | undefined): boolea
   return status === AccountStatus.ACTIVE;
 }
 
-export function isMemberAccountDormant(lastLoginAt?: Date | null, now: number = Date.now()): boolean {
+export function isMemberAccountDormant(lastLoginAt: Date | null, now: number = Date.now()): boolean {
   if (!lastLoginAt) {
     return false;
   }
