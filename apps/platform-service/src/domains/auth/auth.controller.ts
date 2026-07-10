@@ -81,17 +81,17 @@ export class AuthController {
     return this.queryBus.execute(new MeContract());
   }
 
+  @Get('resources')
+  @SwaggerResponse(AllowedResourceListResponseDto)
+  async getAllowedResourceList(): Promise<AllowedResourceListResponseDto> {
+    return this.queryBus.execute(new AllowedResourceListContract());
+  }
+
   @Get('terms')
   @Bypass(BYPASS_POLICIES.TERMS)
   @SwaggerResponse(PendingTermListResponseDto)
   async getPendingTermList(): Promise<PendingTermListResponseDto> {
     return this.queryBus.execute(new PendingTermListContract());
-  }
-
-  @Get('resources')
-  @SwaggerResponse(AllowedResourceListResponseDto)
-  async getAllowedResourceList(): Promise<AllowedResourceListResponseDto> {
-    return this.queryBus.execute(new AllowedResourceListContract());
   }
 
   @Bypass(BYPASS_POLICIES.TERMS)

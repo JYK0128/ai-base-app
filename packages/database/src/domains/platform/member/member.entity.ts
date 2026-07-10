@@ -32,6 +32,9 @@ export class Member extends CoreEntity<Member> {
   @Property({ type: 'string' })
   email!: string;
 
+  @Property({ type: 'string', nullable: true })
+  phone?: string;
+
   @Enum(() => MemberStatus)
   status: Opt<MemberStatus> = MemberStatus.ACTIVE;
 

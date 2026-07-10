@@ -84,6 +84,7 @@ import type {
   ResourceControllerUpdateResourceSortV1201,
   ResourceControllerUpdateResourceV1201,
   ScheduleTermDocumentTerminationRequestDto,
+  SignupControllerGetSignupTermListV1200,
   SupportControllerGetTicketPageV1200,
   SupportControllerGetTicketPageV1Params,
   TermsControllerCancelTermsDocumentTerminationV1200,
@@ -128,10 +129,10 @@ import authControllerLogoutV1Mutator from '../../lib/axios';
 import type { ErrorType as AuthControllerLogoutV1ErrorType } from '../../lib/axios';
 import authControllerMeV1Mutator from '../../lib/axios';
 import type { ErrorType as AuthControllerMeV1ErrorType } from '../../lib/axios';
-import authControllerGetPendingTermListV1Mutator from '../../lib/axios';
-import type { ErrorType as AuthControllerGetPendingTermListV1ErrorType } from '../../lib/axios';
 import authControllerGetAllowedResourceListV1Mutator from '../../lib/axios';
 import type { ErrorType as AuthControllerGetAllowedResourceListV1ErrorType } from '../../lib/axios';
+import authControllerGetPendingTermListV1Mutator from '../../lib/axios';
+import type { ErrorType as AuthControllerGetPendingTermListV1ErrorType } from '../../lib/axios';
 import authControllerAgreeTermsV1Mutator from '../../lib/axios';
 import type { ErrorType as AuthControllerAgreeTermsV1ErrorType , BodyType as AuthControllerAgreeTermsV1BodyType } from '../../lib/axios';
 import authControllerChangePasswordV1Mutator from '../../lib/axios';
@@ -176,6 +177,8 @@ import organizationControllerUpdateOrganizationRoleSortV1Mutator from '../../lib
 import type { ErrorType as OrganizationControllerUpdateOrganizationRoleSortV1ErrorType , BodyType as OrganizationControllerUpdateOrganizationRoleSortV1BodyType } from '../../lib/axios';
 import organizationControllerApproveOrganizationV1Mutator from '../../lib/axios';
 import type { ErrorType as OrganizationControllerApproveOrganizationV1ErrorType , BodyType as OrganizationControllerApproveOrganizationV1BodyType } from '../../lib/axios';
+import signupControllerGetSignupTermListV1Mutator from '../../lib/axios';
+import type { ErrorType as SignupControllerGetSignupTermListV1ErrorType } from '../../lib/axios';
 import resourceControllerCreateResourceV1Mutator from '../../lib/axios';
 import type { ErrorType as ResourceControllerCreateResourceV1ErrorType , BodyType as ResourceControllerCreateResourceV1BodyType } from '../../lib/axios';
 import resourceControllerUpdateResourceV1Mutator from '../../lib/axios';
@@ -856,93 +859,6 @@ export function useAuthControllerMeV1<TData = Awaited<ReturnType<typeof authCont
 
 
 
-export const authControllerGetPendingTermListV1 = (
-
- signal?: AbortSignal
-) => {
-
-
-      return authControllerGetPendingTermListV1Mutator<AuthControllerGetPendingTermListV1200>(
-      {url: `/api/v1/auth/terms`, method: 'GET', signal
-    },
-      );
-    }
-
-
-
-
-export const getAuthControllerGetPendingTermListV1QueryKey = () => {
-    return [
-    `/api/v1/auth/terms`
-    ] as const;
-    }
-
-
-export const getAuthControllerGetPendingTermListV1QueryOptions = <TData = Awaited<ReturnType<typeof authControllerGetPendingTermListV1>>, TError = AuthControllerGetPendingTermListV1ErrorType<unknown>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof authControllerGetPendingTermListV1>>, TError, TData>>, }
-) => {
-
-const {query: queryOptions} = options ?? {};
-
-  const queryKey =  queryOptions?.queryKey ?? getAuthControllerGetPendingTermListV1QueryKey();
-
-
-
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof authControllerGetPendingTermListV1>>> = ({ signal }) => authControllerGetPendingTermListV1(signal);
-
-
-
-
-
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof authControllerGetPendingTermListV1>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
-}
-
-export type AuthControllerGetPendingTermListV1QueryResult = NonNullable<Awaited<ReturnType<typeof authControllerGetPendingTermListV1>>>
-export type AuthControllerGetPendingTermListV1QueryError = AuthControllerGetPendingTermListV1ErrorType<unknown>
-
-
-export function useAuthControllerGetPendingTermListV1<TData = Awaited<ReturnType<typeof authControllerGetPendingTermListV1>>, TError = AuthControllerGetPendingTermListV1ErrorType<unknown>>(
-  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof authControllerGetPendingTermListV1>>, TError, TData>> & Pick<
-        DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof authControllerGetPendingTermListV1>>,
-          TError,
-          Awaited<ReturnType<typeof authControllerGetPendingTermListV1>>
-        > , 'initialData'
-      >, }
- , queryClient?: QueryClient
-  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useAuthControllerGetPendingTermListV1<TData = Awaited<ReturnType<typeof authControllerGetPendingTermListV1>>, TError = AuthControllerGetPendingTermListV1ErrorType<unknown>>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof authControllerGetPendingTermListV1>>, TError, TData>> & Pick<
-        UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof authControllerGetPendingTermListV1>>,
-          TError,
-          Awaited<ReturnType<typeof authControllerGetPendingTermListV1>>
-        > , 'initialData'
-      >, }
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useAuthControllerGetPendingTermListV1<TData = Awaited<ReturnType<typeof authControllerGetPendingTermListV1>>, TError = AuthControllerGetPendingTermListV1ErrorType<unknown>>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof authControllerGetPendingTermListV1>>, TError, TData>>, }
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-
-export function useAuthControllerGetPendingTermListV1<TData = Awaited<ReturnType<typeof authControllerGetPendingTermListV1>>, TError = AuthControllerGetPendingTermListV1ErrorType<unknown>>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof authControllerGetPendingTermListV1>>, TError, TData>>, }
- , queryClient?: QueryClient
- ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
-
-  const queryOptions = getAuthControllerGetPendingTermListV1QueryOptions(options)
-
-  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
-
-  return { ...query, queryKey: queryOptions.queryKey };
-}
-
-
-
-
-
-
-
 export const authControllerGetAllowedResourceListV1 = (
 
  signal?: AbortSignal
@@ -1018,6 +934,93 @@ export function useAuthControllerGetAllowedResourceListV1<TData = Awaited<Return
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getAuthControllerGetAllowedResourceListV1QueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const authControllerGetPendingTermListV1 = (
+
+ signal?: AbortSignal
+) => {
+
+
+      return authControllerGetPendingTermListV1Mutator<AuthControllerGetPendingTermListV1200>(
+      {url: `/api/v1/auth/terms`, method: 'GET', signal
+    },
+      );
+    }
+
+
+
+
+export const getAuthControllerGetPendingTermListV1QueryKey = () => {
+    return [
+    `/api/v1/auth/terms`
+    ] as const;
+    }
+
+
+export const getAuthControllerGetPendingTermListV1QueryOptions = <TData = Awaited<ReturnType<typeof authControllerGetPendingTermListV1>>, TError = AuthControllerGetPendingTermListV1ErrorType<unknown>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof authControllerGetPendingTermListV1>>, TError, TData>>, }
+) => {
+
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getAuthControllerGetPendingTermListV1QueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof authControllerGetPendingTermListV1>>> = ({ signal }) => authControllerGetPendingTermListV1(signal);
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof authControllerGetPendingTermListV1>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type AuthControllerGetPendingTermListV1QueryResult = NonNullable<Awaited<ReturnType<typeof authControllerGetPendingTermListV1>>>
+export type AuthControllerGetPendingTermListV1QueryError = AuthControllerGetPendingTermListV1ErrorType<unknown>
+
+
+export function useAuthControllerGetPendingTermListV1<TData = Awaited<ReturnType<typeof authControllerGetPendingTermListV1>>, TError = AuthControllerGetPendingTermListV1ErrorType<unknown>>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof authControllerGetPendingTermListV1>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof authControllerGetPendingTermListV1>>,
+          TError,
+          Awaited<ReturnType<typeof authControllerGetPendingTermListV1>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useAuthControllerGetPendingTermListV1<TData = Awaited<ReturnType<typeof authControllerGetPendingTermListV1>>, TError = AuthControllerGetPendingTermListV1ErrorType<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof authControllerGetPendingTermListV1>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof authControllerGetPendingTermListV1>>,
+          TError,
+          Awaited<ReturnType<typeof authControllerGetPendingTermListV1>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useAuthControllerGetPendingTermListV1<TData = Awaited<ReturnType<typeof authControllerGetPendingTermListV1>>, TError = AuthControllerGetPendingTermListV1ErrorType<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof authControllerGetPendingTermListV1>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useAuthControllerGetPendingTermListV1<TData = Awaited<ReturnType<typeof authControllerGetPendingTermListV1>>, TError = AuthControllerGetPendingTermListV1ErrorType<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof authControllerGetPendingTermListV1>>, TError, TData>>, }
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getAuthControllerGetPendingTermListV1QueryOptions(options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
@@ -2506,6 +2509,93 @@ const {mutation: mutationOptions} = options ?
       > => {
       return useMutation(getOrganizationControllerApproveOrganizationV1MutationOptions(options), queryClient);
     }
+
+export const signupControllerGetSignupTermListV1 = (
+
+ signal?: AbortSignal
+) => {
+
+
+      return signupControllerGetSignupTermListV1Mutator<SignupControllerGetSignupTermListV1200>(
+      {url: `/api/v1/signup/terms`, method: 'GET', signal
+    },
+      );
+    }
+
+
+
+
+export const getSignupControllerGetSignupTermListV1QueryKey = () => {
+    return [
+    `/api/v1/signup/terms`
+    ] as const;
+    }
+
+
+export const getSignupControllerGetSignupTermListV1QueryOptions = <TData = Awaited<ReturnType<typeof signupControllerGetSignupTermListV1>>, TError = SignupControllerGetSignupTermListV1ErrorType<unknown>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof signupControllerGetSignupTermListV1>>, TError, TData>>, }
+) => {
+
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getSignupControllerGetSignupTermListV1QueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof signupControllerGetSignupTermListV1>>> = ({ signal }) => signupControllerGetSignupTermListV1(signal);
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof signupControllerGetSignupTermListV1>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type SignupControllerGetSignupTermListV1QueryResult = NonNullable<Awaited<ReturnType<typeof signupControllerGetSignupTermListV1>>>
+export type SignupControllerGetSignupTermListV1QueryError = SignupControllerGetSignupTermListV1ErrorType<unknown>
+
+
+export function useSignupControllerGetSignupTermListV1<TData = Awaited<ReturnType<typeof signupControllerGetSignupTermListV1>>, TError = SignupControllerGetSignupTermListV1ErrorType<unknown>>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof signupControllerGetSignupTermListV1>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof signupControllerGetSignupTermListV1>>,
+          TError,
+          Awaited<ReturnType<typeof signupControllerGetSignupTermListV1>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useSignupControllerGetSignupTermListV1<TData = Awaited<ReturnType<typeof signupControllerGetSignupTermListV1>>, TError = SignupControllerGetSignupTermListV1ErrorType<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof signupControllerGetSignupTermListV1>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof signupControllerGetSignupTermListV1>>,
+          TError,
+          Awaited<ReturnType<typeof signupControllerGetSignupTermListV1>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useSignupControllerGetSignupTermListV1<TData = Awaited<ReturnType<typeof signupControllerGetSignupTermListV1>>, TError = SignupControllerGetSignupTermListV1ErrorType<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof signupControllerGetSignupTermListV1>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useSignupControllerGetSignupTermListV1<TData = Awaited<ReturnType<typeof signupControllerGetSignupTermListV1>>, TError = SignupControllerGetSignupTermListV1ErrorType<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof signupControllerGetSignupTermListV1>>, TError, TData>>, }
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getSignupControllerGetSignupTermListV1QueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
 
 export const resourceControllerCreateResourceV1 = (
     createResourceRequestDto: ResourceControllerCreateResourceV1BodyType<CreateResourceRequestDto>,

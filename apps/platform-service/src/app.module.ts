@@ -25,6 +25,7 @@ import { MailModule } from '@/domains/mail/mail.module';
 import { MemberModule } from '@/domains/member/member.module';
 import { OrganizationModule } from '@/domains/organization/organization.module';
 import { ResourceModule } from '@/domains/resource/resource.module';
+import { SignupModule } from '@/domains/signup/signup.module';
 import { SupportModule } from '@/domains/support/support.module';
 import { TermModule } from '@/domains/term/term.module';
 import { ENV } from '@/env';
@@ -72,6 +73,7 @@ import { ENV } from '@/env';
     MailModule,
     MemberModule,
     OrganizationModule,
+    SignupModule,
     ResourceModule,
     SupportModule,
     TermModule,

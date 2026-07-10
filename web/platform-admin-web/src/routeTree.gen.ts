@@ -13,6 +13,7 @@ import { Route as PublicRouteImport } from './routes/_public'
 import { Route as ProtectedRouteImport } from './routes/_protected'
 import { Route as PublicIndexRouteImport } from './routes/_public/index'
 import { Route as PublicTermAgreementRouteImport } from './routes/_public/term-agreement'
+import { Route as PublicSignupRouteImport } from './routes/_public/signup'
 import { Route as PublicLoginRouteImport } from './routes/_public/login'
 import { Route as PublicInviteRouteImport } from './routes/_public/invite'
 import { Route as PublicForgotPasswordRouteImport } from './routes/_public/forgot-password'
@@ -43,6 +44,11 @@ const PublicIndexRoute = PublicIndexRouteImport.update({
 const PublicTermAgreementRoute = PublicTermAgreementRouteImport.update({
   id: '/term-agreement',
   path: '/term-agreement',
+  getParentRoute: () => PublicRoute,
+} as any)
+const PublicSignupRoute = PublicSignupRouteImport.update({
+  id: '/signup',
+  path: '/signup',
   getParentRoute: () => PublicRoute,
 } as any)
 const PublicLoginRoute = PublicLoginRouteImport.update({
@@ -120,6 +126,7 @@ export interface FileRoutesByFullPath {
   '/forgot-password': typeof PublicForgotPasswordRoute
   '/invite': typeof PublicInviteRoute
   '/login': typeof PublicLoginRoute
+  '/signup': typeof PublicSignupRoute
   '/term-agreement': typeof PublicTermAgreementRoute
   '/announcements/': typeof ProtectedAnnouncementsIndexRoute
   '/audit/': typeof ProtectedAuditIndexRoute
@@ -137,6 +144,7 @@ export interface FileRoutesByTo {
   '/forgot-password': typeof PublicForgotPasswordRoute
   '/invite': typeof PublicInviteRoute
   '/login': typeof PublicLoginRoute
+  '/signup': typeof PublicSignupRoute
   '/term-agreement': typeof PublicTermAgreementRoute
   '/announcements': typeof ProtectedAnnouncementsIndexRoute
   '/audit': typeof ProtectedAuditIndexRoute
@@ -156,6 +164,7 @@ export interface FileRoutesById {
   '/_public/forgot-password': typeof PublicForgotPasswordRoute
   '/_public/invite': typeof PublicInviteRoute
   '/_public/login': typeof PublicLoginRoute
+  '/_public/signup': typeof PublicSignupRoute
   '/_public/term-agreement': typeof PublicTermAgreementRoute
   '/_public/': typeof PublicIndexRoute
   '/_protected/announcements/': typeof ProtectedAnnouncementsIndexRoute
@@ -176,6 +185,7 @@ export interface FileRouteTypes {
     | '/forgot-password'
     | '/invite'
     | '/login'
+    | '/signup'
     | '/term-agreement'
     | '/announcements/'
     | '/audit/'
@@ -193,6 +203,7 @@ export interface FileRouteTypes {
     | '/forgot-password'
     | '/invite'
     | '/login'
+    | '/signup'
     | '/term-agreement'
     | '/announcements'
     | '/audit'
@@ -211,6 +222,7 @@ export interface FileRouteTypes {
     | '/_public/forgot-password'
     | '/_public/invite'
     | '/_public/login'
+    | '/_public/signup'
     | '/_public/term-agreement'
     | '/_public/'
     | '/_protected/announcements/'
@@ -257,6 +269,13 @@ declare module '@tanstack/react-router' {
       path: '/term-agreement'
       fullPath: '/term-agreement'
       preLoaderRoute: typeof PublicTermAgreementRouteImport
+      parentRoute: typeof PublicRoute
+    }
+    '/_public/signup': {
+      id: '/_public/signup'
+      path: '/signup'
+      fullPath: '/signup'
+      preLoaderRoute: typeof PublicSignupRouteImport
       parentRoute: typeof PublicRoute
     }
     '/_public/login': {
@@ -386,6 +405,7 @@ interface PublicRouteChildren {
   PublicForgotPasswordRoute: typeof PublicForgotPasswordRoute
   PublicInviteRoute: typeof PublicInviteRoute
   PublicLoginRoute: typeof PublicLoginRoute
+  PublicSignupRoute: typeof PublicSignupRoute
   PublicTermAgreementRoute: typeof PublicTermAgreementRoute
   PublicIndexRoute: typeof PublicIndexRoute
 }
@@ -395,6 +415,7 @@ const PublicRouteChildren: PublicRouteChildren = {
   PublicForgotPasswordRoute: PublicForgotPasswordRoute,
   PublicInviteRoute: PublicInviteRoute,
   PublicLoginRoute: PublicLoginRoute,
+  PublicSignupRoute: PublicSignupRoute,
   PublicTermAgreementRoute: PublicTermAgreementRoute,
   PublicIndexRoute: PublicIndexRoute,
 }

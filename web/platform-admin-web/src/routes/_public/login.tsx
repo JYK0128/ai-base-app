@@ -123,7 +123,13 @@ function LoginPage() {
           </Button>
           <div className="flex items-center gap-2">
             <CardDescription>{t('loginNewHere')}</CardDescription>
-            <Button type="button" variant="link">
+            <Button
+              type="button"
+              variant="link"
+              onClick={() => {
+                void navigate({ to: '/signup' });
+              }}
+            >
               {t('loginCreateAccount')}
             </Button>
           </div>

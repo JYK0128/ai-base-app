@@ -21,6 +21,8 @@ import { BookOpen,
 import type { ChangeEventHandler } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import type { FileRouteTypes } from '@/routeTree.gen';
+
 import { getAuthControllerGetAllowedResourceListV1QueryOptions } from '../api/generated/endpoints';
 import { type AllowedResourceListItem,
          AllowedResourceListItemType } from '../api/generated/model';
@@ -100,7 +102,7 @@ function ProtectedLayout() {
             {hasPath
               ? (
                 <Link
-                  to={item.path}
+                  to={item.path as FileRouteTypes['to']}
                   activeProps={{ className: 'bg-slate-100 text-slate-950' }}
                   className="
                     flex items-center space-x-3 rounded-lg px-3 py-2
