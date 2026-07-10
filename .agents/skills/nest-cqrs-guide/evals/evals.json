@@ -1,17 +1,25 @@
 {
-  "skill_name": "nest-cqrs-pattern",
+  "skill_name": "nest-cqrs-guide",
   "evals": [
     {
       "id": 1,
-      "prompt": "platform-service에 TermsDocument를 업데이트하는 UpdateTermsDocument 커맨드와 핸들러를 만들어줘. id와 title, content를 받아야 하고, 문서가 없으면 NOT_FOUND, 이미 PUBLISHED 상태면 CANNOT_UPDATE 에러를 던져야 해.",
-      "expected_output": "UpdateTermsDocumentCommand, UpdateTermsDocumentAsserter가 포함된 helpers.ts와 Identify-Validate-Execute 패턴을 따르는 handler.ts 생성",
+      "prompt": "platform-service term 도메인에 약관 문서 제목을 수정하는 command 피처를 추가해줘. id와 title을 받고 문서 부재와 종료된 문서 정책을 검증해야 해.",
+      "expected_output": "feature-first 폴더에 contract/request/response/error/handler를 구성하고 Command, Transactional, identify-verify-process, ExceptionGuard, IdResponseDto 규칙을 적용함.",
       "files": []
     },
     {
       "id": 2,
-      "prompt": "platform-service에 특정 문서의 버전 목록을 가져오는 GetTermsVersionList 쿼리와 핸들러를 만들어줘. termsDocumentId를 인자로 받고, 해당 문서의 버전들을 생성일 역순으로 정렬해서 반환해야 해. 문서가 없으면 NOT_FOUND 에러를 던져야 해.",
-      "expected_output": "GetTermsVersionListQuery가 포함된 helpers.ts와 에러 처리가 포함된 handler.ts 생성",
+      "prompt": "platform-service member 도메인에 현재 조직의 초대 목록을 커서 방식으로 조회하는 query를 추가해줘. session에서 organization 컨텍스트를 읽고 최신순으로 응답해줘.",
+      "expected_output": "CLS organization 객체를 식별하고 query process에서 메인 조회와 CursorResponseDto 조립을 수행하며 contract 반환 타입을 명시함.",
       "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "UpdateResource request DTO에 nullable parent와 sortOrder를 노출하고 OpenAPI 클라이언트까지 갱신해줘.",
+      "expected_output": "EntityRequestType(Resource)를 확장한 DTO와 Swagger nullable 계약을 갱신하고 서버 검증 후 pnpm gen:api로 웹 생성물을 갱신함.",
+      "files": [
+        "apps/platform-service/src/domains/resource/update-resource/update-resource.request.dto.ts"
+      ]
     }
   ]
 }

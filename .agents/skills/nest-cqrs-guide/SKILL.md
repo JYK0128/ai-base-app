@@ -1,6 +1,6 @@
 ---
 name: nest-cqrs-guide
-description: NestJS CQRS message, handler, event, error, and DTO structure guidance. Use when working on command/query/event classes, handlers, contracts, request/response DTOs, sort request DTOs, ExceptionGuard-based errors, CQRS tests, and identify/verify/process handler flow.
+description: NestJS CQRS contract, command/query handler, DTO, controller, event/publisher, ExceptionGuard 오류 구조 가이드. feature-first 배치, identify-verify-process 흐름, CLS 인증 컨텍스트, EntityRequest/ResponseType과 공통 응답 DTO 선택, 트랜잭션 및 테스트 규칙을 다룸. platform-service CQRS/API 유스케이스 변경 시 사용.
 ---
 
 # NestJS CQRS Guide
@@ -34,7 +34,8 @@ description: NestJS CQRS message, handler, event, error, and DTO structure guida
    - 위 참조 파일에서 역할 분리와 디렉토리 기준을 확인하고, 특히 `command/query` 기준의 `identify - verify - process` 규칙을 확인함
 3. **구현**:
    - 메시지와 핸들러를 분리하고, payload와 결과를 명시적으로 유지함
-   - `process(command/query, identified...)` 순서를 지키고, query는 `process`에서 메인 조회와 DTO wrapping을 수행함
+   - `process(command/query, identified...)` 순서를 유지하고, query는 `process`에서 메인 조회와 DTO wrapping을 수행함
+   - 요청은 `EntityRequestType`과 공통 request DTO, 응답은 `EntityResponseType`과 공통 response DTO를 우선 검토함
 4. **검증**:
    - 구조 변경 후 타입체크와 린트를 실행함
 5. **정리**:

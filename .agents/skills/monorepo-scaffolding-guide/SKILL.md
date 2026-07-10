@@ -1,6 +1,6 @@
 ---
 name: monorepo-scaffolding-guide
-description: 모노레포 내 신규 프로젝트/패키지 스캐폴딩 시 "base-package" 템플릿 구조 및 설정 준수 여부 검증 및 강제. 신규 패키지/앱 추가 또는 설정 복사 필요 시 사용.
+description: pnpm/Turborepo 모노레포의 신규 앱·서비스·패키지 스캐폴딩 가이드. base-package 템플릿, @pkg/config 공유 설정, workspace 의존성, 루트 TypeScript reference, health endpoint, 프로젝트별 검증 명령을 적용함. apps/packages/web/mobile 하위 프로젝트 추가나 설정 복사 시 사용.
 ---
 
 # 모노레포 스캐폴딩 가이드 (Monorepo Scaffolding Guide)
@@ -30,6 +30,6 @@ description: 모노레포 내 신규 프로젝트/패키지 스캐폴딩 시 "ba
 3. **폴더 복사 및 구성**:
    - `references/02_setup_workflow.md` 단계에 따라 템플릿 파일을 신규 디렉토리에 복사하고 이름 및 설정을 변경함
 4. **루트 연동 및 설치**:
-   - 루트 `tsconfig.json`에 `references`를 연결하고 `pnpm install`을 실행함
+   - 빌드 가능한 TypeScript 프로젝트는 루트 `tsconfig.json`에 `references`를 연결하고 `pnpm install`을 실행함
 5. **검증**:
-   - `pnpm lint` 및 빌드 수행 후 실제 K8s 환경 배포 시 probe 오동작 여부를 확인함
+   - `pnpm --filter=<package-name> lint` 및 build를 수행하고 HTTP 앱은 health endpoint와 K8s probe를 함께 확인함

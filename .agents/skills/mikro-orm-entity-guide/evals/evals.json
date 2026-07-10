@@ -3,25 +3,27 @@
   "evals": [
     {
       "id": 1,
-      "prompt": "platform 스키마의 organization 도메인에 'Project' 엔티티를 추가해줘. 프로젝트는 이름(name), 설명(description, optional), 시작일(startDate), 종료일(endDate, optional)을 가지고 있고, Organization과 ManyToOne 관계야.",
-      "expected_output": "organization-project.entity.ts 파일이 생성되어야 하며 (리포지토리 파일은 생성하지 않음), CoreEntity 상속, [EntityName]?: 'Project' 심볼 선언, Rel<Organization> 사용, legacy 데코레이터 사용 등의 규칙을 준수해야 함.",
+      "prompt": "platform organization 도메인에 Project 엔티티를 추가해줘. name은 필수 문자열, description과 endAt은 nullable, startAt은 필수 Date이고 Organization 필수 ManyToOne 관계를 가져야 해.",
+      "expected_output": "CoreEntity 상속, EntityName 심볼, platform schema, legacy decorator, Rel<Organization>, description/endAt의 T | null = null 표기와 metadata/dist 재생성 절차를 적용함.",
       "files": []
     },
     {
       "id": 2,
-      "prompt": "기존의 TermsVersion 엔티티에 'isPublic' (boolean, default false) 필드를 추가해줘.",
-      "expected_output": "terms-version.entity.ts 파일에 @Property({ type: 'boolean' }) isPublic: Opt<boolean> = false; 가 추가되어야 하며, [EntityName]?: 'TermsVersion' 및 Opt type import가 필요하면 추가되어야 함.",
-      "files": ["packages/database/src/domains/platform/terms/terms-version.entity.ts"]
+      "prompt": "TermsVersion 엔티티에 생성 payload에서 생략 가능한 isPublic boolean 필드를 추가하고 기본값을 false로 설정해줘.",
+      "expected_output": "@Property({ type: 'boolean' })와 isPublic: Opt<boolean> = false를 적용하고 database build, 타입검사, 린트를 수행함.",
+      "files": [
+        "packages/database/src/domains/platform/terms/terms-version.entity.ts"
+      ]
     },
     {
       "id": 3,
-      "prompt": "공지 AnnouncementMetadata에 예약 게시 확정 시각(publishedAt)과 노출 기간(startAt/endAt)을 추가하고 API 응답에는 ISO string으로 내려줘.",
-      "expected_output": "엔티티 metadata의 publishedAt/startAt/endAt은 Date 타입이어야 하고, publishedAt과 startAt의 의미를 명확히 구분해야 하며, mapper에서 ISO string으로 변환되어야 함.",
+      "prompt": "Resource.parent nullable 관계와 sortOrder nullable 숫자 필드의 현재 선언을 점검하고 프로젝트 nullability 표준에 맞춰줘. API request/response 타입 영향도 같이 확인해줘.",
+      "expected_output": "parent는 Rel<Resource> | null = null, sortOrder는 number | null = null로 유지하고 EntityRequestType/EntityResponseType 및 generated API 영향도를 확인함.",
       "files": [
-        "packages/database/src/domains/platform/announcement/announcement.entity.ts",
-        "apps/platform-service/src/domains/announcement/announcement.mapper.ts"
+        "packages/database/src/domains/platform/resource/resource.entity.ts",
+        "apps/platform-service/src/common/interfaces/request/entity.request.dto.ts",
+        "apps/platform-service/src/common/interfaces/response/entity.response.dto.ts"
       ]
     }
   ]
 }
-

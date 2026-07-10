@@ -80,7 +80,7 @@
 
 - **관계 선언 표준**:
   - Required 관계: `field!: Rel<T>` 구문 사용
-  - Nullable 관계: `@ManyToOne(() => Entity, { nullable: true })` 및 `field?: Rel<T>` 구문 사용
+  - Nullable 관계: `@ManyToOne(() => Entity, { nullable: true })` 및 `field: Rel<T> | null = null` 구문 사용
   - One-to-Many 관계: `new Collection<T>(this)` 구문을 사용하여 항상 기본 인스턴스를 즉각 생성 및 할당함
 - **예시 코드**:
 
@@ -92,7 +92,7 @@
   organization!: Rel<Organization>;
 
   @ManyToOne(() => Organization, { nullable: true })
-  organization?: Rel<Organization>;
+  organization: Rel<Organization> | null = null;
 
   @OneToMany(() => MemberAccount, (account) => account.member)
   accounts = new Collection<MemberAccount>(this);
@@ -100,10 +100,12 @@
 
 ---
 
-## 4. 스키마 바인딩 규칙 (Repository 미사용)
+## 4. 스키마 바인딩과 조회 API
 
-- **리포지토리 파일 제거**:
-  - 개편된 스키마 설계에 따라 개별 엔티티별 리포지토리 파일(`*.repository.ts`)은 기본적으로 **생성하지 않음**
+- **공통 조회 API**:
+  - 엔티티 조회와 변경은 `CoreEntity`가 제공하는 static API(`findOne`, `findByPage`, `create`, `nativeUpdate` 등)를 우선 사용함
+  - 공통 동작은 `CoreRepository`와 `QueryEngine`에서 관리함
+  - 도메인별 복합 조회는 handler 또는 명확한 도메인 query helper에 배치함
 - **스키마 바인딩**:
   - `@Entity({ schema: '...' })` 형태로 엔티티가 소속된 데이터베이스 스키마(예: `platform`, `organization` 등)만 명시적으로 설정함
 - **예시 코드**:
@@ -117,13 +119,14 @@
 
 ---
 
-## 5. Gateway DTO와 엔티티 간 타입 동기화 및 단일 진실 공급원 규칙
+## 5. Platform Service DTO와 엔티티 간 타입 동기화
 
 - **적용 목적**: 데이터베이스 엔티티와 타입 정합성을 유지하면서 중복 선언 최소화 및 API 프레젠테이션 계층의 데코레이터와 엔티티 간 관심사 분리
-- **DTO 규칙 (요청 및 응답 DTO 공통)**:
-  - **구현 방식**: `implements Pick<Entity, Keys>` 구문을 적용하여 타입 호환성 강제
-  - **작성 규칙**: 클래스 본문은 `override` 키워드 없는 순수 멤버 변수로 선언하고 `@ApiProperty` / `@ApiPropertyOptional` 및 `class-validator`를 명시적으로 선언
-  - **동작 특징**: 엔티티 스펙 변경 시 빌드 타임에 DTO 타입 오류가 자동 발생하여 실시간 동기화 보장
+- **DTO 규칙**:
+  - 요청 DTO는 `EntityRequestType(Entity)`를 확장하여 엔티티 필드를 선택 입력 계약으로 파생함
+  - 응답 DTO는 `EntityResponseType(Entity)`를 확장하여 엔티티 응답 구조를 파생함
+  - 피처가 노출하는 필드는 `override`와 `@ApiProperty` / `@ApiPropertyOptional`, class-validator를 명시함
+  - nullable scalar와 relation은 엔티티의 `null` 의미를 API 계약까지 전달함
 - **요청 DTO 예시**:
 
   ```typescript
@@ -131,7 +134,9 @@
   import { MemberInvite } from '@pkg/database';
   import { IsEmail, IsString } from 'class-validator';
 
-  export class CreateInviteDto implements Pick<MemberInvite, 'name' | 'email'> {
+  import { EntityRequestType } from '@/common/interfaces';
+
+  export class CreateInviteRequestDto extends EntityRequestType(MemberInvite) {
     @ApiProperty({ example: '김개발', description: '이름' })
     @IsString()
     name!: string;
@@ -148,18 +153,20 @@
   import { ApiProperty } from '@nestjs/swagger';
   import { Member, MemberStatus } from '@pkg/database';
 
-  export class MemberResponseDto implements Pick<Member, 'id' | 'name' | 'status' | 'createdAt'> {
+  import { EntityResponseType } from '@/common/interfaces';
+
+  export class MemberResponseDto extends EntityResponseType(Member) {
     @ApiProperty({ example: '019e5236-adae-70d7-a8f7-2dc90bdf7082', description: '멤버 식별자' })
-    id!: string;
+    override id!: string;
 
     @ApiProperty({ example: '김개발', description: '이름' })
-    name!: string;
+    override name!: string;
 
     @ApiProperty({ enum: MemberStatus, example: 'ACTIVE', description: '상태' })
-    status!: MemberStatus;
+    override status!: MemberStatus;
 
     @ApiProperty({ example: '2026-06-06T14:00:00.000Z', description: '생성 일시' })
-    createdAt!: Date;
+    override createdAt!: Date;
   }
   ```
 

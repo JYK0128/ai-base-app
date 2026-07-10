@@ -2,74 +2,68 @@
 
 ## 1. 기준 목적
 
-- `packages/database` 엔티티와 임베더블의 nullable 표기를 통일함
-- DB 저장 의미와 TypeScript 타입 의미를 분리해서 관리함
+- `packages/database`의 scalar, relation, embeddable 필드 표기를 통일함
+- DB의 값 부재와 생성 payload의 생략 가능성을 각각 명시함
+- 엔티티, DTO, OpenAPI 생성 모델의 nullable 의미를 일관되게 전달함
 
-## 2. 표기 규칙
+## 2. 저장 필드 표기
 
-- `T | null = null`
-  - nullable 저장 필드의 기본 표기
-  - DB 값이 없음을 `null`로 표현함
-  - 초기값을 명시적으로 `null`로 둠
-- `Opt<T>`
-  - 기본값이 있는 상태 필드에 사용함
-  - nullable 의미로 사용하지 않음
-  - 예: enum 상태값, boolean 플래그, 내부 메타데이터 객체
-- `?: T`
-  - 선택적 객체 상태를 표현함
-  - nullable 저장 필드 표현에는 사용하지 않음
+- 필수 저장 필드
+  - 데코레이터에 `nullable`을 지정하지 않음
+  - 생성 시 값이 필요한 필드는 `field!: T`로 선언함
+- nullable 저장 필드
+  - 데코레이터에 `{ nullable: true }`를 지정함
+  - TypeScript는 `field: T | null = null`로 선언함
+  - 값 부재를 DB와 런타임에서 `null`로 통일함
+- 기본값이 있는 필드
+  - `field: Opt<T> = defaultValue`로 선언함
+  - `Opt<T>`는 MikroORM create payload에서 생략 가능한 필드를 표현함
+- 컬렉션 관계
+  - `new Collection<T>(this)`로 즉시 초기화함
 
-## 3. 관계 필드 기준
+## 3. 관계 필드 표기
 
-- `ManyToOne(..., { nullable: true })` 관계는 현재 엔티티 구조에 맞춰 별도 판단함
-- 관계 필드의 객체 존재 여부와 DB nullable 의미를 분리해서 본다
-- 관계 필드 타입 정리는 저장 필드와 별개로 처리한다
+- 필수 관계는 `field!: Rel<T>`로 선언함
+- nullable 관계는 데코레이터의 `{ nullable: true }`와 `field: Rel<T> | null = null`을 함께 사용함
+- relation ID 입력은 `EntityRequestType`이 `string | null` 의미로 변환함
+- API DTO는 실제 외부 계약에 맞춰 `@ApiProperty`의 `nullable`을 명시함
 
-## 4. 현재 적용 예시
+## 4. CoreEntity 공통 필드
 
-- `AnnouncementMetadata.publishedAt: Date | null = null`
-- `AnnouncementMetadata.startAt: Date | null = null`
-- `AnnouncementMetadata.endAt: Date | null = null`
-- `MemberInviteMetadata.sentAt: Date | null = null`
-- `MemberInviteMetadata.failedAt: Date | null = null`
-- `MemberInviteMetadata.cancelAt: Date | null = null`
-- `MemberInviteMetadata.acceptedAt: Date | null = null`
-- `MemberInviteMetadata.rejectedAt: Date | null = null`
-- `MemberInviteMetadata.expiredAt: Date | null = null`
-- `Resource.sortOrder: number | null = null`
-- `I18nLocale.sortOrder: number | null = null`
-- `OrganizationRole.sortOrder: number | null = null`
-- `OrganizationMetadata.approvedAt: Date | null = null`
-- `OrganizationMetadata.deactivatedAt: Date | null = null`
-- `OrganizationMetadata.rejectedAt: Date | null = null`
-- `TermsDocumentMetadata.publishedAt: Date | null = null`
-- `TermsDocumentMetadata.terminatedAt: Date | null = null`
+- 필수·기본값 필드: `id`, `createdAt`
+- nullable 감사 필드: `createdBy`, `updatedAt`, `updatedBy`, `deletedAt`, `deletedBy`
+- nullable 공통 metadata: `metadata`
+- 파생 필드: `isDeleted`
 
-## 5. 검증 기준
+## 5. 현재 적용 예시
 
-- 엔티티 수정 후 `@pkg/database build`를 실행함
-- `metadata.json`과 `dist/index.d.ts`를 갱신함
-- 타입 검사와 린트를 함께 확인함
+- scalar: `MemberInvite.note: string | null = null`
+- scalar: `Resource.sortOrder: number | null = null`
+- relation: `Resource.parent: Rel<Resource> | null = null`
+- embeddable: `AnnouncementMetadata.publishedAt: Date | null = null`
+- embeddable: `MemberInviteMetadata.sentAt: Date | null = null`
+- embeddable: `OrganizationMetadata.approvedAt: Date | null = null`
+- embeddable: `TermsDocumentMetadata.terminatedAt: Date | null = null`
+- default: `Resource.scope: Opt<ResourceScope> = ResourceScope.PLATFORM`
+- default: `Resource.creatable: Opt<boolean> = false`
 
-## 6. 관련 작업 기록
+## 6. DTO 전파 규칙
 
-- [`entity-optional-null-audit.md`](/Users/server/Documents/GitHub/ai-base-app/.docs/_workload/2026-07-07/entity-optional-null-audit.md)
-- [`entity-nullable-field-standardization.md`](/Users/server/Documents/GitHub/ai-base-app/.docs/_workload/2026-07-07/entity-nullable-field-standardization.md)
+- `EntityRequestType(Entity)`는 엔티티 필드를 선택 입력으로 변환함
+- nullable scalar와 relation은 request type에서도 `null`을 유지함
+- `EntityResponseType(Entity)`는 필수 응답 필드 구조를 파생함
+- Date 응답은 직렬화 경계를 고려해 `Date | null` 계약을 제공함
+- 피처 DTO는 파생 타입을 확장하고 노출 필드와 Swagger metadata를 명시함
 
-## 7. 필수값 분류
+## 7. 검증 절차
 
-- `?: T` 필드
-  - 현재 기준에서 모두 비필수값으로 분류함
-  - 공통 책임
-    - `CoreEntity` 공통 감사 필드: `createdBy`, `updatedAt`, `updatedBy`, `deletedAt`, `deletedBy`, `metadata`
-- 관계 선택 필드: `Resource.parent`, `SupportTicket.assignedTo`, `TermsDocument.organization`
-- 선택 스칼라 필드: `Resource.path`, `Resource.icon`, `I18nLocale.regionCode`, `MemberInvite.note`, `MemberAccount.lastLoginAt`, `MemberAccount.lastLoginIp`, `OrganizationRole.description`
-- `T | null = null` 필드
-  - 현재 기준에서 비필수값으로 분류함
-  - 값 부재를 `null`로 저장하고, 초기 상태를 `null`로 고정함
-  - 적용 대상: `AnnouncementMetadata.startAt`, `AnnouncementMetadata.endAt`, `Resource.sortOrder`, `I18nLocale.sortOrder`, `OrganizationRole.sortOrder`
-- `Opt<T>` 필드
-  - 기본값을 가진 상태값으로 분류함
-  - 필수 입력값으로 사용하지 않음
-- 필수값 케이스
-  - 현재 정리된 nullable/optional 저장 필드 기준에서는 별도 필수값 케이스가 없음
+- `pnpm db:build`로 `metadata.json`, generated entity type, `dist/index.d.ts`를 갱신함
+- `pnpm --filter=@pkg/database exec tsc -p tsconfig.app.json --noEmit`로 타입을 검사함
+- `pnpm --filter=@pkg/database lint`로 정적 분석을 수행함
+- API 노출 필드 변경 시 `platform-service`를 검증하고 `pnpm gen:api`로 웹 생성물을 갱신함
+- `rg -n "\\?:|nullable: true|\\| null" packages/database/src/domains`로 잔여 표기를 대조함
+
+## 8. 관련 작업 기록
+
+- [엔티티 optional/null 점검](../_workload/2026-07-07/entity-optional-null-audit.md)
+- [엔티티 nullable 필드 표준화](../_workload/2026-07-07/entity-nullable-field-standardization.md)

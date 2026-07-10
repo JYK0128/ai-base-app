@@ -1,60 +1,91 @@
-# 인터페이스 표준 (요약)
+# 인터페이스 표준
 
-## 1. 통신 및 기본 규격
+## 1. HTTP 기본 규격
 
-* **표준**: HTTPS / RESTful API / JSON (UTF-8)
-* **버저닝**: `/api/v1/...` 형태의 URL Path 기반 관리
+- JSON UTF-8 REST API를 사용함
+- 전역 prefix는 `/api`를 사용함
+- URI 버저닝으로 `/api/v1/...` 경로를 구성함
+- health endpoint는 전역 prefix와 버저닝에서 분리한 `/health/live`, `/health/ready`를 사용함
 
-## 2. 공통 헤더
+## 2. 인증·보안 헤더와 쿠키
 
-* `Authorization`: Bearer JWT 토큰
-* `X-Tenant-ID`: 테넌트 식별 및 데이터 격리 기준값
-* `X-Request-ID`: 전 구간 트랜잭션 추적용 UUID
+- 인증 상태는 Redis-backed session cookie로 전달함
+- 상태 변경 요청은 `x-csrf-token` 헤더를 전달함
+- 클라이언트가 전달한 `x-trace-id`는 동일 추적 흐름에 사용함
+- 서버가 생성한 `x-request-id`는 단일 HTTP 요청 식별에 사용함
+- `Accept-Language`는 오류 메시지와 다국어 컨텍스트 결정에 사용함
 
-## 3. 표준 응답 구조 (Envelope)
+## 3. 표준 응답 Envelope
 
-* **성공**: `{"success": true, "issueId": "...", "topicId": "...", "timestamp": "...", "data": {...}, "detail": null, code: "...", "message": "..."}`
-* **실패**: `{"success": false, "issueId": "...", "topicId": "...", "timestamp": "...", "data": null, "detail": {...}, code: "...", "message": "..."}`
+- 공통 필드
+  - `success`: 성공 여부
+  - `data`: 성공 데이터 또는 `null`
+  - `error`: 오류 정보 또는 `null`
+  - `message`: 대표 메시지 또는 `null`
+  - `traceId`: 분산 추적 식별자 또는 `null`
+  - `requestId`: 요청 식별자 또는 `null`
+- 성공 예시
 
-## 4. HTTP 상태 코드 가이드
+  ```json
+  {
+    "success": true,
+    "data": { "id": "019e5236-adae-70d7-a8f7-2dc90bdf7082" },
+    "error": null,
+    "message": null,
+    "traceId": "trace-id",
+    "requestId": "request-id"
+  }
+  ```
 
-* **200/201**: 요청 성공 및 리소스 생성
-* **400/404**: 클라이언트 요청 오류(파라미터/리소스 부재)
-* **401/403**: 보안 인증 실패 및 접근 권한 부족
-* **429/500**: 서비스 요청 초과(Rate Limit) 및 서버 내부 오류
+- 실패 예시
 
-## 5. Page/List 응답 DTO 조사 결과
+  ```json
+  {
+    "success": false,
+    "data": null,
+    "error": {
+      "code": "RESOURCE_NOT_FOUND",
+      "message": "리소스를 찾을 수 없습니다.",
+      "details": null,
+      "status": 404
+    },
+    "message": "리소스를 찾을 수 없습니다.",
+    "traceId": "trace-id",
+    "requestId": "request-id"
+  }
+  ```
 
-> 조사 기준: `apps/platform-service/src/domains/**/**/*.response.dto.ts`
+## 4. 공통 요청 계약
 
-### 5.1 Page 응답
+- 식별자: `IdRequestDto`, `IdListRequestDto`
+- 엔티티 파생 입력: `EntityRequestType(Entity)`
+- 임의 payload: `PayloadRequestDto`
+- 목록: `ListRequestDto`
+- 페이지: `PageRequestDto`
+- 커서: `CursorRequestDto`
+- 정렬·필터 공통 타입: `SortableRequestDto`, `FilterableRequestDto`
 
-| File | Wrapper | Row DTO | 비고 |
-| --- | --- | --- | --- |
-| `member/get-member-page.response.dto.ts` | `GetMemberPageResponseDto` | `MemberPageItem` | page 전용 row DTO |
-| `announcement/get-announcement-page.response.dto.ts` | `GetAnnouncementPageResponseDto` | `AnnouncementPageItem` | page 전용 row DTO |
-| `support/get-ticket-page.response.dto.ts` | `GetTicketPageResponseDto` | `GetTicketPageItem` | page 전용 row DTO |
+## 5. 공통 응답 계약
 
-### 5.2 List 응답
+- 식별자: `IdResponseDto`, `IdListResponseDto`
+- 엔티티 파생 응답: `EntityResponseType(Entity)`
+- 목록: `ListResponseDto`
+- 페이지: `PageResponseDto`
+- 커서: `CursorResponseDto`
+- 임의 payload: `PayloadResponseDto`
+- 변경 행 수: `AffectedRowsResponseDto`
 
-| File | Wrapper | Row DTO | 비고 |
-| --- | --- | --- | --- |
-| `resource/get-resource-list.response.dto.ts` | `GetResourceListResponseDto` | `GetResourceListItem` | list 전용 row DTO |
-| `organization/get-organization-list.response.dto.ts` | `GetOrganizationListResponseDto` | `OrganizationListItem` | list 전용 row DTO |
-| `i18n/locale-list/get-locale-list.response.dto.ts` | `GetLocaleListResponseDto` | `LocaleListItem` | list 전용 row DTO |
-| `auth/allowed-resource-list/allowed-resource-list.response.dto.ts` | `AllowedResourceListResponseDto` | `AllowedResourceListItem` | list 전용 row DTO |
-| `auth/pending-term-list/pending-term-list.response.dto.ts` | `PendingTermListResponseDto` | `PendingTermListItem` | list 전용 row DTO |
-| `resource/get-role-permission-list/get-role-permission-list.response.dto.ts` | `GetRolePermissionListResponseDto` | `RolePermissionListItem` | list 전용 row DTO |
-| `organization/organization-role-list/get-organization-role-list.response.dto.ts` | `GetOrganizationRoleListResponseDto` | `OrganizationRoleListItem` | list 전용 row DTO |
-| `term/get-term-document/get-term-document.response.dto.ts` | `GetTermDocumentListResponseDto` | `GetTermDocumentItem` | list 전용 row DTO |
-| `term/get-term-document/get-term-document.response.dto.ts` | `GetTermDocumentVersionListResponseDto` | `GetTermDocumentVersionItem` | list 전용 row DTO |
+## 6. 목록 응답 네이밍
 
-### 5.3 요약
+- page row DTO는 `<Domain>PageItem` 또는 피처 의미가 필요한 `<Feature>PageItem`으로 명명함
+- list row DTO는 `<Domain>ListItem` 또는 피처 의미가 필요한 `<Feature>ListItem`으로 명명함
+- wrapper는 `Get<Domain>PageResponseDto`, `Get<Domain>ListResponseDto` 형태를 사용함
+- 단건 detail 응답은 `Get<Domain>ResponseDto` 형태를 사용함
+- row DTO는 `EntityResponseType(Entity)`를 확장하고 외부 노출 필드에 Swagger 데코레이터를 선언함
 
-| 구분 | 관찰 결과 |
-| --- | --- |
-| wrapper 이름 | `PageResponseDto` / `ListResponseDto` 계열은 대체로 일관됨 |
-| row DTO 이름 | page/list 전용 row DTO는 `Item` suffix로 통일됨 |
-| 예외 | detail 응답 DTO는 여전히 `ResponseDto` suffix를 유지함 |
-| 추가 검토 대상 | `term` detail 응답은 내부에 `Item`을 재사용하는 구조임 |
-| 정리 우선순위 | page/list row DTO naming은 `Item` 기준으로 정리 완료 |
+## 7. OpenAPI 생성 흐름
+
+- Controller, Contract, Request DTO, Response DTO를 서버 계약의 신뢰 원천으로 사용함
+- 서버 타입검사와 린트 완료 후 최신 서버를 실행함
+- `pnpm gen:api`로 웹 endpoint, model, Zod schema를 생성함
+- 생성 diff와 서버 계약의 nullable, enum, status code를 대조함

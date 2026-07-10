@@ -6,7 +6,7 @@
   - 모든 scalar 필드는 `type` 속성을 반드시 명시적으로 선언함 (예: `@Property({ type: 'string' })`)
 - **작성 형태**:
   - 필수(Required) 필드: `field!: Type`
-  - Nullable 필드: `@Property({ type: 'string', nullable: true }) field?: Type`
+  - Nullable 필드: `@Property({ type: 'string', nullable: true }) field: Type | null = null`
   - 생략 가능(Optional with Default) 필드: `field: Opt<Type> = defaultValue`
   - 필드 옵션(unique, hidden, nullable 등)은 단일 `@Property({ ... })` 객체 내에 병합하여 정의함
 - **예시 코드**:
@@ -16,7 +16,7 @@
   name!: string;
 
   @Property({ type: 'string', nullable: true })
-  description?: string;
+  description: string | null = null;
 
   @Property({ type: 'number' })
   sortOrder: Opt<number> = 0;
@@ -51,7 +51,7 @@
 
   ```typescript
   @Property({ type: Date, nullable: true })
-  publishedAt?: Date;
+  publishedAt: Date | null = null;
   ```
 
 ---
@@ -74,6 +74,5 @@
     import { AnnouncementPriority } from './announcement.constants';
 
     @Enum({ items: () => AnnouncementPriority, nullable: true })
-    priority?: AnnouncementPriority;
+    priority: AnnouncementPriority | null = null;
     ```
-

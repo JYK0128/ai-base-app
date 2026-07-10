@@ -1,0 +1,23 @@
+{
+  "skill_name": "monorepo-scaffolding-guide",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "packages 아래에 @pkg/notification 공통 TypeScript 패키지를 추가해줘. shared 유틸을 사용하고 루트 빌드에 포함해야 해.",
+      "expected_output": "base-package 템플릿, @pkg/config와 @pkg/shared workspace 의존성, 루트 tsconfig reference, pnpm install, filter lint/build를 적용함.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "apps 아래에 NestJS worker-service를 추가하고 Kubernetes readiness/liveness probe까지 연결해줘.",
+      "expected_output": "apps workspace 규칙, Nest 공유 ESLint 설정, /health/live과 /health/ready, K8s probe 경로 일치, 프로젝트 단위 검증을 적용함.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "web 아래에 새 React 관리 콘솔을 만들고 @pkg/ui와 @pkg/shared/web을 연결해줘.",
+      "expected_output": "web workspace 경로, React 공유 설정, 기능별 workspace 의존성, 루트 TypeScript reference와 filter 검증을 적용함.",
+      "files": []
+    }
+  ]
+}

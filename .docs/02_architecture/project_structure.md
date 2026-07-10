@@ -1,27 +1,58 @@
-# 프로젝트 및 레포지토리 구조 설계 (요약)
+# 프로젝트 및 저장소 구조
 
-## 1. 모노레포 관리 전략
+## 1. 워크스페이스 구성
 
-* **방식**: Turborepo 기반 Monorepo로 `apps/*`, `web/*`, `packages/*` 워크스페이스를 통합 관리함.
-* **공유**: UI/Shared/Database/Config 패키지를 분리해 앱 간 중복 구현을 최소화함.
+- Turborepo와 pnpm workspace로 `apps/*`, `packages/*`, `web/*`, `mobile/*` 경로를 관리함
+- 현재 활성 프로젝트는 백엔드 1개, 웹 1개, 공통 패키지 4개로 구성함
+- `mobile/*`은 향후 모바일 애플리케이션을 위한 예약 워크스페이스로 유지함
 
-## 2. 현재 기준 주요 디렉토리 구조
+## 2. 실행 애플리케이션
 
-* **apps/**: 실행 가능한 백엔드 애플리케이션 및 마이크로서비스
-  * `platform-service`: 인증, 코어, 게이트웨이 기능을 통합한 플랫폼 API
-* **web/**: 실행 가능한 프론트엔드 애플리케이션
-  * `platform-admin-web`: 통합 어드민 포탈 웹앱
-* **packages/**: 공통 라이브러리
-  * `config/`: ESLint·TypeScript·Stylelint 등 공통 빌드/정적분석 설정 (ESM 지원을 위해 .mjs 사용)
-  * `database/`: MikroORM 기반 도메인 엔티티/리포지토리/시더
-  * `shared/`: 프레임워크 비의존 공통 유틸/타입/헬퍼
-  * `ui/`: 재사용 UI 컴포넌트 및 Tailwind 설정
-* **mobile/**: 모바일 앱 워크스페이스 예약 경로(현재 활성 패키지 없음).
-* **.docs/**: 제안·아키텍처·명세·운영/개발 가이드·레퍼런스 문서
-* **.k8s/**: Kubernetes 배포 리소스
+- `apps/platform-service`
+  - NestJS 11 기반 플랫폼 API와 RabbitMQ 마이크로서비스를 함께 실행함
+  - 인증, 공지, 다국어, 가입, 메일, 멤버, 조직, 리소스, 지원, 약관 도메인을 `src/domains/*`에 배치함
+  - MikroORM, Redis 세션, CSRF, CLS 요청 컨텍스트, Pino 로깅을 공통 계층에서 구성함
+- `web/platform-admin-web`
+  - Vite 8, React 19, TanStack Router 기반 플랫폼 관리자 SPA임
+  - 파일 기반 라우트를 `src/routes/*`에 배치하고 `routeTree.gen.ts`를 생성 명령으로 관리함
+  - Orval이 OpenAPI 계약에서 React Query 클라이언트와 Zod 스키마를 생성함
 
-## 3. 품질 및 운영 표준
+## 3. 공통 패키지
 
-* **코드 품질**: 루트 워크스페이스 설정을 기준으로 Lint/Format 규칙을 공통 적용함.
-* **테스트**: 패키지 단위 테스트(Vitest)와 서비스별 테스트(`apps/*`, `web/*`)를 분리 운영함.
-* **DB 변경 관리**: `@pkg/database`에서 마이그레이션/시더 스크립트를 일원화하여 스키마 변경 이력을 추적함.
+- `packages/config`: ESLint, TypeScript, Stylelint 공유 설정 제공
+- `packages/database`: MikroORM 엔티티, CoreEntity 정적 조회 API, 마이그레이션, 시더, 구독자 제공
+- `packages/shared`: common/server/web 진입점별 공통 타입과 유틸리티 제공
+- `packages/ui`: React UI 컴포넌트, 디자인 토큰, Tailwind CSS v4 스타일, Storybook 제공
+
+## 4. 의존 방향
+
+- `platform-service`는 `@pkg/config`, `@pkg/database`, `@pkg/shared`를 사용함
+- `platform-admin-web`은 `@pkg/config`, `@pkg/shared`, `@pkg/ui`를 사용함
+- `@pkg/database`는 백엔드 데이터 모델의 신뢰 원천으로 유지함
+- 웹 API 타입은 서버 OpenAPI 계약에서 생성하며 웹에서 `@pkg/database`를 직접 참조하지 않는 구조로 유지함
+
+## 5. 생성 산출물
+
+- ORM discovery metadata: `packages/database/src/metadata.json`
+- DB 배포 타입: `packages/database/dist/index.d.ts`
+- 웹 API 클라이언트: `web/platform-admin-web/src/api/generated/**`
+- 웹 Zod 스키마: `web/platform-admin-web/src/api/zod.ts`
+- TanStack Router 트리: `web/platform-admin-web/src/routeTree.gen.ts`
+
+## 6. 루트 실행 명령
+
+- 전체 검증: `pnpm build`, `pnpm test`, `pnpm lint`
+- 로컬 웹: `pnpm web:dev`
+- 서버 배포 구성 실행: `pnpm server:up`
+- 웹 배포 구성 실행: `pnpm web:up`
+- API 생성: `pnpm gen:api`
+- 라우트 생성: `pnpm gen:routes`
+- DB 빌드/시드/메타데이터: `pnpm db:build`, `pnpm db:seed`, `pnpm db:meta`
+- UI 빌드/Storybook: `pnpm ui:build`, `pnpm ui:dev`
+
+## 7. 운영 디렉터리
+
+- `.agents`: 저장소 작업 지침과 도메인 스킬
+- `.docs`: 제안, 아키텍처, 기능 명세, 매뉴얼, 개발 표준, 작업 이력
+- `.k8s`: Helm/Kustomize 리소스와 로컬 배포 스크립트
+- `.github`: GitHub 워크플로 및 저장소 자동화 설정

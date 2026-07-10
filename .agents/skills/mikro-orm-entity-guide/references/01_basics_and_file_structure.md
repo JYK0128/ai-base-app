@@ -26,7 +26,7 @@
     ```
 
 > [!NOTE]
-> 개편에 따라 개별 엔티티 단위의 리포지토리 파일(`*.repository.ts`)은 원칙적으로 생성하지 않으며, `@Entity` 데코레이터 선언 시 `repository` 옵션을 바인딩하지 않고 `schema`만 지정합니다.
+> 개별 엔티티는 `CoreEntity`의 static query API를 사용하며, `@Entity` 데코레이터에는 소속 `schema`를 지정합니다. 공통 조회 구현은 `CoreRepository`와 `QueryEngine`에서 관리합니다.
 
 ---
 

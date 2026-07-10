@@ -25,13 +25,22 @@
 
 - **공통 필수**:
   - `@pkg/config`: 공유 툴체인 및 환경 설정용
-  - `@pkg/shared`: 비즈니스 로직 및 공통 유틸리티 공유용
+- **기능별 선택**:
+  - `@pkg/shared`: common/server/web 진입점의 공통 타입과 유틸리티가 필요한 프로젝트에 사용
 - **백엔드 서비스 전용**:
   - `@pkg/database`: ORM 엔티티 정의, 데이터베이스 접근이 필요한 백엔드 서비스에 사용
 - **프론트엔드 앱 전용**:
   - `@pkg/ui`: 디자인 시스템 및 스타일링 테마를 적용, 공통 UI 컴포넌트가 필요한 프론트 서비스에 사용
 
-### 2.3. 헬스체크 표준 (Health Check)
+### 2.3. 워크스페이스 경로
+
+- 백엔드 앱과 서비스: `apps/*`
+- 공통 패키지: `packages/*`
+- 웹 앱: `web/*`
+- 모바일 앱: `mobile/*`
+- 빌드 가능한 TypeScript 프로젝트는 루트 `tsconfig.json`의 `references`에 연결
+
+### 2.4. 헬스체크 표준 (Health Check)
 
 - **HTTP 앱 (Nest/Express 등)**
   - `/health/live`: 프로세스 생존 확인용
